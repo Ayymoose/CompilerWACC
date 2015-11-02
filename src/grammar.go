@@ -5,28 +5,28 @@ type Token int
 const (
   token_start Token  = iota
 
+  IDENTIFIER
+
+  deliminators_start
   COMMA
   SEMICOLON
   COMMENT_START
   COMMENT_END
   COMMENT_LINE
   NESTED_COMMENTS
-  SPACE  // do we need this???
   UNDERSCORE
+  deliminators_end
 
-
-  escaped_char_start  // NOT SURE IF I SHOULD DEFINE IT AS A BACKSLASH FOLLOWED BY THE ESCAPED
-  NULL_TERMINATOR     // CHARACTER (I.E. RECURSIVLY LIKE IN THE SPEC) OR HAVE EACH ESCAPED CHARACTER
-  BACKSPACE           // INCLUDE ITS BACKSLASH
+  escaped_char_start
+  NULL_TERMINATOR
   TAB
   LINE_FEED
   FORM_FEED
   CARRIAGE_RETURN
   DOUBLE_QUOTE
   SINGLE_QUOTE
-  BACKSLASH         // NOT TOO NEAT BACKSLASH BACKSLASH BASICALLY
+  BACKSLASH
   escaped_char_end
-
 
   reserved_word_start
   BEGIN
@@ -51,18 +51,15 @@ const (
   FST
   SND
   NULL
+  PAIR
+  reserved_word_end
 
+  type_start
   INT
   BOOL
   CHAR
   STRING
-
-
-  PAIR
-
-
-  reserved_word_end
-
+  type_end
 
   unary_op_start
   NOT
@@ -73,20 +70,19 @@ const (
   unary_op_end
 
   binary_op_start
-  MULTIPLY
-  DIVIDE
+  MULT
+  DIV
   MOD
   ADD
-  MINUS // '-' ALSO SAME SYMBOL -> NOT SURE IF ENTIRELY correct
+  SUB // '-' ALSO SAME SYMBOL -> NOT SURE IF ENTIRELY correct
   GT
   GTE
   ST
   STE
-  EQUAL // BETTER NAMES??
-  NEQUAL // BETTER NAMES?
+  EQ
+  NEQ
   AND
   OR
-
   binary_op_end
 
   bracket_type_start
@@ -105,13 +101,13 @@ const (
 )
 
 var token_strings = map[Token]string{
+  IDENTIFIER : "identifier"    // Place holder
   COMMA : ",",
   SEMICOLON : ";",
   COMMENT_START : "",
   COMMENT_END : "",
   COMMENT_LINE : "#",
   NESTED_COMMENTS : false,
-  SPACE : " ", // remove if not needed
   UNDERSCORE : "_",
   NULL_TERMINATOR : "\0",
   BACKSPACE : "\b",
@@ -153,18 +149,18 @@ var token_strings = map[Token]string{
   LEN : "len",
   ORD : "ord"
   CHR : "chr",
-  NEG : "- ",     // THIS IS FOR '-' WHICH ALSO EXISTS IN BINARY_OP ASWELL. NOT SURE OF THE BEST NAME
-  MULTIPLY : "*",
-  DIVIDE : "/",
+  NEG : "-",     // THIS IS FOR '-' WHICH ALSO EXISTS IN BINARY_OP ASWELL. NOT SURE OF THE BEST NAME
+  MULT : "*",
+  DIV : "/",
   MOD : "%",
   ADD : "+",
-  MINUS : "-",  // '-' ALSO SAME SYMBOL -> NOT SURE IF ENTIRELY correct
+  SUB : "-",  // '-' ALSO SAME SYMBOL -> NOT SURE IF ENTIRELY correct
   GT : ">",
   GTE : ">=",
   ST : "<",
   STE : "<=",
-  EQUAL : "==",  // BETTER NAMES??
-  NEQUAL : "!=", // BETTER NAMES?
+  EQ : "==",  // BETTER NAMES??
+  NEQ : "!=", // BETTER NAMES?
   AND : "&&",
   OR : "||",
   OPEN_SQUARE : "[",
@@ -175,8 +171,43 @@ var token_strings = map[Token]string{
   FLASE : "false",
 }
 
-func isEscapedChar(token Token) bool {
+func (token Token) isEscapedChar() bool {
   return token > escaped_char_start && token < escaped_char_end
 }
 
-// etc...
+func (token Token) isDeliminator() bool {
+  return token > deliminators_start && token < deliminators_end
+}
+
+func (token Token) isReservedWord() bool {
+  return token > reserved_word_start && token < reserved_word_end
+}
+
+func (token Token) isType() bool {
+  return token > type_start && token < type_end
+}
+
+func (token Token) isUnaryOp() bool {
+  return token > unary_op_start && token < unary_op_end
+}
+
+func (token Token) isBinaryOp() bool {
+  return token > binary_op_start && token < binary_op_end
+}
+
+func (token Token) isBracketType() bool {
+  return token > bracket_type_start && token < bracket_type_end
+}
+
+func (token Token) isBoolean() bool {
+  return token > boolean_start && token < boolean_end
+}
+
+func lookUp(str string) Token {
+  for t, s := range tok_strings {
+		if s == str {
+			return t
+		}
+	}
+	return IDENTIFIER
+}
