@@ -19,6 +19,7 @@ const (
 
   escaped_char_start
   NULL_TERMINATOR
+  BACKSPACE
   TAB
   LINE_FEED
   FORM_FEED
@@ -101,22 +102,22 @@ const (
 )
 
 var token_strings = map[Token]string{
-  IDENTIFIER : "identifier"    // Place holder
+  IDENTIFIER : "identifier",    // Place holder
   COMMA : ",",
   SEMICOLON : ";",
   COMMENT_START : "",
   COMMENT_END : "",
   COMMENT_LINE : "#",
-  NESTED_COMMENTS : false,
+  NESTED_COMMENTS : "false",
   UNDERSCORE : "_",
-  NULL_TERMINATOR : "\0",
+  NULL_TERMINATOR : "\\0",
   BACKSPACE : "\b",
   TAB : "\t",
   LINE_FEED : "\n",
   FORM_FEED : "\f",
   CARRIAGE_RETURN : "\r",
   DOUBLE_QUOTE : "\"",
-  SINGLE_QUOTE : "\'",
+  SINGLE_QUOTE : "\\'",
   BACKSLASH : "\\",
   BEGIN : "begin",
   END : "end",
@@ -147,7 +148,7 @@ var token_strings = map[Token]string{
   PAIR : "pair",
   NOT : "!",
   LEN : "len",
-  ORD : "ord"
+  ORD : "ord",
   CHR : "chr",
   NEG : "-",     // THIS IS FOR '-' WHICH ALSO EXISTS IN BINARY_OP ASWELL. NOT SURE OF THE BEST NAME
   MULT : "*",
@@ -204,10 +205,10 @@ func (token Token) isBoolean() bool {
 }
 
 func lookUp(str string) Token {
-  for t, s := range tok_strings {
+  for t, s := range token_strings {
 		if s == str {
 			return t
 		}
 	}
-	return IDENTIFIER
+  return IDENTIFIER
 }
