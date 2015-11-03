@@ -45,3 +45,9 @@ func (p *parser) parse() bool {
 func (p *parser) expect(typ tokenType) bool {
 	return p.currTok.typ == typ
 }
+
+/* BNF parse functions */
+
+func (p *parser) parseProgram() bool {
+	return false
+}
