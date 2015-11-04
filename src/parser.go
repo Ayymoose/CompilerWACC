@@ -118,6 +118,7 @@ func (p *parser) parseProgram() (bool, []string) {
 
 }
 
+/* TERMINALS */
 func (p *parser) parseFunc() (bool, []string) {
 	var pass = false       // True iff the tokens match a <program> def
 	var errorMsgs []string // An array of error messages
@@ -125,14 +126,32 @@ func (p *parser) parseFunc() (bool, []string) {
 	errorMsgs = append(errorMsgs, p.makeErrorMsg("parseFunction is not implemented"))
 
 	return pass, errorMsgs
-
-}
-
-// Maps error messages with the associated terminal
-func (p *parser) terminalErrorMessages(token tokenType) (bool, []string) {
-	return false, []string{""}
 }
 
 /* TERMINALS */
 
 /* ---------------------------------------------------------------------------*/
+
+// Maps error messages with the associated terminal
+func terminalErrorMessages(token tokenType) string {
+	switch {
+	//You'll have to manuall change these error messages @Nana
+	case token.isEscapedChar():
+		return "Missing" + token_strings[token]
+	case token.isDeliminator():
+		return "Missing" + token_strings[token]
+	case token.isReservedWord():
+		return "Missing" + token_strings[token]
+	case token.isType():
+		return "Missing" + token_strings[token]
+	case token.isUnaryOp():
+		return "Missing" + token_strings[token]
+	case token.isBracketType():
+		return "Missing" + token_strings[token]
+	case token.isBoolean():
+		return "Missing" + token_strings[token]
+	}
+	return "Some error"
+	//Can use formatted output to print the string nicely
+	//E.g fmt.Sprint("Parse error: %s token",msg) etc..
+}
