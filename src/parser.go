@@ -17,6 +17,8 @@ type parser struct {
 
 }
 
+// Basic parser constructer that set the current token to the first token in the
+// tokenStream
 func constructParser(tokenStream []token) *parser {
 	return &parser{tokenStream, 0, 0, tokenStream[0]}
 }
@@ -29,18 +31,13 @@ func (p *parser) isFinished() bool {
 
 // Advances the current token to the next token in the token stream
 func (p *parser) advance() {
-	p.curr++
-
 	if p.isFinished() {
 		return
 	}
 
-	p.currTok = p.tokens[p.curr]
-}
+	p.curr++
 
-// Initiates parse Operation
-func (p *parser) parse() bool {
-	return false
+	p.currTok = p.tokens[p.curr]
 }
 
 // Returns true iff the current token has the tokenType typ
@@ -50,9 +47,17 @@ func (p *parser) expect(typ tokenType) bool {
 
 /* BNF parse functions -------------------------------------------------------*/
 
+// Initiates parse Operation
+func (p *parser) parse() (bool, []string) {
+	var pass, errors = p.parseProgram()
+
+	return pass, errors
+
+}
+
 /* NON-TERMINALS */
-func (p *parser) parseProgram() (bool, string) {
-	return false, ""
+func (p *parser) parseProgram() (bool, []string) {
+	return false, []string{"parseProgram is not implemented"}
 }
 
 /* TERMINALS */
