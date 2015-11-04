@@ -1,8 +1,12 @@
 package main
 
+import "strconv"
+
 type token struct {
-	typ    tokenType
-	lexeme string
+	typ     tokenType
+	lexeme  string
+	lineNum int
+	rowNum  int
 }
 
 /* PARSER --------------------------------------------------------------------*/
@@ -40,6 +44,17 @@ func (p *parser) advance() {
 	p.currTok = p.tokens[p.curr]
 }
 
+// Back track the current token back to the save token
+func (p *parser) backTrack() {
+	p.currTok = p.tokens[p.save]
+	p.curr = p.save
+}
+
+// Saves the position of the current token to the field "save"
+func (p *parser) saveToken() {
+	p.save = p.curr
+}
+
 // Returns true iff the current token has the tokenType typ
 func (p *parser) expect(typ tokenType) bool {
 	return p.currTok.typ == typ
@@ -57,7 +72,23 @@ func (p *parser) parse() (bool, []string) {
 
 /* NON-TERMINALS */
 func (p *parser) parseProgram() (bool, []string) {
-	return false, []string{"parseProgram is not implemented"}
+	var pass = false       // True iff the tokens match a <program> def
+	var errorMsgs []string // An array of error messages
+
+	p.saveToken()
+
+	if !p.expect(BEGIN) {
+		pass = false
+		errorMsgs = append(errorMsgs, "At "+strconv.Itoa(p.currTok.lineNum)+":"+strconv.Itoa(p.currTok.rowNum)+" ::All programs must start with a 'begin' keyword")
+
+		return pass, errorMsgs
+
+	}
+
+	p.advance()
+
+	return pass, errorMsgs
+
 }
 
 /* TERMINALS */
