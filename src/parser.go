@@ -54,8 +54,27 @@ func (p *parser) parseProgram() (bool, []string) {
 }
 
 // Maps error messages with the associated terminal
-func (p *parser) terminalErrorMessages(token tokenType) (bool, []string) {
-	return false, []string{""}
+func terminalErrorMessages(token Token) (string, Token) {
+	switch {
+	//You'll have to manuall change these error messages @Nana
+	case token.isEscapedChar():
+		return "Missing", token
+	case token.isDeliminator():
+		return "Missing", token
+	case token.isReservedWord():
+		return "Missing", token
+	case token.isType():
+		return "Missing", token
+	case token.isUnaryOp():
+		return "Missing", token
+	case token.isBracketType():
+		return "Missing", token
+	case token.isBoolean():
+		return "Missing", token
+	}
+	return "Some error", token
+	//Can use formatted output to print the string nicely
+	//E.g fmt.Sprint("Parse error: %s token",msg) etc..
 }
 
 /* TERMINALS */
