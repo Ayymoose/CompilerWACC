@@ -1,13 +1,15 @@
 package main
 
-type tokenType int
+import "strconv"
 
 type token struct {
-	typ    tokenType
-	lexeme []string
+	typ     tokenType
+	lexeme  string
+	lineNum int
+	rowNum  int
 }
 
-/* PARSER */
+/* PARSER --------------------------------------------------------------------*/
 
 // The paser struct will be used as the parser of the stream of tokens given to
 // it.
@@ -19,6 +21,12 @@ type parser struct {
 
 }
 
+// Basic parser constructer that set the current token to the first token in the
+// tokenStream
+func constructParser(tokenStream []token) *parser {
+	return &parser{tokenStream, 0, 0, tokenStream[0]}
+}
+
 // Returns true iff the token stream is finished
 // I.e. we are at the end of the stream
 func (p *parser) isFinished() bool {
@@ -27,18 +35,24 @@ func (p *parser) isFinished() bool {
 
 // Advances the current token to the next token in the token stream
 func (p *parser) advance() {
-	p.curr++
-
 	if p.isFinished() {
 		return
 	}
 
+	p.curr++
+
 	p.currTok = p.tokens[p.curr]
 }
 
-// Initiates parse Operation
-func (p *parser) parse() bool {
-	return false
+// Back track the current token back to the save token
+func (p *parser) backTrack() {
+	p.currTok = p.tokens[p.save]
+	p.curr = p.save
+}
+
+// Saves the position of the current token to the field "save"
+func (p *parser) saveToken() {
+	p.save = p.curr
 }
 
 // Returns true iff the current token has the tokenType typ
@@ -48,33 +62,34 @@ func (p *parser) expect(typ tokenType) bool {
 
 /* BNF parse functions -------------------------------------------------------*/
 
-/* NON-TERMINALS */
-func (p *parser) parseProgram() (bool, []string) {
-	return false, []string{""}
+// Initiates parse Operation
+func (p *parser) parse() (bool, []string) {
+	var pass, errors = p.parseProgram()
+
+	return pass, errors
+
 }
 
-// Maps error messages with the associated terminal
-func terminalErrorMessages(token Token) (string, Token) {
-	switch {
-	//You'll have to manuall change these error messages @Nana
-	case token.isEscapedChar():
-		return "Missing", token
-	case token.isDeliminator():
-		return "Missing", token
-	case token.isReservedWord():
-		return "Missing", token
-	case token.isType():
-		return "Missing", token
-	case token.isUnaryOp():
-		return "Missing", token
-	case token.isBracketType():
-		return "Missing", token
-	case token.isBoolean():
-		return "Missing", token
+/* NON-TERMINALS */
+func (p *parser) parseProgram() (bool, []string) {
+
+	var pass = false       // True iff the tokens match a <program> def
+	var errorMsgs []string // An array of error messages
+
+	p.saveToken()
+
+	if !p.expect(BEGIN) {
+		pass = false
+		errorMsgs = append(errorMsgs, "At "+strconv.Itoa(p.currTok.lineNum)+":"+strconv.Itoa(p.currTok.rowNum)+" ::All programs must start with a 'begin' keyword")
+
+		return pass, errorMsgs
+
 	}
-	return "Some error", token
-	//Can use formatted output to print the string nicely
-	//E.g fmt.Sprint("Parse error: %s token",msg) etc..
+
+	p.advance()
+
+	return pass, errorMsgs
+
 }
 
 /* TERMINALS */
@@ -195,3 +210,26 @@ func (p *parser) parseNull() (bool, []string) {
 }
 
 /* ---------------------------------------------------------------------------*/
+// Maps error messages with the associated terminal
+func terminalErrorMessages(token tokenType) string {
+	switch {
+	//You'll have to manuall change these error messages @Nana
+	case token.isEscapedChar():
+		return "Missing" + token_strings[token]
+	case token.isDeliminator():
+		return "Missing" + token_strings[token]
+	case token.isReservedWord():
+		return "Missing" + token_strings[token]
+	case token.isType():
+		return "Missing" + token_strings[token]
+	case token.isUnaryOp():
+		return "Missing" + token_strings[token]
+	case token.isBracketType():
+		return "Missing" + token_strings[token]
+	case token.isBoolean():
+		return "Missing" + token_strings[token]
+	}
+	return "Some error"
+	//Can use formatted output to print the string nicely
+	//E.g fmt.Sprint("Parse error: %s token",msg) etc..
+}
