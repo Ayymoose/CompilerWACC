@@ -4,5 +4,5 @@ import "fmt"
 
 func main() {
 	p := new(parser)
-	fmt.Println("Hello World", p.tokens[0])
+	fmt.Println("Hello World", p.curr)
 }

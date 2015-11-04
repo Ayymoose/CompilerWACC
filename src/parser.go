@@ -48,6 +48,9 @@ func (p *parser) expect(typ tokenType) bool {
 
 /* BNF parse functions */
 
-func (p *parser) parseProgram() bool {
-	return false
+/* NON-TERMINALS */
+func (p *parser) parseProgram() (bool, string) {
+	return false, ""
 }
+
+/* TERMINALS */
