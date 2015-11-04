@@ -95,7 +95,7 @@ const (
 
 	boolean_start
 	TRUE
-	FLASE
+	FALSE
 	boolean_end
 
 	tokenType_end
@@ -169,7 +169,7 @@ var token_strings = map[tokenType]string{
 	CLOSE_SQUARE:    "]",
 	CLOSE_ROUND:     ")",
 	TRUE:            "true",
-	FLASE:           "false",
+	FALSE:           "false",
 }
 
 func (tokenTyp tokenType) isEscapedChar() bool {
