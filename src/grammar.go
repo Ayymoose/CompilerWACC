@@ -205,7 +205,7 @@ func (tokenTyp tokenType) isBoolean() bool {
 }
 
 func lookUp(str string) tokenType {
-	for t, s := range tokenType_strings {
+	for t, s := range token_strings {
 		if s == str {
 			return t
 		}
