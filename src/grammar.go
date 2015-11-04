@@ -101,7 +101,7 @@ const (
 	tokenType_end
 )
 
-var tokenType_strings = map[tokenType]string{
+var token_strings = map[tokenType]string{
 	IDENTIFIER:      "identifier", // Place holder
 	COMMA:           ",",
 	SEMICOLON:       ";",
