@@ -1,13 +1,11 @@
 package main
 
-type tokenType int
-
 type token struct {
 	typ    tokenType
 	lexeme string
 }
 
-/* PARSER */
+/* PARSER --------------------------------------------------------------------*/
 
 // The paser struct will be used as the parser of the stream of tokens given to
 // it.
@@ -17,6 +15,10 @@ type parser struct {
 	save    int     // Index of a back-track token
 	currTok token   // the current token
 
+}
+
+func constructParser(tokenStream []token) *parser {
+	return &parser{tokenStream, 0, 0, tokenStream[0]}
 }
 
 // Returns true iff the token stream is finished
