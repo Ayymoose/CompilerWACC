@@ -5,13 +5,15 @@ import (
 	"strings"
 	"unicode"
 	"unicode/utf8"
+
+	"github.com/OliWheeler/wacc_19/src/grammar"
 )
 
 func lexInsideProgram(l *Lexer) stateFn {
 	/*	if strings.HasPrefix(l.input[l.pos:], token_keyword_strings[END]) {
 		return lexEnd
 	}  */
-	for t, s := range token_keyword_strings {
+	for t, s := range grammar.Token_keyword_strings {
 		if strings.HasPrefix(l.input[l.pos:], s) {
 			l.width = len(s)
 			l.pos += l.width
@@ -23,7 +25,7 @@ func lexInsideProgram(l *Lexer) stateFn {
 			return lexInsideProgram
 		}
 	}
-	for t, s := range token_strings {
+	for t, s := range grammar.Token_strings {
 		if strings.HasPrefix(l.input[l.pos:], s) {
 			l.width = len(s)
 			l.pos += l.width
@@ -44,7 +46,7 @@ func lexInsideProgram(l *Lexer) stateFn {
 	case isAlphaNumeric(r):
 		l.backup()
 		return lexIdentifier
-	case r == eof:
+	case r == grammar.Eof:
 		return nil
 	}
 	return lexInsideProgram
@@ -53,7 +55,7 @@ func lexInsideProgram(l *Lexer) stateFn {
 func (l *Lexer) next() (char rune) {
 	if l.pos >= len(l.input) {
 		l.width = 0
-		return eof
+		return grammar.Eof
 	}
 	char, l.width = utf8.DecodeRuneInString(l.input[l.pos:])
 	l.pos += l.width
@@ -88,13 +90,13 @@ func (l *Lexer) acceptRun(valid string) {
 	l.backup()
 }
 
-func (l *Lexer) emit(t ItemType) {
+func (l *Lexer) emit(t grammar.ItemType) {
 	l.Items <- Item{t, l.input[l.start:l.pos]}
 	l.start = l.pos
 }
 
 func (l *Lexer) errorf(format string, args ...interface{}) stateFn {
-	l.Items <- Item{ERROR,
+	l.Items <- Item{grammar.ERROR,
 		fmt.Sprintf(format, args...),
 	}
 	return nil

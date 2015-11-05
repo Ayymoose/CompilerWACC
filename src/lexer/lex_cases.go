@@ -1,6 +1,10 @@
 package lexer
 
-import "unicode"
+import (
+	"unicode"
+
+	"github.com/OliWheeler/wacc_19/src/grammar"
+)
 
 /*
 func lexBegin(l *Lexer) stateFn {
@@ -34,7 +38,7 @@ func lexIdentifier(l *Lexer) stateFn {
 		l.next()
 	}
 	//	l.backup()
-	l.emit(IDENTIFIER)
+	l.emit(grammar.IDENTIFIER)
 	return lexInsideProgram
 }
 
@@ -43,17 +47,17 @@ Loop:
 	for {
 		switch l.next() {
 		case '\\':
-			if r := l.next(); r != eof && r != '\n' {
+			if r := l.next(); r != grammar.Eof && r != '\n' {
 				break
 			}
 			fallthrough
-		case eof, '\n':
+		case grammar.Eof, '\n':
 			return l.errorf("unterminated character constant")
 		case '\'':
 			break Loop
 		}
 	}
-	l.emit(CHARACTER)
+	l.emit(grammar.CHARACTER)
 	return lexInsideProgram
 }
 
@@ -62,17 +66,17 @@ Loop:
 	for {
 		switch l.next() {
 		case '\\':
-			if r := l.next(); r != eof && r != '\n' {
+			if r := l.next(); r != grammar.Eof && r != '\n' {
 				break
 			}
 			fallthrough
-		case eof, '\n':
+		case grammar.Eof, '\n':
 			return l.errorf("unterminated quoted string")
 		case '"':
 			break Loop
 		}
 	}
-	l.emit(STRINGVALUE)
+	l.emit(grammar.STRINGVALUE)
 	return lexInsideProgram
 }
 
@@ -83,6 +87,6 @@ func lexNumber(l *Lexer) stateFn {
 	if unicode.IsLetter(l.peek()) {
 		return l.errorf("bad number syntax: %q", l.input[l.start:l.pos])
 	}
-	l.emit(NUMBER)
+	l.emit(grammar.NUMBER)
 	return lexInsideProgram
 }

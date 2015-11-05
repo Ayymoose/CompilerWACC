@@ -3,12 +3,14 @@ package lexer
 import (
 	"fmt"
 	"strings"
+
+	grammar "github.com/OliWheeler/wacc_19/src/grammar"
 )
 
 type stateFn func(*Lexer) stateFn
 
 type Item struct {
-	typ ItemType
+	typ grammar.ItemType
 	val string
 }
 
@@ -24,12 +26,12 @@ type Lexer struct {
 
 func (i Item) String() string {
 	switch i.typ {
-	case EOF:
+	case grammar.EOF:
 		return "EOF"
-	case ERROR:
+	case grammar.ERROR:
 		return i.val
 	}
-	return fmt.Sprintf("%v : %q", debugTokens[i.typ], i.val)
+	return fmt.Sprintf("%v : %q", grammar.DebugTokens[i.typ], i.val)
 }
 
 func (l *Lexer) run() {
@@ -50,22 +52,22 @@ func (l *Lexer) NextItem() Item {
 func lexText(l *Lexer) stateFn {
 	for {
 		_ = "breakpoint"
-		if strings.HasPrefix(l.input[l.pos:], token_keyword_strings[BEGIN]) {
+		if strings.HasPrefix(l.input[l.pos:], grammar.Token_keyword_strings[grammar.BEGIN]) {
 			/*	if l.pos > l.start {
 				l.emit(PLAINTEXT)
 			}     */
 			l.ignore()
 			return lexInsideProgram
 		}
-		if l.next() == eof {
+		if l.next() == grammar.Eof {
 			break
 		}
 	}
 	//Correclty reached eof
 	if l.pos > l.start {
-		l.emit(PLAINTEXT)
+		l.emit(grammar.PLAINTEXT)
 	}
-	l.emit(EOF)
+	l.emit(grammar.EOF)
 	return nil
 }
 

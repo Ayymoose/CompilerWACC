@@ -1,10 +1,10 @@
-package lexer // Double check its the correct package
+package grammar // Double check its the correct package
 
 type Token int
 
 type ItemType int
 
-const eof = -1
+const Eof = -1
 const (
 	token_start ItemType = iota
 
@@ -112,7 +112,7 @@ const (
 	token_end
 )
 
-var debugTokens = map[ItemType]string{
+var DebugTokens = map[ItemType]string{
 	token_start: "token_start",
 
 	IDENTIFIER: "IDENTIFIER",
@@ -218,7 +218,7 @@ var debugTokens = map[ItemType]string{
 	token_end: "token_end",
 }
 
-var token_keyword_strings = map[ItemType]string{
+var Token_keyword_strings = map[ItemType]string{
 	//	IDENTIFIER: "identifier", // Place holder
 	BEGIN:   "begin",
 	END:     "end",
@@ -254,7 +254,7 @@ var token_keyword_strings = map[ItemType]string{
 	FALSE:   "false",
 }
 
-var token_strings = map[ItemType]string{
+var Token_strings = map[ItemType]string{
 	NOT:       "!",
 	COMMA:     ",",
 	SEMICOLON: ";",
