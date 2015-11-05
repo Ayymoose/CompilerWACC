@@ -1,6 +1,9 @@
 package main
 
-import "strconv"
+import (
+	"fmt"
+	"strconv"
+)
 
 type token struct {
 	typ     tokenType
@@ -25,6 +28,12 @@ type parser struct {
 // tokenStream
 func constructParser(tokenStream []token) *parser {
 	return &parser{tokenStream, 0, 0, tokenStream[0]}
+}
+
+// Prints the string value of currTok
+// Useful for debugging
+func (p *parser) printTok() {
+	fmt.Println(p.tokenPos() + " " + token_strings[p.currTok.typ])
 }
 
 // Returns true iff the token stream is finished
@@ -57,7 +66,6 @@ func (p *parser) saveToken() {
 
 // Returns true iff the current token has the tokenType typ
 func (p *parser) expect(typ tokenType) bool {
-	defer p.advance()
 	return p.currTok.typ == typ
 }
 
@@ -83,14 +91,13 @@ func (p *parser) parse() (bool, []string) {
 
 /* NON-TERMINALS */
 func (p *parser) parseProgram() (bool, []string) {
-	var pass = false       // True iff the tokens match a <program> def
 	var errorMsgs []string // An array of error messages
 
 	p.saveToken()
 
 	// Check for "begin"
 	if !p.expectToken(BEGIN, &errorMsgs, "All programs must start with 'begin'") {
-		return pass, errorMsgs
+		return false, errorMsgs
 	}
 
 	p.saveToken()
@@ -102,14 +109,14 @@ func (p *parser) parseProgram() (bool, []string) {
 
 	// Checks for <Stat>
 	if !p.parseOne(p.parseStat, &errorMsgs) {
-		return pass, errorMsgs
+		return false, errorMsgs
 	}
 
 	p.saveToken()
 
 	// Checks for "end"
 	if !p.expectToken(END, &errorMsgs, "All programs must terminate with 'end'") {
-		return pass, errorMsgs
+		return false, errorMsgs
 	}
 
 	// If all pattern checks were succesful then return true with no error messages
@@ -117,7 +124,6 @@ func (p *parser) parseProgram() (bool, []string) {
 
 }
 
-/* TERMINALS */
 func (p *parser) parseFunc() (bool, []string) {
 	var pass = false       // True iff the tokens match a <program> def
 	var errorMsgs []string // An array of error messages
@@ -134,6 +140,13 @@ func (p *parser) parseFunc() (bool, []string) {
 func (p *parser) parseStat() (bool, []string) {
 	var pass = false       // True iff the tokens match a <program> def
 	var errorMsgs []string // An array of error messages
+
+	/* Option: skip */
+
+	// Checks for "skip"
+	if p.expectToken(SKIP, &errorMsgs, "") {
+		return true, errorMsgs
+	}
 
 	errorMsgs = append(errorMsgs, p.makeErrorMsg("parseStat is not implemented"))
 
