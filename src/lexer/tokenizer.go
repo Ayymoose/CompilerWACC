@@ -29,7 +29,7 @@ func (i Item) String() string {
 	case ERROR:
 		return i.val
 	}
-	return fmt.Sprintf("%q : %q", debugTokens[i.typ], i.val)
+	return fmt.Sprintf("%v : %q", debugTokens[i.typ], i.val)
 }
 
 func (l *Lexer) run() {

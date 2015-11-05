@@ -100,6 +100,7 @@ const (
 	OPEN_ROUND
 	CLOSE_SQUARE
 	CLOSE_ROUND
+	ASSIGNMENT
 	bracket_type_end
 
 	boolean_start
@@ -205,6 +206,7 @@ var debugTokens = map[ItemType]string{
 	OPEN_ROUND:         "OPEN_ROUND",
 	CLOSE_SQUARE:       "CLOSE_SQUARE",
 	CLOSE_ROUND:        "CLOSE_ROUND",
+	ASSIGNMENT:         "ASSIGNMENT",
 	bracket_type_end:   "bracket_type_end",
 
 	boolean_start: "boolean_start",
@@ -225,8 +227,8 @@ var token_keyword_strings = map[ItemType]string{
 	FREE:       "free",
 	RETURN:     "return",
 	EXIT:       "exit",
-	PRINT:      "print",
 	PRINTLN:    "println",
+	PRINT:      "print",
 	IF:         "if",
 	THEN:       "then",
 	ELSE:       "else",
@@ -287,6 +289,7 @@ var token_strings = map[ItemType]string{
 	OPEN_ROUND:      "(",
 	CLOSE_SQUARE:    "]",
 	CLOSE_ROUND:     ")",
+	ASSIGNMENT:      "=",
 }
 
 func (token ItemType) isEscapedChar() bool {

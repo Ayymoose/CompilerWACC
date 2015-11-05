@@ -32,7 +32,7 @@ func lexIdentifier(l *Lexer) stateFn {
 	for unicode.IsLetter(l.peek()) || unicode.IsDigit(l.peek()) {
 		l.next()
 	}
-	l.backup()
+	//	l.backup()
 	l.emit(IDENTIFIER)
 	return lexInsideProgram
 }

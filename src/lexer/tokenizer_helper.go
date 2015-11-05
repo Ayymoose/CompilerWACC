@@ -41,6 +41,9 @@ func lexInsideProgram(l *Lexer) stateFn {
 	case '0' <= r && r <= '9':
 		l.backup()
 		return lexNumber
+	default:
+		l.backup()
+		return lexIdentifier
 	}
 	return lexInsideProgram
 }
