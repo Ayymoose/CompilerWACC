@@ -8,9 +8,9 @@ import (
 )
 
 func lexInsideProgram(l *Lexer) stateFn {
-	if strings.HasPrefix(l.input[l.pos:], token_keyword_strings[END]) {
+	/*	if strings.HasPrefix(l.input[l.pos:], token_keyword_strings[END]) {
 		return lexEnd
-	}
+	}  */
 	for t, s := range token_keyword_strings {
 		if strings.HasPrefix(l.input[l.pos:], s) {
 			l.width = len(s)
@@ -41,9 +41,11 @@ func lexInsideProgram(l *Lexer) stateFn {
 	case '0' <= r && r <= '9':
 		l.backup()
 		return lexNumber
-	default:
+	case isAlphaNumeric(r):
 		l.backup()
 		return lexIdentifier
+	case r == eof:
+		return nil
 	}
 	return lexInsideProgram
 }

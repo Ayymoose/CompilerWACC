@@ -2,6 +2,7 @@ package lexer
 
 import "unicode"
 
+/*
 func lexBegin(l *Lexer) stateFn {
 	_ = "breakpoint"
 	l.width = len(token_keyword_strings[BEGIN])
@@ -22,8 +23,8 @@ func lexEnd(l *Lexer) stateFn {
 		return lexIdentifier
 	}
 	l.emit(END)
-	return nil
-}
+	return lexInsideProgram
+}*/
 
 func lexIdentifier(l *Lexer) stateFn {
 	if !unicode.IsLetter(l.next()) {

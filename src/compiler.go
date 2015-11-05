@@ -11,7 +11,7 @@ import (
 
 func main() {
 	var tokens []lexer.Item
-	b, err := ioutil.ReadFile("../../../../../wacc_examples/valid/if/if5.wacc")
+	b, err := ioutil.ReadFile("../../../../../wacc_examples/valid/function/nested_functions/fibonacciFullRec.wacc")
 	if err != nil {
 		fmt.Println(err)
 		os.Exit(1)
@@ -23,4 +23,5 @@ func main() {
 		tokens = append(tokens, item)
 	}
 	fmt.Println(tokens)
+
 }

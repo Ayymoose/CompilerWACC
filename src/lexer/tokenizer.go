@@ -51,10 +51,11 @@ func lexText(l *Lexer) stateFn {
 	for {
 		_ = "breakpoint"
 		if strings.HasPrefix(l.input[l.pos:], token_keyword_strings[BEGIN]) {
-			if l.pos > l.start {
+			/*	if l.pos > l.start {
 				l.emit(PLAINTEXT)
-			}
-			return lexBegin
+			}     */
+			l.ignore()
+			return lexInsideProgram
 		}
 		if l.next() == eof {
 			break
