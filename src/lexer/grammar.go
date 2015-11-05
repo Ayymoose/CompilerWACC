@@ -26,8 +26,8 @@ const (
 	LINE_FEED
 	FORM_FEED
 	CARRIAGE_RETURN
-	DOUBLE_QUOTE
-	SINGLE_QUOTE
+	//DOUBLE_QUOTE
+	//	SINGLE_QUOTE
 	BACKSLASH
 	escaped_char_end
 
@@ -40,8 +40,9 @@ const (
 	FREE
 	RETURN
 	EXIT
-	PRINT
 	PRINTLN
+	PRINT
+
 	IF
 	THEN
 	ELSE
@@ -132,10 +133,10 @@ var debugTokens = map[ItemType]string{
 	LINE_FEED:          "LINE_FEED",
 	FORM_FEED:          "FORM_FEED",
 	CARRIAGE_RETURN:    "CARRIAGE_RETURN",
-	DOUBLE_QUOTE:       "DOUBLE_QUOTE",
-	SINGLE_QUOTE:       "SINGLE_QUOTE",
-	BACKSLASH:          "BACKSLASH",
-	escaped_char_end:   "escaped_char_end",
+	//	DOUBLE_QUOTE:       "DOUBLE_QUOTE",
+	//	SINGLE_QUOTE:       "SINGLE_QUOTE",
+	BACKSLASH:        "BACKSLASH",
+	escaped_char_end: "escaped_char_end",
 
 	reserved_word_start: "reserved_word_start",
 	BEGIN:               "BEGIN",
@@ -146,8 +147,8 @@ var debugTokens = map[ItemType]string{
 	FREE:                "FREE",
 	RETURN:              "RETURN",
 	EXIT:                "EXIT",
-	PRINT:               "PRINT",
 	PRINTLN:             "PRINTLN",
+	PRINT:               "PRINT",
 	IF:                  "IF",
 	THEN:                "THEN",
 	ELSE:                "ELSE",
@@ -218,39 +219,39 @@ var debugTokens = map[ItemType]string{
 }
 
 var token_keyword_strings = map[ItemType]string{
-	IDENTIFIER: "identifier", // Place holder
-	BEGIN:      "begin",
-	END:        "end",
-	IS:         "is",
-	SKIP:       "skip",
-	READ:       "read",
-	FREE:       "free",
-	RETURN:     "return",
-	EXIT:       "exit",
-	PRINTLN:    "println",
-	PRINT:      "print",
-	IF:         "if",
-	THEN:       "then",
-	ELSE:       "else",
-	FI:         "fi",
-	WHILE:      "while",
-	DONE:       "done",
-	DO:         "do",
-	NEWPAIR:    "newpair",
-	CALL:       "call",
-	FST:        "fst",
-	SND:        "snd",
-	NULL:       "null",
-	INT:        "int",
-	BOOL:       "bool",
-	CHAR:       "char",
-	STRING:     "string",
-	PAIR:       "pair",
-	LEN:        "len",
-	ORD:        "ord",
-	CHR:        "chr",
-	TRUE:       "true",
-	FALSE:      "false",
+	//	IDENTIFIER: "identifier", // Place holder
+	BEGIN:   "begin",
+	END:     "end",
+	IS:      "is",
+	SKIP:    "skip",
+	READ:    "read",
+	FREE:    "free",
+	RETURN:  "return",
+	EXIT:    "exit",
+	PRINTLN: "println",
+	PRINT:   "print",
+	IF:      "if",
+	THEN:    "then",
+	ELSE:    "else",
+	FI:      "fi",
+	WHILE:   "while",
+	DONE:    "done",
+	DO:      "do",
+	NEWPAIR: "newpair",
+	CALL:    "call",
+	FST:     "fst",
+	SND:     "snd",
+	NULL:    "null",
+	INT:     "int",
+	BOOL:    "bool",
+	CHAR:    "char",
+	STRING:  "string",
+	PAIR:    "pair",
+	LEN:     "len",
+	ORD:     "ord",
+	CHR:     "chr",
+	TRUE:    "true",
+	FALSE:   "false",
 }
 
 var token_strings = map[ItemType]string{
@@ -268,28 +269,28 @@ var token_strings = map[ItemType]string{
 	LINE_FEED:       "\n",
 	FORM_FEED:       "\f",
 	CARRIAGE_RETURN: "\r",
-	DOUBLE_QUOTE:    "\"",
-	SINGLE_QUOTE:    "\\'",
-	BACKSLASH:       "\\",
-	NEG:             "-", // THIS IS FOR '-' WHICH ALSO EXISTS IN BINARY_OP ASWELL. NOT SURE OF THE BEST NAME
-	MULT:            "*",
-	DIV:             "/",
-	MOD:             "%",
-	ADD:             "+",
-	SUB:             "-", // '-' ALSO SAME SYMBOL -> NOT SURE IF ENTIRELY correct
-	GT:              ">",
-	GTE:             ">=",
-	ST:              "<",
-	STE:             "<=",
-	EQ:              "==", // BETTER NAMES??
-	NEQ:             "!=", // BETTER NAMES?
-	AND:             "&&",
-	OR:              "||",
-	OPEN_SQUARE:     "[",
-	OPEN_ROUND:      "(",
-	CLOSE_SQUARE:    "]",
-	CLOSE_ROUND:     ")",
-	ASSIGNMENT:      "=",
+	//	DOUBLE_QUOTE:    "\"",
+	//	SINGLE_QUOTE:    "\\'",
+	BACKSLASH:    "\\",
+	NEG:          "-", // THIS IS FOR '-' WHICH ALSO EXISTS IN BINARY_OP ASWELL. NOT SURE OF THE BEST NAME
+	MULT:         "*",
+	DIV:          "/",
+	MOD:          "%",
+	ADD:          "+",
+	SUB:          "-", // '-' ALSO SAME SYMBOL -> NOT SURE IF ENTIRELY correct
+	GT:           ">",
+	GTE:          ">=",
+	ST:           "<",
+	STE:          "<=",
+	EQ:           "==", // BETTER NAMES??
+	NEQ:          "!=", // BETTER NAMES?
+	AND:          "&&",
+	OR:           "||",
+	OPEN_SQUARE:  "[",
+	OPEN_ROUND:   "(",
+	CLOSE_SQUARE: "]",
+	CLOSE_ROUND:  ")",
+	ASSIGNMENT:   "=",
 }
 
 func (token ItemType) isEscapedChar() bool {

@@ -15,7 +15,7 @@ func lexInsideProgram(l *Lexer) stateFn {
 		if strings.HasPrefix(l.input[l.pos:], s) {
 			l.width = len(s)
 			l.pos += l.width
-			if unicode.IsLetter(l.next()) {
+			if isAlphaNumeric(l.next()) {
 				l.backup()
 				return lexIdentifier
 			}
@@ -96,4 +96,9 @@ func (l *Lexer) errorf(format string, args ...interface{}) stateFn {
 		fmt.Sprintf(format, args...),
 	}
 	return nil
+}
+
+// isAlphaNumeric reports whether r is an alphabetic, digit, or underscore.
+func isAlphaNumeric(r rune) bool {
+	return r == '_' || unicode.IsLetter(r) || unicode.IsDigit(r)
 }

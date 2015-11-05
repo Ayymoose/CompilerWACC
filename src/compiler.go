@@ -11,7 +11,7 @@ import (
 
 func main() {
 	var tokens []lexer.Item
-	b, err := ioutil.ReadFile("../../../../../wacc_examples/valid/expressions/boolCalc.wacc")
+	b, err := ioutil.ReadFile("../../../../../wacc_examples/valid/if/if5.wacc")
 	if err != nil {
 		fmt.Println(err)
 		os.Exit(1)
