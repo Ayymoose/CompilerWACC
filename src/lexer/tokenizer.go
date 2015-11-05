@@ -1,59 +1,58 @@
 package lexer
 
-import "strings"
+import (
+	"fmt"
+	"strings"
+)
 
-type stateFn func(*lexer) stateFn
+type stateFn func(*Lexer) stateFn
 
-type item struct {
-	typ itemType
+type Item struct {
+	typ ItemType
 	val string
 }
 
-type lexer struct {
+type Lexer struct {
 	name  string
 	input string
+	state stateFn
 	start int
 	pos   int
 	width int
-	items chan item
+	Items chan Item
 }
 
-const (
-	itemError = iota
-	itemEOF
-	itemBegin
-	itemEnd
-	itemInt
-	itemElse       // else keyword
-	itemIdentifier // identifier
-	itemIf         // if keyword
-	itemString     // quoted string (includes quotes)
-	itemText       // plain text
-)
-
-const (
-	eof   = -1
-	begin = "begin"
-	end   = "end"
-)
-
-func (i item) String() string {
-	// TODO:
-	return ""
+func (i Item) String() string {
+	switch i.typ {
+	case EOF:
+		return "EOF"
+	case ERROR:
+		return i.val
+	}
+	return fmt.Sprintf("%q : %q", debugTokens[i.typ], i.val)
 }
 
-func (l *lexer) run() {
+func (l *Lexer) run() {
 	for state := lexText; state != nil; {
 		state = state(l)
 	}
-	close(l.items)
+	close(l.Items)
 }
 
-func lexText(l *lexer) stateFn {
+// nextItem returns the next item from the input.
+// Called by the parser, not in the lexing goroutine.
+func (l *Lexer) NextItem() Item {
+	item := <-l.Items
+	//l.lastPos = item.pos
+	return item
+}
+
+func lexText(l *Lexer) stateFn {
 	for {
-		if strings.HasPrefix(l.input[l.pos:], begin) {
+		_ = "breakpoint"
+		if strings.HasPrefix(l.input[l.pos:], token_keyword_strings[BEGIN]) {
 			if l.pos > l.start {
-				l.emit(itemText)
+				l.emit(PLAINTEXT)
 			}
 			return lexBegin
 		}
@@ -63,19 +62,18 @@ func lexText(l *lexer) stateFn {
 	}
 	//Correclty reached eof
 	if l.pos > l.start {
-		l.emit(itemText)
+		l.emit(PLAINTEXT)
 	}
-	l.emit(itemEOF)
+	l.emit(EOF)
 	return nil
 }
 
-func lex(name, input string) (*lexer, chan item) {
-
-	l := &lexer{
+func Lex(name, input string) *Lexer {
+	l := &Lexer{
 		name:  name,
 		input: input,
-		items: make(chan item),
+		Items: make(chan Item),
 	}
 	go l.run()
-	return l, l.items
+	return l
 }
