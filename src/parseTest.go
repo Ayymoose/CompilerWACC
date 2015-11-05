@@ -3,7 +3,7 @@ package main
 import "fmt"
 
 func main() {
-	p := constructParser(testStream1())
+	p := constructParser(testStream2())
 	pass, errorMsgs := p.parse()
 
 	if !pass {
@@ -13,14 +13,25 @@ func main() {
 			fmt.Printf("%s\n", errorMsg)
 		}
 
+	} else {
+		fmt.Println("Parse was successful!!!")
 	}
 
 }
 
 func testStream1() []token {
-	t1 := token{BEGIN, token_strings[BEGIN], 0, 0}
+	t1 := token{IDENTIFIER, token_strings[BEGIN], 0, 0}
 	t2 := token{IDENTIFIER, "nman", 0, 5}
 	tokenStream := []token{t1, t2}
+
+	return tokenStream
+}
+
+func testStream2() []token {
+	t1 := token{BEGIN, token_strings[BEGIN], 0, 0}
+	t2 := token{IDENTIFIER, "nman", 1, 2}
+	t3 := token{END, token_strings[END], 2, 0}
+	tokenStream := []token{t1, t2, t3}
 
 	return tokenStream
 }
