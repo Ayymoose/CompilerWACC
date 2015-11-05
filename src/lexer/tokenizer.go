@@ -2,7 +2,6 @@ package lexer
 
 import "strings"
 
-type itemType int
 type stateFn func(*lexer) stateFn
 
 type item struct {

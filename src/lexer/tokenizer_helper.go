@@ -7,63 +7,30 @@ import (
 	"unicode/utf8"
 )
 
-func lexBegin(l *lexer) stateFn {
-	l.width = len(begin)
-	l.pos += l.width
-	if unicode.IsLetter(l.next()) {
-		l.backup()
-		return lexIdentifier
-	}
-	l.emit(itemBegin)
-	return lexInsideProgram
-}
-
-func lexEnd(l *lexer) stateFn {
-	l.width = len(end)
-	l.pos += l.width
-	if unicode.IsLetter(l.next()) {
-		l.backup()
-		return lexIdentifier
-	}
-	l.emit(itemEnd)
-	return nil
-}
-
-func lexIdentifier(l *lexer) stateFn {
-	if !unicode.IsLetter(l.next()) {
-		return l.errorf("bad identifier syntax: %q", l.input[l.start:l.pos])
-	}
-	for unicode.IsLetter(l.peek()) || unicode.IsDigit(l.peek()) {
-		l.next()
-	}
-	l.backup()
-	l.emit(itemIdentifier)
-	return lexInsideProgram
-}
-
-func lexChar(l *lexer) stateFn {
-
-}
-
-func lexString(l *lexer) stateFn {
-
-}
-
-func lexNumber(l *lexer) stateFn {
-	l.accept("+-")
-	digits := "0123456789"
-	l.acceptRun(digits)
-	if unicode.IsLetter(l.peek()) {
-		return l.errorf("bad number syntax: %q", l.input[l.start:l.pos])
-	}
-	l.emit(itemInt)
-	return lexInsideProgram
-}
-
 func lexInsideProgram(l *lexer) stateFn {
 	for {
 		if strings.HasPrefix(l.input[l.pos:], end) {
 			return lexEnd
+		}
+		for t, s := range token_keyword_strings {
+			if strings.HasPrefix(l.input[l.pos:], s) {
+				l.width = len(s)
+				l.pos += l.width
+				if unicode.IsLetter(l.next()) {
+					l.backup()
+					return lexIdentifier
+				}
+				l.emit(t)
+				return lexInsideProgram
+			}
+		}
+		for t, s := range token_strings {
+			if strings.HasPrefix(l.input[l.pos:], s) {
+				l.width = len(s)
+				l.pos += l.width
+				l.emit(t)
+				return lexInsideProgram
+			}
 		}
 		switch r := l.next(); {
 		case unicode.IsSpace(r):
