@@ -3,7 +3,7 @@ package main
 import "fmt"
 
 func main() {
-	p := constructParser(testStream3())
+	p := constructParser(testStream2())
 	pass, errorMsgs := p.parse()
 
 	if !pass {
@@ -20,8 +20,8 @@ func main() {
 }
 
 func testStream1() []token {
-	t1 := token{IDENTIFIER, token_strings[BEGIN], 0, 0}
-	t2 := token{IDENTIFIER, "nman", 0, 5}
+	t1 := token{IDENTIFIER, "abc", 0, 0}
+	t2 := token{IDENTIFIER, "nman", 1, 5}
 	tokenStream := []token{t1, t2}
 
 	return tokenStream

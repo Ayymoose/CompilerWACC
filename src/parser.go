@@ -148,6 +148,8 @@ func (p *parser) parseStat() (bool, []string) {
 		return true, errorMsgs
 	}
 
+	/* Option: 2 */
+
 	errorMsgs = append(errorMsgs, p.makeErrorMsg("parseStat is not implemented"))
 
 	if !pass {
@@ -159,6 +161,10 @@ func (p *parser) parseStat() (bool, []string) {
 
 /* PARSE HELPERS */
 
+// Attempts to parse one pattern based on parseCheck
+// I.e. <Check>
+// This function is obligated to accept at one parseCheck
+// returns true iff the parseCheck was accepted
 func (p *parser) parseOne(parseCheck func() (bool, []string), errorMsgs *[]string) bool {
 	var errorMsgTemp []string
 	var match = false
