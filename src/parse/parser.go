@@ -3,6 +3,8 @@ package main
 import (
 	"fmt"
 	"strconv"
+
+	grammar "github.com/OliWheeler/wacc_19/src/grammar" // CHANGE TO MASTER
 )
 
 type token struct {
@@ -96,7 +98,7 @@ func (p *parser) parseProgram() (bool, []string) {
 	p.saveToken()
 
 	// Check for "begin"
-	if !p.expectToken(BEGIN, &errorMsgs, "All programs must start with 'begin'") {
+	if !p.expectToken(grammar.BEGIN, &errorMsgs, "All programs must start with 'begin'") {
 		return false, errorMsgs
 	}
 
@@ -115,7 +117,7 @@ func (p *parser) parseProgram() (bool, []string) {
 	p.saveToken()
 
 	// Checks for "end"
-	if !p.expectToken(END, &errorMsgs, "All programs must terminate with 'end'") {
+	if !p.expectToken(grammar.END, &errorMsgs, "All programs must terminate with 'end'") {
 		return false, errorMsgs
 	}
 
@@ -144,7 +146,7 @@ func (p *parser) parseStat() (bool, []string) {
 	/* Option: skip */
 
 	// Checks for "skip"
-	if p.expectToken(SKIP, &errorMsgs, "") {
+	if p.expectToken(grammar.SKIP, &errorMsgs, "") {
 		return true, errorMsgs
 	}
 
