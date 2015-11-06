@@ -31,6 +31,7 @@ func (i Item) String() string {
 	case grammar.ERROR:
 		return i.val
 	}
+	//	return fmt.Sprintf("grammar.Item{%v, %q},", grammar.DebugTokens[i.typ], i.val)
 	return fmt.Sprintf("%v : %q", grammar.DebugTokens[i.typ], i.val)
 }
 

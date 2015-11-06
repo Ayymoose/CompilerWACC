@@ -4,6 +4,10 @@ type Token int
 
 type ItemType int
 
+func (i ItemType) Len() int {
+	return int(i)
+}
+
 const Eof = -1
 const (
 	token_start ItemType = iota
@@ -255,7 +259,7 @@ var Token_keyword_strings = map[ItemType]string{
 }
 
 var Token_strings = map[ItemType]string{
-	NOT:       "!",
+
 	COMMA:     ",",
 	SEMICOLON: ";",
 	//COMMENT_START: "",
@@ -271,21 +275,24 @@ var Token_strings = map[ItemType]string{
 	CARRIAGE_RETURN: "\r",
 	//	DOUBLE_QUOTE:    "\"",
 	//	SINGLE_QUOTE:    "\\'",
-	BACKSLASH:    "\\",
-	NEG:          "-", // THIS IS FOR '-' WHICH ALSO EXISTS IN BINARY_OP ASWELL. NOT SURE OF THE BEST NAME
-	MULT:         "*",
-	DIV:          "/",
-	MOD:          "%",
-	ADD:          "+",
-	SUB:          "-", // '-' ALSO SAME SYMBOL -> NOT SURE IF ENTIRELY correct
-	GT:           ">",
-	GTE:          ">=",
-	ST:           "<",
-	STE:          "<=",
-	EQ:           "==", // BETTER NAMES??
-	NEQ:          "!=", // BETTER NAMES?
-	AND:          "&&",
-	OR:           "||",
+	BACKSLASH: "\\",
+	NEG:       "-", // THIS IS FOR '-' WHICH ALSO EXISTS IN BINARY_OP ASWELL. NOT SURE OF THE BEST NAME
+	MULT:      "*",
+	DIV:       "/",
+	MOD:       "%",
+	ADD:       "+",
+	EQ:        "==", // BETTER NAMES??
+	NEQ:       "!=", // BETTER NAMES?
+	NOT:       "!",
+	AND:       "&&",
+	OR:        "||",
+	SUB:       "-", // '-' ALSO SAME SYMBOL -> NOT SURE IF ENTIRELY correct
+	GTE:       ">=",
+	STE:       "<=",
+	GT:        ">",
+
+	ST: "<",
+
 	OPEN_SQUARE:  "[",
 	OPEN_ROUND:   "(",
 	CLOSE_SQUARE: "]",

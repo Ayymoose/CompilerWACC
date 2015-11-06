@@ -2,34 +2,65 @@ package lexer
 
 import (
 	"fmt"
+	"sort"
 	"strings"
 	"unicode"
 	"unicode/utf8"
 
-	"github.com/OliWheeler/wacc_19/src/grammar"
+	grammar "github.com/OliWheeler/wacc_19/src/grammar"
 )
+
+type ItemTypeSlice []grammar.ItemType
+
+func (i ItemTypeSlice) Len() int {
+	return len(i)
+}
+
+func (g ItemTypeSlice) Less(i, j int) bool {
+	if g[i] < g[j] {
+		return true
+	}
+	return false
+}
+
+func (g ItemTypeSlice) Swap(i, j int) {
+	g[i], g[j] = g[j], g[i]
+}
 
 func lexInsideProgram(l *Lexer) stateFn {
 	/*	if strings.HasPrefix(l.input[l.pos:], token_keyword_strings[END]) {
 		return lexEnd
 	}  */
-	for t, s := range grammar.Token_keyword_strings {
-		if strings.HasPrefix(l.input[l.pos:], s) {
+
+	var keysForKeywords ItemTypeSlice
+	for k := range grammar.Token_keyword_strings {
+		keysForKeywords = append(keysForKeywords, k)
+	}
+	sort.Sort(keysForKeywords)
+	for _, key := range keysForKeywords {
+		if strings.HasPrefix(l.input[l.pos:], grammar.Token_keyword_strings[key]) {
+			s := grammar.Token_keyword_strings[key]
 			l.width = len(s)
 			l.pos += l.width
 			if isAlphaNumeric(l.next()) {
 				l.backup()
 				return lexIdentifier
 			}
-			l.emit(t)
+			l.emit(grammar.ItemType(key))
 			return lexInsideProgram
 		}
 	}
-	for t, s := range grammar.Token_strings {
-		if strings.HasPrefix(l.input[l.pos:], s) {
+	var keysForTokens ItemTypeSlice
+	for k := range grammar.Token_strings {
+		keysForTokens = append(keysForTokens, k)
+	}
+	sort.Sort(keysForTokens)
+	for _, key := range keysForTokens {
+		if strings.HasPrefix(l.input[l.pos:], grammar.Token_strings[key]) {
+			s := grammar.Token_strings[key]
 			l.width = len(s)
 			l.pos += l.width
-			l.emit(t)
+			l.emit(grammar.ItemType(key))
 			return lexInsideProgram
 		}
 	}
