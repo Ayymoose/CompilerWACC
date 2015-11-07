@@ -374,7 +374,7 @@ func (p *parser) expectToken(expectedType grammar.ItemType) bool {
 	if !p.expect(expectedType) {
 		return false
 	}
-
+ 
 	p.advance()
 
 	return true
