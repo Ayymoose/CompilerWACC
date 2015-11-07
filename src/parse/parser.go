@@ -81,9 +81,7 @@ func (p *parser) advance() {
 		return
 	}
 
-	p.curr++
-
-	p.currTok = p.tokens[p.curr]
+	p.currTok = p.tokens[++p.curr]
 }
 
 // Back track the current token back to the most recent save point
