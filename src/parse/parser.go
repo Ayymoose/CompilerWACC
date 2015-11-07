@@ -185,6 +185,16 @@ func (p *parser) parseFunc() (bool, []string) {
 	return pass, errorMsgs
 }
 
+func (p *parser) parseParamList() (bool, []string) {
+	return false, {""}
+}
+
+
+func (p *parser) parseParam() (bool, []string) {
+	return false, {""}
+}
+
+
 func (p *parser) parseStat() (bool, []string) {
 	var pass = false           // True iff the tokens match a <program> def
 	var errorMsgs []string     // An array of error messages
@@ -227,6 +237,97 @@ func (p *parser) parseStat() (bool, []string) {
 	return true, []string{}
 }
 
+func (p *parser) parseAssignLHS() (bool, []string) {
+	return false, {""}
+}
+
+func (p *parser) parseAssignRHS() (bool, []string) {
+	return false, {""}
+}
+
+func (p *parser) parseArgList() (bool, []string) {
+	return false, {""}
+}
+
+func (p *parser) parsePairElem() (bool, []string) {
+	return false, {""}
+}
+
+func (p *parser) parseType() (bool, []string) {
+	return false, {""}
+}
+
+func (p *parser) parseBaseType() (bool, []string) {
+	return false, {""}
+}
+
+func (p *parser) parseArrayType() (bool, []string) {
+	return false, {""}
+}
+
+func (p *parser) parsePairType() (bool, []string) {
+	return false, {""}
+}
+
+func (p *parser) parseElemType() (bool, []string) {
+	return false, {""}
+}
+
+func (p *parser) parseExpr() (bool, []string) {
+	return false, {""}
+}
+
+func (p *parser) parseUnaryOp() (bool, []string) {
+	return false, {""}
+}
+
+func (p *parser) parseBinaryOp() (bool, []string) {
+	return false, {""}
+}
+
+func (p *parser) parseIdent() (bool, []string) {
+	return false, {""}
+}
+
+func (p *parser) parseArrayElem() (bool, []string) {
+	return false, {""}
+}
+
+func (p *parser) parseIntLiter() (bool, []string) {
+	return false, {""}
+}
+
+func (p *parser) parseDigit() (bool, []string) {
+	return false, {""}
+}
+
+func (p *parser) parseIntSign() (bool, []string) {
+	return false, {""}
+}
+
+func (p *parser) parseBoolLiteral() (bool, []string) {
+	return false, {""}
+}
+
+func (p *parser) parseCharLiteral() (bool, []string) {
+	return false, {""}
+}
+
+func (p *parser) parseStrLiteral() (bool, []string) {
+	return false, {""}
+}
+
+func (p *parser) parseCharacter() (bool, []string) {
+	return false, {""}
+}
+
+func (p *parser) parseArrayLiteral() (bool, []string) {
+	return false, {""}
+}
+
+func (p *parser) parseComment() (bool, []string) {
+	return false, {""}
+}
 /* PARSE HELPERS */
 
 // Attempts to parse one pattern based on parseCheck
