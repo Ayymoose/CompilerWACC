@@ -1,5 +1,7 @@
 package parse
 
+// TO DO: FIX RECURSIVE ERROR MESSAGES
+
 import (
 	"fmt"
 	"strconv"
@@ -14,22 +16,15 @@ type Token struct {
 	RowNum  int
 }
 
-// A struct that contains arguments to a parser.expectToken function call
-type expectArgs struct {
-	expectedType grammar.ItemType
-	errorMsg     string
-	errorMsgs    *[]string // If expectArgs is being used as an argument
-	// for parsePattern, use &[]string for this field
-}
-
 // A struct that contains arguments to a parser.parsePattern function call
 type patternArgs struct {
-	expArgs   []expectArgs
+	expArgs   []grammar.ItemType
 	checks    []parseType
 	typs      []patternType
 	segErrors []string
 }
 
+// Used to define regex iteration patterns E.g. a* a+ a a?
 type patternType int
 
 const (
@@ -42,7 +37,7 @@ const (
 
 type parseType func() (bool, []string)
 
-type patternCheck func([]expectArgs, []parseType, []patternType) (bool, []string)
+type patternCheck func([]grammar.ItemType, []parseType, []patternType) (bool, []string)
 
 /* PARSER --------------------------------------------------------------------*/
 
@@ -133,9 +128,9 @@ func (p *parser) makeErrorMsg(str string) string {
 
 // Adds a list of errorMsgs to another list of errorMsgs
 func (p *parser) addErrors(errors1 *[]string, errors2 []string) {
-	for _, error := range errors2 {
-		if error != "" {
-			*errors1 = append(*errors1, p.makeErrorMsg(error))
+	for _, cError := range errors2 {
+		if cError != "" {
+			*errors1 = append(*errors1, p.makeErrorMsg(cError))
 		}
 	}
 }
@@ -147,20 +142,21 @@ func (p *parser) Parse() (bool, []string) {
 	var pass, errors = p.parseProgram()
 
 	return pass, errors
-
 }
 
 /* NON-TERMINALS */
+// WARNING : Do not use parseOptions to recursive call the same functions
+// E.g. Do no not have an option that calls parseStat inside of parseStat
+
 func (p *parser) parseProgram() (bool, []string) {
 	var errorMsgs []string // An array of error messages
 	var pass = false       // True iff the tokens match a <program> def
 
-	expected := []expectArgs{expectArgs{grammar.BEGIN, "All programs must start with 'begin'", &[]string{}},
-		expectArgs{grammar.END, "All programs must terminate with 'end'", &[]string{}}}
-
+	expected := []grammar.ItemType{grammar.BEGIN, grammar.END}
 	parseTypes := []parseType{p.parseFunc, p.parseStat}
 	patternTypes := []patternType{EXPECT, ZEROMORE, ONCE, EXPECT}
-	segmentErrors := []string{"", "", "", ""}
+	segmentErrors := []string{"All programs must start with 'begin'", "", "",
+		"All programs must terminate with 'end'"}
 
 	pass, errorMsgs = p.parsePattern(expected, parseTypes, patternTypes, segmentErrors)
 
@@ -169,7 +165,6 @@ func (p *parser) parseProgram() (bool, []string) {
 	}
 
 	return true, []string{}
-
 }
 
 func (p *parser) parseFunc() (bool, []string) {
@@ -186,38 +181,52 @@ func (p *parser) parseFunc() (bool, []string) {
 }
 
 func (p *parser) parseStat() (bool, []string) {
-	var pass = false           // True iff the tokens match a <program> def
+	var pass = false      // True iff the tokens match a <program> def
+	var multiStat = false // True iff the the statement contains multiple
+	// statement I.e. <stat> ';' <stat>
 	var errorMsgs []string     // An array of error messages
 	var errorMsgsTemp []string // Error messages place holder
 
 	p.addErrors(&errorMsgs, []string{"parseStat is not implemented"})
 
 	//Place holders
-	expected := []expectArgs{}
+	expected := []grammar.ItemType{}
 	parseTypes := []parseType{}
 	patternTypes := []patternType{}
 	segmentErrors := []string{}
 
 	// Option 1: 'skip'
-	expected = []expectArgs{expectArgs{grammar.SKIP, "", &[]string{}}}
+	expected = []grammar.ItemType{grammar.SKIP}
 	parseTypes = []parseType{}
 	patternTypes = []patternType{EXPECT}
 	segmentErrors = []string{""}
 
 	op1 := patternArgs{expected, parseTypes, patternTypes, segmentErrors}
 
-	// Option 2: 'skip' ; 'skip'
-	expected = []expectArgs{expectArgs{grammar.SKIP, "", &[]string{}},
-		expectArgs{grammar.SEMICOLON, "", &[]string{}},
-		expectArgs{grammar.SKIP, "", &[]string{}}}
-
-	parseTypes = []parseType{}
-	patternTypes = []patternType{EXPECT, EXPECT, EXPECT}
-	segmentErrors = []string{"", "", ""}
+	// Option 2: 'free' <expr>
+	expected = []grammar.ItemType{grammar.FREE}
+	parseTypes = []parseType{p.parseExpr}
+	patternTypes = []patternType{EXPECT, ONCE}
+	segmentErrors = []string{"", "A variable must follow 'free'"}
 
 	op2 := patternArgs{expected, parseTypes, patternTypes, segmentErrors}
 
 	pass, errorMsgsTemp = p.parseOptions(op2, op1)
+
+	errorMsgs = append(errorMsgs, errorMsgsTemp...)
+
+	// Option 13: <stat> ; <stat>
+
+	// Check for a ';'
+	multiStat, _ = p.parsePattern([]grammar.ItemType{grammar.SEMICOLON},
+		[]parseType{},
+		[]patternType{EXPECT},
+		[]string{""})
+
+	if multiStat {
+		pass, errorMsgsTemp = p.parseStat()
+	}
+
 	errorMsgs = append(errorMsgs, errorMsgsTemp...)
 
 	if !pass {
@@ -225,6 +234,19 @@ func (p *parser) parseStat() (bool, []string) {
 	}
 
 	return true, []string{}
+}
+
+func (p *parser) parseExpr() (bool, []string) {
+	var pass = false       // True iff the tokens match a <program> def
+	var errorMsgs []string // An array of error messages
+
+	p.addErrors(&errorMsgs, []string{"parseExpr is not implemented"})
+
+	if !pass {
+		p.backTrack()
+	}
+
+	return pass, errorMsgs
 }
 
 /* PARSE HELPERS */
@@ -245,14 +267,9 @@ func (p *parser) parseOne(parseCheck parseType, errorMsgs *[]string) bool {
 }
 
 // Returns true iff currTok matches the expectedType.
-func (p *parser) expectToken(expectedType grammar.ItemType, errorMsgs *[]string, errorMsg string) bool {
+func (p *parser) expectToken(expectedType grammar.ItemType) bool {
 	if !p.expect(expectedType) {
-		if len(errorMsg) > 0 {
-			*errorMsgs = append(*errorMsgs, p.makeErrorMsg(errorMsg))
-		}
-
 		return false
-
 	}
 
 	p.advance()
@@ -269,7 +286,7 @@ func (p *parser) parseOptional(parseCheck parseType, errorMsgs *[]string) {
 
 	_, errorMsgTemp = parseCheck()
 
-	p.addErrors(errorMsgs, errorMsgTemp)
+	*errorMsgs = append(*errorMsgs, errorMsgTemp...)
 }
 
 // Attempts to parse zero or patterns based on parseCheck
@@ -284,7 +301,7 @@ func (p *parser) parseZeroOrMore(parseCheck parseType, errorMsgs *[]string) {
 
 	for {
 		if !match {
-			p.addErrors(errorMsgs, errorMsgTemp)
+			*errorMsgs = append(*errorMsgs, errorMsgTemp...)
 			break
 
 		} else {
@@ -306,14 +323,14 @@ func (p *parser) parseOneOrMore(parseCheck parseType, errorMsgs *[]string) bool 
 
 	// fail parse iff the first Check failed
 	if !match {
-		p.addErrors(errorMsgs, errorMsgTemp)
+		*errorMsgs = append(*errorMsgs, errorMsgTemp...)
 
 		return false
 	}
 
 	for {
 		if !match {
-			p.addErrors(errorMsgs, errorMsgTemp)
+			*errorMsgs = append(*errorMsgs, errorMsgTemp...)
 			break
 
 		} else {
@@ -333,7 +350,7 @@ func (p *parser) parseOneOrMore(parseCheck parseType, errorMsgs *[]string) bool 
 // segmentErrors: An array of error messages added to errorMsgTemp when its
 //                respected segemnt/expectArgs (depends on ORDER) fails the check
 // PRE: len(exepected) + len(parse) == len(typs)
-func (p *parser) parsePattern(expArgs []expectArgs, segments []parseType, typs []patternType, segmentErrors []string) (bool, []string) {
+func (p *parser) parsePattern(expArgs []grammar.ItemType, segments []parseType, typs []patternType, segmentErrors []string) (bool, []string) {
 	defer p.removeSave()
 	var errorMsgTemp []string
 
@@ -342,7 +359,7 @@ func (p *parser) parsePattern(expArgs []expectArgs, segments []parseType, typs [
 	for i, typ := range typs {
 		switch typ {
 		case EXPECT:
-			if !p.expectToken(expArgs[0].expectedType, &errorMsgTemp, expArgs[0].errorMsg) {
+			if !p.expectToken(expArgs[0]) {
 				p.addErrors(&errorMsgTemp, []string{segmentErrors[i]})
 				return false, errorMsgTemp
 			}
@@ -350,6 +367,7 @@ func (p *parser) parsePattern(expArgs []expectArgs, segments []parseType, typs [
 			if len(expArgs) > 1 {
 				expArgs = expArgs[1:] // Pop front of the list
 			}
+			break
 
 		case ONCE:
 			if !p.parseOne(segments[0], &errorMsgTemp) {
@@ -360,6 +378,7 @@ func (p *parser) parsePattern(expArgs []expectArgs, segments []parseType, typs [
 			if len(segments) > 1 {
 				segments = segments[1:] // Pop front of the list
 			}
+			break
 
 		case OPTIONAL:
 			p.parseOptional(segments[0], &errorMsgTemp)
@@ -367,6 +386,7 @@ func (p *parser) parsePattern(expArgs []expectArgs, segments []parseType, typs [
 			if len(segments) > 1 {
 				segments = segments[1:] // Pop front of the list
 			}
+			break
 
 		case ZEROMORE:
 			p.parseZeroOrMore(segments[0], &errorMsgTemp)
@@ -374,6 +394,7 @@ func (p *parser) parsePattern(expArgs []expectArgs, segments []parseType, typs [
 			if len(segments) > 1 {
 				segments = segments[1:] // Pop front of the list
 			}
+			break
 
 		case ONEMORE:
 			if !p.parseOneOrMore(segments[0], &errorMsgTemp) {
@@ -384,6 +405,7 @@ func (p *parser) parsePattern(expArgs []expectArgs, segments []parseType, typs [
 			if len(segments) > 1 {
 				segments = segments[1:] // Pop front of the list
 			}
+			break
 
 		}
 
@@ -409,7 +431,7 @@ func (p *parser) parseOptions(args ...patternArgs) (bool, []string) {
 	for _, patternArg := range args {
 		pass, errorMsgsTemp = p.parsePattern(patternArg.expArgs, patternArg.checks, patternArg.typs, patternArg.segErrors)
 
-		p.addErrors(&errorMsgs, errorMsgsTemp)
+		errorMsgs = append(errorMsgs, errorMsgsTemp...)
 
 		if pass {
 			return true, []string{}
