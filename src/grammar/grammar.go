@@ -293,35 +293,35 @@ var Token_strings = map[ItemType]string{
 	ASSIGNMENT:   "=",
 }
 
-func (token ItemType) isEscapedChar() bool {
+func (token ItemType) IsEscapedChar() bool {
 	return token > escaped_char_start && token < escaped_char_end
 }
 
-func (token ItemType) isDeliminator() bool {
+func (token ItemType) IsDeliminator() bool {
 	return token > deliminators_start && token < deliminators_end
 }
 
-func (token ItemType) isReservedWord() bool {
+func (token ItemType) IsReservedWord() bool {
 	return token > reserved_word_start && token < reserved_word_end
 }
 
-func (token ItemType) isType() bool {
+func (token ItemType) IsType() bool {
 	return token > type_start && token < type_end
 }
 
-func (token ItemType) isUnaryOp() bool {
+func (token ItemType) IsUnaryOp() bool {
 	return token > unary_op_start && token < unary_op_end
 }
 
-func (token ItemType) isBinaryOp() bool {
+func (token ItemType) IsBinaryOp() bool {
 	return token > binary_op_start && token < binary_op_end
 }
 
-func (token ItemType) isBracketType() bool {
+func (token ItemType) IsBracketType() bool {
 	return token > bracket_type_start && token < bracket_type_end
 }
 
-func (token ItemType) isBoolean() bool {
+func (token ItemType) IsBoolean() bool {
 	return token > boolean_start && token < boolean_end
 }
 
