@@ -1,7 +1,5 @@
 package parse
 
-// TO DO: FIX RECURSIVE ERROR MESSAGES
-
 import (
 	"fmt"
 	"strconv"
@@ -16,7 +14,7 @@ type Token struct {
 	RowNum  int
 }
 
-// A struct that contains arguments to a parser.parsePattern function call
+// A struct that contains arguments to a parser's parsePattern function call
 type patternArgs struct {
 	expArgs   []grammar.ItemType
 	checks    []parseType
@@ -28,16 +26,18 @@ type patternArgs struct {
 type patternType int
 
 const (
-	ONCE patternType = iota
-	OPTIONAL
-	ZEROMORE
-	ONEMORE
-	EXPECT
+	ONCE     patternType = iota // a
+	OPTIONAL                    // a?
+	ZEROMORE                    // a*
+	ONEMORE                     // a+
+	EXPECT                      // E.g. expect(BEGIN)
 )
 
+// Specification of a parse function that attempts to parse certain Syntax
+// E.g. parseFunc for <func> // parseStat for <stat> evaluations
+// Returns a bool : true iff the parse was succesful
+//         a list of error messages
 type parseType func() (bool, []string)
-
-type patternCheck func([]grammar.ItemType, []parseType, []patternType) (bool, []string)
 
 /* PARSER --------------------------------------------------------------------*/
 
@@ -47,12 +47,12 @@ type parser struct {
 	tokens []Token // Stream of tokens from the lexer
 	curr   int     // Index of current token
 	save   []int   // Array of indexs to save points in the token stream
-	// Used for back tracking
+	//                Used for back tracking
 	currTok Token // the current token
 
 }
 
-// Basic parser constructer that set the current token to the first token in the
+// Basic parser constructer that sets the current token to the first token in the
 // tokenStream
 func ConstructParser(tokenStream []Token) *parser {
 	return &parser{tokenStream, 0, []int{}, tokenStream[0]}
@@ -92,6 +92,7 @@ func (p *parser) backTrack() {
 }
 
 // Pushs the position of currTok to the end of "save"
+// Hence creating a new save point that can be back tracked to using backTrack()
 func (p *parser) saveToken() {
 	p.save = append(p.save, p.curr)
 }
@@ -145,12 +146,17 @@ func (p *parser) Parse() (bool, []string) {
 }
 
 /* NON-TERMINALS */
-// WARNING : Do not use parseOptions to recursive call the same functions
-// E.g. Do no not have an option that calls parseStat inside of parseStat
+// WARNING : Do not use parseOptions to recursively call the same functions
+// E.g. Do no not have an option that calls that begins with parseStat
+// inside of parseStat
+
+// All non terminal parse functions have match the parseType (Above)
 
 func (p *parser) parseProgram() (bool, []string) {
 	var errorMsgs []string // An array of error messages
 	var pass = false       // True iff the tokens match a <program> def
+
+	// Program := 'begin' <func>* <stat> 'end'
 
 	expected := []grammar.ItemType{grammar.BEGIN, grammar.END}
 	parseTypes := []parseType{p.parseFunc, p.parseStat}
@@ -253,8 +259,9 @@ func (p *parser) parseExpr() (bool, []string) {
 
 // Attempts to parse one pattern based on parseCheck
 // I.e. <Check>
-// This function is obligated to accept at one parseCheck
+// This function is obligated to accept one parseCheck
 // returns true iff the parseCheck was accepted
+// Error obtained are appended to errorMsgs
 func (p *parser) parseOne(parseCheck parseType, errorMsgs *[]string) bool {
 	var errorMsgTemp []string
 	var match = false
@@ -281,6 +288,7 @@ func (p *parser) expectToken(expectedType grammar.ItemType) bool {
 // I.e. <Check>?
 // This function has no obligation to parse anything, but it may still add
 // possible error messages
+// Error obtained are appended to errorMsgs
 func (p *parser) parseOptional(parseCheck parseType, errorMsgs *[]string) {
 	var errorMsgTemp []string
 
@@ -293,6 +301,7 @@ func (p *parser) parseOptional(parseCheck parseType, errorMsgs *[]string) {
 // I.e. <Check>*
 // This function has no obligation to parse anything, but it may still add
 // possible error messages
+// Error obtained are appended to errorMsgs
 func (p *parser) parseZeroOrMore(parseCheck parseType, errorMsgs *[]string) {
 	var errorMsgTemp []string
 	var match = false
@@ -315,6 +324,7 @@ func (p *parser) parseZeroOrMore(parseCheck parseType, errorMsgs *[]string) {
 // I.e. <Check>+
 // This function is obligated to accept at least one parseCheck
 // returns true iff the first parseCheck was accepted
+// Error obtained are appended to errorMsgs
 func (p *parser) parseOneOrMore(parseCheck parseType, errorMsgs *[]string) bool {
 	var errorMsgTemp []string
 	var match = false
@@ -343,12 +353,13 @@ func (p *parser) parseOneOrMore(parseCheck parseType, errorMsgs *[]string) bool 
 }
 
 // Attempts to parse a pattern using a series of pattern match request
-// expArgs: All expectToken checks used within the pattern IN ORDER of use
-// segments: All checks (except expect checks) used with in the patter IN ORDER
+// expArgs: All expectToken() checks used within the pattern IN ORDER of use
+// segments: All checks (except expectToken checks)
+//           used with in the patter IN ORDER
 // typs: Used to indicate the number of times each check is processed (regex)
 //       Must match order withing expArgs and segments
 // segmentErrors: An array of error messages added to errorMsgTemp when its
-//                respected segemnt/expectArgs (depends on ORDER) fails the check
+//                respected segment/expectArgs (depends on ORDER) fails the check
 // PRE: len(expArgs) + len(segments) == len(typs)
 func (p *parser) parsePattern(expArgs []grammar.ItemType, segments []parseType, typs []patternType, segmentErrors []string) (bool, []string) {
 	defer p.removeSave()
@@ -417,6 +428,9 @@ func (p *parser) parsePattern(expArgs []grammar.ItemType, segments []parseType, 
 
 // Attempts to parse at least one pattern (from a list of possible parsePattern
 // arguments) from a list of options
+// NOTE: the first option to match will be used, So the order of args is very
+//       important. Hence make sure to avoid any overlapping options by
+//       rearranging options (or by hard coding the options manually)
 // args: A list of arguments to the function parsePattern
 func (p *parser) parseOptions(args ...patternArgs) (bool, []string) {
 	var pass = false           // Pattern check bool place holder
