@@ -21,6 +21,12 @@ type expectArgs struct {
 	errorMsgs    *[]string
 }
 
+type patternArgs struct {
+	expArgs []expectArgs
+	checks  []parseType
+	typs    []patternType
+}
+
 type patternType int
 
 const (
@@ -32,6 +38,8 @@ const (
 )
 
 type parseType func() (bool, []string)
+
+type patternCheck func([]expectArgs, []parseType, []patternType) (bool, []string)
 
 /* PARSER --------------------------------------------------------------------*/
 
@@ -163,25 +171,31 @@ func (p *parser) parseFunc() (bool, []string) {
 }
 
 func (p *parser) parseStat() (bool, []string) {
-	var pass = false       // True iff the tokens match a <program> def
-	var errorMsgs []string // An array of error messages
-
-	/* Option: skip */
-
-	// Checks for "skip"
-	if p.expectToken(grammar.SKIP, &errorMsgs, "") {
-		return true, errorMsgs
-	}
-
-	/* Option: 2 */
+	var pass = false           // True iff the tokens match a <program> def
+	var errorMsgs []string     // An array of error messages
+	var errorMsgsTemp []string // Error messages place holder
 
 	errorMsgs = append(errorMsgs, p.makeErrorMsg("parseStat is not implemented"))
 
+	//Place holders
+	expected := []expectArgs{}
+	parseTypes := []parseType{}
+	patternTypes := []patternType{}
+
+	// Option 1: 'skip'
+	expected = []expectArgs{expectArgs{grammar.SKIP, "", &[]string{}}}
+	parseTypes = []parseType{}
+	patternTypes = []patternType{EXPECT}
+	op1 := patternArgs{expected, parseTypes, patternTypes}
+
+	pass, errorMsgsTemp = p.parseOptions(op1)
+	errorMsgs = append(errorMsgs, errorMsgsTemp...)
+
 	if !pass {
-		p.backTrack()
+		return false, errorMsgs
 	}
 
-	return pass, errorMsgs
+	return true, []string{}
 }
 
 /* PARSE HELPERS */
@@ -284,6 +298,10 @@ func (p *parser) parseOneOrMore(parseCheck parseType, errorMsgs *[]string) bool 
 }
 
 // Attempts to parse a pattern using a series of pattern match request
+// expArgs: All expectToken checks used within the pattern IN ORDER of use
+// segments: All checks (except expect checks) used with in the patter IN ORDER
+// typs: Used to indicate the number of times each check is processed (regex)
+//       Must match order withing expArgs and segments
 // PRE: len(exepected) + len(parse) == len(typs)
 func (p *parser) parsePattern(expArgs []expectArgs, segments []parseType, typs []patternType) (bool, []string) {
 	defer p.removeSave()
@@ -340,6 +358,35 @@ func (p *parser) parsePattern(expArgs []expectArgs, segments []parseType, typs [
 	}
 
 	return true, []string{}
+}
+
+// Attempts to parse at least one pattern (from a list of possible parsePatter
+// arguments) from a list of options
+// args: A list of arguments to the function parsePattern
+// You can not use specialised error messages with this function
+func (p *parser) parseOptions(args ...patternArgs) (bool, []string) {
+	var pass = false           // Pattern check bool place holder
+	var errorMsgs []string     // Error messages returned by each pattern check
+	var errorMsgsTemp []string // Error message place holder
+
+	defer p.removeSave()
+
+	p.saveToken()
+
+	for _, patternArg := range args {
+		pass, errorMsgsTemp = p.parsePattern(patternArg.expArgs, patternArg.checks, patternArg.typs)
+
+		errorMsgs = append(errorMsgs, errorMsgsTemp...)
+
+		if pass {
+			return true, []string{}
+		}
+
+		p.backTrack()
+
+	}
+
+	return pass, errorMsgs
 }
 
 /* ---------------------------------------------------------------------------*/

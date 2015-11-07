@@ -8,7 +8,7 @@ import (
 )
 
 func main() {
-	p := ConstructParser(testStream1())
+	p := ConstructParser(testStream2())
 	pass, errorMsgs := p.Parse()
 
 	if !pass {
