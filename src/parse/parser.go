@@ -349,7 +349,7 @@ func (p *parser) parseOneOrMore(parseCheck parseType, errorMsgs *[]string) bool 
 //       Must match order withing expArgs and segments
 // segmentErrors: An array of error messages added to errorMsgTemp when its
 //                respected segemnt/expectArgs (depends on ORDER) fails the check
-// PRE: len(exepected) + len(parse) == len(typs)
+// PRE: len(expArgs) + len(segments) == len(typs)
 func (p *parser) parsePattern(expArgs []grammar.ItemType, segments []parseType, typs []patternType, segmentErrors []string) (bool, []string) {
 	defer p.removeSave()
 	var errorMsgTemp []string
@@ -415,10 +415,9 @@ func (p *parser) parsePattern(expArgs []grammar.ItemType, segments []parseType, 
 	return true, []string{}
 }
 
-// Attempts to parse at least one pattern (from a list of possible parsePatter
+// Attempts to parse at least one pattern (from a list of possible parsePattern
 // arguments) from a list of options
 // args: A list of arguments to the function parsePattern
-// You can not use specialised error messages with this function
 func (p *parser) parseOptions(args ...patternArgs) (bool, []string) {
 	var pass = false           // Pattern check bool place holder
 	var errorMsgs []string     // Error messages returned by each pattern check
