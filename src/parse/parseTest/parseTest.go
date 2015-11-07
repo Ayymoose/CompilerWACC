@@ -49,3 +49,14 @@ func testStream3() []Token {
 
 	return tokenStream
 }
+
+func testStream4() []Token {
+	t1 := Token{grammar.BEGIN, grammar.Token_strings[grammar.BEGIN], 0, 0}
+	t2 := Token{grammar.SKIP, grammar.Token_strings[grammar.SKIP], 1, 2}
+	t3 := Token{grammar.SEMICOLON, grammar.Token_strings[grammar.SEMICOLON], 2, 2}
+	t4 := Token{grammar.SKIP, grammar.Token_strings[grammar.SKIP], 3, 2}
+	t5 := Token{grammar.END, grammar.Token_strings[grammar.END], 4, 0}
+	tokenStream := []Token{t1, t2, t3, t4, t5}
+
+	return tokenStream
+}
