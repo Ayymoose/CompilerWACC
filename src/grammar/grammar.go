@@ -161,7 +161,7 @@ var DebugTokens = map[ItemType]string{
 	FST:                 "FST",
 	SND:                 "SND",
 	NULL:                "NULL",
-	PAIR:                "PAI",
+	PAIR:                "PAIR",
 	reserved_word_end:   "reserved_word_end",
 	BACKSPACE:           "BACKSPACE",
 	type_start:          "type_start",

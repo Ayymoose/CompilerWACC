@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"strconv"
 
-	grammar "github.com/nanaasiedu/wacc_19/src/grammar" // CHANGE TO MASTER
+	grammar "github.com/Ayymoose/wacc_19/src/grammar" // CHANGE TO MASTER
 )
 
 type Token struct {
@@ -156,12 +156,17 @@ func (p *parser) parseProgram() (bool, []string) {
 
 	// Program := 'begin' <func>* <stat> 'end'
 
+  //The tokens that are required
 	expected := []grammar.ItemType{grammar.BEGIN, grammar.END}
+  //The types we may expect to come across?
 	parseTypes := []parseType{p.parseFunc, p.parseStat}
+	//Regex of pattern types
 	patternTypes := []patternType{EXPECT, ZEROMORE, ONCE, EXPECT}
+	//Error messages
 	segmentErrors := []string{"All programs must start with 'begin'", "", "",
 		"All programs must terminate with 'end'"}
 
+	//Parse the pattern according to the input
 	pass, errorMsgs = p.parsePattern(expected, parseTypes, patternTypes, segmentErrors)
 
 	if !pass {
@@ -315,7 +320,32 @@ func (p *parser) parseIntSign() (bool, []string) {
 }
 
 func (p *parser) parseBoolLiteral() (bool, []string) {
-	return false, {""}
+	var errorMsgs []string // An array of error messages
+	var pass = false       // True iff the tokens match a <program> def
+
+	// bool-liter := 'true' | 'false'
+
+  //The tokens that are required
+	expected := []grammar.ItemType{grammar.TRUE}
+  //The types we may expect to come across?
+	parseTypes := []parseType{}
+	//Regex of pattern types
+	patternTypes := []patternType{EXPECT}
+	//Error messages
+	segmentErrors := []string{""}
+
+	op1 := patternArgs(expected,parseTypes,patternTypes,segmentErrors)
+
+	expected := []grammar.ItemType{grammar.FALSE}
+	op2 := patternArgs(expected,parseTypes,patternTypes,segmentErrors)
+
+  pass, errorMsgs = p.parseOptions(op2,op1);
+
+	if !pass {
+		return false, errorMsgs
+	}
+
+	return true, []string{}
 }
 
 func (p *parser) parseCharLiteral() (bool, []string) {
@@ -374,7 +404,7 @@ func (p *parser) expectToken(expectedType grammar.ItemType) bool {
 	if !p.expect(expectedType) {
 		return false
 	}
- 
+
 	p.advance()
 
 	return true
