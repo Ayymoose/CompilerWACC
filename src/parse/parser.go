@@ -76,7 +76,9 @@ func (p *parser) advance() {
 		return
 	}
 
-	p.currTok = p.tokens[++p.curr]
+	p.curr++
+
+	p.currTok = p.tokens[p.curr]
 }
 
 // Back track the current token back to the most recent save point
@@ -156,9 +158,9 @@ func (p *parser) parseProgram() (bool, []string) {
 
 	// Program := 'begin' <func>* <stat> 'end'
 
-  //The tokens that are required
+	//The tokens that are required
 	expected := []grammar.ItemType{grammar.BEGIN, grammar.END}
-  //The types we may expect to come across?
+	//The types we may expect to come across?
 	parseTypes := []parseType{p.parseFunc, p.parseStat}
 	//Regex of pattern types
 	patternTypes := []patternType{EXPECT, ZEROMORE, ONCE, EXPECT}
@@ -190,14 +192,12 @@ func (p *parser) parseFunc() (bool, []string) {
 }
 
 func (p *parser) parseParamList() (bool, []string) {
-	return false, {""}
+	return false, []string{}
 }
-
 
 func (p *parser) parseParam() (bool, []string) {
-	return false, {""}
+	return false, []string{}
 }
-
 
 func (p *parser) parseStat() (bool, []string) {
 	var pass = false      // True iff the tokens match a <program> def
@@ -256,90 +256,157 @@ func (p *parser) parseStat() (bool, []string) {
 }
 
 func (p *parser) parseAssignLHS() (bool, []string) {
-	return false, {""}
+	return false, []string{}
 }
 
 func (p *parser) parseAssignRHS() (bool, []string) {
-	return false, {""}
+	return false, []string{}
 }
 
 func (p *parser) parseArgList() (bool, []string) {
-	return false, {""}
+	return false, []string{}
 }
 
 func (p *parser) parsePairElem() (bool, []string) {
-	return false, {""}
+	return false, []string{}
 }
 
 func (p *parser) parseType() (bool, []string) {
-	return false, {""}
+	return false, []string{}
 }
 
 func (p *parser) parseBaseType() (bool, []string) {
-	return false, {""}
+	var errorMsgs []string // An array of error messages
+	var pass = false       // True iff the tokens match a <base-type> def
+
+	// base-type := 'int' | 'bool' | 'char' | 'string'
+	expected := []grammar.ItemType{}
+	parseTypes := []parseType{}
+	patternTypes := []patternType{}
+	segmentErrors := []string{}
+
+	//The tokens that are required
+	expected = []grammar.ItemType{grammar.INT}
+	patternTypes = []patternType{EXPECT}
+	// 'int'
+	op1 := patternArgs{expected, parseTypes, patternTypes, segmentErrors}
+
+	// 'bool'
+	expected = []grammar.ItemType{grammar.BOOL}
+	op2 := patternArgs{expected, parseTypes, patternTypes, segmentErrors}
+
+	// 'char'
+	expected = []grammar.ItemType{grammar.CHAR}
+	op3 := patternArgs{expected, parseTypes, patternTypes, segmentErrors}
+
+	// 'string'
+	expected = []grammar.ItemType{grammar.CHAR}
+	op4 := patternArgs{expected, parseTypes, patternTypes, segmentErrors}
+
+	pass, errorMsgs = p.parseOptions(op1, op2, op3, op4)
+
+	if !pass {
+		return false, errorMsgs
+	}
+
+	return true, []string{}
 }
 
 func (p *parser) parseArrayType() (bool, []string) {
-	return false, {""}
+	return false, []string{}
 }
 
 func (p *parser) parsePairType() (bool, []string) {
-	return false, {""}
+	return false, []string{}
 }
 
 func (p *parser) parseElemType() (bool, []string) {
-	return false, {""}
+	return false, []string{}
 }
 
 func (p *parser) parseUnaryOp() (bool, []string) {
-	return false, {""}
+	return false, []string{}
 }
 
 func (p *parser) parseBinaryOp() (bool, []string) {
-	return false, {""}
+	return false, []string{}
 }
 
 func (p *parser) parseIdent() (bool, []string) {
-	return false, {""}
+	return false, []string{}
 }
 
 func (p *parser) parseArrayElem() (bool, []string) {
-	return false, {""}
+	return false, []string{}
 }
 
 func (p *parser) parseIntLiter() (bool, []string) {
-	return false, {""}
+	return false, []string{}
 }
 
 func (p *parser) parseDigit() (bool, []string) {
-	return false, {""}
+	return false, []string{}
 }
 
 func (p *parser) parseIntSign() (bool, []string) {
-	return false, {""}
+	var errorMsgs []string // An array of error messages
+	var pass = false       // True iff the tokens match a <int-sign> def
+
+	// int-sign := '+' | '-'
+	expected := []grammar.ItemType{}
+	parseTypes := []parseType{}
+	patternTypes := []patternType{}
+	segmentErrors := []string{}
+
+	//The tokens that are required
+	expected = []grammar.ItemType{grammar.ADD} //UNSURE IF THIS IS THE RIGHT TOKEN TYPE
+	patternTypes = []patternType{EXPECT}
+	// 'int'
+	op1 := patternArgs{expected, parseTypes, patternTypes, segmentErrors}
+
+	// 'bool'
+	expected = []grammar.ItemType{grammar.SUB} //UNSURE IF THIS IS THE RIGHT TOKEN TYPE
+	op2 := patternArgs{expected, parseTypes, patternTypes, segmentErrors}
+
+	pass, errorMsgs = p.parseOptions(op1, op2)
+
+	if !pass {
+		return false, errorMsgs
+	}
+
+	return true, []string{}
 }
 
 func (p *parser) parseBoolLiteral() (bool, []string) {
 	var errorMsgs []string // An array of error messages
-	var pass = false       // True iff the tokens match a <program> def
+	var pass = false       // True iff the tokens match a <bool literal> def
 
 	// bool-liter := 'true' | 'false'
-
-  //The tokens that are required
-	expected := []grammar.ItemType{grammar.TRUE}
-  //The types we may expect to come across?
+	//Place holders
+	expected := []grammar.ItemType{}
 	parseTypes := []parseType{}
+	patternTypes := []patternType{}
+	segmentErrors := []string{}
+
+	//The tokens that are required
+	expected = []grammar.ItemType{grammar.TRUE}
+	//The types we may expect to come across?
+	parseTypes = []parseType{}
 	//Regex of pattern types
-	patternTypes := []patternType{EXPECT}
+	patternTypes = []patternType{EXPECT}
 	//Error messages
-	segmentErrors := []string{""}
+	segmentErrors = []string{""}
 
-	op1 := patternArgs(expected,parseTypes,patternTypes,segmentErrors)
+	// 'true'
+	op1 := patternArgs{expected, parseTypes, patternTypes, segmentErrors}
 
-	expected := []grammar.ItemType{grammar.FALSE}
-	op2 := patternArgs(expected,parseTypes,patternTypes,segmentErrors)
+	//We can remove duplication
+	expected = []grammar.ItemType{grammar.FALSE}
 
-  pass, errorMsgs = p.parseOptions(op2,op1);
+	//'false'
+	op2 := patternArgs{expected, parseTypes, patternTypes, segmentErrors}
+
+	pass, errorMsgs = p.parseOptions(op2, op1)
 
 	if !pass {
 		return false, errorMsgs
@@ -349,23 +416,23 @@ func (p *parser) parseBoolLiteral() (bool, []string) {
 }
 
 func (p *parser) parseCharLiteral() (bool, []string) {
-	return false, {""}
+	return false, []string{}
 }
 
 func (p *parser) parseStrLiteral() (bool, []string) {
-	return false, {""}
+	return false, []string{}
 }
 
 func (p *parser) parseCharacter() (bool, []string) {
-	return false, {""}
+	return false, []string{}
 }
 
 func (p *parser) parseArrayLiteral() (bool, []string) {
-	return false, {""}
+	return false, []string{}
 }
 
 func (p *parser) parseComment() (bool, []string) {
-	return false, {""}
+	return false, []string{}
 }
 
 func (p *parser) parseExpr() (bool, []string) {
