@@ -733,16 +733,76 @@ func (p *parser) parseCharacter() (bool, []string) {
 }
 
 func (p *parser) parseEscapedCharacter() (bool, []string) {
-	var pass = false       // True iff the tokens match a (pair-liter) def
 	var errorMsgs []string // An array of error messages
+	var pass = false       // True iff the tokens match a <base-type> def
 
-	p.addErrors(&errorMsgs, []string{"parseEscapedCharacter is not implemented"})
+	// ⟨escaped-char ⟩ ::= ‘0’ | ‘b’ | ‘t’ | ‘n’ | ‘f’ | ‘r’ | ‘"’ | ‘’’ | ‘\’
+	expected := []grammar.ItemType{}
+	parseTypes := []parseType{}
+	patternTypes := []patternType{}
+	segmentErrors := []string{}
+
+	// ‘0’
+	expected = []grammar.ItemType{grammar.NULL_TERMINATOR}
+	patternTypes = []patternType{EXPECT}
+
+	op1 := patternArgs{expected, parseTypes, patternTypes, segmentErrors}
+
+	// ‘b’
+	expected = []grammar.ItemType{grammar.BACKSPACE}
+	patternTypes = []patternType{EXPECT}
+
+	op2 := patternArgs{expected, parseTypes, patternTypes, segmentErrors}
+
+	// ‘t’
+	expected = []grammar.ItemType{grammar.TAB}
+	patternTypes = []patternType{EXPECT}
+
+	op3 := patternArgs{expected, parseTypes, patternTypes, segmentErrors}
+
+	// ‘n’
+	expected = []grammar.ItemType{grammar.LINE_FEED}
+	patternTypes = []patternType{EXPECT}
+
+	op4 := patternArgs{expected, parseTypes, patternTypes, segmentErrors}
+
+	// ‘f’
+	expected = []grammar.ItemType{grammar.FORM_FEED}
+	patternTypes = []patternType{EXPECT}
+
+	op5 := patternArgs{expected, parseTypes, patternTypes, segmentErrors}
+
+	// ‘r’
+	expected = []grammar.ItemType{grammar.CARRIAGE_RETURN}
+	patternTypes = []patternType{EXPECT}
+
+	op6 := patternArgs{expected, parseTypes, patternTypes, segmentErrors}
+
+	// ‘"’
+	expected = []grammar.ItemType{grammar.DOUBLE_QUOTE}
+	patternTypes = []patternType{EXPECT}
+
+	op7 := patternArgs{expected, parseTypes, patternTypes, segmentErrors}
+
+	// ‘’’
+	expected = []grammar.ItemType{grammar.SINGLE_QUOTE}
+	patternTypes = []patternType{EXPECT}
+
+	op8 := patternArgs{expected, parseTypes, patternTypes, segmentErrors}
+
+	// ‘\’
+	expected = []grammar.ItemType{grammar.BACKSLASH}
+	patternTypes = []patternType{EXPECT}
+
+	op9 := patternArgs{expected, parseTypes, patternTypes, segmentErrors}
+
+	pass, errorMsgs = p.parseOptions(op1, op2, op3, op4, op5, op6, op7, op8, op9)
 
 	if !pass {
-		p.backTrack()
+		return false, errorMsgs
 	}
 
-	return pass, errorMsgs
+	return true, []string{}
 }
 
 func (p *parser) parseArrayLiteral() (bool, []string) {
@@ -759,16 +819,28 @@ func (p *parser) parseArrayLiteral() (bool, []string) {
 }
 
 func (p *parser) parsePairLiteral() (bool, []string) {
-	var pass = false       // True iff the tokens match a (pair-liter) def
 	var errorMsgs []string // An array of error messages
+	var pass = false       // True iff the tokens match a ⟨pair-liter⟩ def
 
-	p.addErrors(&errorMsgs, []string{"parsePairLiteral is not implemented"})
+	// ⟨pair-liter⟩ ::= ‘null’
+	expected := []grammar.ItemType{}
+	parseTypes := []parseType{}
+	patternTypes := []patternType{}
+	segmentErrors := []string{}
+
+	// ‘null’
+	expected = []grammar.ItemType{grammar.NULL}
+	patternTypes = []patternType{EXPECT}
+
+	op1 := patternArgs{expected, parseTypes, patternTypes, segmentErrors}
+
+	pass, errorMsgs = p.parseOptions(op1)
 
 	if !pass {
-		p.backTrack()
+		return false, errorMsgs
 	}
 
-	return pass, errorMsgs
+	return true, []string{}
 }
 
 func (p *parser) parseComment() (bool, []string) {
@@ -988,6 +1060,7 @@ func (p *parser) parseOptions(args ...patternArgs) (bool, []string) {
 
 /* ---------------------------------------------------------------------------*/
 
+// Is this needed anymore?
 // Maps error messages with the associated terminal
 func TerminalErrorMessages(token grammar.ItemType) string {
 	switch {
