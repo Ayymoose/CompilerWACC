@@ -88,8 +88,8 @@ const (
 	SUB // '-' ALSO SAME SYMBOL -> NOT SURE IF ENTIRELY correct
 	GT
 	GTE
-	ST
-	STE
+	ST  //I think this should be LT (Less than)
+	STE //This too
 	EQ
 	NEQ
 	AND
