@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"strconv"
 
-	grammar "github.com/nanaasiedu/wacc_19/src/grammar" // CHANGE TO MASTER
+	grammar "github.com/Ayymoose/wacc_19/src/grammar" // CHANGE TO MASTER
 )
 
 type Token struct {
@@ -384,10 +384,16 @@ func (p *parser) parseBaseType() (bool, []string) {
 }
 
 func (p *parser) parseArrayType() (bool, []string) {
-	var pass = false       // True iff the tokens match a (pair-liter) def
+	var pass = false       // True iff the tokens match a (array-type) def
 	var errorMsgs []string // An array of error messages
 
-	p.addErrors(&errorMsgs, []string{"parseArrayType is not implemented"})
+	// (array-type) ::= (type) ‘[’ ‘]’
+	expected := []grammar.ItemType{grammar.OPEN_SQUARE, grammar.CLOSE_SQUARE}
+	parseTypes := []parseType{p.parseType}
+	patternTypes := []patternType{EXPECT, EXPECT}
+	segmentErrors := []string{}
+
+	pass, errorMsgs = p.parsePattern(expected, parseTypes, patternTypes, segmentErrors)
 
 	if !pass {
 		p.backTrack()
@@ -608,10 +614,16 @@ func (p *parser) parseArrayElem() (bool, []string) {
 }
 
 func (p *parser) parseIntLiteral() (bool, []string) {
-	var pass = false       // True iff the tokens match a (pair-liter) def
+	var pass = false       // True iff the tokens match a (int-liter) def
 	var errorMsgs []string // An array of error messages
 
-	p.addErrors(&errorMsgs, []string{"parseIntLiteral is not implemented"})
+	// (int-liter) ::= (int-sign)? (digit)+
+	expected := []grammar.ItemType{}
+	parseTypes := []parseType{p.parseIntSign, p.parseDigit}
+	patternTypes := []patternType{OPTIONAL, ONEMORE}
+	segmentErrors := []string{}
+
+	pass, errorMsgs = p.parsePattern(expected, parseTypes, patternTypes, segmentErrors)
 
 	if !pass {
 		p.backTrack()
@@ -621,10 +633,16 @@ func (p *parser) parseIntLiteral() (bool, []string) {
 }
 
 func (p *parser) parseDigit() (bool, []string) {
-	var pass = false       // True iff the tokens match a (pair-liter) def
+	var pass = false       // True iff the tokens match a (digit) def
 	var errorMsgs []string // An array of error messages
 
-	p.addErrors(&errorMsgs, []string{"parseDigit is not implemented"})
+	// (digit) ::= (‘0’-‘9’)
+	expected := []grammar.ItemType{grammar.DIGIT}
+	parseTypes := []parseType{}
+	patternTypes := []patternType{EXPECT}
+	segmentErrors := []string{}
+
+	pass, errorMsgs = p.parsePattern(expected, parseTypes, patternTypes, segmentErrors)
 
 	if !pass {
 		p.backTrack()
@@ -696,10 +714,16 @@ func (p *parser) parseBoolLiteral() (bool, []string) {
 }
 
 func (p *parser) parseCharLiteral() (bool, []string) {
-	var pass = false       // True iff the tokens match a (pair-liter) def
+	var pass = false       // True iff the tokens match a (char-liter) def
 	var errorMsgs []string // An array of error messages
 
-	p.addErrors(&errorMsgs, []string{"parseCharLiteral is not implemented"})
+	// (char-liter) ::= ‘’’ character ‘’’
+	expected := []grammar.ItemType{grammar.SINGLE_QUOTE, grammar.SINGLE_QUOTE}
+	parseTypes := []parseType{p.parseCharacter}
+	patternTypes := []patternType{EXPECT, ONCE, EXPECT}
+	segmentErrors := []string{""}
+
+	pass, errorMsgs = p.parsePattern(expected, parseTypes, patternTypes, segmentErrors)
 
 	if !pass {
 		p.backTrack()
@@ -709,10 +733,16 @@ func (p *parser) parseCharLiteral() (bool, []string) {
 }
 
 func (p *parser) parseStrLiteral() (bool, []string) {
-	var pass = false       // True iff the tokens match a (pair-liter) def
+	var pass = false       // True iff the tokens match a (str-liter) def
 	var errorMsgs []string // An array of error messages
 
-	p.addErrors(&errorMsgs, []string{"parseStrLiteral is not implemented"})
+	// (str-liter) ::= ‘"’ character * ‘"’
+	expected := []grammar.ItemType{grammar.DOUBLE_QUOTE, grammar.DOUBLE_QUOTE}
+	parseTypes := []parseType{p.parseCharacter}
+	patternTypes := []patternType{EXPECT, ZEROMORE, EXPECT}
+	segmentErrors := []string{""}
+
+	pass, errorMsgs = p.parsePattern(expected, parseTypes, patternTypes, segmentErrors)
 
 	if !pass {
 		p.backTrack()
@@ -722,10 +752,29 @@ func (p *parser) parseStrLiteral() (bool, []string) {
 }
 
 func (p *parser) parseCharacter() (bool, []string) {
-	var pass = false       // True iff the tokens match a (pair-liter) def
+	var pass = false       // True iff the tokens match a (character) def
 	var errorMsgs []string // An array of error messages
 
-	p.addErrors(&errorMsgs, []string{"parseCharacter is not implemented"})
+	// (character) ::= (any-ASCII-character-except-)‘\’-‘’’-‘"’ | ‘\’ (escaped-char)
+	expected := []grammar.ItemType{}
+	parseTypes := []parseType{}
+	patternTypes := []patternType{}
+	segmentErrors := []string{}
+
+	// (any-ASCII-character-except-)‘\’-‘’’-‘"’
+	expected = []grammar.ItemType{grammar.CHARACTER}
+	patternTypes = []patternType{EXPECT}
+	op1 := patternArgs{expected, parseTypes, patternTypes, segmentErrors}
+
+	//Mmmmm must check if it is any character except those
+
+	// ‘\’ (escaped-char)
+	expected = []grammar.ItemType{grammar.BACKSLASH}
+	parseTypes = []parseType{p.parseEscapedCharacter}
+	patternTypes = []patternType{EXPECT}
+	op2 := patternArgs{expected, parseTypes, patternTypes, segmentErrors}
+
+	pass, errorMsgs = p.parseOptions(op1, op2)
 
 	if !pass {
 		p.backTrack()

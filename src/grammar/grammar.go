@@ -64,7 +64,7 @@ const (
 	CHAR
 	STRING
 	type_end
-	NUMBER
+	DIGIT
 	CHARACTER
 	STRINGVALUE
 	BOOLEAN
@@ -170,7 +170,7 @@ var DebugTokens = map[ItemType]string{
 	CHAR:                "CHAR",
 	type_end:            "type_end",
 	STRING:              "STRING",
-	NUMBER:              "NUMBER",
+	DIGIT:               "DIGIT",
 	CHARACTER:           "CHARACTER",
 	STRINGVALUE:         "STRINGVALUE",
 	BOOLEAN:             "BOOLEAN",
