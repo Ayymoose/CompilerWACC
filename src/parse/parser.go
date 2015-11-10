@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"strconv"
 
-	grammar "github.com/Ayymoose/wacc_19/src/grammar" // CHANGE TO MASTER
+	grammar "github.com/nanaasiedu/wacc_19/src/grammar" // CHANGE TO MASTER
 )
 
 type Token struct {
@@ -34,9 +34,9 @@ const (
 )
 
 // Specification of a parse function that attempts to parse certain Syntax
-// E.g. parseFunc for <func> // parseStat for <stat> evaluations
-// Returns a bool : true iff the parse was succesful
-//         a list of error messages
+// E.g. parseFunc for <func> // parseStat for <stat>
+// Returns a bool : true iff the parse was succesful;
+//         a []string: a list of error messages
 type parseType func() (bool, []string)
 
 /* PARSER --------------------------------------------------------------------*/
@@ -65,7 +65,7 @@ func (p *parser) printTok() {
 }
 
 // Returns true iff the token stream is finished
-// I.e. we are at the end of the stream
+// I.e. When we are at the end of the stream
 func (p *parser) isFinished() bool {
 	return p.curr >= len(p.tokens)-1
 }
@@ -81,7 +81,7 @@ func (p *parser) advance() {
 	p.currTok = p.tokens[p.curr]
 }
 
-// Back track the current token back to the most recent save point
+// Back tracks the current token back to the most recent save point
 func (p *parser) backTrack() {
 	if len(p.save) <= 0 {
 		return
@@ -91,7 +91,7 @@ func (p *parser) backTrack() {
 	p.currTok = p.tokens[p.curr]
 }
 
-// Pushs the position of currTok to the end of "save"
+// Pushes the position of currTok to the end of "save"
 // Hence creating a new save point that can be back tracked to using backTrack()
 func (p *parser) saveToken() {
 	p.save = append(p.save, p.curr)
@@ -147,8 +147,7 @@ func (p *parser) Parse() (bool, []string) {
 
 /* NON-TERMINALS */
 // WARNING : Do not use parseOptions to recursively call the same functions
-// E.g. Do no not have an option that calls that begins with parseStat
-// inside of parseStat
+// E.g. Do not have an option begins with parseStat inside of parseStat
 
 // All non terminal parse functions have match the parseType (Above)
 
@@ -160,7 +159,7 @@ func (p *parser) parseProgram() (bool, []string) {
 
 	//The tokens that are required
 	expected := []grammar.ItemType{grammar.BEGIN, grammar.END}
-	//The types we may expect to come across?
+	//The parsing functions to use
 	parseTypes := []parseType{p.parseFunc, p.parseStat}
 	//Regex of pattern types
 	patternTypes := []patternType{EXPECT, ZEROMORE, ONCE, EXPECT}
@@ -202,7 +201,7 @@ func (p *parser) parseParam() (bool, []string) {
 func (p *parser) parseStat() (bool, []string) {
 	var pass = false      // True iff the tokens match a <program> def
 	var multiStat = false // True iff the the statement contains multiple
-	// statement I.e. <stat> ';' <stat>
+	//                       statements I.e. <stat> ';' <stat>
 	var errorMsgs []string     // An array of error messages
 	var errorMsgsTemp []string // Error messages place holder
 
@@ -214,7 +213,7 @@ func (p *parser) parseStat() (bool, []string) {
 	patternTypes := []patternType{}
 	segmentErrors := []string{}
 
-	// Option 1: 'skip'
+	// 'skip' option
 	expected = []grammar.ItemType{grammar.SKIP}
 	parseTypes = []parseType{}
 	patternTypes = []patternType{EXPECT}
@@ -222,7 +221,7 @@ func (p *parser) parseStat() (bool, []string) {
 
 	op1 := patternArgs{expected, parseTypes, patternTypes, segmentErrors}
 
-	// Option 2: 'free' <expr>
+	// 'free' <expr> option
 	expected = []grammar.ItemType{grammar.FREE}
 	parseTypes = []parseType{p.parseExpr}
 	patternTypes = []patternType{EXPECT, ONCE}
@@ -234,7 +233,7 @@ func (p *parser) parseStat() (bool, []string) {
 
 	errorMsgs = append(errorMsgs, errorMsgsTemp...)
 
-	// Option 13: <stat> ; <stat>
+	// <stat> ; <stat> option
 
 	// Check for a ';'
 	multiStat, _ = p.parsePattern([]grammar.ItemType{grammar.SEMICOLON},
@@ -280,15 +279,18 @@ func (p *parser) parseBaseType() (bool, []string) {
 	var pass = false       // True iff the tokens match a <base-type> def
 
 	// base-type := 'int' | 'bool' | 'char' | 'string'
+
+	//Place holders
 	expected := []grammar.ItemType{}
 	parseTypes := []parseType{}
 	patternTypes := []patternType{}
 	segmentErrors := []string{}
 
-	//The tokens that are required
-	expected = []grammar.ItemType{grammar.INT}
+	// Each options EXPECTS one token
 	patternTypes = []patternType{EXPECT}
+
 	// 'int'
+	expected = []grammar.ItemType{grammar.INT}
 	op1 := patternArgs{expected, parseTypes, patternTypes, segmentErrors}
 
 	// 'bool'
@@ -300,7 +302,7 @@ func (p *parser) parseBaseType() (bool, []string) {
 	op3 := patternArgs{expected, parseTypes, patternTypes, segmentErrors}
 
 	// 'string'
-	expected = []grammar.ItemType{grammar.CHAR}
+	expected = []grammar.ItemType{grammar.STRING}
 	op4 := patternArgs{expected, parseTypes, patternTypes, segmentErrors}
 
 	pass, errorMsgs = p.parseOptions(op1, op2, op3, op4)
@@ -358,14 +360,15 @@ func (p *parser) parseIntSign() (bool, []string) {
 	patternTypes := []patternType{}
 	segmentErrors := []string{}
 
-	//The tokens that are required
-	expected = []grammar.ItemType{grammar.ADD} //UNSURE IF THIS IS THE RIGHT TOKEN TYPE
+	// Each options EXPECTS one token
 	patternTypes = []patternType{EXPECT}
-	// 'int'
+
+	// '+' option
+	expected = []grammar.ItemType{grammar.ADD}
 	op1 := patternArgs{expected, parseTypes, patternTypes, segmentErrors}
 
-	// 'bool'
-	expected = []grammar.ItemType{grammar.SUB} //UNSURE IF THIS IS THE RIGHT TOKEN TYPE
+	// '-' option
+	expected = []grammar.ItemType{grammar.SUB}
 	op2 := patternArgs{expected, parseTypes, patternTypes, segmentErrors}
 
 	pass, errorMsgs = p.parseOptions(op1, op2)
@@ -382,28 +385,22 @@ func (p *parser) parseBoolLiteral() (bool, []string) {
 	var pass = false       // True iff the tokens match a <bool literal> def
 
 	// bool-liter := 'true' | 'false'
+
 	//Place holders
 	expected := []grammar.ItemType{}
 	parseTypes := []parseType{}
 	patternTypes := []patternType{}
 	segmentErrors := []string{}
 
-	//The tokens that are required
-	expected = []grammar.ItemType{grammar.TRUE}
-	//The types we may expect to come across?
-	parseTypes = []parseType{}
-	//Regex of pattern types
+	// Each options EXPECTS one token
 	patternTypes = []patternType{EXPECT}
-	//Error messages
-	segmentErrors = []string{""}
 
 	// 'true'
+	expected = []grammar.ItemType{grammar.TRUE}
 	op1 := patternArgs{expected, parseTypes, patternTypes, segmentErrors}
 
-	//We can remove duplication
-	expected = []grammar.ItemType{grammar.FALSE}
-
 	//'false'
+	expected = []grammar.ItemType{grammar.FALSE}
 	op2 := patternArgs{expected, parseTypes, patternTypes, segmentErrors}
 
 	pass, errorMsgs = p.parseOptions(op2, op1)
