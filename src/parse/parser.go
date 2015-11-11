@@ -1,5 +1,9 @@
 package parse
 
+//TODO: Change the if statement in the parse functions' return type so that there is only one return
+//I.e return pass, errorMsgs
+//TODO: Consult with Ollie about parseComment()
+
 import (
 	"fmt"
 	"strconv"
@@ -178,42 +182,42 @@ func (p *parser) parseProgram() (bool, []string) {
 }
 
 func (p *parser) parseFunc() (bool, []string) {
-	var pass = false       // True iff the tokens match a <program> def
+	var pass = false       // True iff the tokens match a <func> def
 	var errorMsgs []string // An array of error messages
 
 	p.addErrors(&errorMsgs, []string{"parseFunction is not implemented"})
 
 	if !pass {
-		p.backTrack()
+		return false, errorMsgs
 	}
 
-	return pass, errorMsgs
+	return true, []string{}
 }
 
 func (p *parser) parseParamList() (bool, []string) {
-	var pass = false       // True iff the tokens match a (pair-liter) def
+	var pass = false       // True iff the tokens match a (param-list) def
 	var errorMsgs []string // An array of error messages
 
 	p.addErrors(&errorMsgs, []string{"parseParamList is not implemented"})
 
 	if !pass {
-		p.backTrack()
+		return false, errorMsgs
 	}
 
-	return pass, errorMsgs
+	return true, []string{}
 }
 
 func (p *parser) parseParam() (bool, []string) {
-	var pass = false       // True iff the tokens match a (pair-liter) def
+	var pass = false       // True iff the tokens match a (param) def
 	var errorMsgs []string // An array of error messages
 
 	p.addErrors(&errorMsgs, []string{"parseParam is not implemented"})
 
 	if !pass {
-		p.backTrack()
+		return false, errorMsgs
 	}
 
-	return pass, errorMsgs
+	return true, []string{}
 }
 
 func (p *parser) parseStat() (bool, []string) {
@@ -273,68 +277,68 @@ func (p *parser) parseStat() (bool, []string) {
 }
 
 func (p *parser) parseAssignLHS() (bool, []string) {
-	var pass = false       // True iff the tokens match a (pair-liter) def
+	var pass = false       // True iff the tokens match a (assign-LHS) def
 	var errorMsgs []string // An array of error messages
 
 	p.addErrors(&errorMsgs, []string{"parseAssignLHS is not implemented"})
 
 	if !pass {
-		p.backTrack()
+		return false, errorMsgs
 	}
 
-	return pass, errorMsgs
+	return true, []string{}
 }
 
 func (p *parser) parseAssignRHS() (bool, []string) {
-	var pass = false       // True iff the tokens match a (pair-liter) def
+	var pass = false       // True iff the tokens match a (assign-RHS) def
 	var errorMsgs []string // An array of error messages
 
 	p.addErrors(&errorMsgs, []string{"parseAssignRHS is not implemented"})
 
 	if !pass {
-		p.backTrack()
+		return false, errorMsgs
 	}
 
-	return pass, errorMsgs
+	return true, []string{}
 }
 
 func (p *parser) parseArgList() (bool, []string) {
-	var pass = false       // True iff the tokens match a (pair-liter) def
+	var pass = false       // True iff the tokens match a (arg-list) def
 	var errorMsgs []string // An array of error messages
 
 	p.addErrors(&errorMsgs, []string{"parseArgList is not implemented"})
 
 	if !pass {
-		p.backTrack()
+		return false, errorMsgs
 	}
 
-	return pass, errorMsgs
+	return true, []string{}
 }
 
 func (p *parser) parsePairElem() (bool, []string) {
-	var pass = false       // True iff the tokens match a (pair-liter) def
+	var pass = false       // True iff the tokens match a (pair-elem) def
 	var errorMsgs []string // An array of error messages
 
 	p.addErrors(&errorMsgs, []string{"parsePairElem is not implemented"})
 
 	if !pass {
-		p.backTrack()
+		return false, errorMsgs
 	}
 
-	return pass, errorMsgs
+	return true, []string{}
 }
 
 func (p *parser) parseType() (bool, []string) {
-	var pass = false       // True iff the tokens match a (pair-liter) def
+	var pass = false       // True iff the tokens match a () def
 	var errorMsgs []string // An array of error messages
 
 	p.addErrors(&errorMsgs, []string{"parseType is not implemented"})
 
 	if !pass {
-		p.backTrack()
+		return false, errorMsgs
 	}
 
-	return pass, errorMsgs
+	return true, []string{}
 }
 
 func (p *parser) parseBaseType() (bool, []string) {
@@ -396,36 +400,36 @@ func (p *parser) parseArrayType() (bool, []string) {
 	pass, errorMsgs = p.parsePattern(expected, parseTypes, patternTypes, segmentErrors)
 
 	if !pass {
-		p.backTrack()
+		return false, errorMsgs
 	}
 
-	return pass, errorMsgs
+	return true, []string{}
 }
 
 func (p *parser) parsePairType() (bool, []string) {
-	var pass = false       // True iff the tokens match a (pair-liter) def
+	var pass = false       // True iff the tokens match a (pair-type) def
 	var errorMsgs []string // An array of error messages
 
 	p.addErrors(&errorMsgs, []string{"parsePairType is not implemented"})
 
 	if !pass {
-		p.backTrack()
+		return false, errorMsgs
 	}
 
-	return pass, errorMsgs
+	return true, []string{}
 }
 
 func (p *parser) parseElemType() (bool, []string) {
-	var pass = false       // True iff the tokens match a (pair-liter) def
+	var pass = false       // True iff the tokens match a (elem-type) def
 	var errorMsgs []string // An array of error messages
 
 	p.addErrors(&errorMsgs, []string{"parseElemType is not implemented"})
 
 	if !pass {
-		p.backTrack()
+		return false, errorMsgs
 	}
 
-	return pass, errorMsgs
+	return true, []string{}
 }
 
 func (p *parser) parseExpr() (bool, []string) {
@@ -435,10 +439,10 @@ func (p *parser) parseExpr() (bool, []string) {
 	p.addErrors(&errorMsgs, []string{"parseExpr is not implemented"})
 
 	if !pass {
-		p.backTrack()
+		return false, errorMsgs
 	}
 
-	return pass, errorMsgs
+	return true, []string{}
 }
 
 func (p *parser) parseUnaryOp() (bool, []string) {
@@ -588,29 +592,29 @@ func (p *parser) parseBinaryOp() (bool, []string) {
 }
 
 func (p *parser) parseIdent() (bool, []string) {
-	var pass = false       // True iff the tokens match a (pair-liter) def
+	var pass = false       // True iff the tokens match a (ident) def
 	var errorMsgs []string // An array of error messages
 
 	p.addErrors(&errorMsgs, []string{"parseIdent is not implemented"})
 
 	if !pass {
-		p.backTrack()
+		return false, errorMsgs
 	}
 
-	return pass, errorMsgs
+	return true, []string{}
 }
 
 func (p *parser) parseArrayElem() (bool, []string) {
-	var pass = false       // True iff the tokens match a (pair-liter) def
+	var pass = false       // True iff the tokens match a (array-elem) def
 	var errorMsgs []string // An array of error messages
 
 	p.addErrors(&errorMsgs, []string{"parseArrayElem is not implemented"})
 
 	if !pass {
-		p.backTrack()
+		return false, errorMsgs
 	}
 
-	return pass, errorMsgs
+	return true, []string{}
 }
 
 func (p *parser) parseIntLiteral() (bool, []string) {
@@ -626,10 +630,10 @@ func (p *parser) parseIntLiteral() (bool, []string) {
 	pass, errorMsgs = p.parsePattern(expected, parseTypes, patternTypes, segmentErrors)
 
 	if !pass {
-		p.backTrack()
+		return false, errorMsgs
 	}
 
-	return pass, errorMsgs
+	return true, []string{}
 }
 
 func (p *parser) parseDigit() (bool, []string) {
@@ -645,10 +649,10 @@ func (p *parser) parseDigit() (bool, []string) {
 	pass, errorMsgs = p.parsePattern(expected, parseTypes, patternTypes, segmentErrors)
 
 	if !pass {
-		p.backTrack()
+		return false, errorMsgs
 	}
 
-	return pass, errorMsgs
+	return true, []string{}
 }
 
 func (p *parser) parseIntSign() (bool, []string) {
@@ -726,10 +730,10 @@ func (p *parser) parseCharLiteral() (bool, []string) {
 	pass, errorMsgs = p.parsePattern(expected, parseTypes, patternTypes, segmentErrors)
 
 	if !pass {
-		p.backTrack()
+		return false, errorMsgs
 	}
 
-	return pass, errorMsgs
+	return true, []string{}
 }
 
 func (p *parser) parseStrLiteral() (bool, []string) {
@@ -745,10 +749,10 @@ func (p *parser) parseStrLiteral() (bool, []string) {
 	pass, errorMsgs = p.parsePattern(expected, parseTypes, patternTypes, segmentErrors)
 
 	if !pass {
-		p.backTrack()
+		return false, errorMsgs
 	}
 
-	return pass, errorMsgs
+	return true, []string{}
 }
 
 func (p *parser) parseCharacter() (bool, []string) {
@@ -766,7 +770,9 @@ func (p *parser) parseCharacter() (bool, []string) {
 	patternTypes = []patternType{EXPECT}
 	op1 := patternArgs{expected, parseTypes, patternTypes, segmentErrors}
 
-	//Mmmmm must check if it is any character except those
+	if p.currTok.Lexeme == "\"" || p.currTok.Lexeme == "'" || p.currTok.Lexeme == "\\" {
+		return pass, errorMsgs
+	}
 
 	// ‘\’ (escaped-char)
 	expected = []grammar.ItemType{grammar.BACKSLASH}
@@ -777,15 +783,15 @@ func (p *parser) parseCharacter() (bool, []string) {
 	pass, errorMsgs = p.parseOptions(op1, op2)
 
 	if !pass {
-		p.backTrack()
+		return false, errorMsgs
 	}
 
-	return pass, errorMsgs
+	return true, []string{}
 }
 
 func (p *parser) parseEscapedCharacter() (bool, []string) {
 	var errorMsgs []string // An array of error messages
-	var pass = false       // True iff the tokens match a <base-type> def
+	var pass = false       // True iff the tokens match a <escaped-char> def
 
 	// <escaped-char> ::= ‘0’ | ‘b’ | ‘t’ | ‘n’ | ‘f’ | ‘r’ | ‘"’ | ‘’’ | ‘\’
 
@@ -844,16 +850,53 @@ func (p *parser) parseEscapedCharacter() (bool, []string) {
 }
 
 func (p *parser) parseArrayLiteral() (bool, []string) {
-	var pass = false       // True iff the tokens match a (pair-liter) def
+	var pass = false       // True iff the tokens match a (array-liter) def
 	var errorMsgs []string // An array of error messages
 
-	p.addErrors(&errorMsgs, []string{"parseArrayLiteral is not implemented"})
+	// (array-liter) ::= ‘[’ (expr (‘,’ (expr))*)? ‘]’
+	expected := []grammar.ItemType{grammar.OPEN_SQUARE, grammar.CLOSE_SQUARE}
+	parseTypes := []parseType{p.parseArrayExtra}
+	patternTypes := []patternType{EXPECT, OPTIONAL, EXPECT}
+	segmentErrors := []string{}
+
+	pass, errorMsgs = p.parsePattern(expected, parseTypes, patternTypes, segmentErrors)
 
 	if !pass {
-		p.backTrack()
+		return false, errorMsgs
 	}
 
-	return pass, errorMsgs
+	return true, []string{}
+}
+
+func (p *parser) parseArrayExtra() (bool, []string) {
+	var pass = false
+	var errorMsgs []string // An array of error messages
+
+	// Partial grammar for array-liter
+	// (array-liter) ::= (expr) (‘,’ (expr))*
+	expected := []grammar.ItemType{}
+	parseTypes := []parseType{p.parseExpr, p.parseExtraArg}
+	patternTypes := []patternType{ONCE, ZEROMORE}
+	segmentErrors := []string{}
+
+	pass, errorMsgs = p.parsePattern(expected, parseTypes, patternTypes, segmentErrors)
+
+	if !pass {
+		return false, errorMsgs
+	}
+
+	return true, []string{}
+}
+
+func (p *parser) parseExtraArg() (bool, []string) {
+	var pass = false
+	var errorMsgs []string // An array of error messages
+
+	if !pass {
+		return false, errorMsgs
+	}
+
+	return true, []string{}
 }
 
 func (p *parser) parsePairLiteral() (bool, []string) {
@@ -879,13 +922,22 @@ func (p *parser) parseComment() (bool, []string) {
 	var pass = false       // True iff the tokens match a (comment) def
 	var errorMsgs []string // An array of error messages
 
-	p.addErrors(&errorMsgs, []string{"parseComment is not implemented"})
+	// (comment) ::= ‘#’ (any-character-except-EOL)* (EOL)
+	expected := []grammar.ItemType{grammar.COMMENT_LINE}
+	parseTypes := []parseType{}
+	patternTypes := []patternType{EXPECT, ZEROMORE, EXPECT}
+	segmentErrors := []string{}
+
+	//(any-character-except-EOL)
+	//if (p.currTok.Lexeme == )
+
+	pass, errorMsgs = p.parsePattern(expected, parseTypes, patternTypes, segmentErrors)
 
 	if !pass {
-		p.backTrack()
+		return false, errorMsgs
 	}
 
-	return pass, errorMsgs
+	return true, []string{}
 }
 
 /* PARSE HELPERS */
