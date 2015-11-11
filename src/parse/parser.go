@@ -595,7 +595,46 @@ func (p *parser) parseIdent() (bool, []string) {
 	var pass = false       // True iff the tokens match a (ident) def
 	var errorMsgs []string // An array of error messages
 
-	p.addErrors(&errorMsgs, []string{"parseIdent is not implemented"})
+	// (ident) ::= (‘ ’|‘a’-‘z’|‘A’-‘Z’)(‘ ’|‘a’-‘z’|‘A’-‘Z’|‘0’-‘9’)*
+
+	if !pass {
+		return false, errorMsgs
+	}
+
+	return true, []string{}
+}
+
+func (p *parser) parseIdentHelper() (bool, []string) {
+	var pass = false       // True iff the tokens match a (ident) def
+	var errorMsgs []string // An array of error messages
+
+	// Partial implementation of parseIdent()
+	// (ident) ::= ‘_’ | ‘a’-‘z’ | ‘A’-‘Z’
+
+	expected := []grammar.ItemType{}
+	parseTypes := []parseType{}
+	patternTypes := []patternType{}
+	segmentErrors := []string{}
+
+	// ‘_’
+	expected = []grammar.ItemType{grammar.MULT}
+	patternTypes = []patternType{EXPECT}
+
+	op1 := patternArgs{expected, parseTypes, patternTypes, segmentErrors}
+
+	// ‘/’
+	expected = []grammar.ItemType{grammar.DIV}
+	patternTypes = []patternType{EXPECT}
+
+	op2 := patternArgs{expected, parseTypes, patternTypes, segmentErrors}
+
+	// ‘%’
+	expected = []grammar.ItemType{grammar.MOD}
+	patternTypes = []patternType{EXPECT}
+
+	op3 := patternArgs{expected, parseTypes, patternTypes, segmentErrors}
+
+	pass, errorMsgs = p.parseOptions(op1, op2, op3)
 
 	if !pass {
 		return false, errorMsgs
@@ -608,7 +647,34 @@ func (p *parser) parseArrayElem() (bool, []string) {
 	var pass = false       // True iff the tokens match a (array-elem) def
 	var errorMsgs []string // An array of error messages
 
-	p.addErrors(&errorMsgs, []string{"parseArrayElem is not implemented"})
+	// (array-elem) ::= (ident) (‘[’ expr ‘]’)+
+	expected := []grammar.ItemType{}
+	parseTypes := []parseType{p.parseIdent, p.parseArrayElemHelper}
+	patternTypes := []patternType{ONCE, ONEMORE}
+	segmentErrors := []string{}
+
+	pass, errorMsgs = p.parsePattern(expected, parseTypes, patternTypes, segmentErrors)
+
+	if !pass {
+		return false, errorMsgs
+	}
+
+	return true, []string{}
+}
+
+//Better name?
+func (p *parser) parseArrayElemHelper() (bool, []string) {
+	var pass = false       // True iff the tokens match a (array-elem) def
+	var errorMsgs []string // An array of error messages
+
+	// Partial implementation of array-elem
+	// (array-elem) ::= (‘[’ (expr) ‘]’)+
+	expected := []grammar.ItemType{grammar.OPEN_SQUARE, grammar.CLOSE_SQUARE}
+	parseTypes := []parseType{p.parseExpr}
+	patternTypes := []patternType{EXPECT, OPTIONAL, EXPECT}
+	segmentErrors := []string{}
+
+	pass, errorMsgs = p.parsePattern(expected, parseTypes, patternTypes, segmentErrors)
 
 	if !pass {
 		return false, errorMsgs
