@@ -4,46 +4,103 @@ import (
 	grammar "github.com/henrykhadass/wacc_19/src/grammar"
 )
 
-// A node is an element in te abstract syntax tree
-type Node interface {
-	Type() NodeType
-	String() string
-	Position() Pos
-}
-
-// NodeType identifies the type of an abstract syntax tree node
-type NodeType int
-
-// Pos represents a byte position in the original input text from which
-// this template was parsed
-type Pos int
-
-func (p Pos) Position() Pos {
-	return p
-}
-
-// Type returns itself and provides an easy default implementation
-// for embedding in a Node. Embedded in all non-trivial Nodes
-func (t NodeType) Type() NodeType {
-	return t
-}
+// NodeId identifies the type of an abstract syntax tree node
+type NodeId int
 
 const (
-	NodeSUCKADICk NodeType = iota
-	NodeProgram
+	NodeProgram NodeId = iota
 	NodeFunc
+	NodeParamList
+	NodeParam
+	NodeStat
+	NodeDeclaration
+	NodeAssignment
+	NodeRead
+	NodeFree
+	NodeReturn
+	NodeExit
+	NodePrint
+	NodePrintln
+	NodeIf
+	NodeWhile
+	NodeAssignLHS
+	NodeIdent
+	NodeArrayElem
+	NodePairElem
+	NodeAssignRHS
+	NodeExpr
+	NodeArrayLiter
+	NodeNewPair
+	NodeCall
+	NodeArgList
+	NodeType
+	NodeBaseType
+	NodeInt
+	NodeBool
+	NodeChar
+	NodeString
+	NodeArrayType
+	NodePairType
+	NodePairElemType
+	NodeIntLiter
+	NodeBoolLiter
+	NodeCharLiter
+	NodeStrLiter
+	NodeCharacter
+	NodeEscapedChar
+	NodeNull
+	NodeBackslash
+	NodeTab
+	NodeLineFeed
+	NodeFormFeed
+	NodeCarriageReturn
+	NodeDoubleQuote
+	NodeSingleQuote
+	NodePairLiter
+	NodeUnaryOperExpr
+	NodeEBE
+	NodeUnaryOper
+	NodeNot
+	NodeNeg
+	NodeLen
+	NodeOrd
+	NodeChr
+	NodeBinaryOper
+	NodeMult
+	NodeDiv
+	NodeMod
+	NodeAdd
+	NodeSub
+	NodeGt
+	NodeGte
+	NodeLt
+	NodeLte
+	NodeEq
+	NodeNeq
+	NodeAnd
+	NodeOr
+	NodeDigit
+	NodeIntSign
+	NodePlus
+	NodeNegate
+	NodeComment
 )
 
+type Node interface {
+	getNodeType()
+}
+
+// Root node of AST
 type ProgramNode struct {
-	NodeType
-	Pos
+	NodeId
+	Pos  grammar.Position
 	Func []*FuncNode
-	Stat *StatNode
+	Stat []*StatNode
 }
 
 type FuncNode struct {
-	NodeType
-	Pos
+	NodeId
+	Pos       grammar.Position
 	Type      *TypeNode
 	Ident     *IdentNode
 	ParamList *ParamListNode // Optional
@@ -51,472 +108,470 @@ type FuncNode struct {
 }
 
 type ParamListNode struct {
-	NodeType
-	Pos
-	Param *ParamNode
-	Param []*ParamNode
+	NodeId
+	Pos   grammar.Position
+	Param []*ParamNode // one or more
 }
 
 type ParamNode struct {
-	NodeType
-	Pos
+	NodeId
+	Pos   grammar.Position
 	Type  *TypeNode
 	Ident *IdentNode
 }
 
 type StatNode struct {
-	NodeType
-	Pos
+	NodeId
+	Pos      grammar.Position
 	StatElem *Node
 }
 
-type TypeIdentNode struct {
-	NodeType
-	Pos
+// TypeIdent
+type DeclarationNode struct {
+	NodeId
+	Pos       grammar.Position
 	Type      *TypeNode
 	Ident     *IdentNode
 	AssignRHS *AssignRHSNode
 }
 
-type AssignLHSToRightNode struct {
-	NodeType
-	Pos
+// AssignLHSToRight
+type AssignmentNode struct {
+	NodeId
+	Pos       grammar.Position
 	AssignLHS *AssignLHSNode
 	AssignRHS *AssignRHSNode
 }
 
 type ReadNode struct {
-	NodeType
-	Pos
+	NodeId
+	Pos       grammar.Position
 	AssignLHS *AssignLHSNode
 }
 
 type FreeNode struct {
-	NodeType
-	Pos
+	NodeId
+	Pos  grammar.Position
 	Expr *ExprNode
 }
 
 type ReturnNode struct {
-	NodeType
-	Pos
+	NodeId
+	Pos  grammar.Position
 	Expr *ExprNode
 }
 
 type ExitNode struct {
-	NodeType
-	Pos
+	NodeId
+	Pos  grammar.Position
 	Expr *ExprNode
 }
 
 type PrintNode struct {
-	NodeType
-	Pos
+	NodeId
+	Pos  grammar.Position
 	Expr *ExprNode
 }
 
 type PrintlnNode struct {
-	NodeType
-	Pos
+	NodeId
+	Pos  grammar.Position
 	Expr *ExprNode
 }
 
 type IfNode struct {
-	NodeType
-	Pos
+	NodeId
+	Pos  grammar.Position
 	Expr *ExprNode
-	Stat *StatNode
-	Stat *StatNode
+	Stat []*StatNode // two stats
 }
 
 type WhileNode struct {
-	NodeType
-	Pos
+	NodeId
+	Pos  grammar.Position
 	Expr *ExprNode
 	Stat *StatNode
 }
 
 //    ‘begin’ <stat> ‘end’
-//     <stat> ‘;’ <stat>
+// SPECIAL NEEDS
+type ScopeNode struct {
+	NodeId
+	StatElem *StatNode
+}
+
 type AssignLHSNode struct {
-	NodeType
-	Pos
+	NodeId
+	Pos           grammar.Position
 	AssignLHSElem *Node
 }
 
 type IdentNode struct {
-	NodeType
-	Pos
+	NodeId
+	Pos grammar.Position
 	//	Ident grammar.IDENTIFIER    check this error
+	Ident string
 }
 
 type ArrayElemNode struct {
-	NodeType
-	Pos
+	NodeId
+	Pos   grammar.Position
 	Ident *IdentNode
 	Expr  *ExprNode // repeatable
 }
 
 type PairElemNode struct {
-	NodeType
-	Pos
+	NodeId
+	Pos grammar.Position
 	Fst *ExprNode
 	Snd *ExprNode
 }
 
 type AssignRHSNode struct {
-	NodeType
-	Pos
+	NodeId
+	Pos           grammar.Position
 	AssignRHSElem *Node
 }
 
 type ExprNode struct {
-	NodeType
-	Pos
+	NodeId
+	Pos      grammar.Position
 	ExprElem *Node
 }
 
 type ArrayLiterNode struct {
-	NodeType
-	Pos
-	Expr *ExprNode
+	NodeId
+	Pos  grammar.Position
 	Expr []*ExprNode
 }
 
 type NewPairNode struct {
-	NodeType
-	Pos
-	Expr *ExprNode
-	Expr *ExprNode
+	NodeId
+	Pos  grammar.Position
+	Expr *ExprNode // need two
 }
 
 type CallNode struct {
-	NodeType
-	Pos
+	NodeId
+	Pos     grammar.Position
 	Ident   *IdentNode
 	ArgList *ArgListNode // optional
 }
 
 type ArgListNode struct {
-	NodeType
-	Pos
-	Expr *ExprNode
-	Expr []*ExprNode
+	NodeId
+	Pos  grammar.Position
+	Expr []*ExprNode // one or more args list
 }
 
 type TypeNode struct {
-	NodeType
-	Pos
+	NodeId
+	Pos      grammar.Position
 	TypeElem *Node
 }
 
 type BaseTypeNode struct {
-	NodeType
-	Pos
+	NodeId
+	Pos          grammar.Position
 	BaseTypeElem *Node
 }
 
 type IntNode struct {
-	NodeType
-	Pos
+	NodeId
+	Pos grammar.Position
 	Int int
 }
 
 type BoolNode struct {
-	NodeType
-	Pos
+	NodeId
+	Pos  grammar.Position
 	Bool bool
 }
 
 type CharNode struct {
-	NodeType
-	Pos
+	NodeId
+	Pos  grammar.Position
 	Char rune
 }
 
 type StringNode struct {
-	NodeType
-	Pos
+	NodeId
+	Pos    grammar.Position
 	String string
 }
 
 type ArrayTypeNode struct {
-	NodeType
-	Pos
+	NodeId
+	Pos  grammar.Position
 	Type *TypeNode
 }
 
 type PairTypeNode struct {
-	NodeType
-	Pos
-	PairElemType *PairElemTypeNode
-	PairElemType *PairElemTypeNode
+	NodeId
+	Pos          grammar.Position
+	PairElemType []*PairElemTypeNode // need two for pair
 }
 
 type PairElemTypeNode struct {
-	NodeType
-	Pos
+	NodeId
+	Pos              grammar.Position
 	PairElemTypeElem *Node
 }
 
 type IntLiterNode struct {
-	NodeType
-	Pos
+	NodeId
+	Pos     grammar.Position
 	IntSign *IntSignNode // optional
 	Digit   *DigitNode   // repeatable
 }
 
 type BoolLiterNode struct {
-	NodeType
-	Pos
+	NodeId
+	Pos       grammar.Position
 	BoolLiter bool
 }
 
 type CharLiterNode struct {
-	NodeType
-	Pos
+	NodeId
+	Pos           grammar.Position
 	CharLiterElem *CharacterNode
 }
 
 type StrLiterNode struct {
-	NodeType
-	Pos
+	NodeId
+	Pos      grammar.Position
 	StrLiter []*CharacterNode
 }
 
 type CharacterNode struct {
-	NodeType
-	Pos
+	NodeId
+	Pos grammar.Position
 	// any ascii characterr
-	CharacterElem *Node ///WTF IS they type???  call escaped char here
+	CharacterElem *Node
 }
 
 type EscapedCharNode struct {
-	NodeType
-	Pos
+	NodeId
+	Pos             grammar.Position
 	EscapedCharElem *Node
 }
 
 type NullNode struct {
-	NodeType
-	Pos
-	NullElem grammar.NULL_TERMINATOR
+	NodeId
+	Pos            grammar.Position
+	NullTerminator grammar.ItemType
 }
 
 type BackslashNode struct {
-	NodeType
-	Pos
-	BackslashElem grammar.BACKSLASH
+	NodeId
+	Pos       grammar.Position
+	Backslash grammar.ItemType
 }
 
 type TabNode struct {
-	NodeType
-	Pos
-	TabElem grammar.TAB
+	NodeId
+	Pos grammar.Position
+	Tab grammar.ItemType
 }
 
 type LineFeedNode struct {
-	NodeType
-	Pos
-	LineFeedElem grammar.LINE_FEED
+	NodeId
+	Pos      grammar.Position
+	LineFeed grammar.ItemType
 }
 
 type FormFeedNode struct {
-	NodeType
-	Pos
-	FormFeedElem grammar.FORM_FEED
+	NodeId
+	Pos      grammar.Position
+	FormFeed grammar.ItemType
 }
 
 type CarriageReturnNode struct {
-	NodeType
-	Pos
-	ReturnElem grammar.CARRIAGE_RETURN
+	NodeId
+	Pos            grammar.Position
+	CarriageReturn grammar.ItemType
 }
 
 type DoubleQuoteNode struct {
-	NodeType
-	Pos
-	DoubleQuoteElem grammar.DOUBLE_QUOTE
+	NodeId
+	Pos         grammar.Position
+	DoubleQuote grammar.ItemType
 }
 
 type SingleQuoteNode struct {
-	NodeType
-	Pos
-	SingleQuoteElem grammar.SINGLE_QUOTE
+	NodeId
+	Pos         grammar.Position
+	SingleQuote grammar.ItemType
 }
 
 /// NEED TO IMPLEMENT '\'
 
 type PairLiterNode struct {
-	NodeType
-	Pos
-	PairLiter nil
+	NodeId
+	Pos       grammar.Position
+	PairLiter grammar.ItemType //should be NULL
 }
 
 type UnaryOperExprNode struct {
-	NodeType
-	Pos
+	NodeId
+	Pos       grammar.Position
 	UnaryOper *UnaryOperNode
 	Expr      *ExprNode
 }
 
 type EBENode struct {
-	NodeType
-	Pos
-	Expr       *ExpreNode
+	NodeId
+	Pos        grammar.Position
+	Expr       *ExprNode
 	BinaryOper *BinaryOperNode
 	Expre      *ExprNode
 }
 
-// ( <expr> ) inside expr how to deal with that
+// ( <expr> ) inside expr handled by parser
 
 type UnaryOperNode struct {
-	NodeType
-	Pos
+	NodeId
+	Pos           grammar.Position
 	UnaryOperElem *Node
 }
 
 type NotNode struct {
-	NodeType
-	Pos
-	NotElem grammar.NOT
+	NodeId
+	Pos grammar.Position
+	Not grammar.ItemType
 }
 
 type NegNode struct {
-	NodeType
-	Pos
-	NegElem grammar.NEG
+	NodeId
+	Pos grammar.Position
+	Neg grammar.ItemType
 }
 
 type LenNode struct {
-	NodeType
-	Pos
-	LenElem grammar.LEN
+	NodeId
+	Pos grammar.Position
+	Len grammar.ItemType
 }
 
 type OrdNode struct {
-	NodeType
-	Pos
-	OrdElem grammar.ORD
+	NodeId
+	Pos grammar.Position
+	Ord grammar.ItemType
 }
 
 type ChrNode struct {
-	NodeType
-	Pos
-	ChrElem grammar.CHR
+	NodeId
+	Pos grammar.Position
+	Chr grammar.ItemType
 }
 
 type BinaryOperNode struct {
-	NodeType
-	Pos
+	NodeId
+	Pos            grammar.Position
 	BinaryOperElem *Node
 }
 
 type MultNode struct {
-	NodeType
-	Pos
-	MultElem grammar.MULT
+	NodeId
+	Pos  grammar.Position
+	Mult grammar.ItemType
 }
 
 type DivNode struct {
-	NodeType
-	Pos
-	DivElem grammar.DIV
+	NodeId
+	Pos grammar.Position
+	Div grammar.ItemType
 }
 
 type ModNode struct {
-	NodeType
-	Pos
-	ModElem grammar.MOD
+	NodeId
+	Pos grammar.Position
+	Mod grammar.ItemType
 }
 
 type AddNode struct {
-	NodeType
-	Pos
-	AddElem grammar.ADD
+	NodeId
+	Pos grammar.Position
+	Add grammar.ItemType
 }
 
 type SubNode struct {
-	NodeType
-	Pos
-	SubElem grammar.SUB
+	NodeId
+	Pos grammar.Position
+	Sub grammar.ItemType
 }
 
 type GtNode struct {
-	NodeType
-	Pos
-	GtElem grammar.GT
+	NodeId
+	Pos grammar.Position
+	Gt  grammar.ItemType
 }
 
 type GteNode struct {
-	NodeType
-	Pos
-	GteElem grammar.GTE
+	NodeId
+	Pos grammar.Position
+	Gte grammar.ItemType
 }
 
 type LtNode struct {
-	NodeType
-	Pos
-	LtElem grammar.LT
+	NodeId
+	Pos grammar.Position
+	Lt  grammar.ItemType
 }
 
 type LteNode struct {
-	NodeType
-	Pos
-	LteElem grammar.LTE
+	NodeId
+	Pos grammar.Position
+	Lte grammar.ItemType
 }
 
 type EqNode struct {
-	NodeType
-	Pos
-	EqElem grammar.EQ
+	NodeId
+	Pos grammar.Position
+	Eq  grammar.ItemType
 }
 
 type NeqNode struct {
-	NodeType
-	Pos
-	NeqElem grammar.NEQ
+	NodeId
+	Pos grammar.Position
+	Neq grammar.ItemType
 }
 
 type AndNode struct {
-	NodeType
-	Pos
-	AndElem grammar.AND
+	NodeId
+	Pos grammar.Position
+	And grammar.ItemType
 }
 
 type OrNode struct {
-	NodeType
-	Pos
-	OrElem grammar.OR
+	NodeId
+	Pos grammar.Position
+	Or  grammar.ItemType
 }
 
 type DigitNode struct {
-	NodeType
-	Pos
+	NodeId
+	Pos grammar.Position
 	//	DigitElem //need to include digit in grammar then do grammar.DIGIT
+	Digit int
 }
 
 type IntSignNode struct {
-	NodeType
-	Pos
+	NodeId
+	Pos         grammar.Position
 	IntSignElem *Node
 }
 
 type PlusNode struct {
-	NodeType
-	Pos
-	PlusElem grammar.ADD
+	NodeId
+	Pos grammar.Position
+	Add grammar.ItemType
 }
 
 type NegateNode struct {
-	NodeType
-	Pos
-	NegateElem grammar.SUB
+	NodeId
+	Pos grammar.Position
+	Sub grammar.ItemType
 }
 
-type CommentNode struct {
-	NodeType
-	Pos
-	//   chars //????
-	//   EOL //eol type?????
-}
+//no need for comment node

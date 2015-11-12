@@ -2,24 +2,23 @@ package grammar
 
 import "fmt"
 
-type Pos uint
+type Pos int
 
 // Declare and assign
-var NoPos Pos = 0
+var NoPos Pos = -1
 
 // isValid returns true if its is a valid position
+
+//DO WE FUCKING NEED THIS SHIT NIGGA??
+
 func (p Pos) isValid() bool {
 	return p != NoPos
 }
 
 type Position struct {
-	FileName string
-	Row, Col int
+	LineNum, ColNum int
 }
 
 func (p Position) String() string {
-	if p.FileName == "" {
-		return fmt.Sprintf("%d:%d", p.Row, p.Col)
-	}
-	return fmt.Sprintf("%s:%d:%d", p.FileName, p.Row, p.Col)
+	return fmt.Sprintf("%d:%d", p.LineNum, p.ColNum)
 }
