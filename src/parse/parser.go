@@ -2,22 +2,24 @@ package parse
 
 //TODO: Change the if statement in the parse functions' return type so that there is only one return
 //I.e return pass, errorMsgs
-//TODO: Parse Function
 //TODO: FIX ARRAY TYPE PARSE
 
 import (
 	"fmt"
 	"strconv"
 
-	grammar "github.com/nanaasiedu/wacc_19/src/grammar" // CHANGE TO MASTER
+	grammar "github.com/nanaasiedu/wacc_19/src/grammar"
 )
 
 type Token struct {
 	Typ     grammar.ItemType
 	Lexeme  string
 	LineNum int
-	RowNum  int
+	ColNum  int
 }
+
+// Used as the currTok onced the oken stream is finished
+var TERMINATE_TOKEN grammar.ItemType = -1
 
 // A struct that contains arguments to a parser's parsePattern function call
 type patternArgs struct {
@@ -78,6 +80,9 @@ func (p *parser) isFinished() bool {
 // Advances the current token to the next token in the token stream
 func (p *parser) advance() {
 	if p.isFinished() {
+		p.currTok = Token{Typ: TERMINATE_TOKEN,
+			LineNum: p.currTok.LineNum,
+			ColNum:  p.currTok.ColNum}
 		return
 	}
 
@@ -124,7 +129,7 @@ func (p *parser) expect(typ grammar.ItemType) bool {
 
 // Returns a string with the location of the currTok in the input text
 func (p *parser) tokenPos() string {
-	return "At " + strconv.Itoa(p.currTok.LineNum) + ":" + strconv.Itoa(p.currTok.RowNum)
+	return "At " + strconv.Itoa(p.currTok.LineNum) + ":" + strconv.Itoa(p.currTok.ColNum)
 }
 
 // Returns the string str formmated as an error message for currTok
@@ -186,7 +191,18 @@ func (p *parser) parseFunc() (bool, []string) {
 	var pass = false       // True iff the tokens match a <func> def
 	var errorMsgs []string // An array of error messages
 
-	p.addErrors(&errorMsgs, []string{"parseFunction is not implemented"})
+	// <func> := <type> <ident> '(' <param-list>? ')' 'is' <stat> 'end'
+
+	expected := []grammar.ItemType{grammar.OPEN_ROUND, grammar.CLOSE_ROUND, grammar.IS, grammar.END}
+	parseTypes := []parseType{p.parseType, p.parseIdent, p.parseParamList, p.parseStat}
+	patternTypes := []patternType{ONCE, ONCE, EXPECT, OPTIONAL, EXPECT, EXPECT, ONCE, EXPECT}
+	segmentErrors := []string{"", "", "", "",
+		"Expected ')' to close function parameter list",
+		"Expected 'is' after function parameter list",
+		"Expected statement body for function",
+		"All functions must end with 'end'"}
+
+	pass, errorMsgs = p.parsePattern(expected, parseTypes, patternTypes, segmentErrors)
 
 	if !pass {
 		return false, errorMsgs
@@ -375,8 +391,8 @@ func (p *parser) parseStat() (bool, []string) {
 
 	op12 := patternArgs{expected, parseTypes, patternTypes, segmentErrors}
 
-	pass, errorMsgs = p.parseOptions(op1, op2, op3, op4, op2, op5, op1, op4, op6, op7, op8,
-		op9, op10, op11, op12)
+	pass, errorMsgs = p.parseOptions(op1, op12, op2, op3, op4, op2, op5, op1, op4, op6, op7, op8,
+		op9, op10, op11)
 
 	// <stat> ; <stat> option
 	if pass { // If a <stat> has been read so far
@@ -655,12 +671,38 @@ func (p *parser) parseArrayType() (bool, []string) {
 	var pass = false
 	var errorMsgs []string // An array of error messages
 
+	//Place holders
+	expected := []grammar.ItemType{}
+	parseTypes := []parseType{}
+	patternTypes := []patternType{}
+	segmentErrors := []string{}
+
 	// <array-type> := <type> '[' ']'
 
-	expected := []grammar.ItemType{grammar.OPEN_SQUARE, grammar.CLOSE_SQUARE}
-	parseTypes := []parseType{p.parseBaseType} // CHANGE
-	patternTypes := []patternType{ONCE, EXPECT, EXPECT}
-	segmentErrors := []string{"", "Expected '[' after type", "Expected ']'"}
+	// All options are parsed once
+	patternTypes = []patternType{ONCE}
+	segmentErrors = []string{""}
+
+	// <base-type>
+	parseTypes = []parseType{p.parseBaseType}
+	op1 := patternArgs{expected, parseTypes, patternTypes, segmentErrors}
+
+	// <pair-type>
+	parseTypes = []parseType{p.parsePairType}
+	op2 := patternArgs{expected, parseTypes, patternTypes, segmentErrors}
+
+	pass, errorMsgs = p.parseOptions(op1, op2)
+
+	// if <type> != <base-type> or <pair-type> then check if <type> = <array-type>
+	if !pass {
+		// NOT IMPLEMENTED
+	}
+
+	// Check for '[' ']' after <type> is parsed successfully
+	expected = []grammar.ItemType{grammar.OPEN_SQUARE, grammar.CLOSE_SQUARE}
+	parseTypes = []parseType{}
+	patternTypes = []patternType{EXPECT, EXPECT}
+	segmentErrors = []string{"", "Expected '[' after type", "Expected ']'"}
 
 	pass, errorMsgs = p.parsePattern(expected, parseTypes, patternTypes, segmentErrors)
 
@@ -1390,7 +1432,8 @@ func (p *parser) parsePattern(expArgs []grammar.ItemType, segments []parseType, 
 
 	// For debugging
 	/*fmt.Println("Error IDEN = ", segmentErrors[0])
-	fmt.Println("Len seg + exp = ", len(expArgs)+len(segments), " len typs = ", len(typs), " len errors = ", len(segmentErrors))*/
+	fmt.Println("Len seg + exp = ", len(expArgs)+len(segments), " len typs = ", len(typs), " len errors = ", len(segmentErrors))
+	fmt.Print("\n")*/
 
 	p.saveToken()
 

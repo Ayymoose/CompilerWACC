@@ -8,7 +8,7 @@ import (
 )
 
 func main() {
-	p := ConstructParser(testStream7())
+	p := ConstructParser(testStream3())
 	pass, errorMsgs := p.Parse()
 
 	if !pass {
@@ -52,14 +52,35 @@ func testStream2() []Token {
 }
 
 func testStream3() []Token {
-	/* begin
-		 skip
-	 end */
+	/* begin begin begin
+		 skip;
+
+		 begin
+		 		X = fst Y
+		 end
+
+	 end end end */
 	// SUCCESS
 	t1 := Token{grammar.BEGIN, grammar.Token_strings[grammar.BEGIN], 0, 0}
-	t2 := Token{grammar.SKIP, grammar.Token_strings[grammar.SKIP], 1, 2}
-	t3 := Token{grammar.END, grammar.Token_strings[grammar.END], 2, 0}
-	tokenStream := []Token{t1, t2, t3}
+	t2 := Token{grammar.BEGIN, grammar.Token_strings[grammar.BEGIN], 1, 0}
+	t3 := Token{grammar.BEGIN, grammar.Token_strings[grammar.BEGIN], 2, 0}
+
+	t4 := Token{grammar.SKIP, grammar.Token_strings[grammar.SKIP], 3, 2}
+	ta := Token{grammar.SEMICOLON, grammar.Token_strings[grammar.SEMICOLON], 3, 6}
+
+	tb := Token{grammar.BEGIN, grammar.Token_strings[grammar.BEGIN], 4, 0}
+
+	tc := Token{grammar.IDENTIFIER, "X", 5, 2}
+	td := Token{grammar.EQ, "=", 5, 3}
+	te := Token{grammar.FST, "fst", 5, 4}
+	tf := Token{grammar.IDENTIFIER, "Y", 5, 7}
+
+	tg := Token{grammar.END, grammar.Token_strings[grammar.END], 6, 0}
+
+	t5 := Token{grammar.END, grammar.Token_strings[grammar.END], 7, 0}
+	t6 := Token{grammar.END, grammar.Token_strings[grammar.END], 8, 0}
+	t7 := Token{grammar.END, grammar.Token_strings[grammar.END], 9, 0}
+	tokenStream := []Token{t1, t2, t3, t4, ta, tb, tc, td, te, tf, tg, t5, t6, t7}
 
 	return tokenStream
 }
