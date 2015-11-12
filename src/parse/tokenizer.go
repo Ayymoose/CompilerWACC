@@ -1,38 +1,38 @@
-package lexer
+package parse
 
 import (
-	"fmt"
 	"strings"
 
-	grammar "github.com/OliWheeler/wacc_19/src/grammar"
+	"github.com/wacc_19/src/grammar"
 )
 
 type stateFn func(*Lexer) stateFn
 
+/*
 type Item struct {
 	typ grammar.ItemType
 	val string
+}  */
+
+type Token struct {
+	Typ    grammar.ItemType
+	Lexeme string
+	pos    int
 }
 
 type Lexer struct {
-	name  string
-	input string
-	state stateFn
-	start int
-	pos   int
-	width int
-	Items chan Item
+	name    string
+	input   string
+	state   stateFn
+	start   int
+	pos     int
+	width   int
+	lastPos int // position of most recent item returned by nextItem
+	Items   chan Token
 }
 
-func (i Item) String() string {
-	switch i.typ {
-	case grammar.EOF:
-		return "EOF"
-	case grammar.ERROR:
-		return i.val
-	}
-	//	return fmt.Sprintf("grammar.Item{%v, %q},", grammar.DebugTokens[i.typ], i.val)
-	return fmt.Sprintf("%v : %q", grammar.DebugTokens[i.typ], i.val)
+func (l *Lexer) lineNumber(t Token) int {
+	return 1 + strings.Count(l.input[:t.pos], "\n")
 }
 
 func (l *Lexer) run() {
@@ -44,9 +44,9 @@ func (l *Lexer) run() {
 
 // nextItem returns the next item from the input.
 // Called by the parser, not in the lexing goroutine.
-func (l *Lexer) NextItem() Item {
+func (l *Lexer) NextItem() Token {
 	item := <-l.Items
-	//l.lastPos = item.pos
+	l.lastPos = item.pos
 	return item
 }
 
@@ -76,7 +76,7 @@ func Lex(name, input string) *Lexer {
 	l := &Lexer{
 		name:  name,
 		input: input,
-		Items: make(chan Item),
+		Items: make(chan Token),
 	}
 	go l.run()
 	return l

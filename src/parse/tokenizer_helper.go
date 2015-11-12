@@ -1,4 +1,4 @@
-package lexer
+package parse
 
 import (
 	"fmt"
@@ -7,7 +7,7 @@ import (
 	"unicode"
 	"unicode/utf8"
 
-	grammar "github.com/OliWheeler/wacc_19/src/grammar"
+	"github.com/wacc_19/src/grammar"
 )
 
 type ItemTypeSlice []grammar.ItemType
@@ -42,8 +42,8 @@ func lexInsideProgram(l *Lexer) stateFn {
 			s := grammar.Token_keyword_strings[key]
 			l.width = len(s)
 			l.pos += l.width
-			if isAlphaNumeric(l.next()) {
-				l.backup()
+			if isAlphaNumeric(l.peek()) || l.peek() == '_' {
+				//		l.backup()
 				return lexIdentifier
 			}
 			l.emit(grammar.ItemType(key))
@@ -57,6 +57,12 @@ func lexInsideProgram(l *Lexer) stateFn {
 	sort.Sort(keysForTokens)
 	for _, key := range keysForTokens {
 		if strings.HasPrefix(l.input[l.pos:], grammar.Token_strings[key]) {
+			/*	switch key {
+				case grammar.DOUBLE_QUOTE:
+					return lexString
+				case grammar.SINGLE_QUOTE:
+					return lexChar
+				}  */
 			s := grammar.Token_strings[key]
 			l.width = len(s)
 			l.pos += l.width
@@ -122,14 +128,12 @@ func (l *Lexer) acceptRun(valid string) {
 }
 
 func (l *Lexer) emit(t grammar.ItemType) {
-	l.Items <- Item{t, l.input[l.start:l.pos]}
+	l.Items <- Token{Typ: t, Lexeme: l.input[l.start:l.pos]}
 	l.start = l.pos
 }
 
 func (l *Lexer) errorf(format string, args ...interface{}) stateFn {
-	l.Items <- Item{grammar.ERROR,
-		fmt.Sprintf(format, args...),
-	}
+	l.Items <- Token{Typ: grammar.ERROR, Lexeme: fmt.Sprintf(format, args...)}
 	return nil
 }
 

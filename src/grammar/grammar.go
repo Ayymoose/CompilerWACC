@@ -30,8 +30,8 @@ const (
 	LINE_FEED
 	FORM_FEED
 	CARRIAGE_RETURN
-	//DOUBLE_QUOTE
-	//	SINGLE_QUOTE
+	DOUBLE_QUOTE //Uncommented
+	SINGLE_QUOTE
 	BACKSLASH
 	escaped_char_end
 
@@ -69,8 +69,8 @@ const (
 	STRING
 	type_end
 	NUMBER
-	CHARACTER
-	STRINGVALUE
+	CHARLITER
+	STRINGLITER
 	BOOLEAN
 	PLAINTEXT
 	EOF
@@ -92,8 +92,8 @@ const (
 	SUB // '-' ALSO SAME SYMBOL -> NOT SURE IF ENTIRELY correct
 	GT
 	GTE
-	ST
-	STE
+	ST  //I think this should be LT (Less than)
+	STE //This too
 	EQ
 	NEQ
 	AND
@@ -137,10 +137,10 @@ var DebugTokens = map[ItemType]string{
 	LINE_FEED:          "LINE_FEED",
 	FORM_FEED:          "FORM_FEED",
 	CARRIAGE_RETURN:    "CARRIAGE_RETURN",
-	//	DOUBLE_QUOTE:       "DOUBLE_QUOTE",
-	//	SINGLE_QUOTE:       "SINGLE_QUOTE",
-	BACKSLASH:        "BACKSLASH",
-	escaped_char_end: "escaped_char_end",
+	DOUBLE_QUOTE:       "DOUBLE_QUOTE", //Uncommented these
+	SINGLE_QUOTE:       "SINGLE_QUOTE",
+	BACKSLASH:          "BACKSLASH",
+	escaped_char_end:   "escaped_char_end",
 
 	reserved_word_start: "reserved_word_start",
 	BEGIN:               "BEGIN",
@@ -165,7 +165,7 @@ var DebugTokens = map[ItemType]string{
 	FST:                 "FST",
 	SND:                 "SND",
 	NULL:                "NULL",
-	PAIR:                "PAI",
+	PAIR:                "PAIR",
 	reserved_word_end:   "reserved_word_end",
 	BACKSPACE:           "BACKSPACE",
 	type_start:          "type_start",
@@ -175,8 +175,8 @@ var DebugTokens = map[ItemType]string{
 	type_end:            "type_end",
 	STRING:              "STRING",
 	NUMBER:              "NUMBER",
-	CHARACTER:           "CHARACTER",
-	STRINGVALUE:         "STRINGVALUE",
+	CHARLITER:           "CHARLITER",
+	STRINGLITER:         "STRINGLITER",
 	BOOLEAN:             "BOOLEAN",
 	PLAINTEXT:           "PLAINTEXT",
 	EOF:                 "EOF",
@@ -273,62 +273,88 @@ var Token_strings = map[ItemType]string{
 	LINE_FEED:       "\n",
 	FORM_FEED:       "\f",
 	CARRIAGE_RETURN: "\r",
-	//	DOUBLE_QUOTE:    "\"",
-	//	SINGLE_QUOTE:    "\\'",
-	BACKSLASH: "\\",
-	NEG:       "-", // THIS IS FOR '-' WHICH ALSO EXISTS IN BINARY_OP ASWELL. NOT SURE OF THE BEST NAME
-	MULT:      "*",
-	DIV:       "/",
-	MOD:       "%",
-	ADD:       "+",
-	EQ:        "==", // BETTER NAMES??
-	NEQ:       "!=", // BETTER NAMES?
-	NOT:       "!",
-	AND:       "&&",
-	OR:        "||",
-	SUB:       "-", // '-' ALSO SAME SYMBOL -> NOT SURE IF ENTIRELY correct
-	GTE:       ">=",
-	STE:       "<=",
-	GT:        ">",
+	/*
+		<<<<<<< HEAD
+			//	DOUBLE_QUOTE:    "\"",
+			//	SINGLE_QUOTE:    "\\'",
+			BACKSLASH: "\\",
+			NEG:       "-", // THIS IS FOR '-' WHICH ALSO EXISTS IN BINARY_OP ASWELL. NOT SURE OF THE BEST NAME
+			MULT:      "*",
+			DIV:       "/",
+			MOD:       "%",
+			ADD:       "+",
+			EQ:        "==", // BETTER NAMES??
+			NEQ:       "!=", // BETTER NAMES?
+			NOT:       "!",
+			AND:       "&&",
+			OR:        "||",
+			SUB:       "-", // '-' ALSO SAME SYMBOL -> NOT SURE IF ENTIRELY correct
+			GTE:       ">=",
+			STE:       "<=",
+			GT:        ">",
 
-	ST: "<",
+			ST: "<",
 
+			OPEN_SQUARE:  "[",
+			OPEN_ROUND:   "(",
+			CLOSE_SQUARE: "]",
+			CLOSE_ROUND:  ")",
+			ASSIGNMENT:   "=",
+		=======  */
+	//	DOUBLE_QUOTE: "\"", //Uncommented these because I needed to use it @Ayman
+	//	SINGLE_QUOTE: "\\'",
+	BACKSLASH:    "\\",
+	NEG:          "-", // THIS IS FOR '-' WHICH ALSO EXISTS IN BINARY_OP ASWELL. NOT SURE OF THE BEST NAME
+	MULT:         "*",
+	DIV:          "/",
+	MOD:          "%",
+	ADD:          "+",
+	SUB:          "-", // '-' ALSO SAME SYMBOL -> NOT SURE IF ENTIRELY correct
+	GT:           ">",
+	GTE:          ">=",
+	ST:           "<",
+	STE:          "<=",
+	EQ:           "==", // BETTER NAMES??
+	NEQ:          "!=", // BETTER NAMES?
+	AND:          "&&",
+	OR:           "||",
 	OPEN_SQUARE:  "[",
 	OPEN_ROUND:   "(",
 	CLOSE_SQUARE: "]",
 	CLOSE_ROUND:  ")",
 	ASSIGNMENT:   "=",
+	//>>>>>>> origin/Nana
 }
 
-func (token ItemType) isEscapedChar() bool {
+func (token ItemType) IsEscapedChar() bool {
 	return token > escaped_char_start && token < escaped_char_end
 }
 
-func (token ItemType) isDeliminator() bool {
+func (token ItemType) IsDeliminator() bool {
 	return token > deliminators_start && token < deliminators_end
 }
 
-func (token ItemType) isReservedWord() bool {
+func (token ItemType) IsReservedWord() bool {
 	return token > reserved_word_start && token < reserved_word_end
 }
 
-func (token ItemType) isType() bool {
+func (token ItemType) IsType() bool {
 	return token > type_start && token < type_end
 }
 
-func (token ItemType) isUnaryOp() bool {
+func (token ItemType) IsUnaryOp() bool {
 	return token > unary_op_start && token < unary_op_end
 }
 
-func (token ItemType) isBinaryOp() bool {
+func (token ItemType) IsBinaryOp() bool {
 	return token > binary_op_start && token < binary_op_end
 }
 
-func (token ItemType) isBracketType() bool {
+func (token ItemType) IsBracketType() bool {
 	return token > bracket_type_start && token < bracket_type_end
 }
 
-func (token ItemType) isBoolean() bool {
+func (token ItemType) IsBoolean() bool {
 	return token > boolean_start && token < boolean_end
 }
 
