@@ -17,7 +17,7 @@ type Item struct {
 type Token struct {
 	Typ    grammar.ItemType
 	Lexeme string
-	pos    int
+	Pos    int
 }
 
 type Lexer struct {
@@ -32,7 +32,7 @@ type Lexer struct {
 }
 
 func (l *Lexer) lineNumber(t Token) int {
-	return 1 + strings.Count(l.input[:t.pos], "\n")
+	return 1 + strings.Count(l.input[:t.Pos], "\n")
 }
 
 func (l *Lexer) run() {
@@ -46,7 +46,7 @@ func (l *Lexer) run() {
 // Called by the parser, not in the lexing goroutine.
 func (l *Lexer) NextItem() Token {
 	item := <-l.Items
-	l.lastPos = item.pos
+	l.lastPos = item.Pos
 	return item
 }
 
