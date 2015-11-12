@@ -8,7 +8,7 @@ import (
 )
 
 func main() {
-	p := ConstructParser(testStream6())
+	p := ConstructParser(testStream7())
 	pass, errorMsgs := p.Parse()
 
 	if !pass {
@@ -82,15 +82,16 @@ func testStream4() []Token {
 func testStream5() []Token {
 	/* begin
 		 skip;
-		 free
+		 free nman
 	 end */
-	// ERROR: Invalid <stat> // <expr> expected after free
+	// SUCCESS
 	t1 := Token{grammar.BEGIN, grammar.Token_strings[grammar.BEGIN], 0, 0}
 	t2 := Token{grammar.SKIP, grammar.Token_strings[grammar.SKIP], 1, 2}
 	t3 := Token{grammar.SEMICOLON, grammar.Token_strings[grammar.SEMICOLON], 2, 2}
 	t4 := Token{grammar.FREE, grammar.Token_strings[grammar.FREE], 3, 2}
-	t5 := Token{grammar.END, grammar.Token_strings[grammar.END], 4, 0}
-	tokenStream := []Token{t1, t2, t3, t4, t5}
+	t5 := Token{grammar.IDENTIFIER, "nman", 4, 2}
+	t6 := Token{grammar.END, grammar.Token_strings[grammar.END], 5, 0}
+	tokenStream := []Token{t1, t2, t3, t4, t5, t6}
 
 	return tokenStream
 }
@@ -112,6 +113,27 @@ func testStream6() []Token {
 	t10 := Token{grammar.SKIP, grammar.Token_strings[grammar.SKIP], 9, 2}
 	t11 := Token{grammar.END, grammar.Token_strings[grammar.END], 10, 0}
 	tokenStream := []Token{t1, t2, t3, t4, t5, t6, t7, t8, t9, t10, t11}
+
+	return tokenStream
+}
+
+func testStream7() []Token {
+	/* begin
+		 skip;
+		 free true;
+		 print 0
+	 end */
+	// EXPECTED expr after print
+	t1 := Token{grammar.BEGIN, grammar.Token_strings[grammar.BEGIN], 0, 0}
+	t2 := Token{grammar.SKIP, grammar.Token_strings[grammar.SKIP], 1, 2}
+	t3 := Token{grammar.SEMICOLON, grammar.Token_strings[grammar.SEMICOLON], 2, 2}
+	t4 := Token{grammar.FREE, grammar.Token_strings[grammar.FREE], 3, 2}
+	t5 := Token{grammar.TRUE, "true", 4, 2}
+	t6 := Token{grammar.SEMICOLON, grammar.Token_strings[grammar.SEMICOLON], 5, 2}
+	t7 := Token{grammar.PRINT, grammar.Token_strings[grammar.PRINT], 6, 2}
+	//t8 := Token{grammar.DIGIT, "0", 7, 2}
+	t9 := Token{grammar.END, grammar.Token_strings[grammar.END], 8, 0}
+	tokenStream := []Token{t1, t2, t3, t4, t5, t6, t7, t9}
 
 	return tokenStream
 }
