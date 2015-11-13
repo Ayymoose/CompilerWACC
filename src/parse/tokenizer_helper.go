@@ -128,12 +128,12 @@ func (l *Lexer) acceptRun(valid string) {
 }
 
 func (l *Lexer) emit(t grammar.ItemType) {
-	l.Items <- Token{Typ: t, Lexeme: l.input[l.start:l.pos]}
+	l.Items <- Token{Typ: t, Lexeme: l.input[l.start:l.pos], Pos: l.start}
 	l.start = l.pos
 }
 
 func (l *Lexer) errorf(format string, args ...interface{}) stateFn {
-	l.Items <- Token{Typ: grammar.ERROR, Lexeme: fmt.Sprintf(format, args...)}
+	l.Items <- Token{Typ: grammar.ERROR, Lexeme: fmt.Sprintf(format, args...), Pos: l.start}
 	return nil
 }
 

@@ -74,7 +74,7 @@ func (l *Lexer) ConstructParser(tokenStream []Token) *parser {
 // Prints the string value of currTok
 // Useful for debugging
 func (p *parser) printTok() {
-	fmt.Println(p.tokenPos() + " " + grammar.Token_strings[p.currTok.Typ])
+	fmt.Println(p.TokenPos() + " " + grammar.Token_strings[p.currTok.Typ])
 }
 
 // Returns true iff the token stream is finished
@@ -134,13 +134,14 @@ func (p *parser) expect(typ grammar.ItemType) bool {
 }
 
 // Returns a string with the location of the currTok in the input text
-func (p *parser) tokenPos() string {
-	return "At " + strconv.Itoa(p.lexer.lineNumber(p.currTok)) //p.currTok.LineNum) //+ ":" + strconv.Itoa(p.currTok.RowNum)
+func (p *parser) TokenPos() string {
+	line, col := p.lexer.TokenLocation(p.currTok)
+	return "At " + strconv.Itoa(line) + ":" + strconv.Itoa(col)
 }
 
 // Returns the string str formmated as an error message for currTok
 func (p *parser) makeErrorMsg(str string) string {
-	return p.tokenPos() + " :: " + str
+	return p.TokenPos() + " :: " + str
 }
 
 // Adds a list of errorMsgs to another list of errorMsgs

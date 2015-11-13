@@ -31,8 +31,10 @@ type Lexer struct {
 	Items   chan Token
 }
 
-func (l *Lexer) lineNumber(t Token) int {
-	return 1 + strings.Count(l.input[:t.Pos], "\n")
+func (l *Lexer) TokenLocation(t Token) (line int, col int) {
+	line = 1 + strings.Count(l.input[:t.Pos], "\n")
+	col = strings.Index(l.input[:t.Pos], t.Lexeme) - strings.LastIndex(l.input[:t.Pos], "\n")
+	return
 }
 
 func (l *Lexer) run() {
