@@ -16,7 +16,8 @@ func main() {
 	//	b, err := ioutil.ReadFile("wacc_examples/valid/function/nested_functions/fibonacciFullRec.wacc")
 	//	b, err := ioutil.ReadFile("wacc_examples/invalid/syntaxErr/expressions/missingOperand1.wacc")
 	//	b, err := ioutil.ReadFile("wacc_examples/invalid/syntaxErr/basic/unescapedChar.wacc")
-	b, err := ioutil.ReadFile("wacc_examples/invalid/oliver.wacc")
+	//	b, err := ioutil.ReadFile("wacc_examples/invalid/oliver.wacc")
+	b, err := ioutil.ReadFile("wacc_examples/valid/basic/skip/comment.wacc")
 	if err != nil {
 		fmt.Println(err)
 		os.Exit(1)

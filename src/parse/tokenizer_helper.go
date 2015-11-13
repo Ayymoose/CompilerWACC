@@ -85,6 +85,12 @@ func lexInsideProgram(l *Lexer) stateFn {
 			case grammar.CARRIAGE_RETURN:
 				l.ignore()
 				return lexInsideProgram
+			case grammar.COMMENT_LINE:
+				for l.next() != '\n' {
+					l.ignore()
+				}
+				l.backup()
+				return lexInsideProgram
 			}
 			l.emit(grammar.ItemType(key))
 			return lexInsideProgram
@@ -93,6 +99,7 @@ func lexInsideProgram(l *Lexer) stateFn {
 	switch r := l.next(); {
 	case unicode.IsSpace(r):
 		l.ignore()
+		return lexInsideProgram
 		/*	case r == '\'':
 				return lexChar
 			case r == '"':
