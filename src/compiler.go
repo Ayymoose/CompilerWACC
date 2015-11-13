@@ -13,7 +13,7 @@ func main() {
 	var tokens []parse.Token
 	//	b, err := ioutil.ReadFile("wacc_examples/valid/variables/capCharDeclaration.wacc")
 	//	b, err := ioutil.ReadFile("wacc_examples/valid/function/nested_functions/fibonacciFullRec.wacc")
-	b, err := ioutil.ReadFile("C:/Users/nman/Documents/Go Programming/src/github.com/nanaasiedu/wacc_19/src/wacc_examples/valid/if/if1.wacc")
+	b, err := ioutil.ReadFile("C:/Users/nman/Documents/Computing 1516/WACC spec/valid/if/if1.wacc")
 	if err != nil {
 		fmt.Println(err)
 		os.Exit(1)
@@ -28,7 +28,12 @@ func main() {
 	parser := lexer.ConstructParser(tokens)
 	passed, errs := parser.Parse()
 	fmt.Println("Parsing Successful:", passed)
-	fmt.Println("Parsing errors:", errs)
+	fmt.Println("Parsing errors: \n")
+
+	for _, errorMsg := range errs {
+		fmt.Printf("%s\n", errorMsg)
+	}
+
 	fmt.Println("\n------ Completed Parsing ------\n")
 
 }
