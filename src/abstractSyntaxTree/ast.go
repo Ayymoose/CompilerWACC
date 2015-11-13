@@ -101,22 +101,24 @@ type ProgramNode struct {
 type FuncNode struct {
 	NodeId
 	Pos       grammar.Position
-	Type      string         // add the type
-	Ident     string         // changed from *IdentNode
-	ParamList *ParamListNode // Optional
-	Stat      *StatNode
+	Type      string       // add the type
+	Ident     string       // changed from *IdentNode
+	ParamList []*ParamNode // *ParamListNode // Optional
+	StatList  []*StatNode
 }
 
+/*
 type ParamListNode struct {
 	NodeId
 	Pos   grammar.Position
 	Param []*ParamNode // one or more
 }
+*/
 
 type ParamNode struct {
 	NodeId
 	Pos   grammar.Position
-	Type  *TypeNode
+	Type  string
 	Ident string // changed from  *IdentNode
 }
 

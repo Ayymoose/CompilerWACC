@@ -53,21 +53,27 @@ import "github.com/henrykhadass/wacc_19/src/grammar"
 
 // SymbolTable constructor
 type SymbolTable struct {
-  parent      *SymbolTable
-	semanticMap map[string][]grammar.Token  // A map of strings to a list of tokens
+	parent      *SymbolTable
+	semanticMap map[string]grammar.Token // A map of strings to a list of tokens
 }
 
 // Creates a new instance of a symbolTable with a parent to its pointer
-func New(symbolTable *SymbolTable) *SymbolTable {
-  newSymbolTable := &SymbolTable{}
-  newSymbolTable.parent = symbolTable
-  newSymbolTable.semanticMap = make(map[string][]grammar.Token)
-  return newSymbolTable
+func (symbolTable *SymbolTable) New() *SymbolTable {
+	newSymbolTable := &SymbolTable{}
+	newSymbolTable.parent = symbolTable
+	newSymbolTable.semanticMap = make(map[string][]grammar.Token)
+	return newSymbolTable
 }
 
+func (SymbolTable *SymbolTable) insert(key string, value string) {
+	// convert value string into its grammar token here
+}
+
+/*
 func (s *SymbolTable) Insert(token string, list reflect.TypeOf(list).Elem()) {
 
 }
+*/
 /*
 func addNode(parent *Node, val int) *Node {
   return &Node{nil, nil, parent, val}

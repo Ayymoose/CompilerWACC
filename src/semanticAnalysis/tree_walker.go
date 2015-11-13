@@ -1,16 +1,12 @@
 package semanticAnalysis
 
-//import (
-//  tree "github.com/henrykhadass/wacc_19/src/abstractSyntaxTree"
-//)
-
 func (ast *ProgramNode) visitProgram() {
 	// Create new symbolTable
-	st := New(SymbolTable)
+	st := SymbolTable.New()
 
 	// Visit all function nodes
 	for _, function := range ast.FuncNode {
-		visitFunction(function, st)
+		visitFunction(function, st) // do i need *st??
 	}
 
 	// Visit all statement nodes
@@ -21,46 +17,46 @@ func (ast *ProgramNode) visitProgram() {
 
 func (f *FuncNode) visitFunction(st *SymbolTable) {
 	// New scope so create new symbol table
-	nst := New(st)
+	currentSymbolTable := st.New()
 
 	// Type of function
-	baseType := f.Type
-  pass, errorMsgs = checkBaseType(baseType string)
-	if !pass {
-		// To be implmented - > need to decide on return type
+	baseType := f.Type // string
+	// lex : string -> token
+	// parser : token -> string
+	// semantics : string -> token  conversion done in symbol table insert
+
+	// Identifier of function
+	identifier := f.Ident // string
+
+	//SymbolTable hashMap will be (k, v) where k is identifier and v is the type
+	// parent symbol table contains (functionName, functionType)  ->  parent scope
+
+	// Add all params to local scope
+	// can be 0 or more
+	for _, parameter := range f.ParamList {
+		currentSymbolTable.insert(parameter.Ident, parameter.Type)
 	}
 
-  // Identifier of function
-	identifier := function.Ident
-	pass, errorMsgs = checkIdentifier(identifier string)
-	if !pass {
-	  // To be implemented --> need to decide on a return type
+	// Add all statements to local scope  -> well depending on stat ;)
+	for _, parameter := range f.StatList {
+		visitStatement(parameter, currentSymbolTable)
 	}
 }
 
-func checkIdentifier(identifier string) {
-	"^[a-zA-Z0-9_]+$"   // + does not allow empty strings
-}
-
-func checkBaseType(baseType string) (bool, string) {
-	switch baseType {
-	case "int":
-		return true, ""
-	case "bool":
-		return true, ""
-	case "char":
-		return true, ""
-	case "string":
-		return true, ""
+func (s *StatNode) visitStatement(param ParamNode, symbolTable *SymbolTable) {
+	switch statType := Node.(type) {
+	case DeclarationNode: // add to symbol table
+	case AssignmentNode: // update symbol table but also traverse parent scope
+	case ReadNode: // traverse scope
+	case FreeNode: // traverse scope
+	case ReturnNode: // traverse scope and compare to return type of function
+	case ExitNode: // traverse scoppe if identifier else expr which evaluates to integer
+	case PrintNode: //ts
+	case PrintlnNode: //ts
+	case IfNode: //ts
+	case WhileNode: //ts
+	case ScopeNode: // new scope
 	default:
-		return false, baseType + "is not a WACC base type"
+		"Wrong node type retard"
 	}
 }
-
-/*
-func (p *)
-
-func (s *StatNode) visitStatement() {
-
-}
-*/
