@@ -8,7 +8,7 @@ import (
 	"fmt"
 	"strconv"
 
-	grammar "github.com/nanaasiedu/wacc_19/src/grammar"
+	grammar "grammar"
 )
 
 func (i Token) String() string {
