@@ -11,11 +11,15 @@ import (
 	grammar "github.com/nanaasiedu/wacc_19/src/grammar"
 )
 
-type Token struct {
-	Typ     grammar.ItemType
-	Lexeme  string
-	LineNum int
-	ColNum  int
+func (i Token) String() string {
+	switch i.Typ {
+	case grammar.EOF:
+		return "EOF"
+	case grammar.ERROR:
+		return i.Lexeme
+	}
+	//	return fmt.Sprintf("grammar.Item{%v, %q},", grammar.DebugTokens[i.typ], i.val)
+	return fmt.Sprintf("%v : %q", grammar.DebugTokens[i.Typ], i.Lexeme)
 }
 
 // Used as the currTok onced the oken stream is finished
@@ -51,6 +55,7 @@ type parseType func() (bool, []string)
 // The paser struct will be used as the parser of the stream of tokens given to
 // it.
 type parser struct {
+	lexer  Lexer
 	tokens []Token // Stream of tokens from the lexer
 	curr   int     // Index of current token
 	save   []int   // Array of indexs to save points in the token stream
@@ -61,8 +66,8 @@ type parser struct {
 
 // Basic parser constructer that sets the current token to the first token in the
 // tokenStream
-func ConstructParser(tokenStream []Token) *parser {
-	return &parser{tokenStream, 0, []int{}, tokenStream[0]}
+func ConstructParser(lexer Lexer, tokenStream []Token) *parser {
+	return &parser{lexer, tokenStream, 0, []int{}, tokenStream[0]}
 }
 
 // Prints the string value of currTok
@@ -81,8 +86,7 @@ func (p *parser) isFinished() bool {
 func (p *parser) advance() {
 	if p.isFinished() {
 		p.currTok = Token{Typ: TERMINATE_TOKEN,
-			LineNum: p.currTok.LineNum,
-			ColNum:  p.currTok.ColNum}
+			Pos: p.currTok.Pos}
 		return
 	}
 
@@ -129,7 +133,7 @@ func (p *parser) expect(typ grammar.ItemType) bool {
 
 // Returns a string with the location of the currTok in the input text
 func (p *parser) tokenPos() string {
-	return "At " + strconv.Itoa(p.currTok.LineNum) + ":" + strconv.Itoa(p.currTok.ColNum)
+	return "At " + strconv.Itoa(p.lexer.lineNumber(p.currTok)) //p.currTok.LineNum) //+ ":" + strconv.Itoa(p.currTok.RowNum)
 }
 
 // Returns the string str formmated as an error message for currTok
@@ -1026,29 +1030,10 @@ func (p *parser) parseIntLiteral() (bool, []string) {
 	var errorMsgs []string // An array of error messages
 
 	// <int-liter> ::= <int-sign>? <digit>+
-	expected := []grammar.ItemType{}
-	parseTypes := []parseType{p.parseIntSign, p.parseDigit}
-	patternTypes := []patternType{OPTIONAL, ONEMORE}
+	expected := []grammar.ItemType{grammar.NUMBER}
+	parseTypes := []parseType{p.parseIntSign}
+	patternTypes := []patternType{OPTIONAL, EXPECT}
 	segmentErrors := []string{"", ""}
-
-	pass, errorMsgs = p.parsePattern(expected, parseTypes, patternTypes, segmentErrors)
-
-	if !pass {
-		return false, errorMsgs
-	}
-
-	return true, []string{}
-}
-
-func (p *parser) parseDigit() (bool, []string) {
-	var pass = false       // True iff the tokens match a (digit) def
-	var errorMsgs []string // An array of error messages
-
-	// (digit) ::= (‘0’-‘9’)
-	expected := []grammar.ItemType{grammar.DIGIT}
-	parseTypes := []parseType{}
-	patternTypes := []patternType{EXPECT}
-	segmentErrors := []string{""}
 
 	pass, errorMsgs = p.parsePattern(expected, parseTypes, patternTypes, segmentErrors)
 
@@ -1127,11 +1112,11 @@ func (p *parser) parseCharLiteral() (bool, []string) {
 	var pass = false       // True iff the tokens match a (char-liter) def
 	var errorMsgs []string // An array of error messages
 
-	// <char-liter> ::= ‘’’ character ‘’’
-	expected := []grammar.ItemType{grammar.SINGLE_QUOTE, grammar.SINGLE_QUOTE}
-	parseTypes := []parseType{p.parseCharacter}
-	patternTypes := []patternType{EXPECT, ONCE, EXPECT}
-	segmentErrors := []string{"", "", ""}
+	// <char-liter> ::= CHARLITER
+	expected := []grammar.ItemType{grammar.CHARLITER}
+	parseTypes := []parseType{}
+	patternTypes := []patternType{EXPECT}
+	segmentErrors := []string{""}
 
 	pass, errorMsgs = p.parsePattern(expected, parseTypes, patternTypes, segmentErrors)
 
@@ -1146,49 +1131,13 @@ func (p *parser) parseStrLiteral() (bool, []string) {
 	var pass = false       // True iff the tokens match a (str-liter) def
 	var errorMsgs []string // An array of error messages
 
-	// (str-liter) ::= ‘"’ character * ‘"’
-	expected := []grammar.ItemType{grammar.DOUBLE_QUOTE, grammar.DOUBLE_QUOTE}
-	parseTypes := []parseType{p.parseCharacter}
-	patternTypes := []patternType{EXPECT, ZEROMORE, EXPECT}
-	segmentErrors := []string{"", "", ""}
+	// (str-liter) ::= STRINGLITER
+	expected := []grammar.ItemType{grammar.STRINGLITER}
+	parseTypes := []parseType{}
+	patternTypes := []patternType{EXPECT}
+	segmentErrors := []string{""}
 
 	pass, errorMsgs = p.parsePattern(expected, parseTypes, patternTypes, segmentErrors)
-
-	if !pass {
-		return false, errorMsgs
-	}
-
-	return true, []string{}
-}
-
-func (p *parser) parseCharacter() (bool, []string) {
-	var pass = false       // True iff the tokens match a (character) def
-	var errorMsgs []string // An array of error messages
-
-	// (character) ::= (any-ASCII-character-except-)‘\’-‘’’-‘"’ | ‘\’ (escaped-char)
-	expected := []grammar.ItemType{}
-	parseTypes := []parseType{}
-	patternTypes := []patternType{}
-	segmentErrors := []string{}
-
-	segmentErrors = []string{""}
-
-	// (any-ASCII-character-except-)‘\’-‘’’-‘"’
-	expected = []grammar.ItemType{grammar.CHARACTER}
-	patternTypes = []patternType{EXPECT}
-	op1 := patternArgs{expected, parseTypes, patternTypes, segmentErrors}
-
-	if p.currTok.Lexeme == "\"" || p.currTok.Lexeme == "'" || p.currTok.Lexeme == "\\" {
-		return pass, errorMsgs
-	}
-
-	// ‘\’ (escaped-char)
-	expected = []grammar.ItemType{grammar.BACKSLASH}
-	parseTypes = []parseType{p.parseEscapedCharacter}
-	patternTypes = []patternType{EXPECT}
-	op2 := patternArgs{expected, parseTypes, patternTypes, segmentErrors}
-
-	pass, errorMsgs = p.parseOptions(op1, op2)
 
 	if !pass {
 		return false, errorMsgs
@@ -1537,7 +1486,6 @@ func (p *parser) parseOptions(args ...patternArgs) (bool, []string) {
 // Maps error messages with the associated terminal
 func TerminalErrorMessages(token grammar.ItemType) string {
 	switch {
-	//You'll have to manuall change these error messages @Nana
 	case token.IsEscapedChar():
 		return "Missing" + grammar.Token_strings[token]
 	case token.IsDeliminator():
