@@ -21,7 +21,7 @@ func main() {
 	s := string(b)
 	lexer := parse.Lex("Something", s)
 	for item := range lexer.Items {
-		//		fmt.Println(lexer.TokenLocation(item))
+		fmt.Println(lexer.TokenLocation(item))
 		tokens = append(tokens, item)
 	}
 	fmt.Println(tokens)

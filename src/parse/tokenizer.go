@@ -33,7 +33,7 @@ type Lexer struct {
 
 func (l *Lexer) TokenLocation(t Token) (line int, col int) {
 	line = 1 + strings.Count(l.input[:t.Pos], "\n")
-	col = strings.Index(l.input[:t.Pos], t.Lexeme) - strings.LastIndex(l.input[:t.Pos], "\n")
+	col = t.Pos - strings.LastIndex(l.input[:t.Pos], "\n")
 	return
 }
 
