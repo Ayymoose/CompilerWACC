@@ -30,8 +30,6 @@ const (
 	LINE_FEED
 	FORM_FEED
 	CARRIAGE_RETURN
-	DOUBLE_QUOTE //Uncommented
-	SINGLE_QUOTE
 	BACKSLASH
 	escaped_char_end
 
@@ -97,6 +95,7 @@ const (
 	GTE
 	ST  //I think this should be LT (Less than)
 	STE //This too
+
 	EQ
 	NEQ
 	AND
@@ -140,8 +139,6 @@ var DebugTokens = map[ItemType]string{
 	LINE_FEED:          "LINE_FEED",
 	FORM_FEED:          "FORM_FEED",
 	CARRIAGE_RETURN:    "CARRIAGE_RETURN",
-	DOUBLE_QUOTE:       "DOUBLE_QUOTE", //Uncommented these
-	SINGLE_QUOTE:       "SINGLE_QUOTE",
 	BACKSLASH:          "BACKSLASH",
 	escaped_char_end:   "escaped_char_end",
 
@@ -278,56 +275,26 @@ var Token_strings = map[ItemType]string{
 	LINE_FEED:       "\n",
 	FORM_FEED:       "\f",
 	CARRIAGE_RETURN: "\r",
-	/*
-		<<<<<<< HEAD
-			//	DOUBLE_QUOTE:    "\"",
-			//	SINGLE_QUOTE:    "\\'",
-			BACKSLASH: "\\",
-			NEG:       "-", // THIS IS FOR '-' WHICH ALSO EXISTS IN BINARY_OP ASWELL. NOT SURE OF THE BEST NAME
-			MULT:      "*",
-			DIV:       "/",
-			MOD:       "%",
-			ADD:       "+",
-			EQ:        "==", // BETTER NAMES??
-			NEQ:       "!=", // BETTER NAMES?
-			NOT:       "!",
-			AND:       "&&",
-			OR:        "||",
-			SUB:       "-", // '-' ALSO SAME SYMBOL -> NOT SURE IF ENTIRELY correct
-			GTE:       ">=",
-			STE:       "<=",
-			GT:        ">",
-
-			ST: "<",
-
-			OPEN_SQUARE:  "[",
-			OPEN_ROUND:   "(",
-			CLOSE_SQUARE: "]",
-			CLOSE_ROUND:  ")",
-			ASSIGNMENT:   "=",
-		=======  */
-	//	DOUBLE_QUOTE: "\"", //Uncommented these because I needed to use it @Ayman
-	//	SINGLE_QUOTE: "\\'",
-	BACKSLASH:    "\\",
-	NEG:          "-", // THIS IS FOR '-' WHICH ALSO EXISTS IN BINARY_OP ASWELL. NOT SURE OF THE BEST NAME
-	MULT:         "*",
-	DIV:          "/",
-	MOD:          "%",
-	ADD:          "+",
-	SUB:          "-", // '-' ALSO SAME SYMBOL -> NOT SURE IF ENTIRELY correct
-	GT:           ">",
-	GTE:          ">=",
-	ST:           "<",
-	STE:          "<=",
-	EQ:           "==", // BETTER NAMES??
-	NEQ:          "!=", // BETTER NAMES?
-	AND:          "&&",
-	OR:           "||",
-	OPEN_SQUARE:  "[",
-	OPEN_ROUND:   "(",
-	CLOSE_SQUARE: "]",
-	CLOSE_ROUND:  ")",
-	ASSIGNMENT:   "=",
+	BACKSLASH:       "\\",
+	NEG:             "-", // THIS IS FOR '-' WHICH ALSO EXISTS IN BINARY_OP ASWELL. NOT SURE OF THE BEST NAME
+	MULT:            "*",
+	DIV:             "/",
+	MOD:             "%",
+	ADD:             "+",
+	SUB:             "-", // '-' ALSO SAME SYMBOL -> NOT SURE IF ENTIRELY correct
+	GT:              ">",
+	GTE:             ">=",
+	ST:              "<",
+	STE:             "<=",
+	EQ:              "==", // BETTER NAMES??
+	NEQ:             "!=", // BETTER NAMES?
+	AND:             "&&",
+	OR:              "||",
+	OPEN_SQUARE:     "[",
+	OPEN_ROUND:      "(",
+	CLOSE_SQUARE:    "]",
+	CLOSE_ROUND:     ")",
+	ASSIGNMENT:      "=",
 	//>>>>>>> origin/Nana
 }
 
