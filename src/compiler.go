@@ -13,7 +13,7 @@ func main() {
 	var tokens []parse.Token
 	//	b, err := ioutil.ReadFile("wacc_examples/valid/variables/capCharDeclaration.wacc")
 	//	b, err := ioutil.ReadFile("wacc_examples/valid/function/nested_functions/fibonacciFullRec.wacc")
-	b, err := ioutil.ReadFile("wacc_examples/invalid/syntaxErr/expressions/missingOperand1.wacc")
+	b, err := ioutil.ReadFile("C:/Users/nman/Documents/Go Programming/src/github.com/nanaasiedu/wacc_19/src/wacc_examples/valid/if/if1.wacc")
 	if err != nil {
 		fmt.Println(err)
 		os.Exit(1)
