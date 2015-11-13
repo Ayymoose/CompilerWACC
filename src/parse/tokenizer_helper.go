@@ -57,17 +57,35 @@ func lexInsideProgram(l *Lexer) stateFn {
 	sort.Sort(keysForTokens)
 	for _, key := range keysForTokens {
 		if strings.HasPrefix(l.input[l.pos:], grammar.Token_strings[key]) {
-			switch key {
-			case grammar.DOUBLE_QUOTE:
-				l.next()
-				return lexString
-			case grammar.SINGLE_QUOTE:
-				l.next()
-				return lexChar
-			}
 			s := grammar.Token_strings[key]
 			l.width = len(s)
 			l.pos += l.width
+			switch key {
+			case grammar.DOUBLE_QUOTE:
+				//			l.next()
+				return lexString
+			case grammar.SINGLE_QUOTE:
+				//			l.next()
+				return lexChar
+			case grammar.NULL_TERMINATOR:
+				l.ignore()
+				return lexInsideProgram
+			case grammar.BACKSPACE:
+				l.ignore()
+				return lexInsideProgram
+			case grammar.TAB:
+				l.ignore()
+				return lexInsideProgram
+			case grammar.LINE_FEED:
+				l.ignore()
+				return lexInsideProgram
+			case grammar.FORM_FEED:
+				l.ignore()
+				return lexInsideProgram
+			case grammar.CARRIAGE_RETURN:
+				l.ignore()
+				return lexInsideProgram
+			}
 			l.emit(grammar.ItemType(key))
 			return lexInsideProgram
 		}
