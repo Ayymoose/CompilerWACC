@@ -62,12 +62,14 @@ const (
 	PAIR
 	reserved_word_end
 	BACKSPACE
+
 	type_start
 	INT
 	BOOL
 	CHAR
 	STRING
 	type_end
+
 	NUMBER
 	CHARACTER
 	STRINGVALUE

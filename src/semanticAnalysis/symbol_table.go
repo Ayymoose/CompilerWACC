@@ -62,6 +62,7 @@ func New(symbolTable *SymbolTable) *SymbolTable {
   newSymbolTable := &SymbolTable{}
   newSymbolTable.parent = symbolTable
   newSymbolTable.semanticMap = make(map[string][]grammar.Token)
+  return newSymbolTable
 }
 
 func (s *SymbolTable) Insert(token string, list reflect.TypeOf(list).Elem()) {
