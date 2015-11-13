@@ -55,7 +55,7 @@ type parseType func() (bool, []string)
 // The paser struct will be used as the parser of the stream of tokens given to
 // it.
 type parser struct {
-	lexer  Lexer
+	lexer  *Lexer
 	tokens []Token // Stream of tokens from the lexer
 	curr   int     // Index of current token
 	save   []int   // Array of indexs to save points in the token stream
@@ -66,8 +66,8 @@ type parser struct {
 
 // Basic parser constructer that sets the current token to the first token in the
 // tokenStream
-func ConstructParser(lexer Lexer, tokenStream []Token) *parser {
-	return &parser{lexer, tokenStream, 0, []int{}, tokenStream[0]}
+func (l *Lexer) ConstructParser(tokenStream []Token) *parser {
+	return &parser{l, tokenStream, 0, []int{}, tokenStream[0]}
 }
 
 // Prints the string value of currTok
@@ -86,7 +86,8 @@ func (p *parser) isFinished() bool {
 func (p *parser) advance() {
 	if p.isFinished() {
 		p.currTok = Token{Typ: TERMINATE_TOKEN,
-			Pos: p.currTok.Pos}
+			Pos: p.currTok.Pos,
+		}
 		return
 	}
 
@@ -1134,6 +1135,7 @@ func (p *parser) parseStrLiteral() (bool, []string) {
 	// (str-liter) ::= STRINGLITER
 	expected := []grammar.ItemType{grammar.STRINGLITER}
 	parseTypes := []parseType{}
+
 	patternTypes := []patternType{EXPECT}
 	segmentErrors := []string{""}
 

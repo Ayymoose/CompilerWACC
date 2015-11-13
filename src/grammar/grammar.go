@@ -73,6 +73,8 @@ const (
 	CHARLITER
 	STRINGLITER
 
+	DIGIT
+
 	BOOLEAN
 	PLAINTEXT
 	EOF
@@ -179,10 +181,12 @@ var DebugTokens = map[ItemType]string{
 	NUMBER:              "NUMBER",
 	CHARLITER:           "CHARLITER",
 	STRINGLITER:         "STRINGLITER",
-	BOOLEAN:             "BOOLEAN",
-	PLAINTEXT:           "PLAINTEXT",
-	EOF:                 "EOF",
-	ERROR:               "ERROR",
+
+	DIGIT:     "DIGIT",
+	BOOLEAN:   "BOOLEAN",
+	PLAINTEXT: "PLAINTEXT",
+	EOF:       "EOF",
+	ERROR:     "ERROR",
 
 	unary_op_start: "unary_op_start",
 	NOT:            "NOT",
