@@ -4,7 +4,7 @@ import (
 	"io/ioutil"
 	"testing"
 
-	. "github.com/OliWheeler/wacc_19/src/grammar"
+	. "grammar"
 )
 
 func TestBasicExitExit1(t *testing.T) {

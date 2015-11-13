@@ -3,7 +3,7 @@ package parse
 import (
 	"strings"
 
-	"github.com/wacc_19/src/grammar"
+	"grammar"
 )
 
 type stateFn func(*Lexer) stateFn

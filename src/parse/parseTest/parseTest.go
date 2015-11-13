@@ -3,8 +3,8 @@ package main
 import (
 	"fmt"
 
-	grammar "github.com/nanaasiedu/wacc_19/src/grammar"
-	. "github.com/nanaasiedu/wacc_19/src/parse"
+"grammar"
+"parse"
 )
 
 func main() {

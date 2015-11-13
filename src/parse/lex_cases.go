@@ -3,7 +3,7 @@ package parse
 import (
 	"unicode"
 
-	"github.com/wacc_19/src/grammar"
+	"grammar"
 )
 
 /*

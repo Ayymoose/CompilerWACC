@@ -8,7 +8,7 @@ import (
 	"fmt"
 	"strconv"
 
-	"github.com/wacc_19/src/grammar"
+	"grammar"
 	// CHANGE TO MASTER
 )
 

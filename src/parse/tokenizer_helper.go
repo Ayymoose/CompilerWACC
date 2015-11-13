@@ -7,7 +7,7 @@ import (
 	"unicode"
 	"unicode/utf8"
 
-	"github.com/wacc_19/src/grammar"
+	"grammar"
 )
 
 type ItemTypeSlice []grammar.ItemType

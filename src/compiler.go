@@ -1,13 +1,12 @@
 package main
 
-//   "github.com/OliWheeler/wacc_19/src/lexer"
 import (
 	"fmt"
 	"io/ioutil"
 	"os"
 
-	"github.com/wacc_19/src/grammar"
-	"github.com/wacc_19/src/parse"
+	"grammar"
+	"parse"
 )
 
 func main() {
