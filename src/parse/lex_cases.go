@@ -1,9 +1,9 @@
-package lexer
+package parse
 
 import (
 	"unicode"
 
-	"github.com/OliWheeler/wacc_19/src/grammar"
+	"github.com/nanaasiedu/wacc_19/src/grammar"
 )
 
 /*
@@ -31,10 +31,11 @@ func lexEnd(l *Lexer) stateFn {
 }*/
 
 func lexIdentifier(l *Lexer) stateFn {
-	if !unicode.IsLetter(l.next()) {
+	if !(unicode.IsLetter(l.peek()) || l.peek() != '_') {
+		l.next()
 		return l.errorf("bad identifier syntax: %q", l.input[l.start:l.pos])
 	}
-	for unicode.IsLetter(l.peek()) || unicode.IsDigit(l.peek()) {
+	for isAlphaNumeric(l.peek()) || l.peek() == '_' {
 		l.next()
 	}
 	//	l.backup()
@@ -57,7 +58,7 @@ Loop:
 			break Loop
 		}
 	}
-	l.emit(grammar.CHARACTER)
+	l.emit(grammar.CHARLITER)
 	return lexInsideProgram
 }
 
@@ -76,7 +77,7 @@ Loop:
 			break Loop
 		}
 	}
-	l.emit(grammar.STRINGVALUE)
+	l.emit(grammar.STRINGLITER)
 	return lexInsideProgram
 }
 
