@@ -73,7 +73,7 @@ func (l *Lexer) ConstructParser(tokenStream []Token) *parser {
 // Prints the string value of currTok
 // Useful for debugging
 func (p *parser) printTok() {
-	fmt.Println(p.tokenPos() + " " + grammar.Token_strings[p.currTok.Typ])
+	fmt.Println(p.TokenPos() + " " + grammar.Token_strings[p.currTok.Typ])
 }
 
 // Returns true iff the token stream is finished
@@ -133,13 +133,14 @@ func (p *parser) expect(typ grammar.ItemType) bool {
 }
 
 // Returns a string with the location of the currTok in the input text
-func (p *parser) tokenPos() string {
-	return "At " + strconv.Itoa(p.lexer.lineNumber(p.currTok)) //p.currTok.LineNum) //+ ":" + strconv.Itoa(p.currTok.RowNum)
+func (p *parser) TokenPos() string {
+	line, col := p.lexer.TokenLocation(p.currTok)
+	return "At " + strconv.Itoa(line) + ":" + strconv.Itoa(col)
 }
 
 // Returns the string str formmated as an error message for currTok
 func (p *parser) makeErrorMsg(str string) string {
-	return p.tokenPos() + " :: " + str
+	return p.TokenPos() + " :: " + str
 }
 
 // Adds a list of errorMsgs to another list of errorMsgs
@@ -179,7 +180,7 @@ func (p *parser) parseProgram() (bool, []string) {
 	//Regex of pattern types
 	patternTypes := []patternType{EXPECT, ZEROMORE, ONCE, EXPECT}
 	//Error messages
-	segmentErrors := []string{"All programs must start with 'begin'", "", "",
+	segmentErrors := []string{"All programs must start with 'begin'", "", "Erroneous program body",
 		"All programs must terminate with 'end'"}
 
 	//Parse the pattern according to the input
@@ -298,7 +299,7 @@ func (p *parser) parseStat() (bool, []string) {
 	op1 := patternArgs{expected, parseTypes, patternTypes, segmentErrors}
 
 	// <type> <ident> '=' <assign-rhs> option
-	expected = []grammar.ItemType{grammar.EQ}
+	expected = []grammar.ItemType{grammar.ASSIGNMENT}
 	parseTypes = []parseType{p.parseType, p.parseIdent, p.parseAssignRHS}
 	patternTypes = []patternType{ONCE, ONCE, EXPECT, ONCE}
 	segmentErrors = []string{"", "Identifier must follow its type",
@@ -308,7 +309,7 @@ func (p *parser) parseStat() (bool, []string) {
 	op2 := patternArgs{expected, parseTypes, patternTypes, segmentErrors}
 
 	// <assign-lhs> '=' <assign-rhs> option
-	expected = []grammar.ItemType{grammar.EQ}
+	expected = []grammar.ItemType{grammar.ASSIGNMENT}
 	parseTypes = []parseType{p.parseAssignLHS, p.parseAssignRHS}
 	patternTypes = []patternType{ONCE, EXPECT, ONCE}
 	segmentErrors = []string{"", "Expected '=' assignment after variable", ""}
@@ -331,7 +332,7 @@ func (p *parser) parseStat() (bool, []string) {
 
 	op5 := patternArgs{expected, parseTypes, patternTypes, segmentErrors}
 
-	// 'return' <Expr> option
+	// 'return' <expr> option
 	expected = []grammar.ItemType{grammar.RETURN}
 	parseTypes = []parseType{p.parseExpr}
 	patternTypes = []patternType{EXPECT, ONCE}
@@ -339,7 +340,7 @@ func (p *parser) parseStat() (bool, []string) {
 
 	op6 := patternArgs{expected, parseTypes, patternTypes, segmentErrors}
 
-	// 'exit' <Expr> option
+	// 'exit' <expr> option
 	expected = []grammar.ItemType{grammar.EXIT}
 	parseTypes = []parseType{p.parseExpr}
 	patternTypes = []patternType{EXPECT, ONCE}
@@ -347,7 +348,7 @@ func (p *parser) parseStat() (bool, []string) {
 
 	op7 := patternArgs{expected, parseTypes, patternTypes, segmentErrors}
 
-	// 'print' <Expr> option
+	// 'print' <expr> option
 	expected = []grammar.ItemType{grammar.PRINT}
 	parseTypes = []parseType{p.parseExpr}
 	patternTypes = []patternType{EXPECT, ONCE}
@@ -355,7 +356,7 @@ func (p *parser) parseStat() (bool, []string) {
 
 	op8 := patternArgs{expected, parseTypes, patternTypes, segmentErrors}
 
-	// 'println' <Expr> option
+	// 'println' <expr> option
 	expected = []grammar.ItemType{grammar.PRINTLN}
 	parseTypes = []parseType{p.parseExpr}
 	patternTypes = []patternType{EXPECT, ONCE}
@@ -363,7 +364,7 @@ func (p *parser) parseStat() (bool, []string) {
 
 	op9 := patternArgs{expected, parseTypes, patternTypes, segmentErrors}
 
-	// 'If' <Expr> 'then' <stat> 'else' <stat> 'fi' option
+	// 'If' <expr> 'then' <stat> 'else' <stat> 'fi' option
 	expected = []grammar.ItemType{grammar.IF, grammar.THEN, grammar.ELSE, grammar.FI}
 	parseTypes = []parseType{p.parseExpr, p.parseStat, p.parseStat}
 	patternTypes = []patternType{EXPECT, ONCE, EXPECT, ONCE, EXPECT, ONCE, EXPECT}
@@ -376,7 +377,7 @@ func (p *parser) parseStat() (bool, []string) {
 
 	op10 := patternArgs{expected, parseTypes, patternTypes, segmentErrors}
 
-	// 'while' <Expr> 'do' <stat> 'done' option
+	// 'while' <expr> 'do' <stat> 'done' option
 	expected = []grammar.ItemType{grammar.WHILE, grammar.DO, grammar.DONE}
 	parseTypes = []parseType{p.parseExpr, p.parseStat}
 	patternTypes = []patternType{EXPECT, ONCE, EXPECT, ONCE, EXPECT}
@@ -1389,10 +1390,6 @@ func (p *parser) parsePattern(expArgs []grammar.ItemType, segments []parseType, 
 	p.saveToken()
 
 	for i, typ := range typs {
-		if i >= len(segmentErrors) {
-			i = 0
-		}
-
 		switch typ {
 		case EXPECT:
 			if !p.expectToken(expArgs[0]) {

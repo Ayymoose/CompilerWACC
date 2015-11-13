@@ -57,15 +57,35 @@ func lexInsideProgram(l *Lexer) stateFn {
 	sort.Sort(keysForTokens)
 	for _, key := range keysForTokens {
 		if strings.HasPrefix(l.input[l.pos:], grammar.Token_strings[key]) {
-			/*	switch key {
-				case grammar.DOUBLE_QUOTE:
-					return lexString
-				case grammar.SINGLE_QUOTE:
-					return lexChar
-				}  */
 			s := grammar.Token_strings[key]
 			l.width = len(s)
 			l.pos += l.width
+			switch key {
+			case grammar.DOUBLE_QUOTE:
+				//			l.next()
+				return lexString
+			case grammar.SINGLE_QUOTE:
+				//			l.next()
+				return lexChar
+			case grammar.NULL_TERMINATOR:
+				l.ignore()
+				return lexInsideProgram
+			case grammar.BACKSPACE:
+				l.ignore()
+				return lexInsideProgram
+			case grammar.TAB:
+				l.ignore()
+				return lexInsideProgram
+			case grammar.LINE_FEED:
+				l.ignore()
+				return lexInsideProgram
+			case grammar.FORM_FEED:
+				l.ignore()
+				return lexInsideProgram
+			case grammar.CARRIAGE_RETURN:
+				l.ignore()
+				return lexInsideProgram
+			}
 			l.emit(grammar.ItemType(key))
 			return lexInsideProgram
 		}
@@ -73,10 +93,10 @@ func lexInsideProgram(l *Lexer) stateFn {
 	switch r := l.next(); {
 	case unicode.IsSpace(r):
 		l.ignore()
-	case r == '\'':
-		return lexChar
-	case r == '"':
-		return lexString
+		/*	case r == '\'':
+				return lexChar
+			case r == '"':
+				return lexString  */
 	case '0' <= r && r <= '9':
 		l.backup()
 		return lexNumber
@@ -128,12 +148,12 @@ func (l *Lexer) acceptRun(valid string) {
 }
 
 func (l *Lexer) emit(t grammar.ItemType) {
-	l.Items <- Token{Typ: t, Lexeme: l.input[l.start:l.pos]}
+	l.Items <- Token{Typ: t, Lexeme: l.input[l.start:l.pos], Pos: l.start}
 	l.start = l.pos
 }
 
 func (l *Lexer) errorf(format string, args ...interface{}) stateFn {
-	l.Items <- Token{Typ: grammar.ERROR, Lexeme: fmt.Sprintf(format, args...)}
+	l.Items <- Token{Typ: grammar.ERROR, Lexeme: fmt.Sprintf(format, args...), Pos: l.start}
 	return nil
 }
 
