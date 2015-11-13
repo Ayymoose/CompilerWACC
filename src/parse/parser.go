@@ -16,8 +16,8 @@ func (i Token) String() string {
 	switch i.Typ {
 	case grammar.EOF:
 		return "EOF"
-	case grammar.ERROR:
-		return i.Lexeme
+		/*	case grammar.ERROR:
+			return i.Lexeme  */
 	}
 	//	return fmt.Sprintf("grammar.Item{%v, %q},", grammar.DebugTokens[i.typ], i.val)
 	return fmt.Sprintf("%v : %q", grammar.DebugTokens[i.Typ], i.Lexeme)

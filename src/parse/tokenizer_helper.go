@@ -106,7 +106,7 @@ func lexInsideProgram(l *Lexer) stateFn {
 	case r == grammar.Eof:
 		return nil
 	}
-	return lexInsideProgram
+	return lexError
 }
 
 func (l *Lexer) next() (char rune) {
@@ -150,6 +150,13 @@ func (l *Lexer) acceptRun(valid string) {
 func (l *Lexer) emit(t grammar.ItemType) {
 	l.Items <- Token{Typ: t, Lexeme: l.input[l.start:l.pos], Pos: l.start}
 	l.start = l.pos
+}
+
+func lexError(l *Lexer) stateFn {
+	line, col := l.currLocation()
+	fmt.Printf("%d:%d, Item Not in WACC lanuage: %s", line, col, l.input[l.start:l.start+l.width])
+	l.Items <- Token{Typ: grammar.ERROR, Lexeme: fmt.Sprintf("Item Not in WACC lanuage: %s", l.input[l.start:l.start+l.width]), Pos: l.start}
+	return nil
 }
 
 func (l *Lexer) errorf(format string, args ...interface{}) stateFn {

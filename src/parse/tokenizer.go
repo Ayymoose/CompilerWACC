@@ -37,6 +37,12 @@ func (l *Lexer) TokenLocation(t Token) (line int, col int) {
 	return
 }
 
+func (l *Lexer) currLocation() (line int, col int) {
+	line = 1 + strings.Count(l.input[:l.pos], "\n")
+	col = l.pos - strings.LastIndex(l.input[:l.pos], "\n")
+	return
+}
+
 func (l *Lexer) run() {
 	for state := lexText; state != nil; {
 		state = state(l)
