@@ -30,8 +30,8 @@ const (
 	LINE_FEED
 	FORM_FEED
 	CARRIAGE_RETURN
-	DOUBLE_QUOTE //Uncommented
-	SINGLE_QUOTE
+	//DOUBLE_QUOTE
+	//	SINGLE_QUOTE
 	BACKSLASH
 	escaped_char_end
 
@@ -74,7 +74,6 @@ const (
 	STRINGLITER
 
 	DIGIT
-
 	BOOLEAN
 	PLAINTEXT
 	EOF
@@ -96,8 +95,10 @@ const (
 	SUB // '-' ALSO SAME SYMBOL -> NOT SURE IF ENTIRELY correct
 	GT
 	GTE
+
 	ST  //I think this should be LT (Less than)
 	STE //This too
+
 	EQ
 	NEQ
 	AND
@@ -141,10 +142,11 @@ var DebugTokens = map[ItemType]string{
 	LINE_FEED:          "LINE_FEED",
 	FORM_FEED:          "FORM_FEED",
 	CARRIAGE_RETURN:    "CARRIAGE_RETURN",
-	DOUBLE_QUOTE:       "DOUBLE_QUOTE", //Uncommented these
-	SINGLE_QUOTE:       "SINGLE_QUOTE",
-	BACKSLASH:          "BACKSLASH",
-	escaped_char_end:   "escaped_char_end",
+
+	DOUBLE_QUOTE:     "DOUBLE_QUOTE", //Uncommented these
+	SINGLE_QUOTE:     "SINGLE_QUOTE",
+	BACKSLASH:        "BACKSLASH",
+	escaped_char_end: "escaped_char_end",
 
 	reserved_word_start: "reserved_word_start",
 	BEGIN:               "BEGIN",
@@ -169,18 +171,21 @@ var DebugTokens = map[ItemType]string{
 	FST:                 "FST",
 	SND:                 "SND",
 	NULL:                "NULL",
-	PAIR:                "PAIR",
-	reserved_word_end:   "reserved_word_end",
-	BACKSPACE:           "BACKSPACE",
-	type_start:          "type_start",
-	INT:                 "INT",
-	BOOL:                "BOOL",
-	CHAR:                "CHAR",
-	type_end:            "type_end",
-	STRING:              "STRING",
-	NUMBER:              "NUMBER",
-	CHARLITER:           "CHARLITER",
-	STRINGLITER:         "STRINGLITER",
+
+	PAIR: "PAIR",
+
+	reserved_word_end: "reserved_word_end",
+	BACKSPACE:         "BACKSPACE",
+	type_start:        "type_start",
+	INT:               "INT",
+	BOOL:              "BOOL",
+	CHAR:              "CHAR",
+	type_end:          "type_end",
+	STRING:            "STRING",
+	NUMBER:            "NUMBER",
+
+	CHARLITER:   "CHARLITER",
+	STRINGLITER: "STRINGLITER",
 
 	DIGIT:     "DIGIT",
 	BOOLEAN:   "BOOLEAN",
@@ -279,23 +284,25 @@ var Token_strings = map[ItemType]string{
 	LINE_FEED:       "\n",
 	FORM_FEED:       "\f",
 	CARRIAGE_RETURN: "\r",
+
 	//	DOUBLE_QUOTE: "\"", //Uncommented these because I needed to use it @Ayman
 	//	SINGLE_QUOTE: "\\'",
-	BACKSLASH:    "\\",
-	NEG:          "-", // THIS IS FOR '-' WHICH ALSO EXISTS IN BINARY_OP ASWELL. NOT SURE OF THE BEST NAME
-	MULT:         "*",
-	DIV:          "/",
-	MOD:          "%",
-	ADD:          "+",
-	SUB:          "-", // '-' ALSO SAME SYMBOL -> NOT SURE IF ENTIRELY correct
-	GT:           ">",
-	GTE:          ">=",
-	ST:           "<",
-	STE:          "<=",
-	EQ:           "==", // BETTER NAMES??
-	NEQ:          "!=", // BETTER NAMES?
-	AND:          "&&",
-	OR:           "||",
+	BACKSLASH: "\\",
+	NEG:       "-", // THIS IS FOR '-' WHICH ALSO EXISTS IN BINARY_OP ASWELL. NOT SURE OF THE BEST NAME
+	MULT:      "*",
+	DIV:       "/",
+	MOD:       "%",
+	ADD:       "+",
+	SUB:       "-", // '-' ALSO SAME SYMBOL -> NOT SURE IF ENTIRELY correct
+	GT:        ">",
+	GTE:       ">=",
+	ST:        "<",
+	STE:       "<=",
+	EQ:        "==", // BETTER NAMES??
+	NEQ:       "!=", // BETTER NAMES?
+	AND:       "&&",
+	OR:        "||",
+
 	OPEN_SQUARE:  "[",
 	OPEN_ROUND:   "(",
 	CLOSE_SQUARE: "]",
