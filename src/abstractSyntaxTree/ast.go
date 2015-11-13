@@ -89,7 +89,13 @@ const (
 type Node interface {
 	getNodeType()
 }
+func (ast *ast) tree(i interface{}) {
+  tt := i.interface(type)
+	switch tt
+	ProgramNode
+	FuncNode
 
+}
 // Root node of AST
 type ProgramNode struct {
 	NodeId

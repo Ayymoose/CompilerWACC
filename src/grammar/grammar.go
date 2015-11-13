@@ -30,6 +30,8 @@ const (
 	LINE_FEED
 	FORM_FEED
 	CARRIAGE_RETURN
+	DOUBLE_QUOTE //Uncommented
+	SINGLE_QUOTE
 	BACKSLASH
 	escaped_char_end
 
@@ -139,6 +141,8 @@ var DebugTokens = map[ItemType]string{
 	LINE_FEED:          "LINE_FEED",
 	FORM_FEED:          "FORM_FEED",
 	CARRIAGE_RETURN:    "CARRIAGE_RETURN",
+	DOUBLE_QUOTE:       "DOUBLE_QUOTE", //Uncommented these
+	SINGLE_QUOTE:       "SINGLE_QUOTE",
 	BACKSLASH:          "BACKSLASH",
 	escaped_char_end:   "escaped_char_end",
 
@@ -275,6 +279,8 @@ var Token_strings = map[ItemType]string{
 	LINE_FEED:       "\n",
 	FORM_FEED:       "\f",
 	CARRIAGE_RETURN: "\r",
+	DOUBLE_QUOTE:    "\"", //Uncommented these because I needed to use it @Ayman
+	SINGLE_QUOTE:    "'",
 	BACKSLASH:       "\\",
 	NEG:             "-", // THIS IS FOR '-' WHICH ALSO EXISTS IN BINARY_OP ASWELL. NOT SURE OF THE BEST NAME
 	MULT:            "*",
