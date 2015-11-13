@@ -68,6 +68,7 @@ const (
 	CHAR
 	STRING
 	type_end
+
 	NUMBER
 	CHARLITER
 	STRINGLITER
@@ -95,6 +96,7 @@ const (
 	SUB // '-' ALSO SAME SYMBOL -> NOT SURE IF ENTIRELY correct
 	GT
 	GTE
+
 	ST  //I think this should be LT (Less than)
 	STE //This too
 
@@ -301,7 +303,6 @@ var Token_strings = map[ItemType]string{
 	CLOSE_SQUARE:    "]",
 	CLOSE_ROUND:     ")",
 	ASSIGNMENT:      "=",
-	//>>>>>>> origin/Nana
 }
 
 func (token ItemType) IsEscapedChar() bool {
