@@ -72,8 +72,8 @@ func (l *Lexer) ConstructParser(tokenStream []Token) *parser {
 
 // Prints the string value of currTok
 // Useful for debugging
-func (p *parser) printTok() {
-	fmt.Println(p.TokenPos() + " " + grammar.Token_strings[p.currTok.Typ])
+func (p parser) PrintTok() {
+	fmt.Println(p.TokenPos(), " \"", p.currTok.Lexeme, "\"")
 }
 
 // Returns true iff the token stream is finished
@@ -85,9 +85,7 @@ func (p *parser) isFinished() bool {
 // Advances the current token to the next token in the token stream
 func (p *parser) advance() {
 	if p.isFinished() {
-		p.currTok = Token{Typ: TERMINATE_TOKEN,
-			Pos: p.currTok.Pos,
-		}
+		p.currTok = Token{Typ: TERMINATE_TOKEN, Pos: p.currTok.Pos, Lexeme: "TERMINATE"}
 		return
 	}
 
@@ -278,9 +276,9 @@ func (p *parser) parseParam() (bool, []string) {
 }
 
 func (p *parser) parseStat() (bool, []string) {
-	var pass = false      // True iff the tokens match a <program> def
-	var multiStat = false // True iff the the statement contains multiple
+	var pass = false // True iff the tokens match a <program> def
 	//                       statements I.e. <stat> ';' <stat>
+	var multiStat = false
 	var errorMsgs []string     // An array of error messages
 	var errorMsgsTemp []string // Error messages place holder
 
@@ -397,7 +395,7 @@ func (p *parser) parseStat() (bool, []string) {
 
 	op12 := patternArgs{expected, parseTypes, patternTypes, segmentErrors}
 
-	pass, errorMsgs = p.parseOptions(op1, op12, op2, op3, op4, op2, op5, op1, op4, op6, op7, op8,
+	pass, errorMsgs = p.parseOptions(op2, op1, op12, op3, op4, op2, op5, op1, op4, op6, op7, op8,
 		op9, op10, op11)
 
 	// <stat> ; <stat> option
@@ -411,11 +409,10 @@ func (p *parser) parseStat() (bool, []string) {
 
 		if multiStat {
 			pass, errorMsgsTemp = p.parseStat()
+			errorMsgs = append(errorMsgs, errorMsgsTemp...)
 		}
 
 	}
-
-	errorMsgs = append(errorMsgs, errorMsgsTemp...)
 
 	if !pass {
 		return false, errorMsgs
@@ -623,7 +620,7 @@ func (p *parser) parseType() (bool, []string) {
 	parseTypes = []parseType{p.parsePairType}
 	op3 := patternArgs{expected, parseTypes, patternTypes, segmentErrors}
 
-	pass, errorMsgs = p.parseOptions(op1, op2, op3)
+	pass, errorMsgs = p.parseOptions(op1, op3, op2)
 
 	if !pass {
 		return false, errorMsgs
@@ -701,6 +698,7 @@ func (p *parser) parseArrayType() (bool, []string) {
 
 	// if <type> != <base-type> or <pair-type> then check if <type> = <array-type>
 	if !pass {
+		return false, errorMsgs
 		// NOT IMPLEMENTED
 	}
 
@@ -778,6 +776,7 @@ func (p *parser) parsePairElemType() (bool, []string) {
 
 func (p *parser) parseExpr() (bool, []string) {
 	var pass = false
+	var binaryExpr = false // true iff <expr> <binary-oper> is parsed
 	var errorMsgs []string // An array of error messages
 	var errorMsgsTemp []string
 
@@ -834,14 +833,21 @@ func (p *parser) parseExpr() (bool, []string) {
 
 	pass, errorMsgs = p.parseOptions(op6, op1, op2, op3, op4, op5, op7, op8, op9)
 
-	// <binary-oper> <expr>
-	expected = []grammar.ItemType{}
-	parseTypes = []parseType{p.parseBinaryOp, p.parseExpr}
-	patternTypes = []patternType{ONCE, ONCE}
-	segmentErrors = []string{"", ""}
+	if pass {
+		// <binary-oper> <expr>
+		expected = []grammar.ItemType{}
+		parseTypes = []parseType{p.parseBinaryOp}
+		patternTypes = []patternType{ONCE}
+		segmentErrors = []string{""}
 
-	_, errorMsgsTemp = p.parsePattern(expected, parseTypes, patternTypes, segmentErrors)
-	errorMsgs = append(errorMsgs, errorMsgsTemp...)
+		binaryExpr, _ = p.parsePattern(expected, parseTypes, patternTypes, segmentErrors)
+
+		if binaryExpr {
+			pass, errorMsgsTemp = p.parseExpr()
+			errorMsgs = append(errorMsgs, errorMsgsTemp...)
+		}
+
+	}
 
 	if !pass {
 		return false, errorMsgs
@@ -1307,11 +1313,20 @@ func (p *parser) expectToken(expectedType grammar.ItemType) bool {
 // possible error messages
 // Error obtained are appended to errorMsgs
 func (p *parser) parseOptional(parseCheck parseType, errorMsgs *[]string) {
+	defer p.removeSave()
 	var errorMsgTemp []string
+	var match = false
 
-	_, errorMsgTemp = parseCheck()
+	p.saveToken()
+
+	match, errorMsgTemp = parseCheck()
 
 	*errorMsgs = append(*errorMsgs, errorMsgTemp...)
+
+	if !match {
+		p.backTrack()
+	}
+
 }
 
 // Attempts to parse zero or patterns based on parseCheck
@@ -1320,17 +1335,22 @@ func (p *parser) parseOptional(parseCheck parseType, errorMsgs *[]string) {
 // possible error messages
 // Error obtained are appended to errorMsgs
 func (p *parser) parseZeroOrMore(parseCheck parseType, errorMsgs *[]string) {
+	defer p.removeSave()
 	var errorMsgTemp []string
 	var match = false
+
+	p.saveToken()
 
 	match, errorMsgTemp = parseCheck()
 
 	for {
 		if !match {
+			p.backTrack()
 			*errorMsgs = append(*errorMsgs, errorMsgTemp...)
 			break
 
 		} else {
+			p.reSave()
 			match, errorMsgTemp = parseCheck()
 		}
 
