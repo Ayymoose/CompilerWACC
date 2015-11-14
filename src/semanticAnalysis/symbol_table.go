@@ -65,7 +65,7 @@ func (symbolTable *SymbolTable) New() *SymbolTable {
 	return newSymbolTable
 }
 
-func (SymbolTable *SymbolTable) insert(key string, value string) {
+func (SymbolTable *SymbolTable) insert(key string, value []grammar.ItemType) {
 	// convert value string into its grammar token here
 }
 
