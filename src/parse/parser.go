@@ -8,7 +8,7 @@ import (
 	"fmt"
 	"strconv"
 
-	grammar "grammar"
+	"grammar"
 )
 
 func (i Token) String() string {

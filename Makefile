@@ -2,7 +2,7 @@
 GOPATH := $(CURDIR)
 export GOPATH
 
-all: build
+all: wacc_19
 
-build:
+wacc_19:
 	go build src/compiler.go

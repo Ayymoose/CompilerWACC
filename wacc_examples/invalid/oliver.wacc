@@ -1,7 +1,0 @@
-# This is for error handling characters that aren't defined in the WACC spec. Should throw lex error
-
-# Program:
-
-begin
-$£
-end

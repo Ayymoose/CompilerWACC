@@ -85,9 +85,9 @@ func lexNumber(l *Lexer) stateFn {
 	l.accept("+-")
 	digits := "0123456789"
 	l.acceptRun(digits)
-	if unicode.IsLetter(l.peek()) {
+	/*	if unicode.IsLetter(l.peek()) {
 		return l.errorf("bad number syntax: %q", l.input[l.start:l.pos])
-	}
+	}  */
 	l.emit(grammar.NUMBER)
 	return lexInsideProgram
 }

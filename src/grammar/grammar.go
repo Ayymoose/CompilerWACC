@@ -52,8 +52,8 @@ const (
 	ELSE
 	FI
 	WHILE
-	DO
 	DONE
+	DO
 	NEWPAIR
 	CALL
 	FST
@@ -80,6 +80,25 @@ const (
 	EOF
 	ERROR
 
+	binary_op_start
+	MULT
+	DIV
+	MOD
+	ADD
+	SUB // '-' ALSO SAME SYMBOL -> NOT SURE IF ENTIRELY correct
+
+	GTE
+	GT
+
+	STE //This too
+	ST  //I think this should be LT (Less than)
+
+	EQ
+	NEQ
+	AND
+	OR
+	binary_op_end
+
 	unary_op_start
 	NOT
 	LEN
@@ -87,24 +106,6 @@ const (
 	CHR
 	NEG // THIS IS FOR '-' WHICH ALSO EXISTS IN BINARY_OP ASWELL. NOT SURE OF THE BEST NAME
 	unary_op_end
-
-	binary_op_start
-	MULT
-	DIV
-	MOD
-	ADD
-	SUB // '-' ALSO SAME SYMBOL -> NOT SURE IF ENTIRELY correct
-	GT
-	GTE
-
-	ST  //I think this should be LT (Less than)
-	STE //This too
-
-	EQ
-	NEQ
-	AND
-	OR
-	binary_op_end
 
 	bracket_type_start
 	OPEN_SQUARE
@@ -164,8 +165,8 @@ var DebugTokens = map[ItemType]string{
 	ELSE:                "ELSE",
 	FI:                  "FI",
 	WHILE:               "WHILE",
-	DO:                  "DO",
 	DONE:                "DONE",
+	DO:                  "DO",
 	NEWPAIR:             "NEWPAIR",
 	CALL:                "CALL",
 	FST:                 "FST",
@@ -184,11 +185,27 @@ var DebugTokens = map[ItemType]string{
 	CHARLITER:           "CHARLITER",
 	STRINGLITER:         "STRINGLITER",
 
-	DIGIT:     "DIGIT",
-	BOOLEAN:   "BOOLEAN",
-	PLAINTEXT: "PLAINTEXT",
-	EOF:       "EOF",
-	ERROR:     "ERROR",
+	DIGIT:           "DIGIT",
+	BOOLEAN:         "BOOLEAN",
+	PLAINTEXT:       "PLAINTEXT",
+	EOF:             "EOF",
+	ERROR:           "ERROR",
+	binary_op_start: "binary_op_start",
+	MULT:            "MULT",
+	DIV:             "DIV",
+	MOD:             "MOD",
+	ADD:             "ADD",
+	SUB:             "SUB", // '-' ALSO SAME SYMBOL -> NOT SURE IF ENTIRELY correct
+
+	GTE:           "GTE",
+	GT:            "GT",
+	STE:           "STE",
+	ST:            "ST",
+	NEQ:           "NEQ",
+	EQ:            "EQ",
+	AND:           "AND",
+	OR:            "OR",
+	binary_op_end: "binary_op_end",
 
 	unary_op_start: "unary_op_start",
 	NOT:            "NOT",
@@ -197,22 +214,6 @@ var DebugTokens = map[ItemType]string{
 	CHR:            "CHR",
 	NEG:            "NEG", // THIS IS FOR '-' WHICH ALSO EXISTS IN BINARY_OP ASWELL. NOT SURE OF THE BEST NAME
 	unary_op_end:   "unary_op_end",
-
-	binary_op_start: "binary_op_start",
-	MULT:            "MULT",
-	DIV:             "DIV",
-	MOD:             "MOD",
-	ADD:             "ADD",
-	SUB:             "SUB", // '-' ALSO SAME SYMBOL -> NOT SURE IF ENTIRELY correct
-	GT:              "GT",
-	GTE:             "GTE",
-	ST:              "ST",
-	STE:             "STE",
-	NEQ:             "NEQ",
-	EQ:              "EQ",
-	AND:             "AND",
-	OR:              "OR",
-	binary_op_end:   "binary_op_end",
 
 	bracket_type_start: "bracket_type_start",
 	OPEN_SQUARE:        "OPEN_SQUARE",
@@ -290,19 +291,22 @@ var Token_strings = map[ItemType]string{
 	MOD:             "%",
 	ADD:             "+",
 	SUB:             "-", // '-' ALSO SAME SYMBOL -> NOT SURE IF ENTIRELY correct
-	GT:              ">",
-	GTE:             ">=",
-	ST:              "<",
-	STE:             "<=",
-	EQ:              "==", // BETTER NAMES??
-	NEQ:             "!=", // BETTER NAMES?
-	AND:             "&&",
-	OR:              "||",
-	OPEN_SQUARE:     "[",
-	OPEN_ROUND:      "(",
-	CLOSE_SQUARE:    "]",
-	CLOSE_ROUND:     ")",
-	ASSIGNMENT:      "=",
+
+	GTE: ">=",
+
+	STE:          "<=",
+	GT:           ">",
+	ST:           "<",
+	EQ:           "==", // BETTER NAMES??
+	NEQ:          "!=", // BETTER NAMES?
+	NOT:          "!",
+	AND:          "&&",
+	OR:           "||",
+	OPEN_SQUARE:  "[",
+	OPEN_ROUND:   "(",
+	CLOSE_SQUARE: "]",
+	CLOSE_ROUND:  ")",
+	ASSIGNMENT:   "=",
 }
 
 func (token ItemType) IsEscapedChar() bool {
