@@ -3,6 +3,7 @@ package parse
 //TODO: Change the if statement in the parse functions' return type so that there is only one return
 //I.e return pass, errorMsgs
 //TODO: FIX ARRAY TYPE PARSE
+//TODO: Consider NEG and SUB confusion
 
 import (
 	"fmt"
@@ -301,7 +302,7 @@ func (p *parser) parseStat() (bool, []string) {
 	parseTypes = []parseType{p.parseType, p.parseIdent, p.parseAssignRHS}
 	patternTypes = []patternType{ONCE, ONCE, EXPECT, ONCE}
 	segmentErrors = []string{"", "Identifier must follow its type",
-		"Expected '=' assignment after identifier",
+		"",
 		"Expected value on rhs of assignment"}
 
 	op2 := patternArgs{expected, parseTypes, patternTypes, segmentErrors}
@@ -447,7 +448,7 @@ func (p *parser) parseAssignLHS() (bool, []string) {
 	parseTypes = []parseType{p.parsePairElem}
 	op3 := patternArgs{expected, parseTypes, patternTypes, segmentErrors}
 
-	pass, errorMsgs = p.parseOptions(op1, op2, op3)
+	pass, errorMsgs = p.parseOptions(op2, op1, op3)
 
 	if !pass {
 		return false, errorMsgs
@@ -620,7 +621,7 @@ func (p *parser) parseType() (bool, []string) {
 	parseTypes = []parseType{p.parsePairType}
 	op3 := patternArgs{expected, parseTypes, patternTypes, segmentErrors}
 
-	pass, errorMsgs = p.parseOptions(op1, op3, op2)
+	pass, errorMsgs = p.parseOptions(op2, op1, op3)
 
 	if !pass {
 		return false, errorMsgs
@@ -933,6 +934,10 @@ func (p *parser) parseBinaryOp() (bool, []string) {
 	expected = []grammar.ItemType{grammar.SUB}
 	op5 := patternArgs{expected, parseTypes, patternTypes, segmentErrors}
 
+	// ‘-’ Second '-' lexeme
+	expected = []grammar.ItemType{grammar.NEG}
+	opN := patternArgs{expected, parseTypes, patternTypes, segmentErrors}
+
 	// ‘>’
 	expected = []grammar.ItemType{grammar.GT}
 	op6 := patternArgs{expected, parseTypes, patternTypes, segmentErrors}
@@ -965,7 +970,7 @@ func (p *parser) parseBinaryOp() (bool, []string) {
 	expected = []grammar.ItemType{grammar.OR}
 	op13 := patternArgs{expected, parseTypes, patternTypes, segmentErrors}
 
-	pass, errorMsgs = p.parseOptions(op1, op2, op3, op4, op5, op6, op7, op8, op9, op10, op11, op12, op13)
+	pass, errorMsgs = p.parseOptions(op1, op2, op3, op4, op5, opN, op6, op7, op8, op9, op10, op11, op12, op13)
 
 	if !pass {
 		return false, errorMsgs
