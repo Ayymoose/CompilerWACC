@@ -302,6 +302,8 @@ var Token_strings = map[ItemType]string{
 	ASSIGNMENT:   "=",
 }
 
+var Token_type = map[string]ItemType{}
+
 func (token ItemType) isEscapedChar() bool {
 	return token > escaped_char_start && token < escaped_char_end
 }

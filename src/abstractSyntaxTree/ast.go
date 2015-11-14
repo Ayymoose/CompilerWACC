@@ -101,9 +101,9 @@ type ProgramNode struct {
 type FuncNode struct {
 	NodeId
 	Pos       grammar.Position
-	Type      string       // add the type
-	Ident     string       // changed from *IdentNode
-	ParamList []*ParamNode // *ParamListNode // Optional
+	Type      grammar.ItemType // add the type
+	Ident     string           // changed from *IdentNode
+	ParamList []*ParamNode     // *ParamListNode // Optional
 	StatList  []*StatNode
 }
 
@@ -118,8 +118,8 @@ type ParamListNode struct {
 type ParamNode struct {
 	NodeId
 	Pos   grammar.Position
-	Type  string
-	Ident string // changed from  *IdentNode
+	Type  grammar.ItemType //string
+	Ident string           // changed from  *IdentNode
 }
 
 type StatNode struct {
@@ -132,8 +132,8 @@ type StatNode struct {
 type DeclarationNode struct {
 	NodeId
 	Pos       grammar.Position
-	Type      *TypeNode
-	Ident     string // changed from *IdentNode
+	Type      grammar.ItemType //string // changed from *TypeNode
+	Ident     string           // changed from *IdentNode
 	AssignRHS *AssignRHSNode
 }
 
@@ -277,9 +277,10 @@ type TypeNode struct {
 type BaseTypeNode struct {
 	NodeId
 	Pos          grammar.Position
-	BaseTypeElem *Node
+	BaseTypeElem grammar.ItemType //*Node
 }
 
+/*
 type IntNode struct {
 	NodeId
 	Pos grammar.Position
@@ -303,7 +304,7 @@ type StringNode struct {
 	Pos    grammar.Position
 	String string
 }
-
+*/
 type ArrayTypeNode struct {
 	NodeId
 	Pos  grammar.Position
