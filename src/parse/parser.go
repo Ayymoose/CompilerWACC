@@ -6,6 +6,7 @@ package parse
 
 import (
 	"fmt"
+	"math"
 	"strconv"
 
 	"grammar"
@@ -1374,6 +1375,13 @@ func (p *parser) parseArrayElemHelper() (bool, []string) {
 func (p *parser) parseIntLiteral() (bool, []string) {
 	var pass = false       // True iff the tokens match a (int-liter) def
 	var errorMsgs []string // An array of error messages
+	var intLexeme string
+
+	if p.tokens[curr].Typ == grammar.ADD || p.tokens[curr].Typ == grammar.SUB {
+		intLexeme = p.tokens[curr+1].Lexeme
+	} else {
+		intLexeme = p.tokens[curr].Lexeme
+	}
 
 	// <int-liter> ::= <int-sign>? <digit>+
 	expected := []grammar.ItemType{grammar.NUMBER}
@@ -1384,6 +1392,11 @@ func (p *parser) parseIntLiteral() (bool, []string) {
 	pass, errorMsgs = p.parsePattern(expected, parseTypes, patternTypes, segmentErrors)
 
 	if !pass {
+		return false, errorMsgs
+	}
+
+	if intOutOfRange(strconv.Itoa(intLexeme)) {
+		addErrors(&errorMsgs, []string{"Integer overflow/underflow"})
 		return false, errorMsgs
 	}
 
@@ -1838,3 +1851,7 @@ func (p *parser) parseOptions(args ...patternArgs) (bool, []string) {
 }
 
 /* ---------------------------------------------------------------------------*/
+
+func intOutOfRange(int n) bool {
+	return n < -math.Pow(2, 31) || n > math.Pow(2, 31)-1
+}
