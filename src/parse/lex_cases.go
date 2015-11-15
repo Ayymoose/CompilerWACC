@@ -1,6 +1,7 @@
 package parse
 
 import (
+	"fmt"
 	"strconv"
 	"unicode"
 
@@ -49,20 +50,24 @@ Loop:
 	for {
 		switch l.next() {
 		case '"':
-			return l.errorf("unescaped char %s", l.input[l.start:l.start+l.width])
-
+			fmt.Println(string(l.input[l.pos-2]))
+			if l.input[l.pos-2] != '\\' {
+				return l.errorf("unescaped char %s", string(l.input[l.pos-1]))
+			}
 		case '\\':
-			/*			if r := l.peek(); r != grammar.Eof && r != '\n' {
-						fmt.Println(strconv.QuoteRuneToASCII(r))
-						fmt.Println("Got to Eof\n\\\\\\\\!!!!!!!!!!!!!!!!")
-						l.next()
-						break
-					}  */
 			if _, ok := grammar.EscapeChars[l.peek()]; !ok {
 				return l.errorf("Not an escape character %s", strconv.QuoteRuneToASCII(l.next()))
 			} else {
+				l.next()
 				break
 			}
+			/*	if r := l.peek(); r != grammar.Eof && r != '\n' {
+				fmt.Println(strconv.QuoteRuneToASCII(r))
+				fmt.Println("Got to Eof\n\\\\\\\\!!!!!!!!!!!!!!!!")
+				l.next()
+				break
+			}  */
+
 			fallthrough
 		case grammar.Eof, '\n':
 			return l.errorf("unterminated character constant")
