@@ -40,8 +40,8 @@ func main() {
 	//	fmt.Println("\n------ Completed Lexing ------\n")
 	if tokens[len(tokens)-1].Typ == grammar.ERROR {
 		fmt.Println("#syntax_error#")
-
-		fmt.Println(fmt.Sprint("exit status 100"))
+		fmt.Println(fmt.Sprint("exit:"))
+		fmt.Println(fmt.Sprint("100"))
 		os.Exit(100)
 	}
 	parser := lexer.ConstructParser(tokens)
@@ -54,7 +54,8 @@ func main() {
 	//	fmt.Println("\n------ Completed Parsing ------\n")
 	if !passed {
 		fmt.Println("#syntax_error#")
-		fmt.Println(fmt.Sprint("exit status 100"))
+		fmt.Println(fmt.Sprint("exit:"))
+		fmt.Println(fmt.Sprint("100"))
 		os.Exit(100)
 	}
 }
