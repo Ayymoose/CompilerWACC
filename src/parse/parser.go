@@ -410,6 +410,11 @@ func (p *parser) parseStat() (bool, []string) {
 
 		if multiStat {
 			pass, errorMsgsTemp = p.parseStat()
+
+			if !pass {
+				p.addErrors(&errorMsgsTemp, []string{"A statement must follow ';'"})
+			}
+
 			errorMsgs = append(errorMsgs, errorMsgsTemp...)
 		}
 
@@ -727,7 +732,12 @@ func (p *parser) parsePairType() (bool, []string) {
 	expected := []grammar.ItemType{grammar.PAIR, grammar.OPEN_ROUND, grammar.COMMA, grammar.CLOSE_ROUND}
 	parseTypes := []parseType{p.parsePairElemType, p.parsePairElemType}
 	patternTypes := []patternType{EXPECT, EXPECT, ONCE, EXPECT, ONCE, EXPECT}
-	segmentErrors := []string{"", "", "", "", "", ""}
+	segmentErrors := []string{"",
+		"Expected '(' after 'pair'",
+		"Expected pair-element type",
+		"Expected ',' after pair-element type",
+		"Expected pair-element type",
+		"Expected ')' at the end of pair type"}
 
 	pass, errorMsgs = p.parsePattern(expected, parseTypes, patternTypes, segmentErrors)
 
@@ -766,7 +776,7 @@ func (p *parser) parsePairElemType() (bool, []string) {
 	patternTypes = []patternType{EXPECT}
 	op3 := patternArgs{expected, parseTypes, patternTypes, segmentErrors}
 
-	pass, errorMsgs = p.parseOptions(op1, op2, op3)
+	pass, errorMsgs = p.parseOptions(op2, op1, op3)
 
 	if !pass {
 		return false, errorMsgs
@@ -832,7 +842,7 @@ func (p *parser) parseExpr() (bool, []string) {
 	segmentErrors = []string{"", "", ""}
 	op9 := patternArgs{expected, parseTypes, patternTypes, segmentErrors}
 
-	pass, errorMsgs = p.parseOptions(op6, op1, op2, op3, op4, op5, op7, op8, op9)
+	pass, errorMsgs = p.parseOptions(op7, op6, op1, op2, op3, op4, op5, op8, op9)
 
 	if pass {
 		// <binary-oper> <expr>
