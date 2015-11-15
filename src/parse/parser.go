@@ -192,13 +192,14 @@ func (p *parser) parseProgram() (bool, []string) {
 }
 
 func (p *parser) parseFunc() (bool, []string) {
+	// let <RE-stat> be a statement that will eventually return or exit
 	var pass = false       // True iff the tokens match a <func> def
 	var errorMsgs []string // An array of error messages
 
-	// <func> := <type> <ident> '(' <param-list>? ')' 'is' <stat> 'end'
+	// <func> := <type> <ident> '(' <param-list>? ')' 'is' <RE-stat> 'end'
 
 	expected := []grammar.ItemType{grammar.OPEN_ROUND, grammar.CLOSE_ROUND, grammar.IS, grammar.END}
-	parseTypes := []parseType{p.parseType, p.parseIdent, p.parseParamList, p.parseStat}
+	parseTypes := []parseType{p.parseType, p.parseIdent, p.parseParamList, p.parseFuncReturnExitStat}
 	patternTypes := []patternType{ONCE, ONCE, EXPECT, OPTIONAL, EXPECT, EXPECT, ONCE, EXPECT}
 	segmentErrors := []string{"", "", "", "",
 		"Expected ')' to close function parameter list",
@@ -207,6 +208,298 @@ func (p *parser) parseFunc() (bool, []string) {
 		"All functions must end with 'end'"}
 
 	pass, errorMsgs = p.parsePattern(expected, parseTypes, patternTypes, segmentErrors)
+
+	if !pass {
+		return false, errorMsgs
+	}
+
+	return true, []string{}
+}
+
+func (p *parser) parseFuncReturnExitStat() (bool, []string) {
+	// let <RE-stat> be a statement that will eventually return or exit
+	// let <NRE-stat> be a statement that will not eventually return or exit
+	var pass = false       // True iff the tokens match a <RE-stat> def
+	var statPass = false   // True iff !pass and tokens match a <stat>
+	var semiPass = false   // True iff (pass or statPass) and ';' is parsed
+	var errorMsgs []string // An array of error messages
+	var errorMsgTemp []string
+
+	// parseFunc helper
+	// Returns true iff a statement which eventually returns or exits is parsed
+	// Also allows for <stat> ; <RE-stat>
+
+	// check for <RE-stat>
+	expected := []grammar.ItemType{}
+	parseTypes := []parseType{p.parseFuncReturnExitStatPath}
+	patternTypes := []patternType{ONCE}
+	segmentErrors := []string{""}
+
+	pass, errorMsgs = p.parsePattern(expected, parseTypes, patternTypes, segmentErrors)
+
+	if !pass {
+		// check for <NRE-stat>
+		expected = []grammar.ItemType{}
+		parseTypes = []parseType{p.parseNonReturnExitStat}
+		patternTypes = []patternType{ONCE}
+		segmentErrors = []string{""}
+
+		statPass, errorMsgTemp = p.parsePattern(expected, parseTypes, patternTypes, segmentErrors)
+		errorMsgs = append(errorMsgs, errorMsgTemp...)
+	}
+
+	// check for ';' for multiple statements
+	expected = []grammar.ItemType{grammar.SEMICOLON}
+	parseTypes = []parseType{}
+	patternTypes = []patternType{EXPECT}
+	segmentErrors = []string{""}
+
+	semiPass, _ = p.parsePattern(expected, parseTypes, patternTypes, segmentErrors)
+
+	if pass { // If a return/exit statement is parsed
+		if semiPass { // if a semicolon follows the return/exit statement
+			p.addErrors(&errorMsgs, []string{"statments after ';' can not be reached within function"})
+			return false, errorMsgs
+
+		} else {
+			return true, []string{}
+
+		}
+	}
+
+	if statPass { // if a statment is parsed
+		if semiPass { // if a semicolon follows the statement
+			// check for <RE-stat>
+			expected = []grammar.ItemType{}
+			parseTypes = []parseType{p.parseFuncReturnExitStat}
+			patternTypes = []patternType{ONCE}
+			segmentErrors = []string{""}
+
+			pass, errorMsgTemp = p.parsePattern(expected, parseTypes, patternTypes, segmentErrors)
+			errorMsgs = append(errorMsgs, errorMsgTemp...)
+
+		} else {
+			p.addErrors(&errorMsgs, []string{"Function must reach a 'return' or 'exit' statement in all situations"})
+			return false, errorMsgs
+
+		}
+	}
+
+	if !pass { // if after multiple statements a program cant reach a return/exit in all situations
+		return false, errorMsgs
+	}
+
+	return true, []string{}
+}
+
+func (p *parser) parseFuncReturnExitStatPath() (bool, []string) {
+	var pass = false       // True iff the tokens match a <func> def
+	var errorMsgs []string // An array of error messages
+
+	// parseFuncReturnExitStat helper
+	// Returns true iff a statement which eventually returns or exits is parsed
+	// let <RE-stat> be a statement that will eventually return or exit
+
+	//Place holders
+	expected := []grammar.ItemType{}
+	parseTypes := []parseType{}
+	patternTypes := []patternType{}
+	segmentErrors := []string{}
+
+	// 'return' <expr> or 'exit' <expr>
+	expected = []grammar.ItemType{}
+	parseTypes = []parseType{p.parseReturnExitStat}
+	patternTypes = []patternType{ONCE}
+	segmentErrors = []string{""}
+
+	op1 := patternArgs{expected, parseTypes, patternTypes, segmentErrors}
+
+	// 'If' <expr> 'then' <RE-stat> 'else' <RE-stat> 'fi' option
+	expected = []grammar.ItemType{grammar.IF, grammar.THEN, grammar.ELSE, grammar.FI}
+	parseTypes = []parseType{p.parseExpr, p.parseFuncReturnExitStat, p.parseFuncReturnExitStat}
+	patternTypes = []patternType{EXPECT, ONCE, EXPECT, ONCE, EXPECT, ONCE, EXPECT}
+	segmentErrors = []string{"", "Expected a boolean after 'if'",
+		"Expected 'then' after If-boolean",
+		"Expected statement",
+		"Expected 'else'",
+		"Expected statement",
+		"Expected 'fi' to end If-statement"}
+
+	op2 := patternArgs{expected, parseTypes, patternTypes, segmentErrors}
+
+	// 'while' <expr> 'do' <RE-stat> 'done' option
+	expected = []grammar.ItemType{grammar.WHILE, grammar.DO, grammar.DONE}
+	parseTypes = []parseType{p.parseExpr, p.parseFuncReturnExitStat}
+	patternTypes = []patternType{EXPECT, ONCE, EXPECT, ONCE, EXPECT}
+	segmentErrors = []string{"", "Expected a boolean after 'while'",
+		"Expected 'do' after while-boolean",
+		"Expected statement",
+		"Expected 'done' to end while-loop"}
+
+	op3 := patternArgs{expected, parseTypes, patternTypes, segmentErrors}
+
+	// 'begin' <RE-stat> 'end' option
+	expected = []grammar.ItemType{grammar.BEGIN, grammar.END}
+	parseTypes = []parseType{p.parseFuncReturnExitStat}
+	patternTypes = []patternType{EXPECT, ONCE, EXPECT}
+	segmentErrors = []string{"", "Expected statement in scope",
+		"Expected 'end' to end scope"}
+
+	op4 := patternArgs{expected, parseTypes, patternTypes, segmentErrors}
+
+	pass, errorMsgs = p.parseOptions(op1, op2, op3, op4)
+
+	if !pass {
+		return false, errorMsgs
+	}
+
+	return true, []string{}
+}
+
+func (p *parser) parseReturnExitStat() (bool, []string) {
+	var pass = false       // True iff the tokens match a <func> def
+	var errorMsgs []string // An array of error messages
+
+	// parseFuncReturnExitPath helper function
+	// Returns true iff 'return' or 'exit' statement is parsed
+
+	//Place holders
+	expected := []grammar.ItemType{}
+	parseTypes := []parseType{}
+	patternTypes := []patternType{}
+	segmentErrors := []string{}
+
+	// All options expect one token and parse one parsing function
+	patternTypes = []patternType{EXPECT, ONCE}
+	parseTypes = []parseType{p.parseExpr}
+
+	// 'return' <expr> option
+	expected = []grammar.ItemType{grammar.RETURN}
+	segmentErrors = []string{"", "Expected expression after 'return'"}
+
+	op1 := patternArgs{expected, parseTypes, patternTypes, segmentErrors}
+
+	// 'exit' <expr> option
+	expected = []grammar.ItemType{grammar.EXIT}
+	segmentErrors = []string{"", "Expected expression after 'exit'"}
+
+	op2 := patternArgs{expected, parseTypes, patternTypes, segmentErrors}
+
+	pass, errorMsgs = p.parseOptions(op1, op2)
+
+	if !pass {
+		return false, errorMsgs
+	}
+
+	return true, []string{}
+}
+
+func (p *parser) parseNonReturnExitStat() (bool, []string) {
+	var pass = false       // True iff the tokens match a <func> def
+	var errorMsgs []string // An array of error messages
+
+	// parseFuncReturnExitStat helper function
+	// Returns true iff a non 'return' or 'exit' statement is parsed
+	// NOTE: This function specifically wont pass <stat> ; <stat>
+
+	//Place holders
+	expected := []grammar.ItemType{}
+	parseTypes := []parseType{}
+	patternTypes := []patternType{}
+	segmentErrors := []string{}
+
+	// 'skip' option
+	expected = []grammar.ItemType{grammar.SKIP}
+	parseTypes = []parseType{}
+	patternTypes = []patternType{EXPECT}
+	segmentErrors = []string{""}
+
+	op1 := patternArgs{expected, parseTypes, patternTypes, segmentErrors}
+
+	// <type> <ident> '=' <assign-rhs> option
+	expected = []grammar.ItemType{grammar.ASSIGNMENT}
+	parseTypes = []parseType{p.parseType, p.parseIdent, p.parseAssignRHS}
+	patternTypes = []patternType{ONCE, ONCE, EXPECT, ONCE}
+	segmentErrors = []string{"", "Identifier must follow its type",
+		"",
+		"Expected value on rhs of assignment"}
+
+	op2 := patternArgs{expected, parseTypes, patternTypes, segmentErrors}
+
+	// <assign-lhs> '=' <assign-rhs> option
+	expected = []grammar.ItemType{grammar.ASSIGNMENT}
+	parseTypes = []parseType{p.parseAssignLHS, p.parseAssignRHS}
+	patternTypes = []patternType{ONCE, EXPECT, ONCE}
+	segmentErrors = []string{"", "Expected '=' assignment after variable", ""}
+
+	op3 := patternArgs{expected, parseTypes, patternTypes, segmentErrors}
+
+	// 'read' <assign-lhs> option
+	expected = []grammar.ItemType{grammar.READ}
+	parseTypes = []parseType{p.parseAssignLHS}
+	patternTypes = []patternType{EXPECT, ONCE}
+	segmentErrors = []string{"", "Expected variable after 'read'"}
+
+	op4 := patternArgs{expected, parseTypes, patternTypes, segmentErrors}
+
+	// 'free' <expr> option
+	expected = []grammar.ItemType{grammar.FREE}
+	parseTypes = []parseType{p.parseExpr}
+	patternTypes = []patternType{EXPECT, ONCE}
+	segmentErrors = []string{"", "A variable must follow 'free'"}
+
+	op5 := patternArgs{expected, parseTypes, patternTypes, segmentErrors}
+
+	// 'print' <expr> option
+	expected = []grammar.ItemType{grammar.PRINT}
+	parseTypes = []parseType{p.parseExpr}
+	patternTypes = []patternType{EXPECT, ONCE}
+	segmentErrors = []string{"", "Expected expression after 'print'"}
+
+	op6 := patternArgs{expected, parseTypes, patternTypes, segmentErrors}
+
+	// 'println' <expr> option
+	expected = []grammar.ItemType{grammar.PRINTLN}
+	parseTypes = []parseType{p.parseExpr}
+	patternTypes = []patternType{EXPECT, ONCE}
+	segmentErrors = []string{"", "Expected expression after 'print'"}
+
+	op7 := patternArgs{expected, parseTypes, patternTypes, segmentErrors}
+
+	// 'If' <expr> 'then' <stat> 'else' <stat> 'fi' option
+	expected = []grammar.ItemType{grammar.IF, grammar.THEN, grammar.ELSE, grammar.FI}
+	parseTypes = []parseType{p.parseExpr, p.parseStat, p.parseStat}
+	patternTypes = []patternType{EXPECT, ONCE, EXPECT, ONCE, EXPECT, ONCE, EXPECT}
+	segmentErrors = []string{"", "Expected a boolean after 'if'",
+		"Expected 'then' after If-boolean",
+		"Expected statement",
+		"Expected 'else'",
+		"Expected statement",
+		"Expected 'fi' to end If-statement"}
+
+	op8 := patternArgs{expected, parseTypes, patternTypes, segmentErrors}
+
+	// 'while' <expr> 'do' <stat> 'done' option
+	expected = []grammar.ItemType{grammar.WHILE, grammar.DO, grammar.DONE}
+	parseTypes = []parseType{p.parseExpr, p.parseStat}
+	patternTypes = []patternType{EXPECT, ONCE, EXPECT, ONCE, EXPECT}
+	segmentErrors = []string{"", "Expected a boolean after 'while'",
+		"Expected 'do' after while-boolean",
+		"Expected statement",
+		"Expected 'done' to end while-loop"}
+
+	op9 := patternArgs{expected, parseTypes, patternTypes, segmentErrors}
+
+	// 'begin' <stat> 'end' option
+	expected = []grammar.ItemType{grammar.BEGIN, grammar.END}
+	parseTypes = []parseType{p.parseStat}
+	patternTypes = []patternType{EXPECT, ONCE, EXPECT}
+	segmentErrors = []string{"", "Expected statement in scope",
+		"Expected 'end' to end scope"}
+
+	op10 := patternArgs{expected, parseTypes, patternTypes, segmentErrors}
+
+	pass, errorMsgs = p.parseOptions(op2, op1, op3, op4, op2, op5, op1, op4, op6, op7, op8, op9, op10)
 
 	if !pass {
 		return false, errorMsgs
@@ -728,7 +1021,8 @@ func (p *parser) parseArrayDimension() (bool, []string) {
 	var pass = false
 	var errorMsgs []string // An array of error messages
 
-	// Check for '[' ']' after <type> is parsed successfully
+	// parseArrayType helper function
+	// Check for '[' ']'
 	expected := []grammar.ItemType{grammar.OPEN_SQUARE, grammar.CLOSE_SQUARE}
 	parseTypes := []parseType{}
 	patternTypes := []patternType{EXPECT, EXPECT}
