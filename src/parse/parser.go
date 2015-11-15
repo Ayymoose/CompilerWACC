@@ -879,6 +879,10 @@ func (p *parser) parseUnaryOp() (bool, []string) {
 	expected = []grammar.ItemType{grammar.NEG}
 	op2 := patternArgs{expected, parseTypes, patternTypes, segmentErrors}
 
+	// ‘-’ Second '-' lexeme
+	expected = []grammar.ItemType{grammar.SUB}
+	opN := patternArgs{expected, parseTypes, patternTypes, segmentErrors}
+
 	// ‘len’
 	expected = []grammar.ItemType{grammar.LEN}
 	op3 := patternArgs{expected, parseTypes, patternTypes, segmentErrors}
@@ -891,7 +895,7 @@ func (p *parser) parseUnaryOp() (bool, []string) {
 	expected = []grammar.ItemType{grammar.CHR}
 	op5 := patternArgs{expected, parseTypes, patternTypes, segmentErrors}
 
-	pass, errorMsgs = p.parseOptions(op1, op2, op3, op4, op5)
+	pass, errorMsgs = p.parseOptions(op1, op2, opN, op3, op4, op5)
 
 	if !pass {
 		return false, errorMsgs
@@ -1505,27 +1509,3 @@ func (p *parser) parseOptions(args ...patternArgs) (bool, []string) {
 }
 
 /* ---------------------------------------------------------------------------*/
-
-// Is this needed anymore?
-// Maps error messages with the associated terminal
-func TerminalErrorMessages(token grammar.ItemType) string {
-	switch {
-	case token.IsEscapedChar():
-		return "Missing" + grammar.Token_strings[token]
-	case token.IsDeliminator():
-		return "Missing" + grammar.Token_strings[token]
-	case token.IsReservedWord():
-		return "Missing" + grammar.Token_strings[token]
-	case token.IsType():
-		return "Missing" + grammar.Token_strings[token]
-	case token.IsUnaryOp():
-		return "Missing" + grammar.Token_strings[token]
-	case token.IsBracketType():
-		return "Missing" + grammar.Token_strings[token]
-	case token.IsBoolean():
-		return "Missing" + grammar.Token_strings[token]
-	}
-	return "Some error"
-	//Can use formatted output to print the string nicely
-	//E.g fmt.Sprint("Parse error: %s token",msg) etc..
-}
