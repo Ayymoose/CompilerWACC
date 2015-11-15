@@ -167,6 +167,9 @@ func lexError(l *Lexer) stateFn {
 }
 
 func (l *Lexer) errorf(format string, args ...interface{}) stateFn {
+	line, col := l.currLocation()
+	fmt.Printf("%d : %d, ", line, col)
+	fmt.Printf(format, args)
 	l.Items <- Token{Typ: grammar.ERROR, Lexeme: fmt.Sprintf(format, args...), Pos: l.start}
 	return nil
 }
