@@ -38,10 +38,14 @@ func main() {
 	}
 	//	fmt.Println(tokens)
 	//	fmt.Println("\n------ Completed Lexing ------\n")
+	for x, token := range tokens {
+		if x%2 == 0 {
+			fmt.Println()
+		}
+		fmt.Print(token, ", ")
+	}
 	if tokens[len(tokens)-1].Typ == grammar.ERROR {
 		fmt.Println("#syntax_error#")
-		fmt.Println(fmt.Sprint("exit:"))
-		fmt.Println(fmt.Sprint("100"))
 		os.Exit(100)
 	}
 	parser := lexer.ConstructParser(tokens)
@@ -54,8 +58,6 @@ func main() {
 	//	fmt.Println("\n------ Completed Parsing ------\n")
 	if !passed {
 		fmt.Println("#syntax_error#")
-		fmt.Println(fmt.Sprint("exit:"))
-		fmt.Println(fmt.Sprint("100"))
 		os.Exit(100)
 	}
 }
