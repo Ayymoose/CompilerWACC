@@ -107,7 +107,7 @@ func lexInsideProgram(l *Lexer) stateFn {
 	case '0' <= r && r <= '9':
 		l.backup()
 		return lexNumber
-	case isAlphaNumeric(r):
+	case isAlphaNumeric(r) || r == '_':
 		l.backup()
 		return lexIdentifier
 	case r == grammar.Eof:

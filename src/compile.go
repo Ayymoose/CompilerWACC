@@ -24,6 +24,7 @@ func main() {
 	//	b, err := ioutil.ReadFile("wacc_examples/valid/function/simple_functions/negFunction.wacc")
 	//	b, err := ioutil.ReadFile("wacc_examples/valid/scope/indentationNotImportant.wacc")
 	//	b, err := ioutil.ReadFile("wacc_examples/valid/if/whitespace.wacc")
+	//	b, err := ioutil.ReadFile("wacc_examples/valid/advanced/ticTacToe.wacc")
 
 	if err != nil {
 		fmt.Println(err)

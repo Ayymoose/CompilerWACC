@@ -21,7 +21,7 @@ const (
 	COMMENT_END
 	COMMENT_LINE
 	NESTED_COMMENTS
-	UNDERSCORE
+	//	UNDERSCORE
 	deliminators_end
 
 	escaped_char_start
@@ -135,8 +135,8 @@ var DebugTokens = map[ItemType]string{
 	COMMENT_END:        "COMMENT_END",
 	COMMENT_LINE:       "COMMENT_LINE",
 	NESTED_COMMENTS:    "NESTED_COMMENTS",
-	UNDERSCORE:         "UNDERSCORE",
-	deliminators_end:   "deliminators_end",
+	//	UNDERSCORE:         "UNDERSCORE",
+	deliminators_end: "deliminators_end",
 
 	escaped_char_start: "escaped_char_start",
 	NULL_TERMINATOR:    "escaped_char_start",
@@ -275,7 +275,7 @@ var Token_strings = map[ItemType]string{
 	//	COMMENT_END:   "",
 	COMMENT_LINE: "#",
 	//	NESTED_COMMENTS: false,
-	UNDERSCORE:      "_",
+	//	UNDERSCORE:      "_",
 	NULL_TERMINATOR: "\\0",
 	BACKSPACE:       "\b",
 	TAB:             "\t",

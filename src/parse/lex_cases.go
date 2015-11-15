@@ -31,7 +31,7 @@ func lexEnd(l *Lexer) stateFn {
 }*/
 
 func lexIdentifier(l *Lexer) stateFn {
-	if !(unicode.IsLetter(l.peek()) || l.peek() != '_') {
+	if !(unicode.IsLetter(l.peek()) || l.peek() == '_') {
 		l.next()
 		return l.errorf("bad identifier syntax: %q", l.input[l.start:l.pos])
 	}
