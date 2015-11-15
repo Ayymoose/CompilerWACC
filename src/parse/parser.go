@@ -156,6 +156,11 @@ func (p *parser) addErrors(errors1 *[]string, errors2 []string) {
 func (p *parser) Parse() (bool, []string) {
 	var pass, errors = p.parseProgram()
 
+	if p.currTok.Typ != TERMINATE_TOKEN {
+		p.addErrors(&errors, []string{"Characters detected after the end of program"})
+		return false, errors
+	}
+
 	return pass, errors
 }
 
