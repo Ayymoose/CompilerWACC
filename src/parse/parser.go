@@ -9,7 +9,7 @@ import (
 	"math"
 	"strconv"
 
-	"grammar"
+	"github.com/nanaasiedu/wacc_19/src/grammar"
 )
 
 func (i Token) String() string {
@@ -1377,10 +1377,10 @@ func (p *parser) parseIntLiteral() (bool, []string) {
 	var errorMsgs []string // An array of error messages
 	var intLexeme string
 
-	if p.tokens[curr].Typ == grammar.ADD || p.tokens[curr].Typ == grammar.SUB {
-		intLexeme = p.tokens[curr+1].Lexeme
+	if p.tokens[p.curr].Typ == grammar.ADD || p.tokens[p.curr].Typ == grammar.SUB {
+		intLexeme = p.tokens[p.curr+1].Lexeme
 	} else {
-		intLexeme = p.tokens[curr].Lexeme
+		intLexeme = p.tokens[p.curr].Lexeme
 	}
 
 	// <int-liter> ::= <int-sign>? <digit>+
@@ -1395,8 +1395,10 @@ func (p *parser) parseIntLiteral() (bool, []string) {
 		return false, errorMsgs
 	}
 
-	if intOutOfRange(strconv.Itoa(intLexeme)) {
-		addErrors(&errorMsgs, []string{"Integer overflow/underflow"})
+	i, _ := strconv.ParseFloat(intLexeme, 64)
+
+	if intOutOfRange(i) {
+		p.addErrors(&errorMsgs, []string{"Integer overflow/underflow"})
 		return false, errorMsgs
 	}
 
@@ -1852,6 +1854,6 @@ func (p *parser) parseOptions(args ...patternArgs) (bool, []string) {
 
 /* ---------------------------------------------------------------------------*/
 
-func intOutOfRange(int n) bool {
+func intOutOfRange(n float64) bool {
 	return n < -math.Pow(2, 31) || n > math.Pow(2, 31)-1
 }
