@@ -38,6 +38,9 @@ func main() {
 	parser := lexer.ConstructParser(tokens)
 	passed, errs := parser.Parse()
 	fmt.Println("Parsing Successful:", passed)
+	for parseError := range errs {
+		fmt.Println(parseError)
+	}
 	fmt.Println("Parsing errors:", errs)
 	fmt.Println("\n------ Completed Parsing ------\n")
 }
