@@ -2,8 +2,7 @@ package parse
 
 //TODO: Change the if statement in the parse functions' return type so that there is only one return
 //I.e return pass, errorMsgs
-//TODO: FIX ARRAY TYPE PARSE
-//TODO: Consider NEG and SUB confusion
+//TODO: Check error message accidental removals
 
 import (
 	"fmt"
@@ -679,6 +678,7 @@ func (p *parser) parseBaseType() (bool, []string) {
 func (p *parser) parseArrayType() (bool, []string) {
 	var pass = false
 	var errorMsgs []string // An array of error messages
+	var errorMsgTemp []string
 
 	//Place holders
 	expected := []grammar.ItemType{}
@@ -709,10 +709,30 @@ func (p *parser) parseArrayType() (bool, []string) {
 	}
 
 	// Check for '[' ']' after <type> is parsed successfully
-	expected = []grammar.ItemType{grammar.OPEN_SQUARE, grammar.CLOSE_SQUARE}
-	parseTypes = []parseType{}
-	patternTypes = []patternType{EXPECT, EXPECT}
-	segmentErrors = []string{"", "Expected '[' after type", "Expected ']'"}
+	expected = []grammar.ItemType{}
+	parseTypes = []parseType{p.parseArrayDimension}
+	patternTypes = []patternType{ONEMORE}
+	segmentErrors = []string{""}
+
+	pass, errorMsgTemp = p.parsePattern(expected, parseTypes, patternTypes, segmentErrors)
+	errorMsgs = append(errorMsgs, errorMsgTemp...)
+
+	if !pass {
+		return false, errorMsgs
+	}
+
+	return true, []string{}
+}
+
+func (p *parser) parseArrayDimension() (bool, []string) {
+	var pass = false
+	var errorMsgs []string // An array of error messages
+
+	// Check for '[' ']' after <type> is parsed successfully
+	expected := []grammar.ItemType{grammar.OPEN_SQUARE, grammar.CLOSE_SQUARE}
+	parseTypes := []parseType{}
+	patternTypes := []patternType{EXPECT, EXPECT}
+	segmentErrors := []string{"", "Expected '[' after type", "Expected ']'"}
 
 	pass, errorMsgs = p.parsePattern(expected, parseTypes, patternTypes, segmentErrors)
 
