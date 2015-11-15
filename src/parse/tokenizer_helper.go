@@ -62,10 +62,8 @@ func lexInsideProgram(l *Lexer) stateFn {
 			l.pos += l.width
 			switch key {
 			case grammar.DOUBLE_QUOTE:
-				//			l.next()
 				return lexString
 			case grammar.SINGLE_QUOTE:
-				//			l.next()
 				return lexChar
 			case grammar.NULL_TERMINATOR:
 				l.ignore()

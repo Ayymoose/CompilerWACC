@@ -123,6 +123,18 @@ const (
 	token_end
 )
 
+var EscapeChars = map[rune]ItemType{
+	'0':  NULL_TERMINATOR,
+	'b':  BACKSPACE,
+	't':  TAB,
+	'n':  LINE_FEED,
+	'f':  FORM_FEED,
+	'r':  CARRIAGE_RETURN,
+	'\\': BACKSLASH,
+	'\'': SINGLE_QUOTE,
+	'"':  DOUBLE_QUOTE,
+}
+
 var DebugTokens = map[ItemType]string{
 	token_start: "token_start",
 

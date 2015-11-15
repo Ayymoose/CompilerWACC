@@ -1,6 +1,7 @@
 package parse
 
 import (
+	"strconv"
 	"unicode"
 
 	"grammar"
@@ -51,7 +52,15 @@ Loop:
 			return l.errorf("unescaped char %s", l.input[l.start:l.start+l.width])
 
 		case '\\':
-			if r := l.next(); r != grammar.Eof && r != '\n' {
+			/*			if r := l.peek(); r != grammar.Eof && r != '\n' {
+						fmt.Println(strconv.QuoteRuneToASCII(r))
+						fmt.Println("Got to Eof\n\\\\\\\\!!!!!!!!!!!!!!!!")
+						l.next()
+						break
+					}  */
+			if _, ok := grammar.EscapeChars[l.peek()]; !ok {
+				return l.errorf("Not an escape character %s", strconv.QuoteRuneToASCII(l.next()))
+			} else {
 				break
 			}
 			fallthrough
