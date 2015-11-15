@@ -1855,5 +1855,5 @@ func (p *parser) parseOptions(args ...patternArgs) (bool, []string) {
 /* ---------------------------------------------------------------------------*/
 
 func intOutOfRange(n float64) bool {
-	return n < -math.Pow(2, 31) || n > math.Pow(2, 31)-1
+	return n <= -math.Pow(2, 31) || n > math.Pow(2, 31)-1
 }
