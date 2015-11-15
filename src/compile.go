@@ -10,9 +10,9 @@ import (
 )
 
 func main() {
-	fmt.Println(len(os.Args), os.Args)
+	//	fmt.Println(len(os.Args), os.Args)
 	file := os.Args[1]
-	fmt.Println(file)
+	//	fmt.Println(file)
 
 	b, err := ioutil.ReadFile(file)
 	//	b, err := ioutil.ReadFile("wacc_examples/valid/variables/capCharDeclaration.wacc")
@@ -36,21 +36,24 @@ func main() {
 		//	fmt.Println(lexer.TokenLocation(item))
 		tokens = append(tokens, item)
 	}
-	fmt.Println(tokens)
-	fmt.Println("\n------ Completed Lexing ------\n")
+	//	fmt.Println(tokens)
+	//	fmt.Println("\n------ Completed Lexing ------\n")
 	if tokens[len(tokens)-1].Typ == grammar.ERROR {
+		fmt.Println("#syntax_error#")
+
 		fmt.Println(fmt.Sprint("exit status 100"))
 		os.Exit(100)
 	}
 	parser := lexer.ConstructParser(tokens)
 	passed, errs := parser.Parse()
-	fmt.Println("Parsing Successful:", passed)
+	//	fmt.Println("Parsing Successful:", passed)
 	for _, parseError := range errs {
 		fmt.Println(parseError)
 	}
 	//fmt.Println("Parsing errors:", errs)
-	fmt.Println("\n------ Completed Parsing ------\n")
+	//	fmt.Println("\n------ Completed Parsing ------\n")
 	if !passed {
+		fmt.Println("#syntax_error#")
 		fmt.Println(fmt.Sprint("exit status 100"))
 		os.Exit(100)
 	}
