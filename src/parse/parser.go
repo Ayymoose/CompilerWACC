@@ -9,7 +9,7 @@ import (
 	"math"
 	"strconv"
 
-	"github.com/nanaasiedu/wacc_19/src/grammar"
+	"grammar"
 )
 
 func (i Token) String() string {
