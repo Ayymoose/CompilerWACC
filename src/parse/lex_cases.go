@@ -47,6 +47,9 @@ func lexChar(l *Lexer) stateFn {
 Loop:
 	for {
 		switch l.next() {
+		case '"':
+			return l.errorf("unescaped char %s", l.input[l.start:l.start+l.width])
+
 		case '\\':
 			if r := l.next(); r != grammar.Eof && r != '\n' {
 				break
