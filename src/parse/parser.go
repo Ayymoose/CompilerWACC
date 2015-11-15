@@ -1381,6 +1381,11 @@ func (p *parser) parseIntLiteral() (bool, []string) {
 		intLexeme = p.tokens[p.curr+1].Lexeme
 	} else {
 		intLexeme = p.tokens[p.curr].Lexeme
+
+		if p.tokens[p.curr].Typ == grammar.SUB {
+			intLexeme = "-" + intLexeme
+		}
+
 	}
 
 	// <int-liter> ::= <int-sign>? <digit>+
