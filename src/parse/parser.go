@@ -6,7 +6,6 @@ package parse
 
 import (
 	"fmt"
-	"go/ast"
 	"math"
 	"strconv"
 
@@ -193,10 +192,10 @@ func (p *parser) parseProgram() (bool, []string, ast.Node) {
 	pass, errorMsgs, _ = p.parsePattern(expected, parseTypes, patternTypes, segmentErrors)
 
 	if !pass {
-		return false, errorMsgs, ast.ProgramNode{}
+		return false, errorMsgs, ast.ProgramNode{}.BuildNode(ast.BuildArguments{})
 	}
 
-	return true, []string{}, ast.ProgramNode{}
+	return true, []string{}, ast.ProgramNode{}.BuildNode(ast.BuildArguments{})
 }
 
 func (p *parser) parseFunc() (bool, []string, ast.Node) {
@@ -218,10 +217,10 @@ func (p *parser) parseFunc() (bool, []string, ast.Node) {
 	pass, errorMsgs, _ = p.parsePattern(expected, parseTypes, patternTypes, segmentErrors)
 
 	if !pass {
-		return false, errorMsgs, ast.ProgramNode{}
+		return false, errorMsgs, ast.ProgramNode{}.BuildNode(ast.BuildArguments{})
 	}
 
-	return true, []string{}, ast.ProgramNode{}
+	return true, []string{}, ast.ProgramNode{}.BuildNode(ast.BuildArguments{})
 }
 
 func (p *parser) parseFuncReturnExitStat() (bool, []string, ast.Node) {
@@ -267,10 +266,10 @@ func (p *parser) parseFuncReturnExitStat() (bool, []string, ast.Node) {
 	if pass { // If a return/exit statement is parsed
 		if semiPass { // if a semicolon follows the return/exit statement
 			p.addErrors(&errorMsgs, []string{"statments after ';' can not be reached within function"})
-			return false, errorMsgs, ast.ProgramNode{}
+			return false, errorMsgs, ast.ProgramNode{}.BuildNode(ast.BuildArguments{})
 
 		} else {
-			return true, []string{}, ast.ProgramNode{}
+			return true, []string{}, ast.ProgramNode{}.BuildNode(ast.BuildArguments{})
 
 		}
 	}
@@ -283,21 +282,21 @@ func (p *parser) parseFuncReturnExitStat() (bool, []string, ast.Node) {
 			patternTypes = []patternType{ONCE}
 			segmentErrors = []string{""}
 
-			pass, errorMsgTemp = p.parsePattern(expected, parseTypes, patternTypes, segmentErrors)
+			pass, errorMsgTemp, _ = p.parsePattern(expected, parseTypes, patternTypes, segmentErrors)
 			errorMsgs = append(errorMsgs, errorMsgTemp...)
 
 		} else {
 			p.addErrors(&errorMsgs, []string{"Function must reach a 'return' or 'exit' statement in all situations"})
-			return false, errorMsgs, ast.ProgramNode{}
+			return false, errorMsgs, ast.ProgramNode{}.BuildNode(ast.BuildArguments{})
 
 		}
 	}
 
 	if !pass { // if after multiple statements a program cant reach a return/exit in all situations
-		return false, errorMsgs, ast.ProgramNode{}
+		return false, errorMsgs, ast.ProgramNode{}.BuildNode(ast.BuildArguments{})
 	}
 
-	return true, []string{}, ast.ProgramNode{}
+	return true, []string{}, ast.ProgramNode{}.BuildNode(ast.BuildArguments{})
 }
 
 func (p *parser) parseFuncReturnExitStatPath() (bool, []string, ast.Node) {
@@ -358,10 +357,10 @@ func (p *parser) parseFuncReturnExitStatPath() (bool, []string, ast.Node) {
 	pass, errorMsgs, _ = p.parseOptions(op1, op2, op3, op4)
 
 	if !pass {
-		return false, errorMsgs, ast.ProgramNode{}
+		return false, errorMsgs, ast.ProgramNode{}.BuildNode(ast.BuildArguments{})
 	}
 
-	return true, []string{}, ast.ProgramNode{}
+	return true, []string{}, ast.ProgramNode{}.BuildNode(ast.BuildArguments{})
 }
 
 func (p *parser) parseReturnExitStat() (bool, []string, ast.Node) {
@@ -396,10 +395,10 @@ func (p *parser) parseReturnExitStat() (bool, []string, ast.Node) {
 	pass, errorMsgs, _ = p.parseOptions(op1, op2)
 
 	if !pass {
-		return false, errorMsgs, ast.ProgramNode{}
+		return false, errorMsgs, ast.ProgramNode{}.BuildNode(ast.BuildArguments{})
 	}
 
-	return true, []string{}, ast.ProgramNode{}
+	return true, []string{}, ast.ProgramNode{}.BuildNode(ast.BuildArguments{})
 }
 
 func (p *parser) parseNonReturnExitStat() (bool, []string, ast.Node) {
@@ -507,13 +506,13 @@ func (p *parser) parseNonReturnExitStat() (bool, []string, ast.Node) {
 
 	op10 := patternArgs{expected, parseTypes, patternTypes, segmentErrors}
 
-	pass, errorMsgs = p.parseOptions(op2, op1, op3, op4, op2, op5, op1, op4, op6, op7, op8, op9, op10)
+	pass, errorMsgs, _ = p.parseOptions(op2, op1, op3, op4, op2, op5, op1, op4, op6, op7, op8, op9, op10)
 
 	if !pass {
-		return false, errorMsgs, ast.ProgramNode{}
+		return false, errorMsgs, ast.ProgramNode{}.BuildNode(ast.BuildArguments{})
 	}
 
-	return true, []string{}, ast.ProgramNode{}
+	return true, []string{}, ast.ProgramNode{}.BuildNode(ast.BuildArguments{})
 }
 
 func (p *parser) parseParamList() (bool, []string, ast.Node) {
@@ -530,10 +529,10 @@ func (p *parser) parseParamList() (bool, []string, ast.Node) {
 	pass, errorMsgs, _ = p.parsePattern(expected, parseTypes, patternTypes, segmentErrors)
 
 	if !pass {
-		return false, errorMsgs, ast.ProgramNode{}
+		return false, errorMsgs, ast.ProgramNode{}.BuildNode(ast.BuildArguments{})
 	}
 
-	return true, []string{}, ast.ProgramNode{}
+	return true, []string{}, ast.ProgramNode{}.BuildNode(ast.BuildArguments{})
 }
 
 func (p *parser) parseExtraParam() (bool, []string, ast.Node) {
@@ -551,10 +550,10 @@ func (p *parser) parseExtraParam() (bool, []string, ast.Node) {
 	pass, errorMsgs, _ = p.parsePattern(expected, parseTypes, patternTypes, segmentErrors)
 
 	if !pass {
-		return false, errorMsgs, ast.ProgramNode{}
+		return false, errorMsgs, ast.ProgramNode{}.BuildNode(ast.BuildArguments{})
 	}
 
-	return true, []string{}, ast.ProgramNode{}
+	return true, []string{}, ast.ProgramNode{}.BuildNode(ast.BuildArguments{})
 }
 
 func (p *parser) parseParam() (bool, []string, ast.Node) {
@@ -570,10 +569,10 @@ func (p *parser) parseParam() (bool, []string, ast.Node) {
 	pass, errorMsgs, _ = p.parsePattern(expected, parseTypes, patternTypes, segmentErrors)
 
 	if !pass {
-		return false, errorMsgs, ast.ProgramNode{}
+		return false, errorMsgs, ast.ProgramNode{}.BuildNode(ast.BuildArguments{})
 	}
 
-	return true, []string{}, ast.ProgramNode{}
+	return true, []string{}, ast.ProgramNode{}.BuildNode(ast.BuildArguments{})
 }
 
 func (p *parser) parseStat() (bool, []string, ast.Node) {
@@ -721,10 +720,10 @@ func (p *parser) parseStat() (bool, []string, ast.Node) {
 	}
 
 	if !pass {
-		return false, errorMsgs, ast.ProgramNode{}
+		return false, errorMsgs, ast.ProgramNode{}.BuildNode(ast.BuildArguments{})
 	}
 
-	return true, []string{}, ast.ProgramNode{}
+	return true, []string{}, ast.ProgramNode{}.BuildNode(ast.BuildArguments{})
 }
 
 func (p *parser) parseAssignLHS() (bool, []string, ast.Node) {
@@ -756,10 +755,10 @@ func (p *parser) parseAssignLHS() (bool, []string, ast.Node) {
 	pass, errorMsgs, _ = p.parseOptions(op2, op1, op3)
 
 	if !pass {
-		return false, errorMsgs, ast.ProgramNode{}
+		return false, errorMsgs, ast.ProgramNode{}.BuildNode(ast.BuildArguments{})
 	}
 
-	return true, []string{}, ast.ProgramNode{}
+	return true, []string{}, ast.ProgramNode{}.BuildNode(ast.BuildArguments{})
 }
 
 func (p *parser) parseAssignRHS() (bool, []string, ast.Node) {
@@ -818,10 +817,10 @@ func (p *parser) parseAssignRHS() (bool, []string, ast.Node) {
 	pass, errorMsgs, _ = p.parseOptions(op1, op2, op3, op4, op5)
 
 	if !pass {
-		return false, errorMsgs, ast.ProgramNode{}
+		return false, errorMsgs, ast.ProgramNode{}.BuildNode(ast.BuildArguments{})
 	}
 
-	return true, []string{}, ast.ProgramNode{}
+	return true, []string{}, ast.ProgramNode{}.BuildNode(ast.BuildArguments{})
 }
 
 func (p *parser) parseArgList() (bool, []string, ast.Node) {
@@ -838,10 +837,10 @@ func (p *parser) parseArgList() (bool, []string, ast.Node) {
 	pass, errorMsgs, _ = p.parsePattern(expected, parseTypes, patternTypes, segmentErrors)
 
 	if !pass {
-		return false, errorMsgs, ast.ProgramNode{}
+		return false, errorMsgs, ast.ProgramNode{}.BuildNode(ast.BuildArguments{})
 	}
 
-	return true, []string{}, ast.ProgramNode{}
+	return true, []string{}, ast.ProgramNode{}.BuildNode(ast.BuildArguments{})
 }
 
 func (p *parser) parseExtraArg() (bool, []string, ast.Node) {
@@ -859,10 +858,10 @@ func (p *parser) parseExtraArg() (bool, []string, ast.Node) {
 	pass, errorMsgs, _ = p.parsePattern(expected, parseTypes, patternTypes, segmentErrors)
 
 	if !pass {
-		return false, errorMsgs, ast.ProgramNode{}
+		return false, errorMsgs, ast.ProgramNode{}.BuildNode(ast.BuildArguments{})
 	}
 
-	return true, []string{}, ast.ProgramNode{}
+	return true, []string{}, ast.ProgramNode{}.BuildNode(ast.BuildArguments{})
 }
 
 func (p *parser) parsePairElem() (bool, []string, ast.Node) {
@@ -894,10 +893,10 @@ func (p *parser) parsePairElem() (bool, []string, ast.Node) {
 	pass, errorMsgs, _ = p.parseOptions(op1, op2)
 
 	if !pass {
-		return false, errorMsgs, ast.ProgramNode{}
+		return false, errorMsgs, ast.ProgramNode{}.BuildNode(ast.BuildArguments{})
 	}
 
-	return true, []string{}, ast.ProgramNode{}
+	return true, []string{}, ast.ProgramNode{}.BuildNode(ast.BuildArguments{})
 }
 
 func (p *parser) parseType() (bool, []string, ast.Node) {
@@ -929,10 +928,10 @@ func (p *parser) parseType() (bool, []string, ast.Node) {
 	pass, errorMsgs, _ = p.parseOptions(op2, op1, op3)
 
 	if !pass {
-		return false, errorMsgs, ast.ProgramNode{}
+		return false, errorMsgs, ast.ProgramNode{}.BuildNode(ast.BuildArguments{})
 	}
 
-	return true, []string{}, ast.ProgramNode{}
+	return true, []string{}, ast.ProgramNode{}.BuildNode(ast.BuildArguments{})
 }
 
 func (p *parser) parseBaseType() (bool, []string, ast.Node) {
@@ -970,10 +969,10 @@ func (p *parser) parseBaseType() (bool, []string, ast.Node) {
 	pass, errorMsgs, _ = p.parseOptions(op1, op2, op3, op4)
 
 	if !pass {
-		return false, errorMsgs, ast.ProgramNode{}
+		return false, errorMsgs, ast.ProgramNode{}.BuildNode(ast.BuildArguments{})
 	}
 
-	return true, []string{}, ast.ProgramNode{}
+	return true, []string{}, ast.ProgramNode{}.BuildNode(ast.BuildArguments{})
 }
 
 func (p *parser) parseArrayType() (bool, []string, ast.Node) {
@@ -1005,7 +1004,7 @@ func (p *parser) parseArrayType() (bool, []string, ast.Node) {
 
 	// if <type> != <base-type> or <pair-type> then check if <type> = <array-type>
 	if !pass {
-		return false, errorMsgs, ast.ProgramNode{}
+		return false, errorMsgs, ast.ProgramNode{}.BuildNode(ast.BuildArguments{})
 		// NOT IMPLEMENTED
 	}
 
@@ -1015,14 +1014,14 @@ func (p *parser) parseArrayType() (bool, []string, ast.Node) {
 	patternTypes = []patternType{ONEMORE}
 	segmentErrors = []string{""}
 
-	pass, errorMsgTemp = p.parsePattern(expected, parseTypes, patternTypes, segmentErrors)
+	pass, errorMsgTemp, _ = p.parsePattern(expected, parseTypes, patternTypes, segmentErrors)
 	errorMsgs = append(errorMsgs, errorMsgTemp...)
 
 	if !pass {
-		return false, errorMsgs, ast.ProgramNode{}
+		return false, errorMsgs, ast.ProgramNode{}.BuildNode(ast.BuildArguments{})
 	}
 
-	return true, []string{}, ast.ProgramNode{}
+	return true, []string{}, ast.ProgramNode{}.BuildNode(ast.BuildArguments{})
 }
 
 func (p *parser) parseArrayDimension() (bool, []string, ast.Node) {
@@ -1039,10 +1038,10 @@ func (p *parser) parseArrayDimension() (bool, []string, ast.Node) {
 	pass, errorMsgs, _ = p.parsePattern(expected, parseTypes, patternTypes, segmentErrors)
 
 	if !pass {
-		return false, errorMsgs, ast.ProgramNode{}
+		return false, errorMsgs, ast.ProgramNode{}.BuildNode(ast.BuildArguments{})
 	}
 
-	return true, []string{}, ast.ProgramNode{}
+	return true, []string{}, ast.ProgramNode{}.BuildNode(ast.BuildArguments{})
 }
 
 func (p *parser) parsePairType() (bool, []string, ast.Node) {
@@ -1064,10 +1063,10 @@ func (p *parser) parsePairType() (bool, []string, ast.Node) {
 	pass, errorMsgs, _ = p.parsePattern(expected, parseTypes, patternTypes, segmentErrors)
 
 	if !pass {
-		return false, errorMsgs, ast.ProgramNode{}
+		return false, errorMsgs, ast.ProgramNode{}.BuildNode(ast.BuildArguments{})
 	}
 
-	return true, []string{}, ast.ProgramNode{}
+	return true, []string{}, ast.ProgramNode{}.BuildNode(ast.BuildArguments{})
 }
 
 func (p *parser) parsePairElemType() (bool, []string, ast.Node) {
@@ -1101,10 +1100,10 @@ func (p *parser) parsePairElemType() (bool, []string, ast.Node) {
 	pass, errorMsgs, _ = p.parseOptions(op2, op1, op3)
 
 	if !pass {
-		return false, errorMsgs, ast.ProgramNode{}
+		return false, errorMsgs, ast.ProgramNode{}.BuildNode(ast.BuildArguments{})
 	}
 
-	return true, []string{}, ast.ProgramNode{}
+	return true, []string{}, ast.ProgramNode{}.BuildNode(ast.BuildArguments{})
 }
 
 func (p *parser) parseExpr() (bool, []string, ast.Node) {
@@ -1173,7 +1172,7 @@ func (p *parser) parseExpr() (bool, []string, ast.Node) {
 		patternTypes = []patternType{ONCE}
 		segmentErrors = []string{""}
 
-		binaryExpr, _ = p.parsePattern(expected, parseTypes, patternTypes, segmentErrors)
+		binaryExpr, _, _ = p.parsePattern(expected, parseTypes, patternTypes, segmentErrors)
 
 		if binaryExpr {
 			pass, errorMsgsTemp, _ = p.parseExpr()
@@ -1183,10 +1182,10 @@ func (p *parser) parseExpr() (bool, []string, ast.Node) {
 	}
 
 	if !pass {
-		return false, errorMsgs, ast.ProgramNode{}
+		return false, errorMsgs, ast.ProgramNode{}.BuildNode(ast.BuildArguments{})
 	}
 
-	return true, []string{}, ast.ProgramNode{}
+	return true, []string{}, ast.ProgramNode{}.BuildNode(ast.BuildArguments{})
 }
 
 func (p *parser) parseUnaryOp() (bool, []string, ast.Node) {
@@ -1230,10 +1229,10 @@ func (p *parser) parseUnaryOp() (bool, []string, ast.Node) {
 	pass, errorMsgs, _ = p.parseOptions(op1, op2, opN, op3, op4, op5)
 
 	if !pass {
-		return false, errorMsgs, ast.ProgramNode{}
+		return false, errorMsgs, ast.ProgramNode{}.BuildNode(ast.BuildArguments{})
 	}
 
-	return true, []string{}, ast.ProgramNode{}
+	return true, []string{}, ast.ProgramNode{}.BuildNode(ast.BuildArguments{})
 }
 
 func (p *parser) parseBinaryOp() (bool, []string, ast.Node) {
@@ -1309,10 +1308,10 @@ func (p *parser) parseBinaryOp() (bool, []string, ast.Node) {
 	pass, errorMsgs, _ = p.parseOptions(op1, op2, op3, op4, op5, opN, op6, op7, op8, op9, op10, op11, op12, op13)
 
 	if !pass {
-		return false, errorMsgs, ast.ProgramNode{}
+		return false, errorMsgs, ast.ProgramNode{}.BuildNode(ast.BuildArguments{})
 	}
 
-	return true, []string{}, ast.ProgramNode{}
+	return true, []string{}, ast.ProgramNode{}.BuildNode(ast.BuildArguments{})
 }
 
 func (p *parser) parseIdent() (bool, []string, ast.Node) {
@@ -1329,10 +1328,10 @@ func (p *parser) parseIdent() (bool, []string, ast.Node) {
 	pass, errorMsgs, _ = p.parsePattern(expected, parseTypes, patternTypes, segmentErrors)
 
 	if !pass {
-		return false, errorMsgs, ast.ProgramNode{}
+		return false, errorMsgs, ast.ProgramNode{}.BuildNode(ast.BuildArguments{})
 	}
 
-	return true, []string{}, ast.ProgramNode{}
+	return true, []string{}, ast.ProgramNode{}.BuildNode(ast.BuildArguments{})
 }
 
 func (p *parser) parseArrayElem() (bool, []string, ast.Node) {
@@ -1348,10 +1347,10 @@ func (p *parser) parseArrayElem() (bool, []string, ast.Node) {
 	pass, errorMsgs, _ = p.parsePattern(expected, parseTypes, patternTypes, segmentErrors)
 
 	if !pass {
-		return false, errorMsgs, ast.ProgramNode{}
+		return false, errorMsgs, ast.ProgramNode{}.BuildNode(ast.BuildArguments{})
 	}
 
-	return true, []string{}, ast.ProgramNode{}
+	return true, []string{}, ast.ProgramNode{}.BuildNode(ast.BuildArguments{})
 }
 
 func (p *parser) parseArrayElemHelper() (bool, []string, ast.Node) {
@@ -1368,10 +1367,10 @@ func (p *parser) parseArrayElemHelper() (bool, []string, ast.Node) {
 	pass, errorMsgs, _ = p.parsePattern(expected, parseTypes, patternTypes, segmentErrors)
 
 	if !pass {
-		return false, errorMsgs, ast.ProgramNode{}
+		return false, errorMsgs, ast.ProgramNode{}.BuildNode(ast.BuildArguments{})
 	}
 
-	return true, []string{}, ast.ProgramNode{}
+	return true, []string{}, ast.ProgramNode{}.BuildNode(ast.BuildArguments{})
 }
 
 func (p *parser) parseIntLiteral() (bool, []string, ast.Node) {
@@ -1398,17 +1397,17 @@ func (p *parser) parseIntLiteral() (bool, []string, ast.Node) {
 	pass, errorMsgs, _ = p.parsePattern(expected, parseTypes, patternTypes, segmentErrors)
 
 	if !pass {
-		return false, errorMsgs, ast.ProgramNode{}
+		return false, errorMsgs, ast.ProgramNode{}.BuildNode(ast.BuildArguments{})
 	}
 
 	i, _ := strconv.ParseFloat(intLexeme, 64)
 
 	if intOutOfRange(i) {
 		p.addErrors(&errorMsgs, []string{"Integer overflow"})
-		return false, errorMsgs
+		return false, errorMsgs, ast.ProgramNode{}.BuildNode(ast.BuildArguments{})
 	}
 
-	return true, []string{}, ast.ProgramNode{}
+	return true, []string{}, ast.ProgramNode{}.BuildNode(ast.BuildArguments{})
 }
 
 func (p *parser) parseIntSign() (bool, []string, ast.Node) {
@@ -1436,10 +1435,10 @@ func (p *parser) parseIntSign() (bool, []string, ast.Node) {
 	pass, errorMsgs, _ = p.parseOptions(op1, op2)
 
 	if !pass {
-		return false, errorMsgs, ast.ProgramNode{}
+		return false, errorMsgs, ast.ProgramNode{}.BuildNode(ast.BuildArguments{})
 	}
 
-	return true, []string{}, ast.ProgramNode{}
+	return true, []string{}, ast.ProgramNode{}.BuildNode(ast.BuildArguments{})
 }
 
 func (p *parser) parseBoolLiteral() (bool, []string, ast.Node) {
@@ -1469,10 +1468,10 @@ func (p *parser) parseBoolLiteral() (bool, []string, ast.Node) {
 	pass, errorMsgs, _ = p.parseOptions(op2, op1)
 
 	if !pass {
-		return false, errorMsgs, ast.ProgramNode{}
+		return false, errorMsgs, ast.ProgramNode{}.BuildNode(ast.BuildArguments{})
 	}
 
-	return true, []string{}, ast.ProgramNode{}
+	return true, []string{}, ast.ProgramNode{}.BuildNode(ast.BuildArguments{})
 }
 
 func (p *parser) parseCharLiteral() (bool, []string, ast.Node) {
@@ -1488,10 +1487,10 @@ func (p *parser) parseCharLiteral() (bool, []string, ast.Node) {
 	pass, errorMsgs, _ = p.parsePattern(expected, parseTypes, patternTypes, segmentErrors)
 
 	if !pass {
-		return false, errorMsgs, ast.ProgramNode{}
+		return false, errorMsgs, ast.ProgramNode{}.BuildNode(ast.BuildArguments{})
 	}
 
-	return true, []string{}, ast.ProgramNode{}
+	return true, []string{}, ast.ProgramNode{}.BuildNode(ast.BuildArguments{})
 }
 
 func (p *parser) parseStrLiteral() (bool, []string, ast.Node) {
@@ -1508,10 +1507,10 @@ func (p *parser) parseStrLiteral() (bool, []string, ast.Node) {
 	pass, errorMsgs, _ = p.parsePattern(expected, parseTypes, patternTypes, segmentErrors)
 
 	if !pass {
-		return false, errorMsgs, ast.ProgramNode{}
+		return false, errorMsgs, ast.ProgramNode{}.BuildNode(ast.BuildArguments{})
 	}
 
-	return true, []string{}, ast.ProgramNode{}
+	return true, []string{}, ast.ProgramNode{}.BuildNode(ast.BuildArguments{})
 }
 
 func (p *parser) parseEscapedCharacter() (bool, []string, ast.Node) {
@@ -1569,10 +1568,10 @@ func (p *parser) parseEscapedCharacter() (bool, []string, ast.Node) {
 	pass, errorMsgs, _ = p.parseOptions(op1, op2, op3, op4, op5, op6, op7, op8, op9)
 
 	if !pass {
-		return false, errorMsgs, ast.ProgramNode{}
+		return false, errorMsgs, ast.ProgramNode{}.BuildNode(ast.BuildArguments{})
 	}
 
-	return true, []string{}, ast.ProgramNode{}
+	return true, []string{}, ast.ProgramNode{}.BuildNode(ast.BuildArguments{})
 }
 
 func (p *parser) parseArrayLiteral() (bool, []string, ast.Node) {
@@ -1588,10 +1587,10 @@ func (p *parser) parseArrayLiteral() (bool, []string, ast.Node) {
 	pass, errorMsgs, _ = p.parsePattern(expected, parseTypes, patternTypes, segmentErrors)
 
 	if !pass {
-		return false, errorMsgs, ast.ProgramNode{}
+		return false, errorMsgs, ast.ProgramNode{}.BuildNode(ast.BuildArguments{})
 	}
 
-	return true, []string{}, ast.ProgramNode{}
+	return true, []string{}, ast.ProgramNode{}.BuildNode(ast.BuildArguments{})
 }
 
 func (p *parser) parseArrayExtra() (bool, []string, ast.Node) {
@@ -1608,10 +1607,10 @@ func (p *parser) parseArrayExtra() (bool, []string, ast.Node) {
 	pass, errorMsgs, _ = p.parsePattern(expected, parseTypes, patternTypes, segmentErrors)
 
 	if !pass {
-		return false, errorMsgs, ast.ProgramNode{}
+		return false, errorMsgs, ast.ProgramNode{}.BuildNode(ast.BuildArguments{})
 	}
 
-	return true, []string{}, ast.ProgramNode{}
+	return true, []string{}, ast.ProgramNode{}.BuildNode(ast.BuildArguments{})
 }
 
 func (p *parser) parsePairLiteral() (bool, []string, ast.Node) {
@@ -1627,14 +1626,14 @@ func (p *parser) parsePairLiteral() (bool, []string, ast.Node) {
 	pass, errorMsgs, _ = p.parsePattern(expected, parseTypes, patternTypes, segmentErrors)
 
 	if !pass {
-		return false, errorMsgs, ast.ProgramNode{}
+		return false, errorMsgs, ast.ProgramNode{}.BuildNode(ast.BuildArguments{})
 	}
 
-	return true, []string{}, ast.ProgramNode{}
+	return true, []string{}, ast.ProgramNode{}.BuildNode(ast.BuildArguments{})
 }
 
 func (p *parser) parseComment() (bool, []string, ast.Node) {
-	return true, []string{}, ast.ProgramNode{}
+	return true, []string{}, ast.ProgramNode{}.BuildNode(ast.BuildArguments{})
 }
 
 /* PARSE HELPERS */
@@ -1652,7 +1651,7 @@ func (p *parser) parseOne(parseCheck parseType, errorMsgs *[]string) (bool, ast.
 
 	*errorMsgs = append(*errorMsgs, errorMsgTemp...)
 
-	return match, ast.ProgramNode{}
+	return match, ast.ProgramNode{}.BuildNode(ast.BuildArguments{})
 }
 
 // Returns true iff currTok matches the expectedType.
@@ -1686,7 +1685,7 @@ func (p *parser) parseOptional(parseCheck parseType, errorMsgs *[]string) ast.No
 		p.backTrack()
 	}
 
-	return ast.ProgramNode{}
+	return ast.ProgramNode{}.BuildNode(ast.BuildArguments{})
 
 }
 
@@ -1717,7 +1716,7 @@ func (p *parser) parseZeroOrMore(parseCheck parseType, errorMsgs *[]string) ast.
 
 	}
 
-	return ast.ProgramNode{}
+	return ast.ProgramNode{}.BuildNode(ast.BuildArguments{})
 }
 
 // Attempts to parse one or patterns based on parseCheck
@@ -1735,7 +1734,7 @@ func (p *parser) parseOneOrMore(parseCheck parseType, errorMsgs *[]string) (bool
 	if !match {
 		*errorMsgs = append(*errorMsgs, errorMsgTemp...)
 
-		return false, ast.ProgramNode{}
+		return false, ast.ProgramNode{}.BuildNode(ast.BuildArguments{})
 	}
 
 	for {
@@ -1749,7 +1748,7 @@ func (p *parser) parseOneOrMore(parseCheck parseType, errorMsgs *[]string) (bool
 
 	}
 
-	return true, ast.ProgramNode{}
+	return true, ast.ProgramNode{}.BuildNode(ast.BuildArguments{})
 }
 
 // Attempts to parse a pattern using a series of pattern match request
@@ -1777,7 +1776,7 @@ func (p *parser) parsePattern(expArgs []grammar.ItemType, segments []parseType, 
 		case EXPECT:
 			if !p.expectToken(expArgs[0]) {
 				p.addErrors(&errorMsgTemp, []string{segmentErrors[i]})
-				return false, errorMsgTemp
+				return false, errorMsgTemp, ast.ProgramNode{}.BuildNode(ast.BuildArguments{})
 			}
 
 			if len(expArgs) > 1 {
@@ -1786,9 +1785,11 @@ func (p *parser) parsePattern(expArgs []grammar.ItemType, segments []parseType, 
 			break
 
 		case ONCE:
-			if !p.parseOne(segments[0], &errorMsgTemp) {
+			var pass, node = p.parseOne(segments[0], &errorMsgTemp)
+
+			if !pass {
 				p.addErrors(&errorMsgTemp, []string{segmentErrors[i]})
-				return false, errorMsgTemp
+				return false, errorMsgTemp, node
 			}
 
 			if len(segments) > 1 {
@@ -1813,9 +1814,10 @@ func (p *parser) parsePattern(expArgs []grammar.ItemType, segments []parseType, 
 			break
 
 		case ONEMORE:
-			if !p.parseOneOrMore(segments[0], &errorMsgTemp) {
+			var pass, node = p.parseOneOrMore(segments[0], &errorMsgTemp)
+			if !pass {
 				p.addErrors(&errorMsgTemp, []string{segmentErrors[i]})
-				return false, errorMsgTemp
+				return false, errorMsgTemp, node
 			}
 
 			if len(segments) > 1 {
@@ -1828,7 +1830,7 @@ func (p *parser) parsePattern(expArgs []grammar.ItemType, segments []parseType, 
 		p.reSave()
 	}
 
-	return true, []string{}
+	return true, []string{}, ast.ProgramNode{}.BuildNode(ast.BuildArguments{})
 }
 
 // Attempts to parse at least one pattern (from a list of possible parsePattern
@@ -1852,14 +1854,14 @@ func (p *parser) parseOptions(args ...patternArgs) (bool, []string, ast.Node) {
 		errorMsgs = append(errorMsgs, errorMsgsTemp...)
 
 		if pass {
-			return true, []string{}, ast.ProgramNode{}
+			return true, []string{}, ast.ProgramNode{}.BuildNode(ast.BuildArguments{})
 		}
 
 		p.backTrack()
 
 	}
 
-	return pass, errorMsgs, ast.ProgramNode{}
+	return pass, errorMsgs, ast.ProgramNode{}.BuildNode(ast.BuildArguments{})
 }
 
 /* ---------------------------------------------------------------------------*/
