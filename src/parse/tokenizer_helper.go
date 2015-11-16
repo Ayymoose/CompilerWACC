@@ -27,11 +27,8 @@ func (g ItemTypeSlice) Swap(i, j int) {
 	g[i], g[j] = g[j], g[i]
 }
 
+// lexInsideAction scans the elements inside action delimiters.
 func lexInsideProgram(l *Lexer) stateFn {
-	/*	if strings.HasPrefix(l.input[l.pos:], token_keyword_strings[END]) {
-		return lexEnd
-	}  */
-
 	var keysForKeywords ItemTypeSlice
 	for k := range grammar.Token_keyword_strings {
 		keysForKeywords = append(keysForKeywords, k)
@@ -43,7 +40,6 @@ func lexInsideProgram(l *Lexer) stateFn {
 			l.width = len(s)
 			l.pos += l.width
 			if isAlphaNumeric(l.peek()) || l.peek() == '_' {
-				//		l.backup()
 				return lexIdentifier
 			}
 			l.emit(grammar.ItemType(key))
@@ -114,6 +110,7 @@ func lexInsideProgram(l *Lexer) stateFn {
 	return l.errorf("Item Not in WACC lanuage: %s", l.input[l.start:l.start+l.width])
 }
 
+// next returns the next rune in the input.
 func (l *Lexer) next() (char rune) {
 	if l.pos >= len(l.input) {
 		l.width = 0
@@ -124,20 +121,24 @@ func (l *Lexer) next() (char rune) {
 	return char
 }
 
+// ignore skips over the pending input before this point.
 func (l *Lexer) ignore() {
 	l.start = l.pos
 }
 
+// backup steps back one rune. Can only be called once per call of next.
 func (l *Lexer) backup() {
 	l.pos -= l.width
 }
 
+// peek returns but does not consume the next rune in the input.
 func (l *Lexer) peek() rune {
 	char := l.next()
 	l.backup()
 	return char
 }
 
+// accept consumes the next rune if it's from the valid set.
 func (l *Lexer) accept(vaild string) bool {
 	if strings.IndexRune(vaild, l.next()) >= 0 {
 		return true
@@ -146,22 +147,17 @@ func (l *Lexer) accept(vaild string) bool {
 	return false
 }
 
+// acceptRun consumes a run of runes from the valid set.
 func (l *Lexer) acceptRun(valid string) {
 	for strings.IndexRune(valid, l.next()) >= 0 {
 	}
 	l.backup()
 }
 
+// emit passes an item back to the client.
 func (l *Lexer) emit(t grammar.ItemType) {
 	l.Items <- Token{Typ: t, Lexeme: l.input[l.start:l.pos], Pos: l.start}
 	l.start = l.pos
-}
-
-func lexError(l *Lexer) stateFn {
-	line, col := l.currLocation()
-	fmt.Printf("At %d:%d :: Item Not in WACC lanuage: %s", line, col, l.input[l.start:l.start+l.width])
-	l.Items <- Token{Typ: grammar.ERROR, Lexeme: fmt.Sprintf("Item Not in WACC lanuage: %s", l.input[l.start:l.start+l.width]), Pos: l.start}
-	return nil
 }
 
 func (l *Lexer) errorf(format string, args ...interface{}) stateFn {
