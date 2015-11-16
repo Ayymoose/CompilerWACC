@@ -10,8 +10,8 @@ import (
 	"math"
 	"strconv"
 
-	ast "github.com/nanaasiedu/wacc_19/src/abstractSyntaxTree"
-	"github.com/nanaasiedu/wacc_19/src/grammar"
+	ast "abstractSyntaxTree"
+	"grammar"
 )
 
 func (i Token) String() string {
