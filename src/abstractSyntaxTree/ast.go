@@ -38,8 +38,8 @@ type PosIdentType struct {
 // Root node of AST
 type ProgramNode struct {
 	Position
-	Func []FunctionNode //rename funcslice
-	Stat []StatementNode
+	FuncList []FunctionNode //rename funcslice
+	StatList []StatementNode
 }
 
 type FunctionNode struct {
@@ -458,34 +458,53 @@ func (p *ProgramNode) BuildNode() Node {
 */
 
 func (p *ProgramNode) BuildNode(buildArguments BuildArguments) Node {
-	/*
-		type ProgramNode struct {
-			Position
-			Func []FunctionNode //rename funcslice
-			Stat []StatementNode
-		}*/
 	p.Pos = buildArguments.Pos
 
 	for i, node := range buildArguments.ChildListOne { // []Node
-		p.Func[i] = node.(FunctionNode)
+		p.FuncList[i] = node.(FunctionNode)
 	}
 
 	for i, node := range buildArguments.ChildListTwo { // []Node
-		p.Stat[i] = node.(StatementNode)
+		p.StatList[i] = node.(StatementNode)
 	}
 
 	return p
 }
 
 func (f FunctionNode) BuildNode(buildArguments BuildArguments) Node {
+
+	f.Pos = buildArguments.Pos
+	f.Ident = buildArguments.Ident
+	f.Type = buildArguments.Type
+
+	for i, node := range buildArguments.ChildListOne { // []Node
+		f.ParamList[i] = node.(ParameterNode)
+	}
+
+	for i, node := range buildArguments.ChildListTwo { // []Node
+		f.StatList[i] = node.(StatementNode)
+	}
+
 	return f
 }
 
 func (p ParameterNode) BuildNode(buildArguments BuildArguments) Node {
+
+	p.Pos = buildArguments.Pos
+	p.Ident = buildArguments.Ident
+	p.Type = buildArguments.Type
+
 	return p
 }
 
 func (s StatementNode) BuildNode(buildArguments BuildArguments) Node {
+	/*
+		type StatementNode struct {
+			Position
+			StatElem Node
+		}*/ /*
+		s.Pos = buildArguments.Pos
+		s.Stat =*/
 	return s
 }
 
