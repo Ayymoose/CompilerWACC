@@ -61,22 +61,7 @@ func lexInsideProgram(l *Lexer) stateFn {
 				return lexString
 			case grammar.SINGLE_QUOTE:
 				return lexChar
-			case grammar.NULL_TERMINATOR:
-				l.ignore()
-				return lexInsideProgram
-			case grammar.BACKSPACE:
-				l.ignore()
-				return lexInsideProgram
-			case grammar.TAB:
-				l.ignore()
-				return lexInsideProgram
-			case grammar.LINE_FEED:
-				l.ignore()
-				return lexInsideProgram
-			case grammar.FORM_FEED:
-				l.ignore()
-				return lexInsideProgram
-			case grammar.CARRIAGE_RETURN:
+			case grammar.NULL_TERMINATOR, grammar.BACKSPACE, grammar.TAB, grammar.LINE_FEED, grammar.FORM_FEED, grammar.CARRIAGE_RETURN:
 				l.ignore()
 				return lexInsideProgram
 			case grammar.COMMENT_LINE:

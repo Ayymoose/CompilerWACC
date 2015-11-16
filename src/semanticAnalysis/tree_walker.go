@@ -179,6 +179,8 @@ func (d *DeclarationNode) visitDeclaration(symbolTable *SymbolTable) (bool, []st
 	return pass, errorMsgs
 }
 
+//func checkType(SymbolTable *SymbolTable)
+
 func checkForDeclaration(symbolTable *SymbolTable) (bool, []string) {
 
 	// Check if declaration exists already in symboltable by checking if ident is a key
@@ -192,8 +194,12 @@ func checkForDeclaration(symbolTable *SymbolTable) (bool, []string) {
 }
 
 func (a *AssignRHSNode) checkAssignRHSType(baseType string) (bool, []string, grammar.ItemType) {
-	a.AssignRHSElem //Node
+	node := a.AssignRHSElem //Node
 
+	switch node {
+	case ExprNode:
+
+	}
 	ExprNode
 	ArrayLiterNode
 	// be carefull with dealing with newpairs ASK NANA HOW HE DEALS WITH PAIRS
