@@ -73,10 +73,17 @@ func (symbolTable *SymbolTable) insert(key string, value []grammar.ItemType) {
 func (symbolTable *SymbolTable) lookUp(key string) (bool, []string) {
 	var errorMsgs []string // An array of error messages
 	var pass = true        // source of bugs??
-
 	// check if key is in current symbol table
-	// if not
-	// recurse on parent symbol tables
+	if symbolTable.semanticMap[key] != 0 {
+		return true, []string{""}
+	} else {
+		// if not then recurse on parent symbol tables
+		if symbolTable.parent != nil {
+			symbolTable.parent.lookUp(key)
+		} else {
+			return false, []string{""}
+		}
+	}
 	// if not found after recursion then return undeclared error
 }
 
