@@ -144,14 +144,10 @@ type AssignLHSNode struct {
 	AssignLHSElem Node
 }
 
-/*
 type IdentNode struct {
-	Node
-	Pos grammar.Position
-	//	Ident grammar.IDENTIFIER    check this error
+	Pos   grammar.Position
 	Ident string
 }
-*/
 
 type PairElemNode struct {
 	Position
@@ -181,7 +177,7 @@ type NewPairNode struct {
 
 type ArgListNode struct {
 	Position
-	Expr []ExprNode // one or more args list
+	ExprList []ExprNode // one or more args list
 }
 
 type TypeNode struct {
@@ -573,6 +569,13 @@ func (a AssignLHSNode) BuildNode(buildArguments BuildArguments) Node {
 	return a
 }
 
+func (i IdentNode) BuildNode(buildArguments BuildArguments) Node {
+	i.Pos = buildArguments.Pos
+	i.Ident = buildArguments.Ident
+
+	return i
+}
+
 func (a ArrayElemNode) BuildNode(buildArguments BuildArguments) Node {
 	a.Pos = buildArguments.Pos
 	a.Expr = buildArguments.ChildListOne[0].(ExprNode)
@@ -613,14 +616,27 @@ func (a ArrayLiterNode) BuildNode(buildArguments BuildArguments) Node {
 }
 
 func (n NewPairNode) BuildNode(buildArguments BuildArguments) Node {
+	n.Pos = buildArguments.Pos
+	n.Expr = buildArguments.ChildListOne[0].(ExprNode)
+
 	return n
 }
 
 func (c CallNode) BuildNode(buildArguments BuildArguments) Node {
+	c.Pos = buildArguments.Pos
+	c.Ident = buildArguments.Ident
+	c.ArgList = buildArguments.ChildListOne[0].(ArgListNode)
+
 	return c
 }
 
 func (a ArgListNode) BuildNode(buildArguments BuildArguments) Node {
+	a.Pos = buildArguments.Pos
+
+	for i, node := range buildArguments.ChildListOne { // []Node
+		a.ExprList[i] = node.(ExprNode)
+	}
+
 	return a
 }
 
