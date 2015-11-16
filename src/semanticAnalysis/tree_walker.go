@@ -137,10 +137,10 @@ func (d *DeclarationNode) visitDeclaration(symbolTable *SymbolTable) (bool, []st
 
 	// Get type
 	var baseType []grammar.ItemType
-	baseType = d.PosIdentType.Type // []grammar.ItemType
+	baseType = d.Type // []grammar.ItemType
 
 	// Get identifier
-	ident := d.PosIdentType.Ident // string
+	ident := d.Ident // string
 
 	// Check if ident is already declared in current symbolTable
 	// If not recurse on parent symboltables until found (if at all)
@@ -193,17 +193,23 @@ func checkForDeclaration(symbolTable *SymbolTable) (bool, []string) {
 
 }
 
-func (a *AssignRHSNode) checkAssignRHSType(baseType string) (bool, []string, grammar.ItemType) {
+func (a *AssignRHSNode) checkAssignRHSType(itemType grammar.ItemType, SymbolTable *SymbolTable) (bool, []string, grammar.ItemType) {
 	node := a.AssignRHSElem //Node
 
-	switch node {
+	switch node.(type) {
 	case ExprNode:
+		return (node.(ExprNode)).ExprNodeType(SymbolTable)
+	case ArrayLiterNode:
+	case PairElemNode:
 
 	}
-	ExprNode
-	ArrayLiterNode
+
+	//	ExprNode
+	//	ArrayLiterNode
+
 	// be carefull with dealing with newpairs ASK NANA HOW HE DEALS WITH PAIRS
-	PairElemNode
+
+	//	PairElemNode
 	// be carefull with call -> only works on functions so just check return type of function
 	/*
 			hexpr i
@@ -213,6 +219,15 @@ func (a *AssignRHSNode) checkAssignRHSType(baseType string) (bool, []string, gra
 		| ‘call’ hidenti ‘(’ harg-listi? ‘)’
 	*/
 
+}
+
+func (exprNode *ExprNode) ExprNodeType(SymbolTable *SymbolTable) (grammar.ItemType, []string) {
+
+	elem := exprNode.ExprElem
+	switch elem.(type) {
+	case
+
+	}
 }
 
 func (a *AssignRHSNode) visitAssignRHS() {
@@ -248,7 +263,15 @@ func (a *AssignmentNode) visitAssignment(symbolTable *SymbolTable) {
 
 }
 
-func (r *ReadNode) visitRead(symbolTable *SymbolTable) {
+func (r *ReadNode) visitRead(symbolTable *SymbolTable) (bool, []string) {
+	elem := r.AssignLHS.AssignLHSElem
+
+	switch elem.(type) {
+	case IdentNode:
+		symbolTable.isDefined(elem.(IdentNode).Ident)
+	case ArrayElemNode:
+	case PairElemNode:
+	}
 	// can only read in a char or int
 	// read must be followed by a variable
 

@@ -145,7 +145,7 @@ type AssignLHSNode struct {
 }
 
 type IdentNode struct {
-	Pos   grammar.Position
+	Pos   int
 	Ident string
 }
 
