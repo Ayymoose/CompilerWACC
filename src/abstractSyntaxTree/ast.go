@@ -145,7 +145,7 @@ type AssignLHSNode struct {
 }
 
 type IdentNode struct {
-	Pos   grammar.Position
+	Pos   int
 	Ident string
 }
 
@@ -431,7 +431,7 @@ func (d DataNode) BuildNode(buildArguments BuildArguments) Node {
 	return d
 }
 
-func (p *ProgramNode) BuildNode(buildArguments BuildArguments) Node {
+func (p ProgramNode) BuildNode(buildArguments BuildArguments) Node {
 	p.Pos = buildArguments.Pos
 
 	for i, node := range buildArguments.ChildListOne { // []Node
