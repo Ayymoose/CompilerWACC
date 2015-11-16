@@ -10,10 +10,7 @@ import (
 )
 
 func main() {
-	//	fmt.Println(len(os.Args), os.Args)
 	file := os.Args[1]
-	//	fmt.Println(file)
-
 	b, err := ioutil.ReadFile(file)
 	//	b, err := ioutil.ReadFile("wacc_examples/valid/variables/capCharDeclaration.wacc")
 	//	b, err := ioutil.ReadFile("wacc_examples/valid/function/nested_functions/fibonacciFullRec.wacc")

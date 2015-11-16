@@ -6,18 +6,13 @@ import (
 	"grammar"
 )
 
+// stateFn represents the state of the scanner as a function that returns the next state.
 type stateFn func(*Lexer) stateFn
 
-/*
-type Item struct {
-	typ grammar.ItemType
-	val string
-}  */
-
 type Token struct {
-	Typ    grammar.ItemType
-	Lexeme string
-	Pos    int
+	Typ    grammar.ItemType // The type of this item.
+	Lexeme string           // The value of this item.
+	Pos    int              // The starting position, in bytes, of this item in the input string.
 }
 
 type Lexer struct {
@@ -31,18 +26,21 @@ type Lexer struct {
 	Items   chan Token
 }
 
+// Returns line number and column number of token in .wacc file
 func (l *Lexer) TokenLocation(t Token) (line int, col int) {
 	line = 1 + strings.Count(l.input[:t.Pos], "\n")
 	col = t.Pos - strings.LastIndex(l.input[:t.Pos], "\n")
 	return
 }
 
+//Returns line number and column number of current lexing item in .wacc file
 func (l *Lexer) currLocation() (line int, col int) {
 	line = 1 + strings.Count(l.input[:l.pos], "\n")
 	col = l.pos - strings.LastIndex(l.input[:l.pos], "\n")
 	return
 }
 
+// run runs the state machine for the lexer.
 func (l *Lexer) run() {
 	for state := lexText; state != nil; {
 		state = state(l)
@@ -58,6 +56,7 @@ func (l *Lexer) NextItem() Token {
 	return item
 }
 
+// lexText scans until an opening action "BEGIN"
 func lexText(l *Lexer) stateFn {
 	for {
 		_ = "breakpoint"
@@ -80,6 +79,7 @@ func lexText(l *Lexer) stateFn {
 	return nil
 }
 
+// lex creates a new scanner for the input string.
 func Lex(name, input string) *Lexer {
 	l := &Lexer{
 		name:  name,

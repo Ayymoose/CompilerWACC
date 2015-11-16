@@ -8,30 +8,6 @@ import (
 	"grammar"
 )
 
-/*
-func lexBegin(l *Lexer) stateFn {
-	_ = "breakpoint"
-	l.width = len(token_keyword_strings[BEGIN])
-	l.pos += l.width
-	if unicode.IsLetter(l.next()) {
-		l.backup()
-		return lexIdentifier
-	}
-	l.emit(BEGIN)
-	return lexInsideProgram
-}
-
-func lexEnd(l *Lexer) stateFn {
-	l.width = len(token_keyword_strings[END])
-	l.pos += l.width
-	if unicode.IsLetter(l.next()) {
-		l.backup()
-		return lexIdentifier
-	}
-	l.emit(END)
-	return lexInsideProgram
-}*/
-
 func lexIdentifier(l *Lexer) stateFn {
 	if !(unicode.IsLetter(l.peek()) || l.peek() == '_') {
 		l.next()
@@ -40,7 +16,6 @@ func lexIdentifier(l *Lexer) stateFn {
 	for isAlphaNumeric(l.peek()) || l.peek() == '_' {
 		l.next()
 	}
-	//	l.backup()
 	l.emit(grammar.IDENTIFIER)
 	return lexInsideProgram
 }
@@ -61,13 +36,6 @@ Loop:
 				l.next()
 				break
 			}
-			/*	if r := l.peek(); r != grammar.Eof && r != '\n' {
-				fmt.Println(strconv.QuoteRuneToASCII(r))
-				fmt.Println("Got to Eof\n\\\\\\\\!!!!!!!!!!!!!!!!")
-				l.next()
-				break
-			}  */
-
 			fallthrough
 		case grammar.Eof, '\n':
 			return l.errorf("unterminated character constant")
@@ -102,9 +70,6 @@ func lexNumber(l *Lexer) stateFn {
 	l.accept("+-")
 	digits := "0123456789"
 	l.acceptRun(digits)
-	/*	if unicode.IsLetter(l.peek()) {
-		return l.errorf("bad number syntax: %q", l.input[l.start:l.pos])
-	}  */
 	l.emit(grammar.NUMBER)
 	return lexInsideProgram
 }
