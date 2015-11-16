@@ -38,8 +38,8 @@ type PosIdentType struct {
 // Root node of AST
 type ProgramNode struct {
 	Position
-	Func []FunctionNode //rename funcslice
-	Stat []StatementNode
+	FuncList []FunctionNode //rename funcslice
+	StatList []StatementNode
 }
 
 type FunctionNode struct {
@@ -269,43 +269,6 @@ type NullNode struct {
 	NullTerminator grammar.ItemType
 }
 
-type BackslashNode struct {
-	Position
-	Backslash grammar.ItemType
-}
-
-type TabNode struct {
-	Position
-	Tab grammar.ItemType
-}
-
-type LineFeedNode struct {
-	Position
-	LineFeed grammar.ItemType
-}
-
-type FormFeedNode struct {
-	Position
-	FormFeed grammar.ItemType
-}
-
-type CarriageReturnNode struct {
-	Position
-	CarriageReturn grammar.ItemType
-}
-
-type DoubleQuoteNode struct {
-	Position
-	DoubleQuote grammar.ItemType
-}
-
-type SingleQuoteNode struct {
-	Position
-	SingleQuote grammar.ItemType
-}
-
-/// NEED TO IMPLEMENT '\'
-
 type PairLiterNode struct {
 	Position
 	PairLiter grammar.ItemType //should be NULL
@@ -458,34 +421,49 @@ func (p *ProgramNode) BuildNode() Node {
 */
 
 func (p *ProgramNode) BuildNode(buildArguments BuildArguments) Node {
-	/*
-		type ProgramNode struct {
-			Position
-			Func []FunctionNode //rename funcslice
-			Stat []StatementNode
-		}*/
 	p.Pos = buildArguments.Pos
 
 	for i, node := range buildArguments.ChildListOne { // []Node
-		p.Func[i] = node.(FunctionNode)
+		p.FuncList[i] = node.(FunctionNode)
 	}
 
 	for i, node := range buildArguments.ChildListTwo { // []Node
-		p.Stat[i] = node.(StatementNode)
+		p.StatList[i] = node.(StatementNode)
 	}
 
 	return p
 }
 
 func (f FunctionNode) BuildNode(buildArguments BuildArguments) Node {
+
+	f.Pos = buildArguments.Pos
+	f.Ident = buildArguments.Ident
+	f.Type = buildArguments.Type
+
+	for i, node := range buildArguments.ChildListOne { // []Node
+		f.ParamList[i] = node.(ParameterNode)
+	}
+
+	for i, node := range buildArguments.ChildListTwo { // []Node
+		f.StatList[i] = node.(StatementNode)
+	}
+
 	return f
 }
 
 func (p ParameterNode) BuildNode(buildArguments BuildArguments) Node {
+
+	p.Pos = buildArguments.Pos
+	p.Ident = buildArguments.Ident
+	p.Type = buildArguments.Type
+
 	return p
 }
 
 func (s StatementNode) BuildNode(buildArguments BuildArguments) Node {
+	s.Pos = buildArguments.Pos
+	s.StatElem = buildArguments.ChildListOne[0]
+
 	return s
 }
 
@@ -614,34 +592,6 @@ func (e EscapedCharNode) BuildNode(buildArguments BuildArguments) Node {
 
 func (n NullNode) BuildNode(buildArguments BuildArguments) Node {
 	return n
-}
-
-func (b BackslashNode) BuildNode(buildArguments BuildArguments) Node {
-	return b
-}
-
-func (t TabNode) BuildNode(buildArguments BuildArguments) Node {
-	return t
-}
-
-func (l LineFeedNode) BuildNode(buildArguments BuildArguments) Node {
-	return l
-}
-
-func (f FormFeedNode) BuildNode(buildArguments BuildArguments) Node {
-	return f
-}
-
-func (c CarriageReturnNode) BuildNode(buildArguments BuildArguments) Node {
-	return c
-}
-
-func (d DoubleQuoteNode) BuildNode(buildArguments BuildArguments) Node {
-	return d
-}
-
-func (s SingleQuoteNode) BuildNode(buildArguments BuildArguments) Node {
-	return s
 }
 
 func (p PairLiterNode) BuildNode(buildArguments BuildArguments) Node {

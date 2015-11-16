@@ -1,6 +1,6 @@
 package semanticAnalysis
 
-import "github.com/henrykhadass/wacc_19/src/grammar"
+import "grammar"
 
 func (ast *ProgramNode) visitProgram() {
 	// Create new symbolTable

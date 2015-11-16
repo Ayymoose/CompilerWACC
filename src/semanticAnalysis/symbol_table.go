@@ -49,7 +49,7 @@
 
 package semanticAnalysis
 
-import "github.com/henrykhadass/wacc_19/src/grammar"
+import "grammar"
 
 // SymbolTable constructor
 type SymbolTable struct {
