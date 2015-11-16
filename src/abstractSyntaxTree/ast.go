@@ -1,585 +1,806 @@
 package abstractSyntaxTree
 
 import (
-	grammar "grammar"
+	"grammar"
 )
 
-// NodeId identifies the type of an abstract syntax tree node
-type NodeId int
-
-const (
-	NodeProgram NodeId = iota
-	NodeFunc
-	NodeParamList
-	NodeParam
-	NodeStat
-	NodeDeclaration
-	NodeAssignment
-	NodeRead
-	NodeFree
-	NodeReturn
-	NodeExit
-	NodePrint
-	NodePrintln
-	NodeIf
-	NodeWhile
-	NodeAssignLHS
-	NodeIdent
-	NodeArrayElem
-	NodePairElem
-	NodeAssignRHS
-	NodeExpr
-	NodeArrayLiter
-	NodeNewPair
-	NodeCall
-	NodeArgList
-	NodeType
-	NodeBaseType
-	NodeInt
-	NodeBool
-	NodeChar
-	NodeString
-	NodeArrayType
-	NodePairType
-	NodePairElemType
-	NodeIntLiter
-	NodeBoolLiter
-	NodeCharLiter
-	NodeStrLiter
-	NodeCharacter
-	NodeEscapedChar
-	NodeNull
-	NodeBackslash
-	NodeTab
-	NodeLineFeed
-	NodeFormFeed
-	NodeCarriageReturn
-	NodeDoubleQuote
-	NodeSingleQuote
-	NodePairLiter
-	NodeUnaryOperExpr
-	NodeEBE
-	NodeUnaryOper
-	NodeNot
-	NodeNeg
-	NodeLen
-	NodeOrd
-	NodeChr
-	NodeBinaryOper
-	NodeMult
-	NodeDiv
-	NodeMod
-	NodeAdd
-	NodeSub
-	NodeGt
-	NodeGte
-	NodeLt
-	NodeLte
-	NodeEq
-	NodeNeq
-	NodeAnd
-	NodeOr
-	NodeDigit
-	NodeIntSign
-	NodePlus
-	NodeNegate
-	NodeComment
-)
-
+// Node interface
+// Contains methods to be called on ondividual structs
 type Node interface {
-	getNodeType() int
+	BuildNode() Node
+}
+
+type BuildArguments struct {
+	Pos          grammar.Position
+	Type         grammar.ItemType
+	Ident        string
+	ChildListOne []Node
+	ChildListTwo []Node
+}
+
+// Structs for common fields
+// Not all structs have all of the common fields
+// Hence multiple field structs
+type Position struct {
+	Pos grammar.Position
+}
+
+type PosIdent struct {
+	Pos   grammar.Position
+	Ident string
+}
+
+type PosIdentType struct {
+	Pos   grammar.Position
+	Ident string
+	Type  grammar.ItemType
 }
 
 // Root node of AST
 type ProgramNode struct {
-	NodeId
-	Pos  int
-	Func []*FuncNode
-	Stat []*StatNode
+	Position
+	Node
+	Func []FunctionNode //rename funcslice
+	Stat []StatementNode
 }
 
-type FuncNode struct {
-	NodeId
-	Pos       int
-	Type      string       // add the type
-	Ident     string       // changed from *IdentNode
-	ParamList []*ParamNode // *ParamListNode // Optional
-	StatList  []*StatNode
+type FunctionNode struct {
+	PosIdentType
+	Node
+	ParamList []ParameterNode // *ParamListNode // Optional
+	StatList  []StatementNode
 }
 
-func (n FuncNode) getNodeType() int {
-	return n.Pos
-}
-
-/*
-type ParamListNode struct {
-	NodeId
-	Pos   int
-	Param []*ParamNode // one or more
-}
-*/
-
-type ParamNode struct {
-	NodeId
-	Pos   int
-	Type  string
-	Ident string // changed from  *IdentNode
-}
-
-type StatNode struct {
-	NodeId
-	Pos      int
-	StatElem *Node
+type ParameterNode struct {
+	PosIdentType
+	Node
 }
 
 // TypeIdent
 type DeclarationNode struct {
-	NodeId
-	Pos       int
-	Type      *TypeNode
-	Ident     string // changed from *IdentNode
-	AssignRHS *AssignRHSNode
+	PosIdentType
+	Node
+	AssignRHS AssignRHSNode
+}
+
+type ArrayElemNode struct {
+	PosIdent
+	Node
+	Expr ExprNode // repeatable
+}
+
+type CallNode struct {
+	PosIdent
+	Node
+	ArgList ArgListNode // optional
+}
+
+/*
+type ParamListNode struct {
+	Node
+	Pos   grammar.Position
+	Param []*ParamNode // one or more
+}
+*/
+
+type StatementNode struct {
+	Position
+	Node
+	StatElem Node
 }
 
 // AssignLHSToRight
 type AssignmentNode struct {
-	NodeId
-	Pos       int
-	AssignLHS *AssignLHSNode
-	AssignRHS *AssignRHSNode
+	Position
+	Node
+	AssignLHS AssignLHSNode
+	AssignRHS AssignRHSNode
 }
 
 type ReadNode struct {
-	NodeId
-	Pos       int
-	AssignLHS *AssignLHSNode
+	Position
+	Node
+	AssignLHS AssignLHSNode
 }
 
 type FreeNode struct {
-	NodeId
-	Pos  int
-	Expr *ExprNode
+	Position
+	Node
+	Expr ExprNode
 }
 
 type ReturnNode struct {
-	NodeId
-	Pos  int
-	Expr *ExprNode
+	Position
+	Node
+	Expr ExprNode
 }
 
 type ExitNode struct {
-	NodeId
-	Pos  int
-	Expr *ExprNode
+	Position
+	Node
+	Expr ExprNode
 }
 
 type PrintNode struct {
-	NodeId
-	Pos  int
-	Expr *ExprNode
+	Position
+	Node
+	Expr ExprNode
 }
 
 type PrintlnNode struct {
-	NodeId
-	Pos  int
-	Expr *ExprNode
+	Position
+	Node
+	Expr ExprNode
 }
 
 type IfNode struct {
-	NodeId
-	Pos  int
-	Expr *ExprNode
-	Stat []*StatNode // two stats
+	Position
+	Node
+	Expr ExprNode
+	Stat []StatementNode // two stats
 }
 
 type WhileNode struct {
-	NodeId
-	Pos  int
-	Expr *ExprNode
-	Stat *StatNode
+	Position
+	Node
+	Expr ExprNode
+	Stat StatementNode
 }
 
 //    ‘begin’ <stat> ‘end’
 // SPECIAL NEEDS
 type ScopeNode struct {
-	NodeId
-	StatElem *StatNode
+	Position
+	Node
+	StatElem StatementNode
 }
 
 type AssignLHSNode struct {
-	NodeId
-	Pos           int
-	AssignLHSElem *Node
+	Position
+	Node
+	AssignLHSElem Node
 }
 
 /*
 type IdentNode struct {
-	NodeId
-	Pos int
+	Node
+	Pos grammar.Position
 	//	Ident grammar.IDENTIFIER    check this error
 	Ident string
 }
 */
 
-type ArrayElemNode struct {
-	NodeId
-	Pos   int
-	Ident string    // *IdentNode
-	Expr  *ExprNode // repeatable
-}
-
 type PairElemNode struct {
-	NodeId
-	Pos int
-	Fst *ExprNode
-	Snd *ExprNode
+	Position
+	Node
+	Fst ExprNode
+	Snd ExprNode
 }
 
 type AssignRHSNode struct {
-	NodeId
-	Pos           int
-	AssignRHSElem *Node
+	Position
+	Node
+	AssignRHSElem Node
 }
 
 type ExprNode struct {
-	NodeId
-	Pos      int
-	ExprElem *Node
+	Position
+	Node
+	ExprElem Node
 }
 
 type ArrayLiterNode struct {
-	NodeId
-	Pos  int
-	Expr []*ExprNode
+	Position
+	Node
+	Expr []ExprNode
 }
 
 type NewPairNode struct {
-	NodeId
-	Pos  int
-	Expr *ExprNode // need two
-}
-
-type CallNode struct {
-	NodeId
-	Pos     int
-	Ident   string       // *IdentNode
-	ArgList *ArgListNode // optional
+	Position
+	Node
+	Expr ExprNode // need two
 }
 
 type ArgListNode struct {
-	NodeId
-	Pos  int
-	Expr []*ExprNode // one or more args list
+	Position
+	Node
+	Expr []ExprNode // one or more args list
 }
 
 type TypeNode struct {
-	NodeId
-	Pos      int
-	TypeElem *Node
+	Position
+	Node
+	TypeElem Node
 }
 
 type BaseTypeNode struct {
-	NodeId
-	Pos          int
-	BaseTypeElem *Node
+	Position
+	Node
+	BaseTypeElem grammar.ItemType //*Node
 }
 
+/*
 type IntNode struct {
-	NodeId
-	Pos int
+	Node
+	Pos grammar.Position
 	Int int
 }
 
 type BoolNode struct {
-	NodeId
-	Pos  int
+	Node
+	Pos  grammar.Position
 	Bool bool
 }
 
 type CharNode struct {
-	NodeId
-	Pos  int
+	Node
+	Pos  grammar.Position
 	Char rune
 }
 
 type StringNode struct {
-	NodeId
-	Pos    int
+	Node
+	Pos    grammar.Position
 	String string
 }
-
+*/
 type ArrayTypeNode struct {
-	NodeId
-	Pos  int
-	Type *TypeNode
+	Position
+	Node
+	Type TypeNode
 }
 
 type PairTypeNode struct {
-	NodeId
-	Pos          int
-	PairElemType []*PairElemTypeNode // need two for pair
+	Position
+	Node
+	PairElemType []PairElemTypeNode // need two for pair
 }
 
 type PairElemTypeNode struct {
-	NodeId
-	Pos              int
-	PairElemTypeElem *Node
+	Position
+	Node
+	PairElemTypeElem Node
 }
 
 type IntLiterNode struct {
-	NodeId
-	Pos     int
-	IntSign *IntSignNode // optional
-	Digit   *DigitNode   // repeatable
+	Position
+	Node
+	IntSign IntSignNode // optional
+	Digit   DigitNode   // repeatable
 }
 
 type BoolLiterNode struct {
-	NodeId
-	Pos       int
+	Position
+	Node
 	BoolLiter bool
 }
 
 type CharLiterNode struct {
-	NodeId
-	Pos           int
-	CharLiterElem *CharacterNode
+	Position
+	Node
+	CharLiterElem CharacterNode
 }
 
-type StrLiterNode struct {
-	NodeId
-	Pos      int
-	StrLiter []*CharacterNode
+type StringLiterNode struct {
+	Position
+	Node
+	StrLiter []CharacterNode
 }
 
 type CharacterNode struct {
-	NodeId
-	Pos int
+	Position
+	Node
 	// any ascii characterr
-	CharacterElem *Node
+	CharacterElem Node
 }
 
 type EscapedCharNode struct {
-	NodeId
-	Pos             int
-	EscapedCharElem *Node
+	Position
+	Node
+	EscapedCharElem Node
 }
 
 type NullNode struct {
-	NodeId
-	Pos            int
+	Position
+	Node
 	NullTerminator grammar.ItemType
 }
 
 type BackslashNode struct {
-	NodeId
-	Pos       int
+	Position
+	Node
 	Backslash grammar.ItemType
 }
 
 type TabNode struct {
-	NodeId
-	Pos int
+	Position
+	Node
 	Tab grammar.ItemType
 }
 
 type LineFeedNode struct {
-	NodeId
-	Pos      int
+	Position
+	Node
 	LineFeed grammar.ItemType
 }
 
 type FormFeedNode struct {
-	NodeId
-	Pos      int
+	Position
+	Node
 	FormFeed grammar.ItemType
 }
 
 type CarriageReturnNode struct {
-	NodeId
-	Pos            int
+	Position
+	Node
 	CarriageReturn grammar.ItemType
 }
 
 type DoubleQuoteNode struct {
-	NodeId
-	Pos         int
+	Position
+	Node
 	DoubleQuote grammar.ItemType
 }
 
 type SingleQuoteNode struct {
-	NodeId
-	Pos         int
+	Position
+	Node
 	SingleQuote grammar.ItemType
 }
 
 /// NEED TO IMPLEMENT '\'
 
 type PairLiterNode struct {
-	NodeId
-	Pos       int
+	Position
+	Node
 	PairLiter grammar.ItemType //should be NULL
 }
 
-type UnaryOperExprNode struct {
-	NodeId
-	Pos       int
-	UnaryOper *UnaryOperNode
-	Expr      *ExprNode
+type UnaryOpExprNode struct {
+	Position
+	Node
+	UnaryOper UnaryOpNode
+	Expr      ExprNode
 }
 
 type EBENode struct {
-	NodeId
-	Pos        int
-	Expr       *ExprNode
-	BinaryOper *BinaryOperNode
-	Expre      *ExprNode
+	Position
+	Node
+	Expr       []ExprNode
+	BinaryOper BinaryOpNode
+	// one either side of expr
 }
 
 // ( <expr> ) inside expr handled by parser
 
-type UnaryOperNode struct {
-	NodeId
-	Pos           int
-	UnaryOperElem *Node
+type UnaryOpNode struct {
+	Position
+	Node
+	UnaryOperElem Node
 }
 
 type NotNode struct {
-	NodeId
-	Pos int
+	Position
+	Node
 	Not grammar.ItemType
 }
 
 type NegNode struct {
-	NodeId
-	Pos int
+	Position
+	Node
 	Neg grammar.ItemType
 }
 
 type LenNode struct {
-	NodeId
-	Pos int
+	Position
+	Node
 	Len grammar.ItemType
 }
 
 type OrdNode struct {
-	NodeId
-	Pos int
+	Position
+	Node
 	Ord grammar.ItemType
 }
 
 type ChrNode struct {
-	NodeId
-	Pos int
+	Position
+	Node
 	Chr grammar.ItemType
 }
 
-type BinaryOperNode struct {
-	NodeId
-	Pos            int
+type BinaryOpNode struct {
+	Position
+	Node
 	BinaryOperElem *Node
 }
 
 type MultNode struct {
-	NodeId
-	Pos  int
+	Position
+	Node
 	Mult grammar.ItemType
 }
 
 type DivNode struct {
-	NodeId
-	Pos int
+	Position
+	Node
 	Div grammar.ItemType
 }
 
 type ModNode struct {
-	NodeId
-	Pos int
+	Position
+	Node
 	Mod grammar.ItemType
 }
 
 type AddNode struct {
-	NodeId
-	Pos int
+	Position
+	Node
 	Add grammar.ItemType
 }
 
 type SubNode struct {
-	NodeId
-	Pos int
+	Position
+	Node
 	Sub grammar.ItemType
 }
 
-type GtNode struct {
-	NodeId
-	Pos int
-	Gt  grammar.ItemType
+type GTNode struct {
+	Position
+	Node
+	Gt grammar.ItemType
 }
 
-type GteNode struct {
-	NodeId
-	Pos int
+type GTENode struct {
+	Position
+	Node
 	Gte grammar.ItemType
 }
 
-type LtNode struct {
-	NodeId
-	Pos int
-	Lt  grammar.ItemType
+type LTNode struct {
+	Position
+	Node
+	Lt grammar.ItemType
 }
 
-type LteNode struct {
-	NodeId
-	Pos int
+type LTENode struct {
+	Position
+	Node
 	Lte grammar.ItemType
 }
 
-type EqNode struct {
-	NodeId
-	Pos int
-	Eq  grammar.ItemType
+type EQNode struct {
+	Position
+	Node
+	Eq grammar.ItemType
 }
 
-type NeqNode struct {
-	NodeId
-	Pos int
+type NEQNode struct {
+	Position
+	Node
 	Neq grammar.ItemType
 }
 
 type AndNode struct {
-	NodeId
-	Pos int
+	Position
+	Node
 	And grammar.ItemType
 }
 
 type OrNode struct {
-	NodeId
-	Pos int
-	Or  grammar.ItemType
+	Position
+	Node
+	Or grammar.ItemType
 }
 
 type DigitNode struct {
-	NodeId
-	Pos int
+	Position
+	Node
 	//	DigitElem //need to include digit in grammar then do grammar.DIGIT
 	Digit int
 }
 
 type IntSignNode struct {
-	NodeId
-	Pos         int
-	IntSignElem *Node
+	Position
+	Node
+	IntSignElem Node
 }
 
-type PlusNode struct {
-	NodeId
-	Pos int
+type PositiveNode struct {
+	Position
+	Node
 	Add grammar.ItemType
 }
 
-type NegateNode struct {
-	NodeId
-	Pos int
+type NegativeNode struct {
+	Position
+	Node
 	Sub grammar.ItemType
 }
 
 //no need for comment node
+
+func (p *ProgramNode) BuildNode() Node {
+	p.Pos = BuildArguments.Pos
+	etcccccc
+	return p
+}
+
+func (p *ProgramNode) BuildNode() Node {
+	return p
+}
+
+func (f *FunctionNode) BuildNode() Node {
+	return f
+}
+
+func (p *ParameterNode) BuildNode() Node {
+	return p
+}
+
+func (s *StatementNode) BuildNode() Node {
+	return s
+}
+
+func (d *DeclarationNode) BuildNode() Node {
+	return d
+}
+
+func (a *AssignmentNode) BuildNode() Node {
+	return a
+}
+
+func (r *ReadNode) BuildNode() Node {
+	return r
+}
+
+func (f *FreeNode) BuildNode() Node {
+	return f
+}
+
+func (r *ReturnNode) BuildNode() Node {
+	return r
+}
+
+func (e *ExitNode) BuildNode() Node {
+	return e
+}
+
+func (p *PrintNode) BuildNode() Node {
+	return p
+}
+
+func (p *PrintlnNode) BuildNode() Node {
+	return p
+}
+
+func (i *IfNode) BuildNode() Node {
+	return i
+}
+
+func (w *WhileNode) BuildNode() Node {
+	return w
+}
+
+func (s *ScopeNode) BuildNode() Node {
+	return s
+}
+
+func (a *AssignLHSNode) BuildNode() Node {
+	return a
+}
+
+func (a *ArrayElemNode) BuildNode() Node {
+	return a
+}
+
+func (p *PairElemNode) BuildNode() Node {
+	return p
+}
+
+func (a *AssignRHSNode) BuildNode() Node {
+	return a
+}
+
+func (e *ExprNode) BuildNode() Node {
+	return e
+}
+
+func (a *ArrayLiterNode) BuildNode() Node {
+	return a
+}
+
+func (n *NewPairNode) BuildNode() Node {
+	return n
+}
+
+func (c *CallNode) BuildNode() Node {
+	return c
+}
+
+func (a *ArgListNode) BuildNode() Node {
+	return a
+}
+
+func (t *TypeNode) BuildNode() Node {
+	return t
+}
+
+func (b *BaseTypeNode) BuildNode() Node {
+	return b
+}
+
+func (a *ArrayTypeNode) BuildNode() Node {
+	return a
+}
+
+func (p *PairTypeNode) BuildNode() Node {
+	return p
+}
+
+func (p *PairElemTypeNode) BuildNode() Node {
+	return p
+}
+
+func (i *IntLiterNode) BuildNode() Node {
+	return i
+}
+
+func (b *BoolLiterNode) BuildNode() Node {
+	return b
+}
+
+func (c *CharLiterNode) BuildNode() Node {
+	return c
+}
+
+func (s *StringLiterNode) BuildNode() Node {
+	return s
+}
+func (c *CharacterNode) BuildNode() Node {
+	return c
+}
+
+func (e *EscapedCharNode) BuildNode() Node {
+	return e
+}
+
+func (n *NullNode) BuildNode() Node {
+	return n
+}
+
+func (b *BackslashNode) BuildNode() Node {
+	return b
+}
+
+func (t *TabNode) BuildNode() Node {
+	return t
+}
+
+func (l *LineFeedNode) BuildNode() Node {
+	return l
+}
+
+func (f *FormFeedNode) BuildNode() Node {
+	return f
+}
+
+func (c *CarriageReturnNode) BuildNode() Node {
+	return c
+}
+
+func (d *DoubleQuoteNode) BuildNode() Node {
+	return d
+}
+
+func (s *SingleQuoteNode) BuildNode() Node {
+	return s
+}
+
+func (p *PairLiterNode) BuildNode() Node {
+	return p
+}
+
+func (u *UnaryOpExprNode) BuildNode() Node {
+	return u
+}
+
+func (e *EBENode) BuildNode() Node {
+	return e
+}
+
+func (u *UnaryOpNode) BuildNode() Node {
+	return u
+}
+
+func (n *NotNode) BuildNode() Node {
+	return n
+}
+
+func (n *NegNode) BuildNode() Node {
+	return n
+}
+
+func (l *LenNode) BuildNode() Node {
+	return l
+}
+
+func (o *OrdNode) BuildNode() Node {
+	return o
+}
+
+func (c *ChrNode) BuildNode() Node {
+	return c
+}
+
+func (b *BinaryOpNode) BuildNode() Node {
+	return b
+}
+
+func (m *MultNode) BuildNode() Node {
+	return m
+}
+
+func (d *DivNode) BuildNode() Node {
+	return d
+}
+
+func (m *ModNode) BuildNode() Node {
+	return m
+}
+
+func (a *AddNode) BuildNode() Node {
+	return a
+}
+
+func (s *SubNode) BuildNode() Node {
+	return s
+}
+
+func (g *GTNode) BuildNode() Node {
+	return g
+}
+
+func (g *GTENode) BuildNode() Node {
+	return g
+}
+
+func (l *LTNode) BuildNode() Node {
+	return l
+}
+
+func (l *LTENode) BuildNode() Node {
+	return l
+}
+
+func (e *EQNode) BuildNode() Node {
+	return e
+}
+
+func (n *NEQNode) BuildNode() Node {
+	return n
+}
+
+func (a *AndNode) BuildNode() Node {
+	return a
+}
+
+func (o *OrNode) BuildNode() Node {
+	return o
+}
+
+func (d *DigitNode) BuildNode() Node {
+	return d
+}
+
+func (i *IntSignNode) BuildNode() Node {
+	return i
+}
+
+func (p *PositiveNode) BuildNode() Node {
+	return p
+}
+
+func (n *NegativeNode) BuildNode() Node {
+	return n
+}
