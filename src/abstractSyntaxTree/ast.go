@@ -1,7 +1,7 @@
 package abstractSyntaxTree
 
 import (
-	grammar "github.com/henrykhadass/wacc_19/src/grammar"
+	"grammar"
 )
 
 // Node interface

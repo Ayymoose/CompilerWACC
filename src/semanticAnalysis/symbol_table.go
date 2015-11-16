@@ -54,30 +54,36 @@ import "github.com/henrykhadass/wacc_19/src/grammar"
 // SymbolTable constructor
 type SymbolTable struct {
 	parent      *SymbolTable
-	semanticMap map[string][]grammar.ItemType // A map of strings to a list of tokens
+	semanticMap map[string]grammar.Token // A map of strings to a list of tokens
 }
 
 // Creates a new instance of a symbolTable with a parent to its pointer
 func (symbolTable *SymbolTable) New() *SymbolTable {
 	newSymbolTable := &SymbolTable{}
 	newSymbolTable.parent = symbolTable
-	newSymbolTable.semanticMap = make(map[string][]grammar.ItemType)
+	newSymbolTable.semanticMap = make(map[string][]grammar.Token)
 	return newSymbolTable
 }
 
-func (symbolTable *SymbolTable) insert(key string, value []grammar.ItemType) {
-	// I think below code is correct but double check
-	//symbolTable.semanticMap[key] = value
+func (SymbolTable *SymbolTable) insert(key string, value string) {
+	// convert value string into its grammar token here
 }
 
-func (symbolTable *SymbolTable) lookUp(key string) (bool, []string) {
-	var errorMsgs []string // An array of error messages
-	var pass = true        // source of bugs??
+//Checks if ident is already declared
+func (SymbolTable *SymbolTable) isDefined(key string) bool {
+	curr := SymbolTable
+	for curr != nil {
+		if curr.contains(key) {
+			return true
+		}
+		curr := SymbolTable.parent
+	}
+	return false
+}
 
-	// check if key is in current symbol table
-	// if not
-	// recurse on parent symbol tables
-	// if not found after recursion then return undeclared error
+func (SymbolTable *SymbolTable) contains(key string) bool {
+	_, ok := SymbolTable.semanticMap[key]
+	return ok
 }
 
 /*
