@@ -464,286 +464,290 @@ func (p *ProgramNode) BuildNode(buildArguments BuildArguments) Node {
 			Func []FunctionNode //rename funcslice
 			Stat []StatementNode
 		}*/
-	/*
-	     p.Pos = buildArguments.Pos
-	   	p.Func = buildArguments.ChildListOne.()
-	   	p.Stat = buildArguments.ChildListTwo
-	   	return p
-	*/
+	p.Pos = buildArguments.Pos
+
+	for i, node := range buildArguments.ChildListOne { // []Node
+		p.Func[i] = node.(FunctionNode)
+	}
+
+	for i, node := range buildArguments.ChildListTwo { // []Node
+		p.Stat[i] = node.(StatementNode)
+	}
+
 	return p
 }
 
-func (f *FunctionNode) BuildNode(buildArguments BuildArguments) Node {
+func (f FunctionNode) BuildNode(buildArguments BuildArguments) Node {
 	return f
 }
 
-func (p *ParameterNode) BuildNode(buildArguments BuildArguments) Node {
+func (p ParameterNode) BuildNode(buildArguments BuildArguments) Node {
 	return p
 }
 
-func (s *StatementNode) BuildNode(buildArguments BuildArguments) Node {
+func (s StatementNode) BuildNode(buildArguments BuildArguments) Node {
 	return s
 }
 
-func (d *DeclarationNode) BuildNode(buildArguments BuildArguments) Node {
+func (d DeclarationNode) BuildNode(buildArguments BuildArguments) Node {
 	return d
 }
 
-func (a *AssignmentNode) BuildNode(buildArguments BuildArguments) Node {
+func (a AssignmentNode) BuildNode(buildArguments BuildArguments) Node {
 	return a
 }
 
-func (r *ReadNode) BuildNode(buildArguments BuildArguments) Node {
+func (r ReadNode) BuildNode(buildArguments BuildArguments) Node {
 	return r
 }
 
-func (f *FreeNode) BuildNode(buildArguments BuildArguments) Node {
+func (f FreeNode) BuildNode(buildArguments BuildArguments) Node {
 	return f
 }
 
-func (r *ReturnNode) BuildNode(buildArguments BuildArguments) Node {
+func (r ReturnNode) BuildNode(buildArguments BuildArguments) Node {
 	return r
 }
 
-func (e *ExitNode) BuildNode(buildArguments BuildArguments) Node {
+func (e ExitNode) BuildNode(buildArguments BuildArguments) Node {
 	return e
 }
 
-func (p *PrintNode) BuildNode(buildArguments BuildArguments) Node {
+func (p PrintNode) BuildNode(buildArguments BuildArguments) Node {
 	return p
 }
 
-func (p *PrintlnNode) BuildNode(buildArguments BuildArguments) Node {
+func (p PrintlnNode) BuildNode(buildArguments BuildArguments) Node {
 	return p
 }
 
-func (i *IfNode) BuildNode(buildArguments BuildArguments) Node {
+func (i IfNode) BuildNode(buildArguments BuildArguments) Node {
 	return i
 }
 
-func (w *WhileNode) BuildNode(buildArguments BuildArguments) Node {
+func (w WhileNode) BuildNode(buildArguments BuildArguments) Node {
 	return w
 }
 
-func (s *ScopeNode) BuildNode(buildArguments BuildArguments) Node {
+func (s ScopeNode) BuildNode(buildArguments BuildArguments) Node {
 	return s
 }
 
-func (a *AssignLHSNode) BuildNode(buildArguments BuildArguments) Node {
+func (a AssignLHSNode) BuildNode(buildArguments BuildArguments) Node {
 	return a
 }
 
-func (a *ArrayElemNode) BuildNode(buildArguments BuildArguments) Node {
+func (a ArrayElemNode) BuildNode(buildArguments BuildArguments) Node {
 	return a
 }
 
-func (p *PairElemNode) BuildNode(buildArguments BuildArguments) Node {
+func (p PairElemNode) BuildNode(buildArguments BuildArguments) Node {
 	return p
 }
 
-func (a *AssignRHSNode) BuildNode(buildArguments BuildArguments) Node {
+func (a AssignRHSNode) BuildNode(buildArguments BuildArguments) Node {
 	return a
 }
 
-func (e *ExprNode) BuildNode(buildArguments BuildArguments) Node {
+func (e ExprNode) BuildNode(buildArguments BuildArguments) Node {
 	return e
 }
 
-func (a *ArrayLiterNode) BuildNode(buildArguments BuildArguments) Node {
+func (a ArrayLiterNode) BuildNode(buildArguments BuildArguments) Node {
 	return a
 }
 
-func (n *NewPairNode) BuildNode(buildArguments BuildArguments) Node {
+func (n NewPairNode) BuildNode(buildArguments BuildArguments) Node {
 	return n
 }
 
-func (c *CallNode) BuildNode(buildArguments BuildArguments) Node {
+func (c CallNode) BuildNode(buildArguments BuildArguments) Node {
 	return c
 }
 
-func (a *ArgListNode) BuildNode(buildArguments BuildArguments) Node {
+func (a ArgListNode) BuildNode(buildArguments BuildArguments) Node {
 	return a
 }
 
-func (t *TypeNode) BuildNode(buildArguments BuildArguments) Node {
+func (t TypeNode) BuildNode(buildArguments BuildArguments) Node {
 	return t
 }
 
-func (b *BaseTypeNode) BuildNode(buildArguments BuildArguments) Node {
+func (b BaseTypeNode) BuildNode(buildArguments BuildArguments) Node {
 	return b
 }
 
-func (a *ArrayTypeNode) BuildNode(buildArguments BuildArguments) Node {
+func (a ArrayTypeNode) BuildNode(buildArguments BuildArguments) Node {
 	return a
 }
 
-func (p *PairTypeNode) BuildNode(buildArguments BuildArguments) Node {
+func (p PairTypeNode) BuildNode(buildArguments BuildArguments) Node {
 	return p
 }
 
-func (p *PairElemTypeNode) BuildNode(buildArguments BuildArguments) Node {
+func (p PairElemTypeNode) BuildNode(buildArguments BuildArguments) Node {
 	return p
 }
 
-func (i *IntLiterNode) BuildNode(buildArguments BuildArguments) Node {
+func (i IntLiterNode) BuildNode(buildArguments BuildArguments) Node {
 	return i
 }
 
-func (b *BoolLiterNode) BuildNode(buildArguments BuildArguments) Node {
+func (b BoolLiterNode) BuildNode(buildArguments BuildArguments) Node {
 	return b
 }
 
-func (c *CharLiterNode) BuildNode(buildArguments BuildArguments) Node {
+func (c CharLiterNode) BuildNode(buildArguments BuildArguments) Node {
 	return c
 }
 
-func (s *StringLiterNode) BuildNode(buildArguments BuildArguments) Node {
+func (s StringLiterNode) BuildNode(buildArguments BuildArguments) Node {
 	return s
 }
-func (c *CharacterNode) BuildNode(buildArguments BuildArguments) Node {
+func (c CharacterNode) BuildNode(buildArguments BuildArguments) Node {
 	return c
 }
 
-func (e *EscapedCharNode) BuildNode(buildArguments BuildArguments) Node {
+func (e EscapedCharNode) BuildNode(buildArguments BuildArguments) Node {
 	return e
 }
 
-func (n *NullNode) BuildNode(buildArguments BuildArguments) Node {
+func (n NullNode) BuildNode(buildArguments BuildArguments) Node {
 	return n
 }
 
-func (b *BackslashNode) BuildNode(buildArguments BuildArguments) Node {
+func (b BackslashNode) BuildNode(buildArguments BuildArguments) Node {
 	return b
 }
 
-func (t *TabNode) BuildNode(buildArguments BuildArguments) Node {
+func (t TabNode) BuildNode(buildArguments BuildArguments) Node {
 	return t
 }
 
-func (l *LineFeedNode) BuildNode(buildArguments BuildArguments) Node {
+func (l LineFeedNode) BuildNode(buildArguments BuildArguments) Node {
 	return l
 }
 
-func (f *FormFeedNode) BuildNode(buildArguments BuildArguments) Node {
+func (f FormFeedNode) BuildNode(buildArguments BuildArguments) Node {
 	return f
 }
 
-func (c *CarriageReturnNode) BuildNode(buildArguments BuildArguments) Node {
+func (c CarriageReturnNode) BuildNode(buildArguments BuildArguments) Node {
 	return c
 }
 
-func (d *DoubleQuoteNode) BuildNode(buildArguments BuildArguments) Node {
+func (d DoubleQuoteNode) BuildNode(buildArguments BuildArguments) Node {
 	return d
 }
 
-func (s *SingleQuoteNode) BuildNode(buildArguments BuildArguments) Node {
+func (s SingleQuoteNode) BuildNode(buildArguments BuildArguments) Node {
 	return s
 }
 
-func (p *PairLiterNode) BuildNode(buildArguments BuildArguments) Node {
+func (p PairLiterNode) BuildNode(buildArguments BuildArguments) Node {
 	return p
 }
 
-func (u *UnaryOpExprNode) BuildNode(buildArguments BuildArguments) Node {
+func (u UnaryOpExprNode) BuildNode(buildArguments BuildArguments) Node {
 	return u
 }
 
-func (e *EBENode) BuildNode(buildArguments BuildArguments) Node {
+func (e EBENode) BuildNode(buildArguments BuildArguments) Node {
 	return e
 }
 
-func (u *UnaryOpNode) BuildNode(buildArguments BuildArguments) Node {
+func (u UnaryOpNode) BuildNode(buildArguments BuildArguments) Node {
 	return u
 }
 
-func (n *NotNode) BuildNode(buildArguments BuildArguments) Node {
+func (n NotNode) BuildNode(buildArguments BuildArguments) Node {
 	return n
 }
 
-func (n *NegNode) BuildNode(buildArguments BuildArguments) Node {
+func (n NegNode) BuildNode(buildArguments BuildArguments) Node {
 	return n
 }
 
-func (l *LenNode) BuildNode(buildArguments BuildArguments) Node {
+func (l LenNode) BuildNode(buildArguments BuildArguments) Node {
 	return l
 }
 
-func (o *OrdNode) BuildNode(buildArguments BuildArguments) Node {
+func (o OrdNode) BuildNode(buildArguments BuildArguments) Node {
 	return o
 }
 
-func (c *ChrNode) BuildNode(buildArguments BuildArguments) Node {
+func (c ChrNode) BuildNode(buildArguments BuildArguments) Node {
 	return c
 }
 
-func (b *BinaryOpNode) BuildNode(buildArguments BuildArguments) Node {
+func (b BinaryOpNode) BuildNode(buildArguments BuildArguments) Node {
 	return b
 }
 
-func (m *MultNode) BuildNode(buildArguments BuildArguments) Node {
+func (m MultNode) BuildNode(buildArguments BuildArguments) Node {
 	return m
 }
 
-func (d *DivNode) BuildNode(buildArguments BuildArguments) Node {
+func (d DivNode) BuildNode(buildArguments BuildArguments) Node {
 	return d
 }
 
-func (m *ModNode) BuildNode(buildArguments BuildArguments) Node {
+func (m ModNode) BuildNode(buildArguments BuildArguments) Node {
 	return m
 }
 
-func (a *AddNode) BuildNode(buildArguments BuildArguments) Node {
+func (a AddNode) BuildNode(buildArguments BuildArguments) Node {
 	return a
 }
 
-func (s *SubNode) BuildNode(buildArguments BuildArguments) Node {
+func (s SubNode) BuildNode(buildArguments BuildArguments) Node {
 	return s
 }
 
-func (g *GTNode) BuildNode(buildArguments BuildArguments) Node {
+func (g GTNode) BuildNode(buildArguments BuildArguments) Node {
 	return g
 }
 
-func (g *GTENode) BuildNode(buildArguments BuildArguments) Node {
+func (g GTENode) BuildNode(buildArguments BuildArguments) Node {
 	return g
 }
 
-func (l *LTNode) BuildNode(buildArguments BuildArguments) Node {
+func (l LTNode) BuildNode(buildArguments BuildArguments) Node {
 	return l
 }
 
-func (l *LTENode) BuildNode(buildArguments BuildArguments) Node {
+func (l LTENode) BuildNode(buildArguments BuildArguments) Node {
 	return l
 }
 
-func (e *EQNode) BuildNode(buildArguments BuildArguments) Node {
+func (e EQNode) BuildNode(buildArguments BuildArguments) Node {
 	return e
 }
 
-func (n *NEQNode) BuildNode(buildArguments BuildArguments) Node {
+func (n NEQNode) BuildNode(buildArguments BuildArguments) Node {
 	return n
 }
 
-func (a *AndNode) BuildNode(buildArguments BuildArguments) Node {
+func (a AndNode) BuildNode(buildArguments BuildArguments) Node {
 	return a
 }
 
-func (o *OrNode) BuildNode(buildArguments BuildArguments) Node {
+func (o OrNode) BuildNode(buildArguments BuildArguments) Node {
 	return o
 }
 
-func (d *DigitNode) BuildNode(buildArguments BuildArguments) Node {
+func (d DigitNode) BuildNode(buildArguments BuildArguments) Node {
 	return d
 }
 
-func (i *IntSignNode) BuildNode(buildArguments BuildArguments) Node {
+func (i IntSignNode) BuildNode(buildArguments BuildArguments) Node {
 	return i
 }
 
-func (p *PositiveNode) BuildNode(buildArguments BuildArguments) Node {
+func (p PositiveNode) BuildNode(buildArguments BuildArguments) Node {
 	return p
 }
 
-func (n *NegativeNode) BuildNode(buildArguments BuildArguments) Node {
+func (n NegativeNode) BuildNode(buildArguments BuildArguments) Node {
 	return n
 }
