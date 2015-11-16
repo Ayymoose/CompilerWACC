@@ -414,6 +414,9 @@ type DataNode struct {
 	StrVal string
 }
 
+type NullNode struct {
+}
+
 //no need for comment node
 
 /*
@@ -423,6 +426,10 @@ func (p *ProgramNode) BuildNode() Node {
 	return p
 }
 */
+func (n NullNode) BuildNode(buildArguments BuildArguments) Node {
+	return n
+}
+
 func (d DataNode) BuildNode(buildArguments BuildArguments) Node {
 	d.Position.Pos = buildArguments.Pos
 	d.IntVal = buildArguments.IntVal
