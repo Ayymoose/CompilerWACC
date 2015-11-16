@@ -8,6 +8,61 @@ func (i ItemType) Len() int {
 	return int(i)
 }
 
+type Type interface {
+	getMainType() AllType
+}
+
+type BaseType int
+
+const (
+	BaseInt BaseType = iota
+	BaseChar
+	BaseBool
+	BaseString
+)
+
+func (baseType BaseType) getMainType() AllType {
+	switch baseType {
+	case BaseInt:
+		return TypeInt
+	case BaseChar:
+		return TypeChar
+	case BaseBool:
+		return TypeBool
+	case BaseString:
+		return TypeString
+	}
+	return -1
+}
+
+type AllType INT
+
+const (
+	TypeInt AllType = iota
+	TypeChar
+	TypeBool
+	TypeString
+	TypeArray
+	TypePair
+)
+
+type ArrayType struct {
+	Dimen    int
+	BaseType BaseType
+}
+type PairType struct {
+	FstType AllType
+	SndType AllType
+}
+
+func (arrayType ArrayType) getMainType() AllType {
+	return TypeArray
+}
+
+func (pairType PairType) getMainType() AllType {
+	return TypePair
+}
+
 const Eof = -1
 const (
 	token_start ItemType = iota

@@ -86,6 +86,18 @@ func (SymbolTable *SymbolTable) contains(key string) bool {
 	return ok
 }
 
+func (SymbolTable *SymbolTable) getTypeOfIdent(key string) grammar.Token {
+	curr := SymbolTable
+	for curr != nil {
+		if curr.contains(key) {
+			k := curr.semanticMap[key]
+			return k
+		}
+		curr := SymbolTable.parent
+	}
+	return nil
+}
+
 /*
 func (s *SymbolTable) Insert(token string, list reflect.TypeOf(list).Elem()) {
 

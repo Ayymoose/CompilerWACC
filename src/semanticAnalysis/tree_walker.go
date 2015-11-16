@@ -264,11 +264,14 @@ func (a *AssignmentNode) visitAssignment(symbolTable *SymbolTable) {
 }
 
 func (r *ReadNode) visitRead(symbolTable *SymbolTable) (bool, []string) {
+		var errorMsgs []string // An array of error message
 	elem := r.AssignLHS.AssignLHSElem
 
 	switch elem.(type) {
 	case IdentNode:
-		symbolTable.isDefined(elem.(IdentNode).Ident)
+		if !symbolTable.isDefined(elem.(IdentNode).Ident) {
+				errorMsgs = append(errorMsgs, "Identifier not defined")
+		}
 	case ArrayElemNode:
 	case PairElemNode:
 	}

@@ -34,7 +34,17 @@ type PosIdent struct {
 type PosIdentType struct {
 	Pos   int
 	Ident string
-	Type  grammar.ItemType
+	Type  grammar.Type
+}
+
+func (itemType PosIdentType.Type) isArray() bool {
+	if len(itemType) == 3 {
+	}
+}
+
+func (itemType PosIdentType.Type) isPair() bool {
+	if len(itemType) == 3 {
+	}
 }
 
 // Root node of AST
@@ -431,7 +441,7 @@ func (d DataNode) BuildNode(buildArguments BuildArguments) Node {
 	return d
 }
 
-func (p *ProgramNode) BuildNode(buildArguments BuildArguments) Node {
+func (p ProgramNode) BuildNode(buildArguments BuildArguments) Node {
 	p.Pos = buildArguments.Pos
 
 	for i, node := range buildArguments.ChildListOne { // []Node
