@@ -1,7 +1,7 @@
 package abstractSyntaxTree
 
 import (
-	"grammar"
+	"github.com/nanaasiedu/wacc_19/src/grammar"
 )
 
 // Node interface
@@ -440,7 +440,7 @@ func (d DataNode) BuildNode(buildArguments BuildArguments) Node {
 	return d
 }
 
-func (p *ProgramNode) BuildNode(buildArguments BuildArguments) Node {
+func (p ProgramNode) BuildNode(buildArguments BuildArguments) Node {
 	p.Pos = buildArguments.Pos
 
 	for i, node := range buildArguments.ChildListOne { // []Node
