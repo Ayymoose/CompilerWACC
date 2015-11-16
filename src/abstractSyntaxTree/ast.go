@@ -269,43 +269,6 @@ type NullNode struct {
 	NullTerminator grammar.ItemType
 }
 
-type BackslashNode struct {
-	Position
-	Backslash grammar.ItemType
-}
-
-type TabNode struct {
-	Position
-	Tab grammar.ItemType
-}
-
-type LineFeedNode struct {
-	Position
-	LineFeed grammar.ItemType
-}
-
-type FormFeedNode struct {
-	Position
-	FormFeed grammar.ItemType
-}
-
-type CarriageReturnNode struct {
-	Position
-	CarriageReturn grammar.ItemType
-}
-
-type DoubleQuoteNode struct {
-	Position
-	DoubleQuote grammar.ItemType
-}
-
-type SingleQuoteNode struct {
-	Position
-	SingleQuote grammar.ItemType
-}
-
-/// NEED TO IMPLEMENT '\'
-
 type PairLiterNode struct {
 	Position
 	PairLiter grammar.ItemType //should be NULL
@@ -498,13 +461,9 @@ func (p ParameterNode) BuildNode(buildArguments BuildArguments) Node {
 }
 
 func (s StatementNode) BuildNode(buildArguments BuildArguments) Node {
-	/*
-		type StatementNode struct {
-			Position
-			StatElem Node
-		}*/ /*
-		s.Pos = buildArguments.Pos
-		s.Stat =*/
+	s.Pos = buildArguments.Pos
+	s.StatElem = buildArguments.ChildListOne[0]
+
 	return s
 }
 
@@ -633,34 +592,6 @@ func (e EscapedCharNode) BuildNode(buildArguments BuildArguments) Node {
 
 func (n NullNode) BuildNode(buildArguments BuildArguments) Node {
 	return n
-}
-
-func (b BackslashNode) BuildNode(buildArguments BuildArguments) Node {
-	return b
-}
-
-func (t TabNode) BuildNode(buildArguments BuildArguments) Node {
-	return t
-}
-
-func (l LineFeedNode) BuildNode(buildArguments BuildArguments) Node {
-	return l
-}
-
-func (f FormFeedNode) BuildNode(buildArguments BuildArguments) Node {
-	return f
-}
-
-func (c CarriageReturnNode) BuildNode(buildArguments BuildArguments) Node {
-	return c
-}
-
-func (d DoubleQuoteNode) BuildNode(buildArguments BuildArguments) Node {
-	return d
-}
-
-func (s SingleQuoteNode) BuildNode(buildArguments BuildArguments) Node {
-	return s
 }
 
 func (p PairLiterNode) BuildNode(buildArguments BuildArguments) Node {
