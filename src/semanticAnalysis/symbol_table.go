@@ -54,19 +54,30 @@ import "github.com/henrykhadass/wacc_19/src/grammar"
 // SymbolTable constructor
 type SymbolTable struct {
 	parent      *SymbolTable
-	semanticMap map[string]grammar.Token // A map of strings to a list of tokens
+	semanticMap map[string][]grammar.ItemType // A map of strings to a list of tokens
 }
 
 // Creates a new instance of a symbolTable with a parent to its pointer
 func (symbolTable *SymbolTable) New() *SymbolTable {
 	newSymbolTable := &SymbolTable{}
 	newSymbolTable.parent = symbolTable
-	newSymbolTable.semanticMap = make(map[string][]grammar.Token)
+	newSymbolTable.semanticMap = make(map[string][]grammar.ItemType)
 	return newSymbolTable
 }
 
-func (SymbolTable *SymbolTable) insert(key string, value string) {
-	// convert value string into its grammar token here
+func (symbolTable *SymbolTable) insert(key string, value []grammar.ItemType) {
+	// I think below code is correct but double check
+	//symbolTable.semanticMap[key] = value
+}
+
+func (symbolTable *SymbolTable) lookUp(key string) (bool, []string) {
+	var errorMsgs []string // An array of error messages
+	var pass = true        // source of bugs??
+
+	// check if key is in current symbol table
+	// if not
+	// recurse on parent symbol tables
+	// if not found after recursion then return undeclared error
 }
 
 /*
