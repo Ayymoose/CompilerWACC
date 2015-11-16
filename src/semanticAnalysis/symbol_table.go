@@ -69,6 +69,7 @@ func (SymbolTable *SymbolTable) insert(key string, value string) {
 	// convert value string into its grammar token here
 }
 
+<<<<<<< HEAD
 //Checks if ident is already declared
 func (SymbolTable *SymbolTable) isDefined(key string) bool {
 	curr := SymbolTable
@@ -96,6 +97,23 @@ func (SymbolTable *SymbolTable) getTypeOfIdent(key string) grammar.Token {
 		curr := SymbolTable.parent
 	}
 	return nil
+=======
+func (symbolTable *SymbolTable) lookUp(key string) (bool, []string) {
+	var errorMsgs []string // An array of error messages
+	var pass = true        // source of bugs??
+	// check if key is in current symbol table
+	if symbolTable.semanticMap[key] != 0 {
+		return true, []string{""}
+	} else {
+		// if not then recurse on parent symbol tables
+		if symbolTable.parent != nil {
+			symbolTable.parent.lookUp(key)
+		} else {
+			return false, []string{""}
+		}
+	}
+	// if not found after recursion then return undeclared error
+>>>>>>> d92f0ce21dac8a6f61948ca69fbb8aa6cd20b7a1
 }
 
 /*
