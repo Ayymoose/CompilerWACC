@@ -321,7 +321,7 @@ type ChrNode struct {
 
 type BinaryOpNode struct {
 	Position
-	BinaryOperElem *Node
+	BinaryOperElem Node
 }
 
 type MultNode struct {
@@ -696,14 +696,14 @@ func (b BoolLiterNode) BuildNode(buildArguments BuildArguments) Node {
 
 func (c CharLiterNode) BuildNode(buildArguments BuildArguments) Node {
 	c.Pos = buildArguments.Pos
-	c.CharLiterElem = buildArguments.ChildListOne[0].(CharLiterNode)
+	c.CharLiterElem = buildArguments.ChildListOne[0].(CharacterNode)
 	return c
 }
 
 func (s StringLiterNode) BuildNode(buildArguments BuildArguments) Node {
 	s.Pos = buildArguments.Pos
 	for i, node := range buildArguments.ChildListOne {
-		e.Expr[i] = node.(ExprNode)
+		s.StrLiter[i] = node.(CharacterNode)
 	}
 	return s
 }
@@ -748,7 +748,7 @@ func (e EBENode) BuildNode(buildArguments BuildArguments) Node {
 }
 
 func (u UnaryOpNode) BuildNode(buildArguments BuildArguments) Node {
-	u.Pos = buildArguments.pos
+	u.Pos = buildArguments.Pos
 	u.UnaryOperElem = buildArguments.ChildListOne[0].(UnaryOpNode)
 	return u
 }
@@ -785,7 +785,8 @@ func (c ChrNode) BuildNode(buildArguments BuildArguments) Node {
 
 func (b BinaryOpNode) BuildNode(buildArguments BuildArguments) Node {
 	b.Pos = buildArguments.Pos
-	b.BinaryOper = buildArguments.ChildListOne[0].(BinaryOpNode)
+	b.BinaryOperElem = buildArguments.ChildListOne[0].(BinaryOpNode)
+	return b
 }
 
 func (m MultNode) BuildNode(buildArguments BuildArguments) Node {
