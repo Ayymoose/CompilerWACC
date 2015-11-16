@@ -1402,7 +1402,7 @@ func (p *parser) parseIntLiteral() (bool, []string) {
 	i, _ := strconv.ParseFloat(intLexeme, 64)
 
 	if intOutOfRange(i) {
-		p.addErrors(&errorMsgs, []string{"Integer overflow/underflow"})
+		p.addErrors(&errorMsgs, []string{"Integer overflow"})
 		return false, errorMsgs
 	}
 
@@ -1859,5 +1859,5 @@ func (p *parser) parseOptions(args ...patternArgs) (bool, []string) {
 /* ---------------------------------------------------------------------------*/
 
 func intOutOfRange(n float64) bool {
-	return n <= -math.Pow(2, 31) || n > math.Pow(2, 31)-1
+	return n < -math.Pow(2, 31) || n > math.Pow(2, 31)-1
 }
