@@ -35,7 +35,7 @@ func (baseType BaseType) getMainType() AllType {
 	return -1
 }
 
-type AllType INT
+type AllType int
 
 const (
 	TypeInt AllType = iota

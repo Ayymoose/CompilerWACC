@@ -11,7 +11,7 @@ type Node interface {
 
 type BuildArguments struct {
 	Pos          int
-	Type         grammar.ItemType
+	Type         grammar.Type
 	Ident        string
 	StrVal       string
 	IntVal       int
@@ -37,16 +37,6 @@ type PosIdentType struct {
 	Pos   int
 	Ident string
 	Type  grammar.Type
-}
-
-func (itemType PosIdentType.Type) isArray() bool {
-	if len(itemType) == 3 {
-	}
-}
-
-func (itemType PosIdentType.Type) isPair() bool {
-	if len(itemType) == 3 {
-	}
 }
 
 // Root node of AST
@@ -199,7 +189,7 @@ type TypeNode struct {
 
 type BaseTypeNode struct {
 	Position
-	BaseTypeElem grammar.ItemType //*Node
+	BaseTypeElem grammar.Type //*Node
 }
 
 /*
@@ -276,12 +266,12 @@ type EscapedCharNode struct {
 
 type NullNode struct {
 	Position
-	NullTerminator grammar.ItemType
+	NullTerminator grammar.Type
 }
 
 type PairLiterNode struct {
 	Position
-	PairLiter grammar.ItemType //should be NULL
+	PairLiter grammar.Type //should be NULL
 }
 
 type UnaryOpExprNode struct {
@@ -306,27 +296,27 @@ type UnaryOpNode struct {
 
 type NotNode struct {
 	Position
-	Not grammar.ItemType
+	Not grammar.Type
 }
 
 type NegNode struct {
 	Position
-	Neg grammar.ItemType
+	Neg grammar.Type
 }
 
 type LenNode struct {
 	Position
-	Len grammar.ItemType
+	Len grammar.Type
 }
 
 type OrdNode struct {
 	Position
-	Ord grammar.ItemType
+	Ord grammar.Type
 }
 
 type ChrNode struct {
 	Position
-	Chr grammar.ItemType
+	Chr grammar.Type
 }
 
 type BinaryOpNode struct {
@@ -336,67 +326,67 @@ type BinaryOpNode struct {
 
 type MultNode struct {
 	Position
-	Mult grammar.ItemType
+	Mult grammar.Type
 }
 
 type DivNode struct {
 	Position
-	Div grammar.ItemType
+	Div grammar.Type
 }
 
 type ModNode struct {
 	Position
-	Mod grammar.ItemType
+	Mod grammar.Type
 }
 
 type AddNode struct {
 	Position
-	Add grammar.ItemType
+	Add grammar.Type
 }
 
 type SubNode struct {
 	Position
-	Sub grammar.ItemType
+	Sub grammar.Type
 }
 
 type GTNode struct {
 	Position
-	Gt grammar.ItemType
+	Gt grammar.Type
 }
 
 type GTENode struct {
 	Position
-	Gte grammar.ItemType
+	Gte grammar.Type
 }
 
 type LTNode struct {
 	Position
-	Lt grammar.ItemType
+	Lt grammar.Type
 }
 
 type LTENode struct {
 	Position
-	Lte grammar.ItemType
+	Lte grammar.Type
 }
 
 type EQNode struct {
 	Position
-	Eq grammar.ItemType
+	Eq grammar.Type
 }
 
 type NEQNode struct {
 	Position
-	Neq grammar.ItemType
+	Neq grammar.Type
 }
 
 type AndNode struct {
 	Position
-	And grammar.ItemType
+	And grammar.Type
 }
 
 type OrNode struct {
 	Position
-	Or grammar.ItemType
+	Or grammar.Type
 }
 
 type DigitNode struct {
@@ -412,12 +402,12 @@ type IntSignNode struct {
 
 type PositiveNode struct {
 	Position
-	Add grammar.ItemType
+	Add grammar.Type
 }
 
 type NegativeNode struct {
 	Position
-	Sub grammar.ItemType
+	Sub grammar.Type
 }
 
 type DataNode struct {
