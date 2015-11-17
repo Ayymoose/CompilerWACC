@@ -100,12 +100,12 @@ func (st *SymbolTable) insertFunctionParams(f FuncNode) {
 	}
 }
 
-func (s *StatNode) visitStatement(symbolTable *SymbolTable) (bool, []string) {
+func (s *StatementNode) visitStatement(symbolTable *SymbolTable) (bool, []string) {
 	var errorMsgs []string // An array of error messages
 	var pass = true        // source of bugs??
 
 	// DO I NEED TO USE S (STATNODE) HERE RATHER THAN NODE???
-	switch statType := Node.(type) {
+	switch statType := s.(type) {
 	case DeclarationNode:
 		pass, errorMsgs = statType.visitDeclaration(symbolTable)
 	case AssignmentNode:
@@ -148,7 +148,7 @@ func (d *DeclarationNode) visitDeclaration(symbolTable *SymbolTable) (bool, []st
 
 	// Check if ident is already declared in current symbolTable
 	// If not recurse on parent symboltables until found (if at all)
-	declared, msgs := symbolTable.lookUp(ident)
+	declared := symbolTable.isDefined(ident)
 	/*	if !declared {
 			symbolTable.insert(ident, baseType)
 		}
@@ -184,18 +184,6 @@ func (d *DeclarationNode) visitDeclaration(symbolTable *SymbolTable) (bool, []st
 }
 
 //func checkType(SymbolTable *SymbolTable)
-
-func checkForDeclaration(symbolTable *SymbolTable) (bool, []string) {
-
-	// Check if declaration exists already in symboltable by checking if ident is a key
-	// if already exists redeclaration error
-	symbolTable.parent == nill{ // == null only at top level scope i.e. we are coming in from a function branch traversal
-	// == null only at top level statement traversal
-	// when constructing symbol table i believe parent pointer is initialised to nill but need to double check
-	// if not then source of errorMsgs
-	}
-
-}
 
 func (a *AssignRHSNode) checkAssignRHSType(itemType grammar.ItemType, SymbolTable *SymbolTable) (bool, []string, grammar.ItemType) {
 	node := a.AssignRHSElem //Node
@@ -344,12 +332,14 @@ func (p *PrintlnNode) visitPrintln(symbolTable *SymbolTable) {
 	//Same as above not sure if needed to be implemented
 }
 
-func (i *IfNode) visitIf(symbolTable *SymbolTable) {
+func (i IfNode) visitIf(symbolTable *SymbolTable) {
 	// if <expr> then
 	// expr must evaluate to bool
 	// check if <expr> variable have been declared in current/parent scope
 	//error if not
 	// visit statements...
+	i
+
 }
 
 func (w *WhileNode) visitWhile(symbolTable *SymbolTable) {
