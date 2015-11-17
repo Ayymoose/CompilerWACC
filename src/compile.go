@@ -10,21 +10,11 @@ import (
 )
 
 const SYNTAX_ERROR = 100
+const SEMANTIC_ERROR = 200
 
 func main() {
 	file := os.Args[1] // index 1 is file path
 	b, err := ioutil.ReadFile(file)
-	//	b, err := ioutil.ReadFile("wacc_examples/valid/variables/capCharDeclaration.wacc")
-	//	b, err := ioutil.ReadFile("wacc_examples/valid/function/nested_functions/fibonacciFullRec.wacc")
-	//b, err := ioutil.ReadFile("wacc_examples/invalid/syntaxErr/expressions/missingOperand1.wacc")
-	//	b, err := ioutil.ReadFile("wacc_examples/invalid/syntaxErr/basic/unescapedChar.wacc")
-	//	b, err := ioutil.ReadFile("wacc_examples/invalid/oliver.wacc")
-	//	b, err := ioutil.ReadFile("wacc_examples/valid/basic/skip/comment.wacc")
-	//	b, err := ioutil.ReadFile("wacc_examples/valid/function/simple_functions/negFunction.wacc")
-	//	b, err := ioutil.ReadFile("wacc_examples/valid/scope/indentationNotImportant.wacc")
-	//	b, err := ioutil.ReadFile("wacc_examples/valid/if/whitespace.wacc")
-	//	b, err := ioutil.ReadFile("wacc_examples/valid/advanced/ticTacToe.wacc")
-	//	b, err := ioutil.ReadFile("wacc_examples/valid/IO/print/printEscChar.wacc")
 	if err != nil {
 		fmt.Println(err)
 		os.Exit(1)
@@ -33,11 +23,9 @@ func main() {
 	var tokens []parse.Token
 	lexer := parse.Lex("Something", s)
 	for item := range lexer.Items {
-		//	fmt.Println(lexer.TokenLocation(item))
 		tokens = append(tokens, item)
 	}
-	//	fmt.Println(tokens)
-	//	fmt.Println("\n------ Completed Lexing ------\n")
+
 	for x, token := range tokens {
 		if x%2 == 0 {
 			fmt.Println()
@@ -50,7 +38,6 @@ func main() {
 	}
 	parser := lexer.ConstructParser(tokens)
 	passed, errs := parser.Parse()
-	//	fmt.Println("Parsing Successful:", passed)
 	fmt.Println("\n------ Parsing Complete ------\n")
 	for _, parseError := range errs {
 		fmt.Println(parseError)
