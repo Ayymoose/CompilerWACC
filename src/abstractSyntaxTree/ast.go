@@ -45,6 +45,7 @@ type DataNode struct {
 	IntVal int
 	StrVal string
 	Nodes  []Node
+	Type   grammar.Type
 }
 
 type NullChildNode struct {

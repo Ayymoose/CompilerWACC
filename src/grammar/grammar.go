@@ -9,7 +9,7 @@ func (i ItemType) Len() int {
 }
 
 type Type interface {
-	getMainType() AllType
+	GetMainType() AllType
 }
 
 type BaseType int
@@ -21,7 +21,7 @@ const (
 	BaseString
 )
 
-func (baseType BaseType) getMainType() AllType {
+func (baseType BaseType) GetMainType() AllType {
 	switch baseType {
 	case BaseInt:
 		return TypeInt
@@ -55,11 +55,11 @@ type PairType struct {
 	SndType Type
 }
 
-func (arrayType ArrayType) getMainType() AllType {
+func (arrayType ArrayType) GetMainType() AllType {
 	return TypeArray
 }
 
-func (pairType PairType) getMainType() AllType {
+func (pairType PairType) GetMainType() AllType {
 	return TypePair
 }
 

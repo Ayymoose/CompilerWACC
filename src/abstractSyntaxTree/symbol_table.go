@@ -47,7 +47,7 @@
 
 // maps are not safe for concurrent read/write
 
-package semanticAnalysis
+package abstractSyntaxTree
 
 import "grammar"
 
@@ -61,13 +61,13 @@ type SymbolTable struct {
 func (symbolTable *SymbolTable) New() *SymbolTable {
 	newSymbolTable := &SymbolTable{}
 	newSymbolTable.parent = symbolTable
-	newSymbolTable.semanticMap = make(map[string][]grammar.Token)
+	newSymbolTable.semanticMap = make(map[string][]grammar.Type)
 	return newSymbolTable
 }
 
 func (SymbolTable *SymbolTable) insert(key string, value []grammar.Type) {
 	// convert value string into its grammar token here
-	SymbolTable[key] = value
+	SymbolTable.semanticMap[key] = value
 }
 
 //Checks if ident is already declared
@@ -77,7 +77,7 @@ func (SymbolTable *SymbolTable) isDefined(key string) bool {
 		if curr.contains(key) {
 			return true
 		}
-		curr := SymbolTable.parent
+		curr = SymbolTable.parent
 	}
 	return false
 }
@@ -94,7 +94,7 @@ func (SymbolTable *SymbolTable) getTypeOfIdent(key string) []grammar.Type {
 			k := curr.semanticMap[key]
 			return k
 		}
-		curr := SymbolTable.parent
+		curr = SymbolTable.parent
 	}
 	return nil
 }
