@@ -64,7 +64,7 @@ type DeclarationNode struct {
 
 type ArrayElemNode struct {
 	PosIdent
-	Expr ExprNode // repeatable
+	Expr []ExprNode // repeatable
 }
 
 type CallNode struct {
@@ -296,27 +296,27 @@ type UnaryOpNode struct {
 
 type NotNode struct {
 	Position
-	Not grammar.Type
+	Not grammar.ItemType
 }
 
 type NegNode struct {
 	Position
-	Neg grammar.Type
+	Neg grammar.ItemType
 }
 
 type LenNode struct {
 	Position
-	Len grammar.Type
+	Len grammar.ItemType
 }
 
 type OrdNode struct {
 	Position
-	Ord grammar.Type
+	Ord grammar.ItemType
 }
 
 type ChrNode struct {
 	Position
-	Chr grammar.Type
+	Chr grammar.ItemType
 }
 
 type BinaryOpNode struct {
