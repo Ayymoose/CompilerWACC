@@ -69,7 +69,6 @@ func (SymbolTable *SymbolTable) insert(key string, value string) {
 	// convert value string into its grammar token here
 }
 
-<<<<<<< HEAD
 //Checks if ident is already declared
 func (SymbolTable *SymbolTable) isDefined(key string) bool {
 	curr := SymbolTable
@@ -87,7 +86,7 @@ func (SymbolTable *SymbolTable) contains(key string) bool {
 	return ok
 }
 
-func (SymbolTable *SymbolTable) getTypeOfIdent(key string) grammar.Token {
+func (SymbolTable *SymbolTable) getTypeOfIdent(key string) grammar.Type {
 	curr := SymbolTable
 	for curr != nil {
 		if curr.contains(key) {
@@ -97,7 +96,9 @@ func (SymbolTable *SymbolTable) getTypeOfIdent(key string) grammar.Token {
 		curr := SymbolTable.parent
 	}
 	return nil
-=======
+}
+
+/*
 func (symbolTable *SymbolTable) lookUp(key string) (bool, []string) {
 	var errorMsgs []string // An array of error messages
 	var pass = true        // source of bugs??
@@ -113,8 +114,7 @@ func (symbolTable *SymbolTable) lookUp(key string) (bool, []string) {
 		}
 	}
 	// if not found after recursion then return undeclared error
->>>>>>> d92f0ce21dac8a6f61948ca69fbb8aa6cd20b7a1
-}
+} */
 
 /*
 func (s *SymbolTable) Insert(token string, list reflect.TypeOf(list).Elem()) {
