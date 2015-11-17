@@ -76,7 +76,6 @@ const (
 	COMMENT_END
 	COMMENT_LINE
 	NESTED_COMMENTS
-	//	UNDERSCORE
 	deliminators_end
 
 	escaped_char_start
@@ -85,7 +84,7 @@ const (
 	LINE_FEED
 	FORM_FEED
 	CARRIAGE_RETURN
-	DOUBLE_QUOTE //Uncommented
+	DOUBLE_QUOTE
 	SINGLE_QUOTE
 	BACKSLASH
 	escaped_char_end
@@ -140,13 +139,13 @@ const (
 	DIV
 	MOD
 	ADD
-	SUB // '-' ALSO SAME SYMBOL -> NOT SURE IF ENTIRELY correct
+	SUB
 
 	GTE
 	GT
 
-	STE //This too
-	ST  //I think this should be LT (Less than)
+	STE
+	ST
 
 	EQ
 	NEQ
@@ -159,7 +158,7 @@ const (
 	LEN
 	ORD
 	CHR
-	NEG // THIS IS FOR '-' WHICH ALSO EXISTS IN BINARY_OP ASWELL. NOT SURE OF THE BEST NAME
+	NEG
 	unary_op_end
 
 	bracket_type_start
@@ -202,8 +201,7 @@ var DebugTokens = map[ItemType]string{
 	COMMENT_END:        "COMMENT_END",
 	COMMENT_LINE:       "COMMENT_LINE",
 	NESTED_COMMENTS:    "NESTED_COMMENTS",
-	//	UNDERSCORE:         "UNDERSCORE",
-	deliminators_end: "deliminators_end",
+	deliminators_end:   "deliminators_end",
 
 	escaped_char_start: "escaped_char_start",
 	NULL_TERMINATOR:    "escaped_char_start",
@@ -211,7 +209,7 @@ var DebugTokens = map[ItemType]string{
 	LINE_FEED:          "LINE_FEED",
 	FORM_FEED:          "FORM_FEED",
 	CARRIAGE_RETURN:    "CARRIAGE_RETURN",
-	DOUBLE_QUOTE:       "DOUBLE_QUOTE", //Uncommented these
+	DOUBLE_QUOTE:       "DOUBLE_QUOTE",
 	SINGLE_QUOTE:       "SINGLE_QUOTE",
 	BACKSLASH:          "BACKSLASH",
 	escaped_char_end:   "escaped_char_end",
@@ -262,7 +260,7 @@ var DebugTokens = map[ItemType]string{
 	DIV:             "DIV",
 	MOD:             "MOD",
 	ADD:             "ADD",
-	SUB:             "SUB", // '-' ALSO SAME SYMBOL -> NOT SURE IF ENTIRELY correct
+	SUB:             "SUB",
 
 	GTE:           "GTE",
 	GT:            "GT",
@@ -279,7 +277,7 @@ var DebugTokens = map[ItemType]string{
 	LEN:            "LEN",
 	ORD:            "ORD",
 	CHR:            "CHR",
-	NEG:            "NEG", // THIS IS FOR '-' WHICH ALSO EXISTS IN BINARY_OP ASWELL. NOT SURE OF THE BEST NAME
+	NEG:            "NEG",
 	unary_op_end:   "unary_op_end",
 
 	bracket_type_start: "bracket_type_start",
@@ -299,7 +297,6 @@ var DebugTokens = map[ItemType]string{
 }
 
 var Token_keyword_strings = map[ItemType]string{
-	//	IDENTIFIER: "identifier", // Place holder
 	BEGIN:   "begin",
 	END:     "end",
 	IS:      "is",
@@ -336,36 +333,32 @@ var Token_keyword_strings = map[ItemType]string{
 
 var Token_strings = map[ItemType]string{
 
-	COMMA:     ",",
-	SEMICOLON: ";",
-	//COMMENT_START: "",
-	//	COMMENT_END:   "",
-	COMMENT_LINE: "#",
-	//	NESTED_COMMENTS: false,
-	//	UNDERSCORE:      "_",
+	COMMA:           ",",
+	SEMICOLON:       ";",
+	COMMENT_LINE:    "#",
 	NULL_TERMINATOR: "\\0",
 	BACKSPACE:       "\b",
 	TAB:             "\t",
 	LINE_FEED:       "\n",
 	FORM_FEED:       "\f",
 	CARRIAGE_RETURN: "\r",
-	DOUBLE_QUOTE:    "\"", //Uncommented these because I needed to use it @Ayman
+	DOUBLE_QUOTE:    "\"",
 	SINGLE_QUOTE:    "'",
 	BACKSLASH:       "\\",
-	NEG:             "-", // THIS IS FOR '-' WHICH ALSO EXISTS IN BINARY_OP ASWELL. NOT SURE OF THE BEST NAME
+	NEG:             "-",
 	MULT:            "*",
 	DIV:             "/",
 	MOD:             "%",
 	ADD:             "+",
-	SUB:             "-", // '-' ALSO SAME SYMBOL -> NOT SURE IF ENTIRELY correct
+	SUB:             "-",
 
 	GTE: ">=",
 
 	STE:          "<=",
 	GT:           ">",
 	ST:           "<",
-	EQ:           "==", // BETTER NAMES??
-	NEQ:          "!=", // BETTER NAMES?
+	EQ:           "==",
+	NEQ:          "!=",
 	NOT:          "!",
 	AND:          "&&",
 	OR:           "||",
@@ -407,14 +400,3 @@ func (token ItemType) IsBracketType() bool {
 func (token ItemType) IsBoolean() bool {
 	return token > boolean_start && token < boolean_end
 }
-
-/*
-func lookUp(str string) Token {
-	for t, s := range token_strings {
-		if s == str {
-			return t
-		}
-	}
-	return
-}
-*/

@@ -166,7 +166,7 @@ type ArrayElemNode struct {
 	ExprList []ExprNode
 }
 
-// <pair-elem>
+// ‘fst’ <expr> | ‘snd’ <expr >
 type PairElemNode struct {
 	Position
 	Fst ExprNode
@@ -288,191 +288,212 @@ type NullNode struct {
 	NullTerminator grammar.Type
 }
 
+// <unary-oper> <expr>
 type UnaryOpExprNode struct {
 	Position
 	UnaryOp UnaryOpNode
 	Expr    ExprNode
 }
 
+// <expr> <binary-oper> <expr>
 type BinaryOpExprNode struct {
 	Position
 	Expr     []ExprNode
 	BinaryOp BinaryOpNode
 }
 
-// ( <expr> ) inside expr handled by parser
-
+// '!' | '-' | 'len' | 'ord' | 'chr'
 type UnaryOpNode struct {
 	Position
 	UnaryOpType Node
 }
 
+// '!'
 type NotNode struct {
 	Position
 	Not grammar.Type
 }
 
+// '-'
 type NegNode struct {
 	Position
 	Neg grammar.Type
 }
 
+// 'len'
 type LenNode struct {
 	Position
 	Len grammar.Type
 }
 
+// 'ord'
 type OrdNode struct {
 	Position
 	Ord grammar.Type
 }
 
+// 'chr'
 type ChrNode struct {
 	Position
 	Chr grammar.Type
 }
 
+// '*' | '/' | '%' | '+' | '-' | '>' | '>=' | '<' | '<=' | '==' | '!=' | '&&'
+// '||'
 type BinaryOpNode struct {
 	Position
 	BinaryOpType Node
 }
 
+// '*'
 type MultNode struct {
 	Position
 	Mult grammar.Type
 }
 
+// '/'
 type DivNode struct {
 	Position
 	Div grammar.Type
 }
 
+// '%'
 type ModNode struct {
 	Position
 	Mod grammar.Type
 }
 
+// '+'
 type AddNode struct {
 	Position
 	Add grammar.Type
 }
 
+// '-'
 type SubNode struct {
 	Position
 	Sub grammar.Type
 }
 
+// '>'
 type GTNode struct {
 	Position
 	GT grammar.Type
 }
 
+// '>='
 type GTENode struct {
 	Position
 	GTE grammar.Type
 }
 
+// '<'
 type LTNode struct {
 	Position
 	LT grammar.Type
 }
 
+// '<='
 type LTENode struct {
 	Position
 	LTE grammar.Type
 }
 
+// '=='
 type EQNode struct {
 	Position
 	EQ grammar.Type
 }
 
+// '!='
 type NEQNode struct {
 	Position
 	NEQ grammar.Type
 }
 
+// '&&'
 type AndNode struct {
 	Position
 	And grammar.Type
 }
 
+// '||'
 type OrNode struct {
 	Position
 	Or grammar.Type
 }
 
+// ('0'-'9')
 type DigitNode struct {
 	Position
 	Digit int
 }
 
+// '+' | '-'
 type IntSignNode struct {
 	Position
 	IntSign Node
 }
 
+// '+'
 type PositiveNode struct {
 	Position
 	Positive grammar.Type
 }
 
+// '-'
 type NegativeNode struct {
 	Position
 	Neg grammar.Type
 }
 
-// For error handling
+// Null node used for error handling in parser
 type NullChildNode struct {
 }
 
-/* End of WACC BNF -----------------------------------------------------------*/
+/* End of structs for WACC BNF -----------------------------------------------*/
 
 /* Interface method called on individual node structs -----------------------*/
 
-// Builds DataNode
 func (d DataNode) BuildNode(buildArguments BuildArguments) Node {
 	d.Pos = buildArguments.Pos
 	d.IntVal = buildArguments.IntVal
 	d.StrVal = buildArguments.StrVal
 
-	for i, node := range buildArguments.ChildListOne {
-		d.Nodes[i] = node.(Node)
+	for i, node := range buildArguments.ChildListOne { // []Node
+		d.Nodes[i] = node.(Node) // Don't think we nned to cast it
 	}
 	return d
 }
 
-// Builds ProgramNode
 func (p ProgramNode) BuildNode(buildArguments BuildArguments) Node {
 	p.Pos = buildArguments.Pos
 
-	for i, node := range buildArguments.ChildListOne {
+	for i, node := range buildArguments.ChildListOne { // []Node
 		p.FuncList[i] = node.(FunctionNode)
 	}
 
-	for j, node := range buildArguments.ChildListTwo {
+	for j, node := range buildArguments.ChildListTwo { // []Node
 		p.StatList[j] = node.(StatementNode)
 	}
 	return p
 }
 
-// Builds FunctionNode
 func (f FunctionNode) BuildNode(buildArguments BuildArguments) Node {
 	f.Pos = buildArguments.Pos
 	f.Ident = buildArguments.Ident
 	f.Type = buildArguments.Type
 
-	for i, node := range buildArguments.ChildListOne {
+	for i, node := range buildArguments.ChildListOne { // []Node
 		f.ParamList[i] = node.(ParameterNode)
 	}
 
-	for i, node := range buildArguments.ChildListTwo {
+	for i, node := range buildArguments.ChildListTwo { // []Node
 		f.StatList[i] = node.(StatementNode)
 	}
 	return f
 }
 
-// Builds ParameterNode
 func (p ParameterNode) BuildNode(buildArguments BuildArguments) Node {
 	p.Pos = buildArguments.Pos
 	p.Ident = buildArguments.Ident
@@ -480,14 +501,12 @@ func (p ParameterNode) BuildNode(buildArguments BuildArguments) Node {
 	return p
 }
 
-// Builds StatementNode
 func (s StatementNode) BuildNode(buildArguments BuildArguments) Node {
 	s.Pos = buildArguments.Pos
 	s.Stat = buildArguments.ChildListOne[0]
 	return s
 }
 
-// Builds DeclarationNode
 func (d DeclarationNode) BuildNode(buildArguments BuildArguments) Node {
 	d.Pos = buildArguments.Pos
 	d.Ident = buildArguments.Ident
@@ -496,7 +515,6 @@ func (d DeclarationNode) BuildNode(buildArguments BuildArguments) Node {
 	return d
 }
 
-// Builds AssignmentNode
 func (a AssignmentNode) BuildNode(buildArguments BuildArguments) Node {
 	a.Pos = buildArguments.Pos
 	a.AssignLHS = buildArguments.ChildListOne[0].(AssignLHSNode)
@@ -504,105 +522,92 @@ func (a AssignmentNode) BuildNode(buildArguments BuildArguments) Node {
 	return a
 }
 
-// Builds ReadNode
 func (r ReadNode) BuildNode(buildArguments BuildArguments) Node {
 	r.Pos = buildArguments.Pos
 	r.AssignLHS = buildArguments.ChildListOne[0].(AssignLHSNode)
 	return r
 }
 
-// Builds FreeNode
 func (f FreeNode) BuildNode(buildArguments BuildArguments) Node {
 	f.Pos = buildArguments.Pos
 	f.Expr = buildArguments.ChildListOne[0].(ExprNode)
 	return f
 }
 
-// Builds ReturnNode
 func (r ReturnNode) BuildNode(buildArguments BuildArguments) Node {
 	r.Pos = buildArguments.Pos
 	r.Expr = buildArguments.ChildListOne[0].(ExprNode)
 	return r
 }
 
-// Builds ExitNode
 func (e ExitNode) BuildNode(buildArguments BuildArguments) Node {
 	e.Pos = buildArguments.Pos
 	e.Expr = buildArguments.ChildListOne[0].(ExprNode)
 	return e
 }
 
-// Builds PrintNode
 func (p PrintNode) BuildNode(buildArguments BuildArguments) Node {
 	p.Pos = buildArguments.Pos
 	p.Expr = buildArguments.ChildListOne[0].(ExprNode)
 	return p
 }
 
-// Builds PrintlnNode
 func (p PrintlnNode) BuildNode(buildArguments BuildArguments) Node {
 	p.Pos = buildArguments.Pos
 	p.Expr = buildArguments.ChildListOne[0].(ExprNode)
 	return p
 }
 
-// Builds IfNode
 func (i IfNode) BuildNode(buildArguments BuildArguments) Node {
 	i.Pos = buildArguments.Pos
 	i.Expr = buildArguments.ChildListOne[0].(ExprNode)
 
-	for j, node := range buildArguments.ChildListTwo {
+	for j, node := range buildArguments.ChildListTwo { // []Node
 		i.StatList[j] = node.(StatementNode)
 	}
 	return i
 }
 
-// Builds WhileNode
 func (w WhileNode) BuildNode(buildArguments BuildArguments) Node {
 	w.Pos = buildArguments.Pos
 	w.Expr = buildArguments.ChildListOne[0].(ExprNode)
 
-	for i, node := range buildArguments.ChildListTwo {
+	for i, node := range buildArguments.ChildListTwo { // []Node
 		w.StatList[i] = node.(StatementNode)
 	}
 	return w
 }
 
-// Builds ScopeNode
 func (s ScopeNode) BuildNode(buildArguments BuildArguments) Node {
 	s.Pos = buildArguments.Pos
 
-	for i, node := range buildArguments.ChildListOne {
+	for i, node := range buildArguments.ChildListOne { // []Node
 		s.StatList[i] = node.(StatementNode)
 	}
 	return s
 }
 
-// Builds AssignLHSNode
 func (a AssignLHSNode) BuildNode(buildArguments BuildArguments) Node {
 	a.Pos = buildArguments.Pos
 	a.AssignLHS = buildArguments.ChildListOne[0]
 	return a
 }
 
-// Builds IdentNode
 func (i IdentNode) BuildNode(buildArguments BuildArguments) Node {
 	i.Pos = buildArguments.Pos
 	i.Ident = buildArguments.Ident
 	return i
 }
 
-// Builds ArrayElemNode
 func (a ArrayElemNode) BuildNode(buildArguments BuildArguments) Node {
 	a.Pos = buildArguments.Pos
 
-	for i, node := range buildArguments.ChildListOne {
+	for i, node := range buildArguments.ChildListOne { // []Node
 		a.ExprList[i] = node.(ExprNode)
 	}
 	return a
 }
 
-// Builds PairElemNode
 func (p PairElemNode) BuildNode(buildArguments BuildArguments) Node {
 	p.Pos = buildArguments.Pos
 	p.Fst = buildArguments.ChildListOne[0].(ExprNode)
@@ -610,40 +615,37 @@ func (p PairElemNode) BuildNode(buildArguments BuildArguments) Node {
 	return p
 }
 
-// Builds AssignRHSNode
 func (a AssignRHSNode) BuildNode(buildArguments BuildArguments) Node {
 	a.Pos = buildArguments.Pos
 	a.AssignRHS = buildArguments.ChildListOne[0].(Node)
 	return a
 }
 
-// Builds ExprNode
 func (e ExprNode) BuildNode(buildArguments BuildArguments) Node {
 	e.Pos = buildArguments.Pos
 	e.Expr = buildArguments.ChildListOne[0].(Node)
 	return e
 }
 
-// Builds ArrayLiterNode
 func (a ArrayLiterNode) BuildNode(buildArguments BuildArguments) Node {
 	a.Pos = buildArguments.Pos
 
-	for i, node := range buildArguments.ChildListOne {
+	for i, node := range buildArguments.ChildListOne { // []Node
 		a.ExprList[i] = node.(ExprNode)
 	}
 	return a
 }
 
-// Builds NewPairNode
 func (n NewPairNode) BuildNode(buildArguments BuildArguments) Node {
 	n.Pos = buildArguments.Pos
 
-	for i, node := range buildArguments.ChildListOne {
+	for i, node := range buildArguments.ChildListOne { // []Node
 		n.ExprList[i] = node.(ExprNode)
 	}
 	return n
 }
 
+//Builds CallNode
 func (c CallNode) BuildNode(buildArguments BuildArguments) Node {
 	c.Pos = buildArguments.Pos
 	c.Ident = buildArguments.Ident
@@ -654,6 +656,7 @@ func (c CallNode) BuildNode(buildArguments BuildArguments) Node {
 	return c
 }
 
+//Builds ArgListNode
 func (a ArgListNode) BuildNode(buildArguments BuildArguments) Node {
 	a.Pos = buildArguments.Pos
 
@@ -663,28 +666,28 @@ func (a ArgListNode) BuildNode(buildArguments BuildArguments) Node {
 	return a
 }
 
+//Builds TypeNode
 func (t TypeNode) BuildNode(buildArguments BuildArguments) Node {
 	t.Pos = buildArguments.Pos
 	t.Type = buildArguments.ChildListOne[0].(Node)
 	return t
 }
 
+//Builds BaseTypeNode
 func (b BaseTypeNode) BuildNode(buildArguments BuildArguments) Node {
 	b.Pos = buildArguments.Pos
 	b.BaseType = buildArguments.Type
 	return b
 }
 
-/*
-Insert base type build functions here if needed
-*/
-
+//Builds ArrayTypeNode
 func (a ArrayTypeNode) BuildNode(buildArguments BuildArguments) Node {
 	a.Pos = buildArguments.Pos
 	a.Type = buildArguments.ChildListOne[0].(TypeNode)
 	return a
 }
 
+//Builds PairTypeNode
 func (p PairTypeNode) BuildNode(buildArguments BuildArguments) Node {
 	p.Pos = buildArguments.Pos
 
@@ -694,12 +697,14 @@ func (p PairTypeNode) BuildNode(buildArguments BuildArguments) Node {
 	return p
 }
 
+//Builds PairElemTypeNode
 func (p PairElemTypeNode) BuildNode(buildArguments BuildArguments) Node {
 	p.Pos = buildArguments.Pos
 	p.PairElemType = buildArguments.ChildListOne[0].(PairElemTypeNode)
 	return p
 }
 
+//Builds IntLiterNode
 func (i IntLiterNode) BuildNode(buildArguments BuildArguments) Node {
 	i.Pos = buildArguments.Pos
 	i.IntSign = buildArguments.ChildListOne[0].(IntSignNode)
@@ -709,18 +714,21 @@ func (i IntLiterNode) BuildNode(buildArguments BuildArguments) Node {
 	return i
 }
 
+//Builds BoolLiterNode
 func (b BoolLiterNode) BuildNode(buildArguments BuildArguments) Node {
 	b.Pos = buildArguments.Pos
 	b.BoolLiter = buildArguments.BoolVal
 	return b
 }
 
+//Builds CharLiterNode
 func (c CharLiterNode) BuildNode(buildArguments BuildArguments) Node {
 	c.Pos = buildArguments.Pos
 	c.CharLiter = buildArguments.ChildListOne[0].(CharacterNode)
 	return c
 }
 
+//Builds StrLiterNode
 func (s StrLiterNode) BuildNode(buildArguments BuildArguments) Node {
 	s.Pos = buildArguments.Pos
 
@@ -729,30 +737,36 @@ func (s StrLiterNode) BuildNode(buildArguments BuildArguments) Node {
 	}
 	return s
 }
+
+//Builds CharacterNode
 func (c CharacterNode) BuildNode(buildArguments BuildArguments) Node {
 	c.Pos = buildArguments.Pos
 	c.Character = buildArguments.ChildListOne[0].(CharacterNode)
 	return c
 }
 
+//Builds EscapedCharNode
 func (e EscapedCharNode) BuildNode(buildArguments BuildArguments) Node {
 	e.Pos = buildArguments.Pos
 	e.EscapedChar = buildArguments.ChildListOne[0].(Node)
 	return e
 }
 
+//Builds NullNode
 func (n NullNode) BuildNode(buildArguments BuildArguments) Node {
 	n.Pos = buildArguments.Pos
 	n.NullTerminator = buildArguments.Type
 	return n
 }
 
+//Builds PairLiterNode
 func (p PairLiterNode) BuildNode(buildArguments BuildArguments) Node {
 	p.Pos = buildArguments.Pos
 	p.PairLiter = buildArguments.Type
 	return p
 }
 
+//Builds UnaryOpExprNode
 func (u UnaryOpExprNode) BuildNode(buildArguments BuildArguments) Node {
 	u.Pos = buildArguments.Pos
 	u.UnaryOp = buildArguments.ChildListOne[0].(UnaryOpNode)
@@ -760,6 +774,7 @@ func (u UnaryOpExprNode) BuildNode(buildArguments BuildArguments) Node {
 	return u
 }
 
+//Builds BinaryOpExprNode
 func (b BinaryOpExprNode) BuildNode(buildArguments BuildArguments) Node {
 	b.Pos = buildArguments.Pos
 
@@ -770,150 +785,177 @@ func (b BinaryOpExprNode) BuildNode(buildArguments BuildArguments) Node {
 	return b
 }
 
+//Builds UnaryOpNode
 func (u UnaryOpNode) BuildNode(buildArguments BuildArguments) Node {
 	u.Pos = buildArguments.Pos
 	u.UnaryOpType = buildArguments.ChildListOne[0].(Node)
 	return u
 }
 
+//Builds NotNode
 func (n NotNode) BuildNode(buildArguments BuildArguments) Node {
 	n.Pos = buildArguments.Pos
 	n.Not = buildArguments.Type
 	return n
 }
 
+//Builds NegNode
 func (n NegNode) BuildNode(buildArguments BuildArguments) Node {
 	n.Pos = buildArguments.Pos
 	n.Neg = buildArguments.Type
 	return n
 }
 
+//Builds LenNode
 func (l LenNode) BuildNode(buildArguments BuildArguments) Node {
 	l.Pos = buildArguments.Pos
 	l.Len = buildArguments.Type
 	return l
 }
 
+//Builds OrdNode
 func (o OrdNode) BuildNode(buildArguments BuildArguments) Node {
 	o.Pos = buildArguments.Pos
 	o.Ord = buildArguments.Type
 	return o
 }
 
+//Builds ChrNode
 func (c ChrNode) BuildNode(buildArguments BuildArguments) Node {
 	c.Pos = buildArguments.Pos
 	c.Chr = buildArguments.Type
 	return c
 }
 
+//Builds BinaryOpNode
 func (b BinaryOpNode) BuildNode(buildArguments BuildArguments) Node {
 	b.Pos = buildArguments.Pos
 	b.BinaryOpType = buildArguments.ChildListOne[0].(Node)
 	return b
 }
 
+//Builds MultNode
 func (m MultNode) BuildNode(buildArguments BuildArguments) Node {
 	m.Pos = buildArguments.Pos
 	m.Mult = buildArguments.Type
 	return m
 }
 
+//Builds DivNode
 func (d DivNode) BuildNode(buildArguments BuildArguments) Node {
 	d.Pos = buildArguments.Pos
 	d.Div = buildArguments.Type
 	return d
 }
 
+//Builds ModNode
 func (m ModNode) BuildNode(buildArguments BuildArguments) Node {
 	m.Pos = buildArguments.Pos
 	m.Mod = buildArguments.Type
 	return m
 }
 
+//Builds AddNode
 func (a AddNode) BuildNode(buildArguments BuildArguments) Node {
 	a.Pos = buildArguments.Pos
 	a.Add = buildArguments.Type
 	return a
 }
 
+//Builds SubNode
 func (s SubNode) BuildNode(buildArguments BuildArguments) Node {
 	s.Pos = buildArguments.Pos
 	s.Sub = buildArguments.Type
 	return s
 }
 
+//Builds GTNode
 func (g GTNode) BuildNode(buildArguments BuildArguments) Node {
 	g.Pos = buildArguments.Pos
 	g.GT = buildArguments.Type
 	return g
 }
 
+//Builds GTENode
 func (g GTENode) BuildNode(buildArguments BuildArguments) Node {
 	g.Pos = buildArguments.Pos
 	g.GTE = buildArguments.Type
 	return g
 }
 
+//Builds LTNode
 func (l LTNode) BuildNode(buildArguments BuildArguments) Node {
 	l.Pos = buildArguments.Pos
 	l.LT = buildArguments.Type
 	return l
 }
 
+//Builds LTENode
 func (l LTENode) BuildNode(buildArguments BuildArguments) Node {
 	l.Pos = buildArguments.Pos
 	l.LTE = buildArguments.Type
 	return l
 }
 
+//Builds EQNode
 func (e EQNode) BuildNode(buildArguments BuildArguments) Node {
 	e.Pos = buildArguments.Pos
 	e.EQ = buildArguments.Type
 	return e
 }
 
+//Builds NEQNode
 func (n NEQNode) BuildNode(buildArguments BuildArguments) Node {
 	n.Pos = buildArguments.Pos
 	n.NEQ = buildArguments.Type
 	return n
 }
 
+//Builds AndNode
 func (a AndNode) BuildNode(buildArguments BuildArguments) Node {
 	a.Pos = buildArguments.Pos
 	a.And = buildArguments.Type
 	return a
 }
 
+//Builds OrNode
 func (o OrNode) BuildNode(buildArguments BuildArguments) Node {
 	o.Pos = buildArguments.Pos
 	o.Or = buildArguments.Type
 	return o
 }
 
+//Builds DigitNode
 func (d DigitNode) BuildNode(buildArguments BuildArguments) Node {
 	d.Pos = buildArguments.Pos
 	d.Digit = buildArguments.DigitVal
 	return d
 }
 
+//Builds IntSignNode
 func (i IntSignNode) BuildNode(buildArguments BuildArguments) Node {
 	i.Pos = buildArguments.Pos
 	i.IntSign = buildArguments.ChildListOne[0].(Node)
 	return i
 }
 
+//Builds PositiveNode
 func (p PositiveNode) BuildNode(buildArguments BuildArguments) Node {
 	p.Pos = buildArguments.Pos
 	p.Positive = buildArguments.Type
 	return p
 }
 
+//Builds NegativeNode
 func (n NegativeNode) BuildNode(buildArguments BuildArguments) Node {
 	n.Pos = buildArguments.Pos
 	n.Neg = buildArguments.Type
 	return n
 }
 
+// Upcasts Null node to node
 func (n NullChildNode) BuildNode(buildArguments BuildArguments) Node {
 	return n
 }
+
+/* End of interface methods --------------------------------------------------*/

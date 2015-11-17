@@ -247,15 +247,6 @@ func (a *AssignmentNode) visitAssignment(symbolTable *SymbolTable) (bool,
 	} else {
 		return true, nil
 	}
-	// needs to be declared before you can assign
-
-	// If identifier exists in current symboltable
-	// If value is of basetype then update symbol table
-	// if types match -> else type error
-	// If not of base type then recurse on parent symboltables to find declaration
-	// and update identifier in current symbol table if types match
-	// If not in scope (nothing is found after traversing parent symbol tables to root)
-	// then -> error variable is undeclared
 }
 
 /* This function evaluates the type of the AssignRHSNode,
@@ -386,12 +377,6 @@ func (f *FreeNode) visitFree(symbolTable *SymbolTable) (bool, []string) {
 	} else {
 		return true, nil
 	}
-	// If identifier is in current scope check if identifier is pair or array type
-	// If not then error -> cannot free type of type <int/bool/char>
-	// must be of type pair/array
-	// If not in current symbol table scope then recurse on parents
-	// IF not pair or array type then same error as above
-	// if identifier not found after traversal then undeclared variable error
 }
 
 func (r *ReturnNode) visitReturn(symbolTable *SymbolTable) (bool, []string) {
@@ -409,19 +394,6 @@ func (r *ReturnNode) visitReturn(symbolTable *SymbolTable) (bool, []string) {
 	}
 	return false, []string{"No function found in symbol table"}
 
-	// return expression must match return type of
-	// functionmin current symbol table scope
-	//once return statement is executed then exit function immediatley
-
-	// if identifier if of base type
-	// check if baseType and function type match -> if not then return type error
-	// if identifier is variable
-	// check if in current symbol table scope
-	// if so check if types of function and variable match
-	//if not in current symbol table
-	// recurse on parent symbol tables to find declaration
-	// check type match
-	// if not declared then return undeclared variable error
 }
 
 func (e *ExitNode) visitExit(symbolTable *SymbolTable) (bool, []string) {
@@ -433,12 +405,7 @@ func (e *ExitNode) visitExit(symbolTable *SymbolTable) (bool, []string) {
 	} else {
 		return true, nil
 	}
-	// If identifier is of basetype then must be int
-	// otherwise error -> cannot exit with non - int value
-	// if not of base type then find declaration
-	// in current then parent symbolTable scope
-	// if found check that type is int
-	// if not found undeclared variable error
+
 }
 
 func (p *PrintNode) visitPrint(symbolTable *SymbolTable) (bool, []string) {
@@ -486,21 +453,11 @@ func (i *IfNode) visitIf(symbolTable *SymbolTable) (bool, []string) {
 		errorMsgs = append(errorMsgs, msgs...)
 	}
 
-	if !passFirst {
-		pass = false
-		errorMsgs = append(errorMsgs, msgs...)
-	}
-
 	res := pass && passFirst && passSecond
 	return res, errorMsgs
 }
 
 func (w *WhileNode) visitWhile(symbolTable *SymbolTable) (bool, []string) {
-	//while <expr> do
-	// expr must evaluate to bool
-	// check if <expr> variable have been declared in current/parent scope
-	//error if not
-	// visit statements...
 	var errorMsgs []string // An array of error messages
 	var pass = true        // source of bugs??
 
@@ -554,7 +511,7 @@ func (exprNode ExprNode) evalExpr(symbolTable *SymbolTable) (grammar.Type,
 			return nil, []string{"character is not defined"}
 		}
 		if len(symbolTable.getTypeOfIdent((evalElem.(IdentNode).Ident))) > 1 {
-			return nil, []string{"Can't eval ident for fucntion"}
+			return nil, []string{"Can't eval ident for function"}
 		} else {
 			return symbolTable.getTypeOfIdent((evalElem.(IdentNode).Ident))[0], nil
 		}
