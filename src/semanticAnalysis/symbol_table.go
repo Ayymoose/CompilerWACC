@@ -54,7 +54,7 @@ import "grammar"
 // SymbolTable constructor
 type SymbolTable struct {
 	parent      *SymbolTable
-	semanticMap map[string]grammar.Token // A map of strings to a list of tokens
+	semanticMap map[string]grammar.Type // A map of strings to a list of tokens
 }
 
 // Creates a new instance of a symbolTable with a parent to its pointer

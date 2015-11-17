@@ -2,6 +2,10 @@ package semanticAnalysis
 
 import "grammar"
 
+func (exprNode *ExprNode) evalExp(SymbolTable *SymbolTable) (grammar.Type, []string) {
+	return nil, nil
+}
+
 func (ast *ProgramNode) visitProgram() {
 	// Create new symbolTable
 	st := SymbolTable.New()
@@ -14,7 +18,7 @@ func (ast *ProgramNode) visitProgram() {
 	// Hashmap of (funcIdent, timesDeclared)
 	funcMap := make(map[string]int)
 	for _, function := range ast.Func {
-		funcMap[function.PosIdentType.Ident]++
+		funcMap[function.Ident]++
 	}
 
 	// Visit all function nodes
@@ -23,7 +27,7 @@ func (ast *ProgramNode) visitProgram() {
 		// Slice of functions
 		// Fucntion Hashmap
 		// SymbolTable at top level scope
-		pass, msg := function.visitFunction(ast.Func, funcMap, st)
+		pass, msg := function.visitFunction(funcMap, st)
 		// if visitFuction passes then add function name and parameter types to current symbol table
 		// key is function ident (the function name)
 		// value is a list of parameter types with first one being the function type
@@ -55,7 +59,7 @@ func (st *SymbolTable) insertFunctionDeclaration(function *FuncNode) { // insert
 	st.insert(function.PosIdentType.Ident, types)
 }
 
-func (f *FuncNode) visitFunction(functions []FuncNode, funcMap map[string]int, st *SymbolTable) (bool, []string) {
+func (f *FuncNode) visitFunction(funcMap map[string]int, st *SymbolTable) (bool, []string) {
 	// Functions are only defined at the top level scope
 	var errorMsgs []string // An array of error messages
 	var pass = true        // source of bugs??
@@ -234,6 +238,8 @@ func (a *AssignRHSNode) visitAssignRHS() {
 
 }
 
+
+
 // check for type mismatch  -> int i = true is Wrong
 // variable s are case sensitive -> check if variable name is in scope if not variable is undeclared/not in scope
 // redeclaration of variable is not allowed
@@ -271,6 +277,10 @@ func (r *ReadNode) visitRead(symbolTable *SymbolTable) (bool, []string) {
 	case IdentNode:
 		if !symbolTable.isDefined(elem.(IdentNode).Ident) {
 				errorMsgs = append(errorMsgs, "Identifier not defined")
+		} else {
+			switch type :=symbolTable.getTypeOfIdent(key string) {
+				case
+			}
 		}
 	case ArrayElemNode:
 	case PairElemNode:
