@@ -13,7 +13,11 @@ func (exprNode *ExprNode) evalExpr(SymbolTable *SymbolTable) (grammar.Type, []st
 			if !SymbolTable.isDefined((evalElem.(IdentNode).Ident)) {
 				return nil,  []string{"character is not defined"}
 			}
-			return	SymbolTable.getTypeOfIdent((evalElem.(IdentNode).Ident)), nil
+			if 	len(SymbolTable.getTypeOfIdent((evalElem.(IdentNode).Ident))) > 1 {
+				return nil, []string{"Can't eval ident for fucntion"}
+				} else {
+					return 	SymbolTable.getTypeOfIdent((evalElem.(IdentNode).Ident))[0], nil
+				}
 		case IntLiterNode:
 			return grammar.BaseInt, nil
 		case BoolLiterNode:
@@ -468,14 +472,19 @@ itemType, errs := f.Expr.evalExpr(symbolTable)
 	// if identifier not found after traversal then undeclared variable error
 }
 
-func (r *ReturnNode) visitReturn(symbolTable *SymbolTable) {
-
-
+func (r *ReturnNode) visitReturn(symbolTable *SymbolTable) (bool, []string){
 
 	itemType, errs := r.Expr.evalExpr(symbolTable)
 	if errs != nil {
 		return false, errs
 	}
+		for _, ident := range symbolTable.semanticMap {
+			if len(ident) > 0 && itemType == ident[0]{
+				return true, nil
+			} else {
+				return false, []string{"Mismatching return types"}
+			}
+		}
 
 	// return expression must match return type of functionmin current symbol table scope
 	//once return statement is executed then exit function immediatley

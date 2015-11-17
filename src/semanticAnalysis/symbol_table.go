@@ -54,14 +54,14 @@ import "grammar"
 // SymbolTable constructor
 type SymbolTable struct {
 	parent      *SymbolTable
-	semanticMap map[string]grammar.Type // A map of strings to a list of tokens
+	semanticMap map[string][]grammar.Type // A map of strings to a list of tokens
 }
 
 // Creates a new instance of a symbolTable with a parent to its pointer
 func (symbolTable *SymbolTable) New() *SymbolTable {
 	newSymbolTable := &SymbolTable{}
 	newSymbolTable.parent = symbolTable
-	newSymbolTable.semanticMap = make(map[string][]grammar.Type)
+	newSymbolTable.semanticMap = make(map[string][]grammar.Token)
 	return newSymbolTable
 }
 
@@ -87,7 +87,7 @@ func (SymbolTable *SymbolTable) contains(key string) bool {
 	return ok
 }
 
-func (SymbolTable *SymbolTable) getTypeOfIdent(key string) grammar.Type {
+func (SymbolTable *SymbolTable) getTypeOfIdent(key string) []grammar.Type {
 	curr := SymbolTable
 	for curr != nil {
 		if curr.contains(key) {
