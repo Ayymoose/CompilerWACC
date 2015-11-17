@@ -9,8 +9,10 @@ import (
 	"parse"
 )
 
+const SYNTAX_ERROR = 100
+
 func main() {
-	file := os.Args[1]
+	file := os.Args[1] // index 1 is file path
 	b, err := ioutil.ReadFile(file)
 	//	b, err := ioutil.ReadFile("wacc_examples/valid/variables/capCharDeclaration.wacc")
 	//	b, err := ioutil.ReadFile("wacc_examples/valid/function/nested_functions/fibonacciFullRec.wacc")
@@ -44,7 +46,7 @@ func main() {
 	}
 	if tokens[len(tokens)-1].Typ == grammar.ERROR {
 		fmt.Println("#syntax_error#(Lex)")
-		os.Exit(100)
+		os.Exit(SYNTAX_ERROR)
 	}
 	parser := lexer.ConstructParser(tokens)
 	passed, errs := parser.Parse()
@@ -56,7 +58,7 @@ func main() {
 
 	if !passed {
 		fmt.Println("#syntax_error#(Parse)")
-		os.Exit(100)
+		os.Exit(SYNTAX_ERROR)
 	}
 
 }
