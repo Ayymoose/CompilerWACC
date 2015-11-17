@@ -48,7 +48,7 @@ type DataNode struct {
 	IntVal int
 	StrVal string
 	Nodes  []Node
-	Type   grammar.ItemType
+	Type   grammar.Type
 }
 
 /* End of utility structs ----------------------------------------------------*/

@@ -1,13 +1,13 @@
-package semanticAnalysis
+package abstractSyntaxTree
 
 import (
-	ast "abstractSyntaxTree"
+	"fmt"
 	"grammar"
 )
 
 // This struct holds all the valid functions
 // (if any) in a map
-type FuctionMap struct {
+type FunctionMap struct {
 	functionMap map[string][]grammar.Type
 }
 
@@ -17,12 +17,12 @@ func NewFuncMap() *FunctionMap {
 }
 
 // Start traversing the tree at the root node
-func (root *ast.ProgramNode) visitProgram() (bool, []string) {
+func (root *ProgramNode) VisitProgram() (bool, []string) {
 	var errorMsgs []string // An array of error messages
 	var pass = true        // source of bugs??
-
+	symTable := &SymbolTable{parent: nil, semanticMap: make(map[string][]grammar.Type)}
 	// Create new symbolTable for global scope
-	symTable := SymbolTable.New()
+	//symTable := SymbolTable.New()
 
 	// Initialise functionMap struct
 	fMap := NewFuncMap()
@@ -30,12 +30,12 @@ func (root *ast.ProgramNode) visitProgram() (bool, []string) {
 	// First step in validating functions is to
 	// create a frequency hashmap of (funcIdent, timesDeclared)
 	funcMap := make(map[string]int)
-	for _, function := range root.Func {
+	for _, function := range root.FuncList {
 		funcMap[function.Ident]++
 	}
 
 	// Visit all function nodes
-	for _, function := range root.Func {
+	for _, function := range root.FuncList {
 		pass, errorMsgs = function.visitFunction(funcMap, symTable)
 		if pass {
 			// If visitFunction passes insert function declaration into
@@ -46,13 +46,13 @@ func (root *ast.ProgramNode) visitProgram() (bool, []string) {
 	}
 
 	// Visit all statement nodes
-	for _, statement := range root.Stat {
+	for _, statement := range root.StatList {
 		pass, errorMsgs = statement.visitStatement(symTable)
 	}
 	return pass, errorMsgs
 }
 
-func (f *ast.FuncNode) visitFunction(funcMap map[string]int, symTable *SymbolTable) (bool, []string) {
+func (f FunctionNode) visitFunction(funcMap map[string]int, symTable *SymbolTable) (bool, []string) {
 	// Functions are only defined at the top level scope
 	var errorMsgs []string // An array of error messages
 	var pass = true        // source of bugs??
@@ -61,7 +61,7 @@ func (f *ast.FuncNode) visitFunction(funcMap map[string]int, symTable *SymbolTab
 	key := funcMap[f.Ident]
 	if key > 1 {
 		pass = false
-		errorMsgs = append(errorMsgs, "Function "+function.Ident+" is being redefined in top level scope")
+		errorMsgs = append(errorMsgs, "Function "+f.Ident+" is being redefined in top level scope")
 	}
 
 	// Create new symbol table for function scope
@@ -75,14 +75,14 @@ func (f *ast.FuncNode) visitFunction(funcMap map[string]int, symTable *SymbolTab
 		fine, msgs := statement.visitStatement(funcSymTable)
 		if !fine {
 			pass = false
-			errorMsgs = append(errorMsgs, msgs)
+			errorMsgs = append(errorMsgs, msgs...)
 		}
 	}
 	//Empty errorMsgs if all ok
 	return pass, errorMsgs
 }
 
-func (st *ast.SymbolTable) insertFunctionDeclaration(function *FuncNode, fm *FunctionMap) {
+func (st *SymbolTable) insertFunctionDeclaration(function FunctionNode, fm *FunctionMap) {
 	var types []grammar.Type
 
 	// Add the function type
@@ -103,8 +103,8 @@ func (fm *FunctionMap) insertIntoFuncMap(ident string, types []grammar.Type) {
 	fm.functionMap[ident] = types
 }
 
-func (st *ast.SymbolTable) insertFunctionParams(f FuncNode) {
-	var typeParam []grammar.ItemType
+func (st *SymbolTable) insertFunctionParams(f FunctionNode) {
+	var typeParam []grammar.Type
 
 	for _, param := range f.ParamList {
 		typeParam[0] = param.Type
@@ -112,11 +112,11 @@ func (st *ast.SymbolTable) insertFunctionParams(f FuncNode) {
 	}
 }
 
-func (s *ast.StatementNode) visitStatement(symbolTable *SymbolTable) (bool, []string) {
+func (s *StatementNode) visitStatement(symbolTable *SymbolTable) (bool, []string) {
 	var errorMsgs []string // An array of error messages
 	var pass = true        // source of bugs??
 
-	switch statType := s.StatElem.(type) {
+	switch statType := s.Stat.(type) {
 	case DeclarationNode:
 		pass, errorMsgs = statType.visitDeclaration(symbolTable)
 	case AssignmentNode:
@@ -141,12 +141,12 @@ func (s *ast.StatementNode) visitStatement(symbolTable *SymbolTable) (bool, []st
 		pass, errorMsgs = statType.visitScope(symbolTable)
 	default:
 		pass = false
-		errorMsgs = append(errorMsgs, statType+" is not a valid statement node")
+		errorMsgs = append(errorMsgs, fmt.Sprint(statType)+" is not a valid statement node")
 	}
 	return pass, errorMsgs
 }
 
-func (d *ast.DeclarationNode) visitDeclaration(symbolTable *SymbolTable) (bool, []string) {
+func (d *DeclarationNode) visitDeclaration(symbolTable *SymbolTable) (bool, []string) {
 	var errorMsgs []string // An array of error messages
 	var pass = true        // source of bugs??
 
@@ -166,55 +166,58 @@ func (d *ast.DeclarationNode) visitDeclaration(symbolTable *SymbolTable) (bool, 
 	}
 
 	// Evaluate RHS expression
-	foundType, errors := d.AssignRHS.evalAssignRHS(symbolTable)
+	foundType, errors := d.AssignRHS.evalAssignRHSNode(symbolTable)
+	if errors != nil {
+		errorMsgs = append(errorMsgs, errors...)
+	}
 	// Types must match
 	if foundType != baseType {
 		pass = false
 		errorMsgs = append(errorMsgs,
-			"Type Error : Expected type "+baseType+", bur found "+foundType)
+			"Type Error : Expected type "+fmt.Sprint(baseType)+", bur found "+fmt.Sprint(foundType))
 	}
 
 	// Only add to symbol table after all checks have passed
 	if !declared && (foundType == baseType) {
-		symbolTable.insert(ident, baseType)
+		symbolTable.insert(ident, []grammar.Type{baseType})
 	}
 	return pass, errorMsgs
 }
 
-func (a *ast.AssignmentNode) visitAssignment(symbolTable *SymbolTable) (bool, []string) {
+func (a *AssignmentNode) visitAssignment(symbolTable *SymbolTable) (bool, []string) {
 
 	var errorMsgs []string // An array of error message
 	lhs := a.AssignLHS
 	rhs := a.AssignRHS
-
+	evalElem := lhs.AssignLHS
 	var lhsType grammar.Type
 	//var rhsType grammar.Type
 
-	switch lhs.AssignLHSElem.(type) {
-	case ast.IdentNode:
-		if !symbolTable.isDefined(lhs.AssignLHSElem.(IdentNode).Ident) {
+	switch lhs.AssignLHS.(type) {
+	case IdentNode:
+		if !symbolTable.isDefined(lhs.AssignLHS.(IdentNode).Ident) {
 			errorMsgs = append(errorMsgs, "Identifier not defined")
 		} else {
-			lhsType = symbolTable.getTypeOfIdent((lhs.AssignLHSElem.(IdentNode)).Ident)[0]
+			lhsType = symbolTable.getTypeOfIdent((lhs.AssignLHS.(IdentNode)).Ident)[0]
 		}
-	case ast.ArrayElemNode:
-		ident := (lhs.AssignLHSElem.(ArrayElemNode)).Ident
-		if !SymbolTable.isDefined(ident) {
+	case ArrayElemNode:
+		ident := (lhs.AssignLHS.(ArrayElemNode)).Ident
+		if !symbolTable.isDefined(ident) {
 			errorMsgs = append(errorMsgs, "character is not defined")
 		}
-		if x := SymbolTable.getTypeOfIdent(ident); grammar.ArrayType != SymbolTable.getTypeOfIdent(ident).(type) {
+		if x := symbolTable.getTypeOfIdent(ident); x[0].GetMainType() != grammar.TypeArray {
 			errorMsgs = append(errorMsgs, "not array type")
-		} else if x.Dimen < len((evalElem.(ArrayElemNode)).Expr) {
+		} else if x[0].(grammar.ArrayType).Dimen < len((evalElem.(ArrayElemNode)).ExprList) {
 			errorMsgs = append(errorMsgs, "array dimen too small")
-		} else if x.Dimen > len((evalElem.(ArrayElemNode)).Expr) {
-			lhsType = grammar.ArrayType{x.Dimen - len((evalElem.(ArrayElemNode)).Expr), x.BaseType}
+		} else if x[0].(grammar.ArrayType).Dimen > len((evalElem.(ArrayElemNode)).ExprList) {
+			lhsType = grammar.ArrayType{x[0].(grammar.ArrayType).Dimen - len((evalElem.(ArrayElemNode)).ExprList), x[0].(grammar.ArrayType).BaseType}
 		} else {
-			lhsType = x.BaseType
+			lhsType = x[0].(grammar.ArrayType).BaseType
 		}
-	case ast.PairElemNode:
-		itemType, errs := (lhs.AssignLHSElem.(PairElemNode)).Elem.evalExpr(symbolTable)
+	case PairElemNode:
+		itemType, errs := (lhs.AssignLHS.(PairElemNode)).Fst.evalExpr(symbolTable) // THIS ISN't RIGHT
 		if errs != nil {
-			errorMsgs = append(errorMsgs, errs)
+			errorMsgs = append(errorMsgs, errs...)
 		} else {
 			lhsType = itemType
 		}
@@ -222,7 +225,7 @@ func (a *ast.AssignmentNode) visitAssignment(symbolTable *SymbolTable) (bool, []
 		errorMsgs = append(errorMsgs, "LHS not defined correctly")
 	}
 
-	typeOfRHS, errs := rhs.AssignRHSElem.evalAssignRHSNode(symbolTable)
+	typeOfRHS, errs := rhs.evalAssignRHSNode(symbolTable)
 	if errs != nil {
 		errorMsgs = append(errorMsgs, "Error in RHS of assigment")
 	} else if typeOfRHS != lhsType {
@@ -244,27 +247,28 @@ func (a *ast.AssignmentNode) visitAssignment(symbolTable *SymbolTable) (bool, []
 	// then -> error variable is undeclared
 }
 
-func (a *ast.AssignRHSNode) evalAssignRHSNode(symbolTable *SymbolTable) (grammar.Type, []string) {
+func (a *AssignRHSNode) evalAssignRHSNode(symbolTable *SymbolTable) (grammar.Type, []string) {
+	rhs := a.AssignRHS
 
-	switch rhs.AssignRHSElem.(type) {
-	case ast.ExprNode:
-		rightHandType, errs := (rhs.AssignRHSElem.(ast.ExprNode)).evalExpr(symbolTable)
+	switch rhs.(type) {
+	case ExprNode:
+		rightHandType, errs := (rhs.(ExprNode)).evalExpr(symbolTable)
 		if errs != nil {
 			return nil, errs
 		} else {
 			return rightHandType, nil
 		}
-	case ast.ArrayLiterNode:
-		typeArray, errs := (rhs.AssignRHSElem.(ast.ArrayLiterNode)).evalArrayLiterNode(symbolTable)
+	case ArrayLiterNode:
+		typeArray, errs := (rhs.(ArrayLiterNode)).evalArrayLiterNode(symbolTable)
 		if errs != nil {
 			return nil, errs
 		} else {
 			return typeArray, nil
 		}
-	case ast.NewPairNode:
-		pairNode := (rhs.AssignRHSElem.(ast.NewPairNode))
-		fst := pairNode.Expr[0]
-		snd := pairNode.Expr[1]
+	case NewPairNode:
+		pairNode := (rhs.(NewPairNode))
+		fst := pairNode.ExprList[0]
+		//		snd := pairNode.ExprList[1]
 		fstType, errsF := fst.evalExpr(symbolTable)
 		sndType, errsS := fst.evalExpr(symbolTable)
 		if errsF != nil {
@@ -273,16 +277,16 @@ func (a *ast.AssignRHSNode) evalAssignRHSNode(symbolTable *SymbolTable) (grammar
 		if errsS != nil {
 			return nil, errsS
 		}
-		return grammar.PairType{errsF, errsS}, nil
-	case ast.PairElemNode:
-		mainType, errs := ((rhs.AssignRHSElem.(ast.PairElemNode)).Elem).evalExpr(symbolTable)
+		return grammar.PairType{fstType, sndType}, nil
+	case PairElemNode:
+		mainType, errs := ((rhs.(PairElemNode)).Fst).evalExpr(symbolTable) // Not right
 		if errs != nil {
 			return nil, errs
 		} else {
 			return mainType, nil
 		}
-	case ast.CallNode:
-		returnType := symbolTable.getTypeOfIdent(((rhs.AssignRHSElem.(ast.CallNode)).Ident))[0]
+	case CallNode:
+		returnType := symbolTable.getTypeOfIdent(((rhs.(CallNode)).Ident))[0]
 		if returnType == nil {
 			return nil, []string{"Function not defined in symbol table"}
 		} else {
@@ -293,14 +297,14 @@ func (a *ast.AssignRHSNode) evalAssignRHSNode(symbolTable *SymbolTable) (grammar
 	}
 }
 
-func (a ast.ArrayLiterNode) evalArrayLiterNode(symbolTable *SymbolTable) (grammar.Type, []string) {
-	expressions := a.Expr
-	fsType, errs := expressions[0].evalExpr(synbolTable)
+func (a ArrayLiterNode) evalArrayLiterNode(symbolTable *SymbolTable) (grammar.Type, []string) {
+	expressions := a.ExprList
+	fsType, errs := expressions[0].evalExpr(symbolTable)
 	if errs != nil {
 		return nil, []string{"Error in first expression in arrayliter"}
 	}
-	for _, expr := range expresions {
-		newType, errs := expr.evalExpr(synbolTable)
+	for _, expr := range expressions {
+		newType, errs := expr.evalExpr(symbolTable)
 		if errs != nil {
 			return nil, []string{"Error in first expression in arrayliter"}
 		} else if fsType != newType {
@@ -310,7 +314,7 @@ func (a ast.ArrayLiterNode) evalArrayLiterNode(symbolTable *SymbolTable) (gramma
 	return fsType, nil
 }
 
-func (r *ast.ReadNode) visitRead(symbolTable *SymbolTable) (bool, []string) {
+func (r *ReadNode) visitRead(symbolTable *SymbolTable) (bool, []string) {
 	var errorMsgs []string // An array of error message
 	elem := r.AssignLHS.AssignLHS
 
@@ -318,27 +322,27 @@ func (r *ast.ReadNode) visitRead(symbolTable *SymbolTable) (bool, []string) {
 	case IdentNode:
 		if !symbolTable.isDefined(elem.(IdentNode).Ident) {
 			errorMsgs = append(errorMsgs, "Identifier"+elem.(IdentNode).Ident+" is not defined")
-		} else if itemType := symbolTable.getTypeOfIdent((elem.(ast.IdentNode)).Ident)[0]; !(itemType == grammar.BaseInt || itemType == grammar.BaseChar) {
+		} else if itemType := symbolTable.getTypeOfIdent((elem.(IdentNode)).Ident)[0]; !(itemType == grammar.BaseInt || itemType == grammar.BaseChar) {
 			errorMsgs = append(errorMsgs, " type not int or char")
 		}
 	case ArrayElemNode:
 		ident := (elem.(ArrayElemNode)).Ident
-		if !SymbolTable.isDefined(ident) {
+		if !symbolTable.isDefined(ident) {
 			errorMsgs = append(errorMsgs, "character is not defined")
 		}
-		if x := SymbolTable.getTypeOfIdent(ident); grammar.ArrayType != SymbolTable.getTypeOfIdent(ident).(type) {
+		if x := symbolTable.getTypeOfIdent(ident); symbolTable.getTypeOfIdent(ident)[0].GetMainType() != grammar.TypeArray {
 			errorMsgs = append(errorMsgs, "not array type")
-		} else if x.Dimen < len((evalElem.(ArrayElemNode)).Expr) {
+		} else if x[0].(grammar.ArrayType).Dimen < len((elem.(ArrayElemNode)).ExprList) {
 			errorMsgs = append(errorMsgs, "array length too small")
-		} else if x.Dimen > len((evalElem.(ArrayElemNode)).Expr) {
+		} else if x[0].(grammar.ArrayType).Dimen > len((elem.(ArrayElemNode)).ExprList) {
 			errorMsgs = append(errorMsgs, "cannot read type array")
-		} else if !(x.BaseType == grammar.BaseInt || x.BaseType == grammar.BaseChar) {
+		} else if !(x[0].(grammar.BaseType) == grammar.BaseInt || x[0].(grammar.BaseType) == grammar.BaseChar) {
 			errorMsgs = append(errorMsgs, "cannot read type that isn't char or int")
 		}
 	case PairElemNode:
-		itemType, errs := (elem.(PairElemNode)).Elem.evalExpr(symbolTable)
+		itemType, errs := (elem.(PairElemNode)).Fst.evalExpr(symbolTable) // Not right!!!!!!
 		if errs != nil {
-			errorMsgs = append(errorMsgs, errs)
+			errorMsgs = append(errorMsgs, errs...)
 		} else if !(itemType == grammar.BaseInt || itemType == grammar.BaseChar) {
 			errorMsgs = append(errorMsgs, "cannot read type that isn't char or int")
 		}
@@ -352,12 +356,12 @@ func (r *ast.ReadNode) visitRead(symbolTable *SymbolTable) (bool, []string) {
 	}
 }
 
-func (f *ast.FreeNode) visitFree(symbolTable *SymbolTable) (bool, []string) {
+func (f *FreeNode) visitFree(symbolTable *SymbolTable) (bool, []string) {
 	// Free parameter must evaluate to a valid pair <pair(T1, T1)> or a valid array <T[]>
 	itemType, errs := f.Expr.evalExpr(symbolTable)
 	if errs != nil {
 		return false, errs
-	} else if !(itemType == grammar.ArrayType || itemType == grammar.PairType) {
+	} else if !(itemType.GetMainType() != grammar.TypeArray || itemType.GetMainType() == grammar.TypePair) {
 		return false, []string{"Cannot free type that isn't pair/array"}
 	} else {
 		return true, nil
@@ -369,7 +373,7 @@ func (f *ast.FreeNode) visitFree(symbolTable *SymbolTable) (bool, []string) {
 	// if identifier not found after traversal then undeclared variable error
 }
 
-func (r *ast.ReturnNode) visitReturn(symbolTable *SymbolTable) (bool, []string) {
+func (r *ReturnNode) visitReturn(symbolTable *SymbolTable) (bool, []string) {
 
 	itemType, errs := r.Expr.evalExpr(symbolTable)
 	if errs != nil {
@@ -398,7 +402,7 @@ func (r *ast.ReturnNode) visitReturn(symbolTable *SymbolTable) (bool, []string) 
 	// if not declared then return undeclared variable error
 }
 
-func (e *ast.ExitNode) visitExit(symbolTable *SymbolTable) (bool, []string) {
+func (e *ExitNode) visitExit(symbolTable *SymbolTable) (bool, []string) {
 	itemType, errs := e.Expr.evalExpr(symbolTable)
 	if errs != nil {
 		return false, errs
@@ -414,8 +418,8 @@ func (e *ast.ExitNode) visitExit(symbolTable *SymbolTable) (bool, []string) {
 	// if not found undeclared variable error
 }
 
-func (p *ast.PrintNode) visitPrint(symbolTable *SymbolTable) {
-	itemType, errs := p.Expr.evalExpr(symbolTable)
+func (p *PrintNode) visitPrint(symbolTable *SymbolTable) (bool, []string) {
+	_, errs := p.Expr.evalExpr(symbolTable)
 	if errs != nil {
 		return false, errs
 	} else {
@@ -423,8 +427,8 @@ func (p *ast.PrintNode) visitPrint(symbolTable *SymbolTable) {
 	}
 }
 
-func (p *ast.PrintlnNode) visitPrintln(symbolTable *SymbolTable) {
-	itemType, errs := p.Expr.evalExpr(symbolTable)
+func (p *PrintlnNode) visitPrintln(symbolTable *SymbolTable) (bool, []string) {
+	_, errs := p.Expr.evalExpr(symbolTable)
 	if errs != nil {
 		return false, errs
 	} else {
@@ -439,28 +443,28 @@ func (i *IfNode) visitIf(symbolTable *SymbolTable) (bool, []string) {
 
 	if msgs != nil {
 		pass = false
-		errorMsgs = append(errorMsgs, msgs)
+		errorMsgs = append(errorMsgs, msgs...)
 	}
 
 	if baseType != grammar.BaseBool {
 		pass = false
-		errorMsgs = append(errorMsgs, "Evaluated type "+baseType+"not of baseBool type")
+		errorMsgs = append(errorMsgs, "Evaluated type "+fmt.Sprint(baseType)+"not of baseBool type")
 	}
 
-	firstStat := i.StatList[0].(StatementNode)
-	secondStat := i.StatList[1].(StatementNode)
+	firstStat := i.StatList[0]
+	secondStat := i.StatList[1]
 
 	passFirst, msgs := firstStat.visitStatement(symbolTable)
 	passSecond, msgs := secondStat.visitStatement(symbolTable)
 
 	if !passFirst {
 		pass = false
-		errorMsgs = append(errorMsgs, msgs)
+		errorMsgs = append(errorMsgs, msgs...)
 	}
 
 	if !passFirst {
 		pass = false
-		errorMsgs = append(errorMsgs, msgs)
+		errorMsgs = append(errorMsgs, msgs...)
 	}
 
 	res := pass && passFirst && passSecond
@@ -479,49 +483,51 @@ func (w *WhileNode) visitWhile(symbolTable *SymbolTable) (bool, []string) {
 	baseType, msgs := w.Expr.evalExpr(symbolTable) //ExprNode
 	if msgs != nil {
 		pass = false
-		errorMsgs = append(errorMsgs, msgs)
+		errorMsgs = append(errorMsgs, msgs...)
 	}
 
 	if baseType != grammar.BaseBool {
 		pass = false
-		errorMsgs = append(errorMsgs, "Evaluated type "+baseType+"not of baseBool type")
+		errorMsgs = append(errorMsgs, "Evaluated type "+fmt.Sprint(baseType)+"not of baseBool type")
 	}
-
-	passed, msgs := w.Stat.(StatementNode).visitStatement(symbolTable)
-	if !passed {
-		pass = false
-		errorMsgs = append(errorMsgs, msgs)
+	for _, statNode := range w.StatList {
+		passed, msgs := statNode.visitStatement(symbolTable)
+		if !passed {
+			pass = false
+			errorMsgs = append(errorMsgs, msgs...)
+		}
 	}
 	return pass, errorMsgs
 }
 
-func (s *ScopeNode) visitScope(symbolTable *SymbolTable) {
+func (s *ScopeNode) visitScope(symbolTable *SymbolTable) (bool, []string) {
 	// entering a new scope so create a new symbol table
 
 	var errorMsgs []string // An array of error messages
 	var pass = true        // source of bugs??
 	// Create a new symbol table as we enter a new scope
 	newScope := symbolTable.New()
-
-	passed, msgs := s.Stat.visitStatement(newScope)
-	if !passed {
-		errorMsgs = append(errorMsgs, msgs)
+	for _, statNode := range s.StatList {
+		passed, msgs := statNode.visitStatement(newScope)
+		if !passed {
+			errorMsgs = append(errorMsgs, msgs...)
+		}
 	}
 	return pass, errorMsgs
 }
 
-func (exprNode *ast.ExprNode) evalExpr(SymbolTable *SymbolTable) (grammar.Type, []string) {
+func (exprNode ExprNode) evalExpr(symbolTable *SymbolTable) (grammar.Type, []string) {
 	evalElem := exprNode.Expr
 
-	switch nodeType := evalElem.(type) {
+	switch evalElem.(type) {
 	case IdentNode:
-		if !SymbolTable.isDefined((evalElem.(IdentNode).Ident)) {
+		if !symbolTable.isDefined((evalElem.(IdentNode).Ident)) {
 			return nil, []string{"character is not defined"}
 		}
-		if len(SymbolTable.getTypeOfIdent((evalElem.(IdentNode).Ident))) > 1 {
+		if len(symbolTable.getTypeOfIdent((evalElem.(IdentNode).Ident))) > 1 {
 			return nil, []string{"Can't eval ident for fucntion"}
 		} else {
-			return SymbolTable.getTypeOfIdent((evalElem.(IdentNode).Ident))[0], nil
+			return symbolTable.getTypeOfIdent((evalElem.(IdentNode).Ident))[0], nil
 		}
 	case IntLiterNode:
 		return grammar.BaseInt, nil
@@ -529,63 +535,69 @@ func (exprNode *ast.ExprNode) evalExpr(SymbolTable *SymbolTable) (grammar.Type, 
 		return grammar.BaseBool, nil
 	case CharLiterNode:
 		return grammar.BaseChar, nil
-	case StringLiterNode:
+	case StrLiterNode:
 		return grammar.BaseString, nil
 	case ArrayElemNode:
 		ident := (evalElem.(ArrayElemNode)).Ident
-		if !SymbolTable.isDefined(ident) {
+		if !symbolTable.isDefined(ident) {
 			return nil, []string{"character is not defined"}
 		}
-		if x := SymbolTable.getTypeOfIdent(ident); grammar.ArrayType != SymbolTable.getTypeOfIdent(ident).(type) {
+		if x := symbolTable.getTypeOfIdent(ident); grammar.TypeArray != symbolTable.getTypeOfIdent(ident)[0].GetMainType() {
 			return nil, []string{"not array type"}
-		} else if x.Dimen < len((evalElem.(ArrayElemNode)).Expr) {
+		} else if x[0].(grammar.ArrayType).Dimen < len((evalElem.(ArrayElemNode)).ExprList) {
 			return nil, []string{"array length too small"}
-		} else if x.Dimen > len((evalElem.(ArrayElemNode)).Expr) {
-			return grammar.ArrayType{x.Dimen - len((evalElem.(ArrayElemNode)).Expr), x.BaseType}, nil
+		} else if x[0].(grammar.ArrayType).Dimen > len((evalElem.(ArrayElemNode)).ExprList) {
+			return grammar.ArrayType{x[0].(grammar.ArrayType).Dimen - len((evalElem.(ArrayElemNode)).ExprList), x[0].(grammar.ArrayType).BaseType}, nil
 		} else {
-			return x.BaseType, nil
+			return x[0].(grammar.ArrayType).BaseType, nil
 		}
 	case PairLiterNode:
 		//			return evalElem.(PairLiterNode).PairLiter
 		return grammar.PairType{}, nil
 	case UnaryOpExprNode:
-		itemType, errs := (evalElem.(UnaryOpExprNode)).Expr.evalExp(SymbolTable)
+		itemType, errs := (evalElem.(UnaryOpExprNode)).Expr.evalExpr(symbolTable)
 		if errs != nil {
 			return nil, errs
 		}
-		switch itemType {
-		case grammar.BaseBool:
-			if (evalElem.(UnaryOpExprNode)).UnaryOp.UnaryOpType.(type) != NotNode {
+		switch itemType.GetMainType() {
+		case grammar.TypeBool:
+			switch (evalElem.(UnaryOpExprNode)).UnaryOp.UnaryOpType.(type) {
+			case NotNode:
 				return nil, []string{"Wrong unary operation"}
-			} else {
+			default:
 				return grammar.BaseBool, nil
 			}
-		case grammar.BaseInt:
-			if (evalElem.(UnaryOpExprNode)).UnaryOp.UnaryOpType.(type) == NegNode {
+		case grammar.TypeInt:
+			switch (evalElem.(UnaryOpExprNode)).UnaryOp.UnaryOpType.(type) {
+			case NegNode:
 				return grammar.BaseInt, nil
-			} else if (evalElem.(UnaryOpExprNode)).UnaryOp.UnaryOpType.(type) == ChrNode {
+			case ChrNode:
 				return grammar.BaseChar, nil
-			} else {
+			default:
 				return nil, []string{"Wrong unary operation"}
 			}
-		case grammar.BaseChar:
-			if (evalElem.(UnaryOpExprNode)).UnaryOp.UnaryOpType.(type) == OrdNode {
+		case grammar.TypeChar:
+			switch (evalElem.(UnaryOpExprNode)).UnaryOp.UnaryOpType.(type) {
+			case OrdNode:
 				return grammar.BaseInt, nil
-			} else {
+			case LenNode:
+				return grammar.BaseInt, nil
+			default:
 				return nil, []string{"Wrong unary operation"}
 			}
-		case grammar.BaseString, grammar.ArrayType:
-			if (evalElem.(UnaryOpExprNode)).UnaryOp.UnaryOpType.(type) == LenNode {
+		case grammar.TypeString, grammar.TypeArray:
+			switch (evalElem.(UnaryOpExprNode)).UnaryOp.UnaryOpType.(type) {
+			case LenNode:
 				return grammar.BaseInt, nil
-			} else {
+			default:
 				return nil, []string{"Wrong unary operation"}
 			}
 		default:
 			return nil, []string{"Cannot perform unary type of this type"}
 		}
 	case BinaryOpExprNode:
-		x, errsX := (evalElem.(BinaryOpExprNode)).Expr[0].evalExpr(SymbolTable)
-		y, errsY := (evalElem.(BinaryOpExprNode)).Expr[1].evalExpr(SymbolTable)
+		x, errsX := (evalElem.(BinaryOpExprNode)).Expr[0].evalExpr(symbolTable)
+		y, errsY := (evalElem.(BinaryOpExprNode)).Expr[1].evalExpr(symbolTable)
 		if errsX != nil {
 			return nil, errsX
 		}
@@ -597,14 +609,14 @@ func (exprNode *ast.ExprNode) evalExpr(SymbolTable *SymbolTable) (grammar.Type, 
 		}
 		switch x {
 		case grammar.BaseBool:
-			switch (evalElem.(BinaryOpExprNode)).BinaryOp.BinaryOpType {
+			switch (evalElem.(BinaryOpExprNode)).BinaryOp.BinaryOpType.(type) {
 			case EQNode, NEQNode, AndNode, OrNode:
 				return grammar.BaseBool, nil
 			default:
 				return nil, []string{"Not valid binop on booleans"}
 			}
 		case grammar.BaseInt:
-			switch (evalElem.(BinaryOpExprNode)).BinaryOp.BinaryOpType {
+			switch (evalElem.(BinaryOpExprNode)).BinaryOp.BinaryOpType.(type) {
 			case SubNode, AddNode, ModNode, DivNode, MultNode:
 				return grammar.BaseInt, nil
 			case EQNode, NEQNode, LTENode, LTNode, GTENode, GTNode:
@@ -613,14 +625,14 @@ func (exprNode *ast.ExprNode) evalExpr(SymbolTable *SymbolTable) (grammar.Type, 
 				return nil, []string{"Not valid binop on booleans"}
 			}
 		case grammar.BaseChar:
-			switch (evalElem.(BinaryOpExprNode)).BinaryOp.BinaryOpType {
+			switch (evalElem.(BinaryOpExprNode)).BinaryOp.BinaryOpType.(type) {
 			case EQNode, NEQNode, LTENode, LTNode, GTENode, GTNode:
 				return grammar.BaseBool, nil
 			default:
 				return nil, []string{"Not valid binop on booleans"}
 			}
 		default:
-			switch (evalElem.(BinaryOpExprNode)).BinaryOp.BinaryOpType {
+			switch (evalElem.(BinaryOpExprNode)).BinaryOp.BinaryOpType.(type) {
 			case EQNode, NEQNode:
 				return grammar.BaseBool, nil
 			default:
