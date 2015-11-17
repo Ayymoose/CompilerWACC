@@ -4,26 +4,13 @@ import (
 	"grammar"
 )
 
-// Node interface
+// All AST nodes implement this Node interface
 type Node interface {
 	BuildNode(buildArguments BuildArguments) Node
 }
 
-// Struct containing information with
-// which to construct individual nodes
-type BuildArguments struct {
-	Pos          int
-	Type         grammar.Type
-	Ident        string
-	StrVal       string
-	IntVal       int
-	ChildListOne []Node
-	ChildListTwo []Node
-	BoolVal      bool
-	DigitVal     int
-}
-
-// Structs for common fields
+/* Utility structs -----------------------------------------------------------*/
+/* Common field structs ------------------------------------------------------*/
 type Position struct {
 	Pos int
 }
@@ -39,7 +26,23 @@ type PosIdentType struct {
 	Type  grammar.Type
 }
 
-// Utility Struct
+/* End of common field structs -----------------------------------------------*/
+
+// Argument struct contains information with which to build individual AST
+// nodes. Undeclared fields will default to their uninitialised nil value
+type BuildArguments struct {
+	Pos          int
+	Type         grammar.Type
+	Ident        string
+	StrVal       string
+	IntVal       int
+	ChildListOne []Node
+	ChildListTwo []Node
+	BoolVal      bool
+	DigitVal     int
+}
+
+// Holds information with which to construct further AST nodes
 type DataNode struct {
 	Position
 	IntVal int
@@ -48,22 +51,25 @@ type DataNode struct {
 	Type   grammar.Type
 }
 
-type NullChildNode struct {
-}
+/* End of utility structs ----------------------------------------------------*/
 
-// Root node of AST
+/* Structs for WACC BNF ------------------------------------------------------*/
+
+// ‘begin’ <func>* <stat> ‘end’
 type ProgramNode struct {
 	Position
 	FuncList []FunctionNode
 	StatList []StatementNode
 }
 
+// <type> <ident> ‘(’ <param-list> ‘)’ ‘is’ <stat> ‘end’
 type FunctionNode struct {
 	PosIdentType
 	ParamList []ParameterNode
 	StatList  []StatementNode
 }
 
+// <param> ( ‘,’ <param> )*
 type ParameterNode struct {
 	PosIdentType
 }
@@ -405,11 +411,11 @@ type NegativeNode struct {
 	Neg grammar.Type
 }
 
-// Functions which build individual nodes
-
-func (n NullChildNode) BuildNode(buildArguments BuildArguments) Node {
-	return n
+// For error handling
+type NullChildNode struct {
 }
+
+// Functions which build individual nodes
 
 func (d DataNode) BuildNode(buildArguments BuildArguments) Node {
 	d.Pos = buildArguments.Pos
@@ -868,5 +874,9 @@ func (p PositiveNode) BuildNode(buildArguments BuildArguments) Node {
 func (n NegativeNode) BuildNode(buildArguments BuildArguments) Node {
 	n.Pos = buildArguments.Pos
 	n.Neg = buildArguments.Type
+	return n
+}
+
+func (n NullChildNode) BuildNode(buildArguments BuildArguments) Node {
 	return n
 }
