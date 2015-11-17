@@ -17,7 +17,7 @@ func NewFuncMap() *FunctionMap {
 }
 
 // Start traversing the tree at the root node
-func (root *ProgramNode) visitProgram() (bool, []string) {
+func (root *ProgramNode) VisitProgram() (bool, []string) {
 	var errorMsgs []string // An array of error messages
 	var pass = true        // source of bugs??
 	symTable := &SymbolTable{parent: nil, semanticMap: make(map[string][]grammar.Type)}
