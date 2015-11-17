@@ -544,34 +544,105 @@ func (p *ast.PrintlnNode) visitPrintln(symbolTable *SymbolTable) {
 	//Same as above not sure if needed to be implemented
 }
 
-func (i *ast.IfNode) visitIf(symbolTable *SymbolTable) {
+func (i *IfNode) visitIf(symbolTable *SymbolTable) (bool, []string) {
 	// if <expr> then
 	// expr must evaluate to bool
 	// check if <expr> variable have been declared in current/parent scope
 	//error if not
 	// visit statements...
-	i
+	var errorMsgs []string // An array of error messages
+	var pass = true        // source of bugs??
 
+	baseType, msgs := i.Expr.evalExpr(symbolTable)
+
+	if msgs != nil {
+		pass = false
+		errorMsgs = append(errorMsgs, "We have an error in if expr")
+	}
+
+	firstStat := i.StatList[0].(StatementNode)
+	secondStat := i.StatList[1].(StatementNode)
+
+	passFirst, msgs := firstStat.visitStatement(symbolTable)
+	passSecond, msgs := secondStat.visitStatement(symbolTable)
+
+	if !passFirst {
+		errorMsgs = append(errorMsgs, msgs)
+	}
+
+	if !passFirst {
+		errorMsgs = append(errorMsgs, msgs)
+	}
+
+  pass = passFirst && passSecond
+	return pass, errorMsgs
 }
 
-func (w *ast.WhileNode) visitWhile(symbolTable *SymbolTable) {
+func (w *WhileNode) visitWhile(symbolTable *SymbolTable) (bool, []string) {
 	//while <expr> do
 
 	// expr must evaluate to bool
 	// check if <expr> variable have been declared in current/parent scope
 	//error if not
 	// visit statements...
+	var errorMsgs []string // An array of error messages
+	var pass = true        // source of bugs??
+
+
+	baseType, msgs := w.Expr.evalExpr(symbolTable) //ExprNode
+	if msgs != nil {
+		pass = false
+		errorMsgs = append(errorMsgs, msgs)
+	}
+
+	passed, msgs := w.Stat.(StatementNode).visitStatement(symbolTable) //StatementNode
+	if !passed {
+		pass = false
+		errorMsgs = append(errorMsgs, msgs)
+	}
+	return pass, errorMsgs
 }
 
-func (s *ast.ScopeNode) visitScope(symbolTable *SymbolTable) {
+func (s *ScopeNode) visitScope(symbolTable *SymbolTable) {
 	// entering a new scope so create a new symbol table
+
+	var errorMsgs []string // An array of error messages
+	var pass = true        // source of bugs??
+	// Create a new symbol table as we enter a new scope
+	newScope := symbolTable.New()
+
+	passed, msgs := s.Stat.visitStatement(newScope)
+	if !passed {
+	  errorMsgs = append(errorMsgs, msgs)
+	}
+	return pass, errorMsgs
 }
 
 //
 
-func (c *ast.CallNode) visitCall(symbolTable *SymbolTable) {
+func (c *CallNode) visitCall(symbolTable *SymbolTable) {
 	// when calling a function you get value and its type. type must match variable if it is assigned to something
 	// when calling a function , the parameter type must  match the original parameter type
 	// when calling a function need to have the same number of arguments as orifinal
 	//
+
+	// Check if ident matches declared function in function Hashmap
+
+
 }
+
+/** DONT REALLLY NEED JUST CHECK ON THE TYPES OF THE FUNCTION ARGUMENTS
+func (a *ArgListNode) visitArgList(symbolTable *SymbolTable) (bool, []string) {
+
+	var errorMsgs []string // An array of error messages
+	var pass = true        // source of bugs??
+
+	for _,expr := range a.ExprList {
+		passed, msgs := expr.visitExpr(symbolTable)
+		pass &= passed
+		errorMsgs = append(errorMsgs, msgs)
+	}
+
+	return pass, errorMsgs
+}
+**/
