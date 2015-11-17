@@ -1,7 +1,8 @@
 package abstractSyntaxTree
 
 import (
-	"grammar"
+	//"grammar"
+	grammar "github.com/henrykhadass/wacc_19/src/grammar"
 )
 
 // Node interface
@@ -45,6 +46,7 @@ type DataNode struct {
 	IntVal int
 	StrVal string
 	Nodes  []Node
+	Type   grammar.ItemType
 }
 
 type NullChildNode struct {

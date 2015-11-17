@@ -1,4 +1,4 @@
-package grammar // Double check its the correct package
+package grammar
 
 type Token int
 
