@@ -166,7 +166,7 @@ type ArrayElemNode struct {
 	ExprList []ExprNode
 }
 
-// <pair-elem>
+// ‘fst’ <expr> | ‘snd’ <expr >
 type PairElemNode struct {
 	Position
 	Fst ExprNode
@@ -451,7 +451,9 @@ type NegativeNode struct {
 type NullChildNode struct {
 }
 
-// Functions which build individual nodes
+/* End of structs for WACC BNF -----------------------------------------------*/
+
+/* Interface method called on individual node structs -----------------------*/
 
 func (d DataNode) BuildNode(buildArguments BuildArguments) Node {
 	d.Pos = buildArguments.Pos
@@ -955,3 +957,5 @@ func (n NegativeNode) BuildNode(buildArguments BuildArguments) Node {
 func (n NullChildNode) BuildNode(buildArguments BuildArguments) Node {
 	return n
 }
+
+/* End of interface methods --------------------------------------------------*/
