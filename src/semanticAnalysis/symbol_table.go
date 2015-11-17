@@ -87,7 +87,7 @@ func (SymbolTable *SymbolTable) contains(key string) bool {
 	return ok
 }
 
-func (SymbolTable *SymbolTable) getTypeOfIdent(key string) grammar.Token {
+func (SymbolTable *SymbolTable) getTypeOfIdent(key string) grammar.Type {
 	curr := SymbolTable
 	for curr != nil {
 		if curr.contains(key) {
@@ -98,6 +98,24 @@ func (SymbolTable *SymbolTable) getTypeOfIdent(key string) grammar.Token {
 	}
 	return nil
 }
+
+/*
+func (symbolTable *SymbolTable) lookUp(key string) (bool, []string) {
+	var errorMsgs []string // An array of error messages
+	var pass = true        // source of bugs??
+	// check if key is in current symbol table
+	if symbolTable.semanticMap[key] != 0 {
+		return true, []string{""}
+	} else {
+		// if not then recurse on parent symbol tables
+		if symbolTable.parent != nil {
+			symbolTable.parent.lookUp(key)
+		} else {
+			return false, []string{""}
+		}
+	}
+	// if not found after recursion then return undeclared error
+} */
 
 /*
 func (s *SymbolTable) Insert(token string, list reflect.TypeOf(list).Elem()) {
