@@ -61,11 +61,11 @@ type SymbolTable struct {
 func (symbolTable *SymbolTable) New() *SymbolTable {
 	newSymbolTable := &SymbolTable{}
 	newSymbolTable.parent = symbolTable
-	newSymbolTable.semanticMap = make(map[string][]grammar.Token)
+	newSymbolTable.semanticMap = make(map[string][]grammar.Type)
 	return newSymbolTable
 }
 
-func (SymbolTable *SymbolTable) insert(key string, value []grammar.Token) {
+func (SymbolTable *SymbolTable) insert(key string, value []grammar.Type) {
 	// convert value string into its grammar token here
 	SymbolTable[key] = value
 }

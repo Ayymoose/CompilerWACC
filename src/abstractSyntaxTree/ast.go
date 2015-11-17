@@ -414,6 +414,7 @@ type DataNode struct {
 	Position
 	IntVal int
 	StrVal string
+	Nodes  []Node
 }
 
 type NullChildNode struct {

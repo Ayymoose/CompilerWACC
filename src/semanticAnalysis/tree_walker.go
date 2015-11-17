@@ -217,12 +217,14 @@ func (st *SymbolTable) insertFunctionParams(f FuncNode) {
 	}
 }
 
-func (s *StatNode) visitStatement(symbolTable *SymbolTable) (bool, []string) {
+func (s *StatementNode) visitStatement(symbolTable *SymbolTable) (bool, []string) {
 	var errorMsgs []string // An array of error messages
 	var pass = true        // source of bugs??
 
 	// DO I NEED TO USE S (STATNODE) HERE RATHER THAN NODE???
+
 	switch statType := s.StatElem.(type) {
+
 	case DeclarationNode:
 		pass, errorMsgs = statType.visitDeclaration(symbolTable)
 	case AssignmentNode:
@@ -265,7 +267,7 @@ func (d *DeclarationNode) visitDeclaration(symbolTable *SymbolTable) (bool, []st
 
 	// Check if ident is already declared in current symbolTable
 	// If not recurse on parent symboltables until found (if at all)
-	declared, msgs := symbolTable.lookUp(ident)
+	declared := symbolTable.isDefined(ident)
 	/*	if !declared {
 			symbolTable.insert(ident, baseType)
 		}
@@ -314,6 +316,8 @@ func checkForDeclaration(symbolTable *SymbolTable) (bool, []string) {
 
 }
 /*
+=======
+>>>>>>> 216b45cb3e0f4fd85197a796a4a47749e2b5a8a1
 func (a *AssignRHSNode) checkAssignRHSType(itemType grammar.ItemType, SymbolTable *SymbolTable) (bool, []string, grammar.ItemType) {
 	node := a.AssignRHSElem //Node
 
@@ -359,7 +363,7 @@ case ExprNode:
 case ArrayLiterNode:
 case NewPairNode:
 case PairElemNode:
-	
+
 
 }
 }
@@ -533,12 +537,14 @@ func (p *PrintlnNode) visitPrintln(symbolTable *SymbolTable) {
 	//Same as above not sure if needed to be implemented
 }
 
-func (i *IfNode) visitIf(symbolTable *SymbolTable) {
+func (i IfNode) visitIf(symbolTable *SymbolTable) {
 	// if <expr> then
 	// expr must evaluate to bool
 	// check if <expr> variable have been declared in current/parent scope
 	//error if not
 	// visit statements...
+	i
+
 }
 
 func (w *WhileNode) visitWhile(symbolTable *SymbolTable) {
