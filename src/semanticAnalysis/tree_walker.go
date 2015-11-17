@@ -316,8 +316,6 @@ func checkForDeclaration(symbolTable *SymbolTable) (bool, []string) {
 
 }
 /*
-=======
->>>>>>> 216b45cb3e0f4fd85197a796a4a47749e2b5a8a1
 func (a *AssignRHSNode) checkAssignRHSType(itemType grammar.ItemType, SymbolTable *SymbolTable) (bool, []string, grammar.ItemType) {
 	node := a.AssignRHSElem //Node
 
@@ -425,7 +423,7 @@ func (r *ReadNode) visitRead(symbolTable *SymbolTable) (bool, []string) {
 				errorMsgs = append(errorMsgs, "cannot read type that isn't char or int")
 			}
 		case PairElemNode:
-			itemType, errs :=	(elem.(PairElemNode)).Fst.evalExpr(symbolTable)
+			itemType, errs :=	(elem.(PairElemNode)).Elem.evalExpr(symbolTable)
 			if errs != nil {
 				errorMsgs = append(errorMsgs, errs)
 				} else if !(itemType == grammar.BaseInt || itemType == grammar.BaseChar) {
