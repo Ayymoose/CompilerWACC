@@ -1,52 +1,3 @@
-// Syboml Table for compiler
-// Stores information about variable names, function names, etc
-
-// Carries out the following functions
-// Stores names of all entities in one place
-// Verifies if a variable has ben declared
-// Implements type checking by verifying assignments and expressions in source code are semantically correct
-// Scope resolution
-
-// Hash table data structure
-// Maintains entries in the following format
-// <symbolName, type>
-// EG: int foo  -->  <foo, int>
-
-// Each symbol can have different attributes
-// EG function have a number of variable with types
-//    but an int just has variable name and type
-
-// Provide the following operations:
-
-// Posibility of adding a scope attribute???
-
-// insert()
-// Insert an symbol into the table
-// int a  -->  insert(a, int)
-
-// lookUp()
-// Searches a name in the symbol table to determine :
-// If the symbol exists in the table
-// If it is declared before it is used
-// if the name is used in the scope
-// if the symbol is initialised
-// if the symbol is declared multiple times
-
-// a --> lookUp(a)
-
-// This method returns 0 if the symbol does not exist in the symbol table
-// If the symbol exists in the symbol table it returns its attributes stored in the table
-
-// Set up a separate symbol table for each scope
-
-// Algorithm for whenever a name needs to be searched in the symbol table
-// First a symbol will be searched in the current scope  --> i.e. the current symbol table
-// If a name is found then the search is complete
-// else it will be searched in the parent symcol table until
-// Either the name is found or global symbol table has been searched for name
-
-// maps are not safe for concurrent read/write
-
 package abstractSyntaxTree
 
 import "grammar"
@@ -54,10 +5,10 @@ import "grammar"
 // SymbolTable constructor
 type SymbolTable struct {
 	parent      *SymbolTable
-	semanticMap map[string][]grammar.Type // A map of strings to a list of tokens
+	semanticMap map[string][]grammar.Type
 }
 
-// Creates a new instance of a symbolTable with a parent to its pointer
+// Constructor creates new instance of a symbolTable with pointer to its parent
 func (symbolTable *SymbolTable) New() *SymbolTable {
 	newSymbolTable := &SymbolTable{}
 	newSymbolTable.parent = symbolTable
@@ -65,12 +16,12 @@ func (symbolTable *SymbolTable) New() *SymbolTable {
 	return newSymbolTable
 }
 
+// Inserts a given key and value into the symbol table
 func (SymbolTable *SymbolTable) insert(key string, value []grammar.Type) {
-	// convert value string into its grammar token here
 	SymbolTable.semanticMap[key] = value
 }
 
-//Checks if ident is already declared
+// Checks if the key is already declared in the symbol table
 func (SymbolTable *SymbolTable) isDefined(key string) bool {
 	curr := SymbolTable
 	for curr != nil {
@@ -82,11 +33,14 @@ func (SymbolTable *SymbolTable) isDefined(key string) bool {
 	return false
 }
 
+// Helper function which return a boolean depending on
+// whether or not the given key is in the symbol table
 func (SymbolTable *SymbolTable) contains(key string) bool {
 	_, ok := SymbolTable.semanticMap[key]
 	return ok
 }
 
+// Given an Ident key, returns the slice of Type tokens
 func (SymbolTable *SymbolTable) getTypeOfIdent(key string) []grammar.Type {
 	curr := SymbolTable
 	for curr != nil {
@@ -98,72 +52,3 @@ func (SymbolTable *SymbolTable) getTypeOfIdent(key string) []grammar.Type {
 	}
 	return nil
 }
-
-/*
-func (symbolTable *SymbolTable) lookUp(key string) (bool, []string) {
-	var errorMsgs []string // An array of error messages
-	var pass = true        // source of bugs??
-	// check if key is in current symbol table
-	if symbolTable.semanticMap[key] != 0 {
-		return true, []string{""}
-	} else {
-		// if not then recurse on parent symbol tables
-		if symbolTable.parent != nil {
-			symbolTable.parent.lookUp(key)
-		} else {
-			return false, []string{""}
-		}
-	}
-	// if not found after recursion then return undeclared error
-} */
-
-/*
-func (s *SymbolTable) Insert(token string, list reflect.TypeOf(list).Elem()) {
-
-}
-*/
-/*
-func addNode(parent *Node, val int) *Node {
-  return &Node{nil, nil, parent, val}
-}
-
-func (b *BinaryTree) Insert(val int) (n *Node) {
-  if b.root == nil {
-    n = addNode(nil, val)
-    b.root = n
-  } else {
-    n = b.insert(b.root, nil, val)
-  }
-  return
-}
-
-func (b *BinaryTree) insert(root *Node, parent *Node, val int) *Node {
-  switch {
-  case root == nil:
-    return addNode(parent, val)
-  case val <= root.value:
-    root.left = b.insert(root.left, root, val)
-  case val > root.value:
-    root.right = b.insert(root.right, root, val)
-  }
-  return root
-}
-
-
-
-func main() {
-  newSt = new(st)
-
-
-
-  st := new(nil)
-  st.insert(whate)
-
-  st.Insert(whatever, )
-  b.Insert(1)
-  b.Insert(-1)
-  fmt.Println(b.root)
-  b.Delete(1)
-  fmt.Println(b.root)
-}
-*/
