@@ -511,7 +511,7 @@ func (s *ScopeNode) visitScope(symbolTable *SymbolTable) {
 }
 
 func (exprNode *ast.ExprNode) evalExpr(SymbolTable *SymbolTable) (grammar.Type, []string) {
-	evalElem := exprNode.ExprElem
+	evalElem := exprNode.Expr
 
 	switch nodeType := evalElem.(type) {
 	case IdentNode:
@@ -555,27 +555,27 @@ func (exprNode *ast.ExprNode) evalExpr(SymbolTable *SymbolTable) (grammar.Type, 
 		}
 		switch itemType {
 		case grammar.BaseBool:
-			if (evalElem.(UnaryOpExprNode)).UnaryOper.UnaryOperElem.(type) != NotNode {
+			if (evalElem.(UnaryOpExprNode)).UnaryOp.UnaryOpType.(type) != NotNode {
 				return nil, []string{"Wrong unary operation"}
 			} else {
 				return grammar.BaseBool, nil
 			}
 		case grammar.BaseInt:
-			if (evalElem.(UnaryOpExprNode)).UnaryOper.UnaryOperElem.(type) == NegNode {
+			if (evalElem.(UnaryOpExprNode)).UnaryOp.UnaryOpType.(type) == NegNode {
 				return grammar.BaseInt, nil
-			} else if (evalElem.(UnaryOpExprNode)).UnaryOper.UnaryOperElem.(type) == ChrNode {
+			} else if (evalElem.(UnaryOpExprNode)).UnaryOp.UnaryOpType.(type) == ChrNode {
 				return grammar.BaseChar, nil
 			} else {
 				return nil, []string{"Wrong unary operation"}
 			}
 		case grammar.BaseChar:
-			if (evalElem.(UnaryOpExprNode)).UnaryOper.UnaryOperElem.(type) == OrdNode {
+			if (evalElem.(UnaryOpExprNode)).UnaryOp.UnaryOpType.(type) == OrdNode {
 				return grammar.BaseInt, nil
 			} else {
 				return nil, []string{"Wrong unary operation"}
 			}
 		case grammar.BaseString, grammar.ArrayType:
-			if (evalElem.(UnaryOpExprNode)).UnaryOper.UnaryOperElem.(type) == LenNode {
+			if (evalElem.(UnaryOpExprNode)).UnaryOp.UnaryOpType.(type) == LenNode {
 				return grammar.BaseInt, nil
 			} else {
 				return nil, []string{"Wrong unary operation"}
@@ -583,9 +583,9 @@ func (exprNode *ast.ExprNode) evalExpr(SymbolTable *SymbolTable) (grammar.Type, 
 		default:
 			return nil, []string{"Cannot perform unary type of this type"}
 		}
-	case EBENode:
-		x, errsX := (evalElem.(EBENode))[0].evalExpr(SymbolTable)
-		y, errsY := (evalElem.(EBENode))[1].evalExpr(SymbolTable)
+	case BinaryOpExprNode:
+		x, errsX := (evalElem.(BinaryOpExprNode)).Expr[0].evalExpr(SymbolTable)
+		y, errsY := (evalElem.(BinaryOpExprNode)).Expr[1].evalExpr(SymbolTable)
 		if errsX != nil {
 			return nil, errsX
 		}
@@ -597,14 +597,14 @@ func (exprNode *ast.ExprNode) evalExpr(SymbolTable *SymbolTable) (grammar.Type, 
 		}
 		switch x {
 		case grammar.BaseBool:
-			switch (evalElem.(EBENode)).BinaryOper.BinaryOperElem {
+			switch (evalElem.(BinaryOpExprNode)).BinaryOp.BinaryOpType {
 			case EQNode, NEQNode, AndNode, OrNode:
 				return grammar.BaseBool, nil
 			default:
 				return nil, []string{"Not valid binop on booleans"}
 			}
 		case grammar.BaseInt:
-			switch (evalElem.(EBENode)).BinaryOper.BinaryOperElem {
+			switch (evalElem.(BinaryOpExprNode)).BinaryOp.BinaryOpType {
 			case SubNode, AddNode, ModNode, DivNode, MultNode:
 				return grammar.BaseInt, nil
 			case EQNode, NEQNode, LTENode, LTNode, GTENode, GTNode:
@@ -613,14 +613,14 @@ func (exprNode *ast.ExprNode) evalExpr(SymbolTable *SymbolTable) (grammar.Type, 
 				return nil, []string{"Not valid binop on booleans"}
 			}
 		case grammar.BaseChar:
-			switch (evalElem.(EBENode)).BinaryOper.BinaryOperElem {
+			switch (evalElem.(BinaryOpExprNode)).BinaryOp.BinaryOpType {
 			case EQNode, NEQNode, LTENode, LTNode, GTENode, GTNode:
 				return grammar.BaseBool, nil
 			default:
 				return nil, []string{"Not valid binop on booleans"}
 			}
 		default:
-			switch (evalElem.(EBENode)).BinaryOper.BinaryOperElem {
+			switch (evalElem.(BinaryOpExprNode)).BinaryOp.BinaryOpType {
 			case EQNode, NEQNode:
 				return grammar.BaseBool, nil
 			default:
