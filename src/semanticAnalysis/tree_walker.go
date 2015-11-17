@@ -5,6 +5,14 @@ import (
 	ast "abstractSyntaxTree"
 )
 
+type FuctionMap struct {
+	functionMap map[string][]grammar.Type
+}
+
+func NewFuncMap() *FunctionMap {
+    return &FunctionMap{functionMap : make(map[string][]grammar.Type)}
+}
+
 func (exprNode *ast.ExprNode) evalExpr(SymbolTable *SymbolTable) (grammar.Type, []string) {
 	evalElem := exprNode.ExprElem
 
@@ -138,6 +146,10 @@ func (root *ast.ProgramNode) visitProgram() {
 		funcMap[function.Ident]++
 	}
 
+  // Initialise functionMap struct
+	fMap := NewFuncMap()
+
+
 	// Visit all function nodes
 	for _, function := range root.Func {
 		// Each time pass:
@@ -150,7 +162,7 @@ func (root *ast.ProgramNode) visitProgram() {
 		// value is a list of parameter types with first one being the function type
 		// Added in order
 		if pass {
-			st.insertFunctionDeclaration(function)
+			st.insertFunctionDeclaration(function, fMap)
 		}
 	}
 
@@ -160,7 +172,7 @@ func (root *ast.ProgramNode) visitProgram() {
 	}
 }
 
-func (st *ast.SymbolTable) insertFunctionDeclaration(function *FuncNode) { // insert function into program symbolTable
+func (st *ast.SymbolTable) insertFunctionDeclaration(function *FuncNode, fm *FunctionMap) { // insert function into program symbolTable
 	var types []grammar.ItemType
 
 	// Add the function type
@@ -170,10 +182,15 @@ func (st *ast.SymbolTable) insertFunctionDeclaration(function *FuncNode) { // in
 	// There can be 0 or more function parameters
 	for i, param := range function.ParamList {
 		// not starting indexing fro 0 cos that is where function type is located
-		types[i+1] = param.PosIdentType.Type // grammar.ItemType
+		types[i+1] = param.Type // grammar.ItemType
 	}
 
-	st.insert(function.PosIdentType.Ident, types)
+	st.insert(function.Ident, types)
+	fm.insertIntoFuncMap(function.Ident, types)
+}
+
+func (fm *FunctionMap) insertIntoFuncMap(ident string, types []grammar.Type) {
+	  fm.functionMap[ident] = types
 }
 
 func (f *ast.FuncNode) visitFunction(funcMap map[string]int, st *SymbolTable) (bool, []string) {
@@ -212,8 +229,8 @@ func (st *ast.SymbolTable) insertFunctionParams(f FuncNode) {
 	var typeParam []grammar.ItemType
 
 	for _, param := range f.ParamList {
-		typeParam[0] = param.PosIdentType.Type
-		s.insert(param.PosIdentType.Ident, typeParam)
+		typeParam[0] = param.Type
+		st.insert(param.Ident, typeParam)
 	}
 }
 
@@ -611,13 +628,39 @@ func (s *ScopeNode) visitScope(symbolTable *SymbolTable) {
 
 //
 
-func (c *CallNode) visitCall(symbolTable *SymbolTable) {
+func (c *CallNode) visitCall(symbolTable *SymbolTable, fMap *FunctionMap) {
 	// when calling a function you get value and its type. type must match variable if it is assigned to something
 	// when calling a function , the parameter type must  match the original parameter type
 	// when calling a function need to have the same number of arguments as orifinal
 	//
+	var errorMsgs []string // An array of error messages
+	var pass = true        // source of bugs??
 
-	// Check if ident matches declared function in function Hashmap
+	// Check if ident matches declared function in function Hashmap -> i.e that it exits
+  if fMap.functionMap[c.Ident] == nil {
+		pass = false
+		errorMsgs = append(errorMsgs, "Function with ident "+c.Ident+"is not able to be called as it is undeclared or redefinied")
+	}
+
+	// Check if parameter types all match
+	if fMap.functionMap[c.Ident] != nil {
+		types := fMap.functionMap[c.Ident]
+		for _, arg := range c.ArgList {
+		  //arg // []ExprNode HOW TO DEAL WITH THIS INDIRECTION ????? DOUBLE FOR LOOP??
+			// compareTYPES
+
+
+
+
+
+		}
+	}
+
+	c.Arglist // []Arglistnode
+
+
+
+
 
 
 }

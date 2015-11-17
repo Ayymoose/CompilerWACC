@@ -9,6 +9,8 @@ type Node interface {
 	BuildNode(buildArguments BuildArguments) Node
 }
 
+// Struct containing information with
+// which to construct individual nodes
 type BuildArguments struct {
 	Pos          int
 	Type         grammar.Type
@@ -22,8 +24,6 @@ type BuildArguments struct {
 }
 
 // Structs for common fields
-// Not all structs have all of the common fields
-// Hence multiple field structs
 type Position struct {
 	Pos int
 }
@@ -39,16 +39,27 @@ type PosIdentType struct {
 	Type  grammar.Type
 }
 
+// Utility Struct
+type DataNode struct {
+	Position
+	IntVal int
+	StrVal string
+	Nodes  []Node
+}
+
+type NullChildNode struct {
+}
+
 // Root node of AST
 type ProgramNode struct {
 	Position
-	FuncList []FunctionNode //rename funcslice
+	FuncList []FunctionNode
 	StatList []StatementNode
 }
 
 type FunctionNode struct {
 	PosIdentType
-	ParamList []ParameterNode // *ParamListNode // Optional
+	ParamList []ParameterNode
 	StatList  []StatementNode
 }
 
@@ -56,36 +67,16 @@ type ParameterNode struct {
 	PosIdentType
 }
 
-// TypeIdent
+type StatementNode struct {
+	Position
+	Stat Node
+}
+
 type DeclarationNode struct {
 	PosIdentType
 	AssignRHS AssignRHSNode
 }
 
-type ArrayElemNode struct {
-	PosIdent
-	Expr []ExprNode // repeatable
-}
-
-type CallNode struct {
-	PosIdent
-	ArgList ArgListNode // optional
-}
-
-/*
-type ParamListNode struct {
-	Node
-	Pos   grammar.Position
-	Param []*ParamNode // one or more
-}
-*/
-
-type StatementNode struct {
-	Position
-	StatElem Node
-}
-
-// AssignLHSToRight
 type AssignmentNode struct {
 	Position
 	AssignLHS AssignLHSNode
@@ -125,30 +116,33 @@ type PrintlnNode struct {
 type IfNode struct {
 	Position
 	Expr     ExprNode
-	StatList []StatementNode // two stats
+	StatList []StatementNode
 }
 
 type WhileNode struct {
 	Position
-	Expr ExprNode
-	Stat StatementNode
+	Expr     ExprNode
+	StatList []StatementNode
 }
 
-//    ‘begin’ <stat> ‘end’
-// SPECIAL NEEDS
+// ‘begin’ <stat> ‘end’
 type ScopeNode struct {
 	Position
-	Stat StatementNode
+	StatList []StatementNode
 }
 
 type AssignLHSNode struct {
 	Position
-	AssignLHSElem Node
+	AssignLHS Node
 }
 
 type IdentNode struct {
-	Position
-	Ident string
+	PosIdent
+}
+
+type ArrayElemNode struct {
+	PosIdent
+	ExprList []ExprNode
 }
 
 type PairElemNode struct {
@@ -159,22 +153,27 @@ type PairElemNode struct {
 
 type AssignRHSNode struct {
 	Position
-	AssignRHSElem Node
+	AssignRHS Node
 }
 
 type ExprNode struct {
 	Position
-	ExprElem Node
+	Expr Node
 }
 
 type ArrayLiterNode struct {
 	Position
-	Expr []ExprNode
+	ExprList []ExprNode
 }
 
 type NewPairNode struct {
 	Position
-	Expr ExprNode // need two
+	ExprList []ExprNode
+}
+
+type CallNode struct {
+	PosIdent
+	ArgList []ArgListNode
 }
 
 type ArgListNode struct {
@@ -184,39 +183,36 @@ type ArgListNode struct {
 
 type TypeNode struct {
 	Position
-	TypeElem Node
+	Type Node
 }
 
 type BaseTypeNode struct {
 	Position
-	BaseTypeElem grammar.Type //*Node
+	BaseType grammar.Type //Node
 }
 
 /*
 type IntNode struct {
-	Node
-	Pos grammar.Position
+	Position
 	Int int
 }
 
 type BoolNode struct {
-	Node
-	Pos  grammar.Position
+	Position
 	Bool bool
 }
 
 type CharNode struct {
-	Node
-	Pos  grammar.Position
+	Position
 	Char rune
 }
 
 type StringNode struct {
-	Node
-	Pos    grammar.Position
+	Position
 	String string
 }
 */
+
 type ArrayTypeNode struct {
 	Position
 	Type TypeNode
@@ -224,18 +220,18 @@ type ArrayTypeNode struct {
 
 type PairTypeNode struct {
 	Position
-	PairElemType []PairElemTypeNode // need two for pair
+	PairElemTypeList []PairElemTypeNode // need two for pair
 }
 
 type PairElemTypeNode struct {
 	Position
-	PairElemTypeElem Node
+	PairElemType Node
 }
 
 type IntLiterNode struct {
 	Position
-	IntSign IntSignNode // optional
-	Digit   DigitNode   // repeatable
+	IntSign   IntSignNode // optional
+	DigitList []DigitNode // repeatable -> can change to int
 }
 
 type BoolLiterNode struct {
@@ -245,23 +241,28 @@ type BoolLiterNode struct {
 
 type CharLiterNode struct {
 	Position
-	CharLiterElem CharacterNode
-}
-
-type StringLiterNode struct {
-	Position
-	StrLiter []CharacterNode
+	CharLiter CharacterNode
 }
 
 type CharacterNode struct {
 	Position
-	// any ascii characterr
-	CharacterElem Node
+	// Any ascii character
+	Character Node
+}
+
+type StrLiterNode struct {
+	Position
+	StrLiterList []CharacterNode
 }
 
 type EscapedCharNode struct {
 	Position
-	EscapedCharElem Node
+	EscapedChar Node
+}
+
+type PairLiterNode struct {
+	Position
+	PairLiter grammar.Type //could be NULLNode
 }
 
 type NullNode struct {
@@ -269,59 +270,53 @@ type NullNode struct {
 	NullTerminator grammar.Type
 }
 
-type PairLiterNode struct {
-	Position
-	PairLiter grammar.Type //should be NULL
-}
-
 type UnaryOpExprNode struct {
 	Position
-	UnaryOper UnaryOpNode
-	Expr      ExprNode
+	UnaryOp UnaryOpNode
+	Expr    ExprNode
 }
 
-type EBENode struct {
+type BinaryOpExprNode struct {
 	Position
-	Expr       []ExprNode
-	BinaryOper BinaryOpNode
-	// one either side of expr
+	Expr     []ExprNode
+	BinaryOp BinaryOpNode
 }
 
 // ( <expr> ) inside expr handled by parser
 
 type UnaryOpNode struct {
 	Position
-	UnaryOperElem Node
+	UnaryOpType Node
 }
 
 type NotNode struct {
 	Position
-	Not grammar.ItemType
+	Not grammar.Type
 }
 
 type NegNode struct {
 	Position
-	Neg grammar.ItemType
+	Neg grammar.Type
 }
 
 type LenNode struct {
 	Position
-	Len grammar.ItemType
+	Len grammar.Type
 }
 
 type OrdNode struct {
 	Position
-	Ord grammar.ItemType
+	Ord grammar.Type
 }
 
 type ChrNode struct {
 	Position
-	Chr grammar.ItemType
+	Chr grammar.Type
 }
 
 type BinaryOpNode struct {
 	Position
-	BinaryOperElem Node
+	BinaryOpType Node
 }
 
 type MultNode struct {
@@ -351,32 +346,32 @@ type SubNode struct {
 
 type GTNode struct {
 	Position
-	Gt grammar.Type
+	GT grammar.Type
 }
 
 type GTENode struct {
 	Position
-	Gte grammar.Type
+	GTE grammar.Type
 }
 
 type LTNode struct {
 	Position
-	Lt grammar.Type
+	LT grammar.Type
 }
 
 type LTENode struct {
 	Position
-	Lte grammar.Type
+	LTE grammar.Type
 }
 
 type EQNode struct {
 	Position
-	Eq grammar.Type
+	EQ grammar.Type
 }
 
 type NEQNode struct {
 	Position
-	Neq grammar.Type
+	NEQ grammar.Type
 }
 
 type AndNode struct {
@@ -391,44 +386,26 @@ type OrNode struct {
 
 type DigitNode struct {
 	Position
-	//	DigitElem //need to include digit in grammar then do grammar.DIGIT
 	Digit int
 }
 
 type IntSignNode struct {
 	Position
-	IntSignElem Node
+	IntSign Node
 }
 
 type PositiveNode struct {
 	Position
-	Add grammar.Type
+	Pos grammar.Type
 }
 
 type NegativeNode struct {
 	Position
-	Sub grammar.Type
+	Neg grammar.Type
 }
 
-type DataNode struct {
-	Position
-	IntVal int
-	StrVal string
-	Nodes  []Node
-}
+// Functions which build individual nodes
 
-type NullChildNode struct {
-}
-
-//no need for comment node
-
-/*
-func (p *ProgramNode) BuildNode() Node {
-	p.Pos = BuildArguments.Pos
-	etcccccc
-	return p
-}
-*/
 func (n NullChildNode) BuildNode(buildArguments BuildArguments) Node {
 	return n
 }
@@ -635,7 +612,10 @@ func (n NewPairNode) BuildNode(buildArguments BuildArguments) Node {
 func (c CallNode) BuildNode(buildArguments BuildArguments) Node {
 	c.Pos = buildArguments.Pos
 	c.Ident = buildArguments.Ident
-	c.ArgList = buildArguments.ChildListOne[0].(ArgListNode)
+
+	for i, node := range buildArguments.ChildListOne { // []Node
+		c.ARglist[i] = node.(ArgListNode)
+	}
 
 	return c
 }
