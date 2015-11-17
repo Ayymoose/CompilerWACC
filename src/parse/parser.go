@@ -1,11 +1,14 @@
 package parse
 
+//TODO: Change the if statement in the parse functions' return type so that there is only one return
+//I.e return pass, errorMsgs
+//TODO: Check error message accidental removals
+
 import (
 	"fmt"
 	"math"
 	"strconv"
 
-	ast "github.com/nanaasiedu/wacc_19/src/abstractSyntaxTree"
 	"github.com/nanaasiedu/wacc_19/src/grammar"
 )
 
@@ -46,7 +49,7 @@ const (
 // E.g. parseFunc for <func> // parseStat for <stat>
 // Returns a bool : true iff the parse was succesful;
 //         a []string: a list of error messages
-type parseType func() (bool, []string, ast.Node)
+type parseType func() (bool, []string)
 
 /* PARSER --------------------------------------------------------------------*/
 
@@ -152,7 +155,7 @@ func (p *parser) addErrors(errors1 *[]string, errors2 []string) {
 
 // Initiates parse Operation
 func (p *parser) Parse() (bool, []string) {
-	var pass, errors, _ = p.parseProgram()
+	var pass, errors = p.parseProgram()
 
 	if pass && p.currTok.Typ != TERMINATE_TOKEN {
 		p.addErrors(&errors, []string{"Characters detected after the end of program"})
@@ -168,14 +171,9 @@ func (p *parser) Parse() (bool, []string) {
 
 // All non terminal parse functions have match the parseType (Above)
 
-func (p *parser) parseProgram() (bool, []string, ast.Node) {
-	var errorMsgs []string     // An array of error messages
-	var pass = false           // True iff the tokens match a <program> def
-	var nodeLists [][]ast.Node // An array of a list of nodes
-	var node ast.Node          // returns programNode
-
-	var args ast.BuildArguments
-	args.Pos = p.currTok.Pos
+func (p *parser) parseProgram() (bool, []string) {
+	var errorMsgs []string // An array of error messages
+	var pass = false       // True iff the tokens match a <program> def
 
 	// <program> := 'begin' <func>* <stat> 'end'
 
@@ -190,29 +188,19 @@ func (p *parser) parseProgram() (bool, []string, ast.Node) {
 		"All programs must terminate with 'end'"}
 
 	//Parse the pattern according to the input
-	pass, errorMsgs, nodeLists = p.parsePattern(expected, parseTypes, patternTypes, segmentErrors)
+	pass, errorMsgs = p.parsePattern(expected, parseTypes, patternTypes, segmentErrors)
 
 	if !pass {
-		return false, errorMsgs, ast.NullChildNode{}
+		return false, errorMsgs
 	}
 
-	args.ChildListOne = nodeLists[0]
-	args.ChildListTwo = (nodeLists[1][0]).(ast.DataNode).Nodes
-
-	node = ast.ProgramNode{}.BuildNode(args)
-
-	return true, []string{}, node
+	return true, []string{}
 }
 
-func (p *parser) parseFunc() (bool, []string, ast.Node) {
+func (p *parser) parseFunc() (bool, []string) {
 	// let <RE-stat> be a statement that will eventually return or exit
-	var pass = false           // True iff the tokens match a <func> def
-	var errorMsgs []string     // An array of error messages
-	var nodeLists [][]ast.Node // An array of a list of nodes
-	var node ast.Node          // returns FunctionNode
-
-	var args ast.BuildArguments
-	args.Pos = p.currTok.Pos
+	var pass = false       // True iff the tokens match a <func> def
+	var errorMsgs []string // An array of error messages
 
 	// <func> := <type> <ident> '(' <param-list>? ')' 'is' <RE-stat> 'end'
 
@@ -225,22 +213,16 @@ func (p *parser) parseFunc() (bool, []string, ast.Node) {
 		"Expected statement body for function",
 		"All functions must end with 'end'"}
 
-	pass, errorMsgs, nodeLists = p.parsePattern(expected, parseTypes, patternTypes, segmentErrors)
+	pass, errorMsgs = p.parsePattern(expected, parseTypes, patternTypes, segmentErrors)
 
 	if !pass {
-		return false, errorMsgs, ast.NullChildNode{}
+		return false, errorMsgs
 	}
 
-	args.Type = nodeLists[0][0].(ast.DataNode).Type
-	args.StrVal = nodeLists[1][0].(ast.DataNode).StrVal
-	args.ChildListOne = (nodeLists[2][0]).(ast.DataNode).Nodes
-	args.ChildListTwo = (nodeLists[3][0]).(ast.DataNode).Nodes
-	node = ast.FunctionNode{}.BuildNode(args)
-
-	return true, []string{}, node
+	return true, []string{}
 }
 
-func (p *parser) parseFuncReturnExitStat() (bool, []string, ast.Node) {
+func (p *parser) parseFuncReturnExitStat() (bool, []string) {
 	// let <RE-stat> be a statement that will eventually return or exit
 	// let <NRE-stat> be a statement that will not eventually return or exit
 	var pass = false       // True iff the tokens match a <RE-stat> def
@@ -248,11 +230,6 @@ func (p *parser) parseFuncReturnExitStat() (bool, []string, ast.Node) {
 	var semiPass = false   // True iff (pass or statPass) and ';' is parsed
 	var errorMsgs []string // An array of error messages
 	var errorMsgTemp []string
-	var nodeLists [][]ast.Node // An array of a list of nodes
-	var node ast.Node
-
-	var args ast.BuildArguments
-	args.Pos = p.currTok.Pos
 
 	// parseFunc helper
 	// Returns true iff a statement which eventually returns or exits is parsed
@@ -264,7 +241,7 @@ func (p *parser) parseFuncReturnExitStat() (bool, []string, ast.Node) {
 	patternTypes := []patternType{ONCE}
 	segmentErrors := []string{""}
 
-	pass, errorMsgs, nodeLists = p.parsePattern(expected, parseTypes, patternTypes, segmentErrors)
+	pass, errorMsgs = p.parsePattern(expected, parseTypes, patternTypes, segmentErrors)
 
 	if !pass {
 		// check for <NRE-stat>
@@ -273,7 +250,7 @@ func (p *parser) parseFuncReturnExitStat() (bool, []string, ast.Node) {
 		patternTypes = []patternType{ONCE}
 		segmentErrors = []string{""}
 
-		statPass, errorMsgTemp, nodeLists = p.parsePattern(expected, parseTypes, patternTypes, segmentErrors)
+		statPass, errorMsgTemp = p.parsePattern(expected, parseTypes, patternTypes, segmentErrors)
 		errorMsgs = append(errorMsgs, errorMsgTemp...)
 	}
 
@@ -283,15 +260,15 @@ func (p *parser) parseFuncReturnExitStat() (bool, []string, ast.Node) {
 	patternTypes = []patternType{EXPECT}
 	segmentErrors = []string{""}
 
-	semiPass, _, _ = p.parsePattern(expected, parseTypes, patternTypes, segmentErrors)
+	semiPass, _ = p.parsePattern(expected, parseTypes, patternTypes, segmentErrors)
 
 	if pass { // If a return/exit statement is parsed
 		if semiPass { // if a semicolon follows the return/exit statement
 			p.addErrors(&errorMsgs, []string{"statments after ';' can not be reached within function"})
-			return false, errorMsgs, ast.ProgramNode{}.BuildNode(ast.BuildArguments{})
+			return false, errorMsgs
 
 		} else {
-			return true, []string{}, ast.ProgramNode{}.BuildNode(ast.BuildArguments{})
+			return true, []string{}
 
 		}
 	}
@@ -304,31 +281,26 @@ func (p *parser) parseFuncReturnExitStat() (bool, []string, ast.Node) {
 			patternTypes = []patternType{ONCE}
 			segmentErrors = []string{""}
 
-			pass, errorMsgTemp, _ = p.parsePattern(expected, parseTypes, patternTypes, segmentErrors)
+			pass, errorMsgTemp = p.parsePattern(expected, parseTypes, patternTypes, segmentErrors)
 			errorMsgs = append(errorMsgs, errorMsgTemp...)
 
 		} else {
 			p.addErrors(&errorMsgs, []string{"Function must reach a 'return' or 'exit' statement in all situations"})
-			return false, errorMsgs, ast.ProgramNode{}.BuildNode(ast.BuildArguments{})
+			return false, errorMsgs
 
 		}
 	}
 
 	if !pass { // if after multiple statements a program cant reach a return/exit in all situations
-		return false, errorMsgs, ast.ProgramNode{}.BuildNode(ast.BuildArguments{})
+		return false, errorMsgs
 	}
 
-	return true, []string{}, ast.ProgramNode{}.BuildNode(ast.BuildArguments{})
+	return true, []string{}
 }
 
-func (p *parser) parseFuncReturnExitStatPath() (bool, []string, ast.Node) {
-	var pass = false           // True iff the tokens match a <func> def
-	var errorMsgs []string     // An array of error messages
-	var nodeLists [][]ast.Node // An array of a list of nodes
-	var node ast.Node
-
-	var args ast.BuildArguments
-	args.Pos = p.currTok.Pos
+func (p *parser) parseFuncReturnExitStatPath() (bool, []string) {
+	var pass = false       // True iff the tokens match a <func> def
+	var errorMsgs []string // An array of error messages
 
 	// parseFuncReturnExitStat helper
 	// Returns true iff a statement which eventually returns or exits is parsed
@@ -381,23 +353,19 @@ func (p *parser) parseFuncReturnExitStatPath() (bool, []string, ast.Node) {
 
 	op4 := patternArgs{expected, parseTypes, patternTypes, segmentErrors}
 
-	pass, errorMsgs, _ = p.parseOptions(op1, op2, op3, op4)
+	pass, errorMsgs = p.parseOptions(op1, op2, op3, op4)
 
 	if !pass {
-		return false, errorMsgs, ast.NullChildNode{}
+		return false, errorMsgs
 	}
 
-	return true, []string{}, ast.ProgramNode{}.BuildNode(ast.BuildArguments{})
+	return true, []string{}
 }
 
-func (p *parser) parseReturnExitStat() (bool, []string, ast.Node) {
-	var pass = false           // True iff the tokens match a <func> def
-	var errorMsgs []string     // An array of error messages
-	var nodeLists [][]ast.Node // An array of a list of nodes
-	var node ast.Node
+func (p *parser) parseReturnExitStat() (bool, []string) {
+	var pass = false       // True iff the tokens match a <func> def
+	var errorMsgs []string // An array of error messages
 
-	var args ast.BuildArguments
-	args.Pos = p.currTok.Pos
 	// parseFuncReturnExitPath helper function
 	// Returns true iff 'return' or 'exit' statement is parsed
 
@@ -423,23 +391,19 @@ func (p *parser) parseReturnExitStat() (bool, []string, ast.Node) {
 
 	op2 := patternArgs{expected, parseTypes, patternTypes, segmentErrors}
 
-	pass, errorMsgs, _ = p.parseOptions(op1, op2)
+	pass, errorMsgs = p.parseOptions(op1, op2)
 
 	if !pass {
-		return false, errorMsgs, ast.NullChildNode{}
+		return false, errorMsgs
 	}
 
-	return true, []string{}, ast.ProgramNode{}.BuildNode(ast.BuildArguments{})
+	return true, []string{}
 }
 
-func (p *parser) parseNonReturnExitStat() (bool, []string, ast.Node) {
-	var pass = false           // True iff the tokens match a <func> def
-	var errorMsgs []string     // An array of error messages
-	var nodeLists [][]ast.Node // An array of a list of nodes
-	var node ast.Node
+func (p *parser) parseNonReturnExitStat() (bool, []string) {
+	var pass = false       // True iff the tokens match a <func> def
+	var errorMsgs []string // An array of error messages
 
-	var args ast.BuildArguments
-	args.Pos = p.currTok.Pos
 	// parseFuncReturnExitStat helper function
 	// Returns true iff a non 'return' or 'exit' statement is parsed
 	// NOTE: This function specifically wont pass <stat> ; <stat>
@@ -541,23 +505,19 @@ func (p *parser) parseNonReturnExitStat() (bool, []string, ast.Node) {
 
 	op10 := patternArgs{expected, parseTypes, patternTypes, segmentErrors}
 
-	pass, errorMsgs, _ = p.parseOptions(op2, op1, op3, op4, op2, op5, op1, op4, op6, op7, op8, op9, op10)
+	pass, errorMsgs = p.parseOptions(op2, op1, op3, op4, op2, op5, op1, op4, op6, op7, op8, op9, op10)
 
 	if !pass {
-		return false, errorMsgs, ast.NullChildNode{}
+		return false, errorMsgs
 	}
 
-	return true, []string{}, ast.ProgramNode{}.BuildNode(ast.BuildArguments{})
+	return true, []string{}
 }
 
-func (p *parser) parseParamList() (bool, []string, ast.Node) {
+func (p *parser) parseParamList() (bool, []string) {
 	var pass = false
-	var errorMsgs []string     // An array of error messages
-	var nodeLists [][]ast.Node // An array of a list of nodes
-	var node ast.Node          // returns DataNode with slice of ParameterNodes
+	var errorMsgs []string // An array of error messages
 
-	var args ast.BuildArguments
-	args.Pos = p.currTok.Pos
 	// <param-list> := <param> ( ',' <param> )*
 
 	expected := []grammar.ItemType{}
@@ -565,27 +525,19 @@ func (p *parser) parseParamList() (bool, []string, ast.Node) {
 	patternTypes := []patternType{ONCE, ZEROMORE}
 	segmentErrors := []string{"", "", "", ""}
 
-	pass, errorMsgs, nodeLists = p.parsePattern(expected, parseTypes, patternTypes, segmentErrors)
+	pass, errorMsgs = p.parsePattern(expected, parseTypes, patternTypes, segmentErrors)
 
 	if !pass {
-		return false, errorMsgs, ast.NullChildNode{}
+		return false, errorMsgs
 	}
 
-	args.ChildListOne = append(args.ChildListOne, nodeLists[0][0])
-	args.ChildListOne = append(args.ChildListOne, nodeLists[1]...)
-	node = ast.DataNode{}.BuildNode(args)
-
-	return true, []string{}, node
+	return true, []string{}
 }
 
-func (p *parser) parseExtraParam() (bool, []string, ast.Node) {
-	var pass = false           // True iff the tokens match a (pair-liter) def
-	var errorMsgs []string     // An array of error messages
-	var nodeLists [][]ast.Node // An array of a list of nodes
-	var node ast.Node          // A DataNode containing one ParameterNodes
+func (p *parser) parseExtraParam() (bool, []string) {
+	var pass = false       // True iff the tokens match a (pair-liter) def
+	var errorMsgs []string // An array of error messages
 
-	var args ast.BuildArguments
-	args.Pos = p.currTok.Pos
 	// Helper parse function for parseParamList
 	// extram param := ',' <param>
 
@@ -594,60 +546,40 @@ func (p *parser) parseExtraParam() (bool, []string, ast.Node) {
 	patternTypes := []patternType{EXPECT, ONCE}
 	segmentErrors := []string{"", "Expected a parameter after comma"}
 
-	pass, errorMsgs, nodeLists = p.parsePattern(expected, parseTypes, patternTypes, segmentErrors)
+	pass, errorMsgs = p.parsePattern(expected, parseTypes, patternTypes, segmentErrors)
 
 	if !pass {
-		return false, errorMsgs, ast.NullChildNode{}
+		return false, errorMsgs
 	}
 
-	args.ChildListOne = (nodeLists[0][0]).(ast.DataNode).Nodes
-
-	node = ast.DataNode{}.BuildNode(args)
-
-	return true, []string{}, node
+	return true, []string{}
 }
 
-func (p *parser) parseParam() (bool, []string, ast.Node) {
-	var pass = false           // True iff the tokens match a (param) def
-	var errorMsgs []string     // An array of error messages
-	var nodeLists [][]ast.Node // An array of a list of nodes
-	var node ast.Node          // A ParameterNode
+func (p *parser) parseParam() (bool, []string) {
+	var pass = false       // True iff the tokens match a (param) def
+	var errorMsgs []string // An array of error messages
 
-	var args ast.BuildArguments
-	args.Pos = p.currTok.Pos
 	// <param> := <type> <ident>
 	expected := []grammar.ItemType{}
 	parseTypes := []parseType{p.parseType, p.parseIdent}
 	patternTypes := []patternType{ONCE, ONCE}
 	segmentErrors := []string{"", "An parameter identifier must follow its type"}
 
-	pass, errorMsgs, nodeLists = p.parsePattern(expected, parseTypes, patternTypes, segmentErrors)
+	pass, errorMsgs = p.parsePattern(expected, parseTypes, patternTypes, segmentErrors)
 
 	if !pass {
-		return false, errorMsgs, ast.NullChildNode{}
+		return false, errorMsgs
 	}
 
-	args.Type = nodeLists[0][0].(ast.DataNode).Type
-	args.StrVal = nodeLists[1][0].(ast.DataNode).StrVal
-	node = ast.ParameterNode{}.BuildNode(args)
-
-	return true, []string{}, node
+	return true, []string{}
 }
 
-func (p *parser) parseStat() (bool, []string, ast.Node) {
+func (p *parser) parseStat() (bool, []string) {
 	var pass = false // True iff the tokens match a <program> def
 	//                       statements I.e. <stat> ';' <stat>
 	var multiStat = false
 	var errorMsgs []string     // An array of error messages
 	var errorMsgsTemp []string // Error messages place holder
-	var nodeLists [][]ast.Node // An array of a list of nodes
-	var node ast.Node          // A DataNode containing a slice of statement Nodes
-	var nodeTemp ast.Node
-	var nodeTemp2 ast.Node
-	var nodeListTemp []ast.Node
-
-	var args ast.BuildArguments
-	args.Pos = p.currTok.Pos
 
 	//Place holders
 	expected := []grammar.ItemType{}
@@ -762,25 +694,20 @@ func (p *parser) parseStat() (bool, []string, ast.Node) {
 
 	op12 := patternArgs{expected, parseTypes, patternTypes, segmentErrors}
 
-	pass, errorMsgs, nodeLists = p.parseOptions(op2, op1, op12, op3, op4, op2, op5, op1, op4, op6, op7, op8,
+	pass, errorMsgs = p.parseOptions(op2, op1, op12, op3, op4, op2, op5, op1, op4, op6, op7, op8,
 		op9, op10, op11)
 
 	// <stat> ; <stat> option
 	if pass { // If a <stat> has been read so far
-		args.ChildListOne = makeNodeList((nodeLists[0][0]))
-		nodeTemp = ast.StatementNode{}.BuildNode(args)
 
 		// Check for a ';'
-		multiStat, _, _ = p.parsePattern([]grammar.ItemType{grammar.SEMICOLON},
+		multiStat, _ = p.parsePattern([]grammar.ItemType{grammar.SEMICOLON},
 			[]parseType{},
 			[]patternType{EXPECT},
 			[]string{""})
 
 		if multiStat {
-			pass, errorMsgsTemp, nodeTemp2 = p.parseStat()
-
-			addNodeToList(&nodeListTemp, nodeTemp)
-			nodeListTemp = append(nodeListTemp, nodeTemp2.(ast.DataNode).Nodes...)
+			pass, errorMsgsTemp = p.parseStat()
 
 			if !pass {
 				p.addErrors(&errorMsgsTemp, []string{"A statement must follow ';'"})
@@ -792,23 +719,15 @@ func (p *parser) parseStat() (bool, []string, ast.Node) {
 	}
 
 	if !pass {
-		return false, errorMsgs, ast.NullChildNode{}
+		return false, errorMsgs
 	}
 
-	args.ChildListOne = nodeListTemp
-	node = ast.DataNode{}.BuildNode(args)
-
-	return true, []string{}, node
+	return true, []string{}
 }
 
-func (p *parser) parseAssignLHS() (bool, []string, ast.Node) {
-	var pass = false           // True iff the tokens match a (assign-LHS) def
-	var errorMsgs []string     // An array of error messages
-	var nodeLists [][]ast.Node // An array of a list of nodes
-	var node ast.Node
-
-	var args ast.BuildArguments
-	args.Pos = p.currTok.Pos
+func (p *parser) parseAssignLHS() (bool, []string) {
+	var pass = false       // True iff the tokens match a (assign-LHS) def
+	var errorMsgs []string // An array of error messages
 
 	//Place holders
 	expected := []grammar.ItemType{}
@@ -832,29 +751,18 @@ func (p *parser) parseAssignLHS() (bool, []string, ast.Node) {
 	parseTypes = []parseType{p.parsePairElem}
 	op3 := patternArgs{expected, parseTypes, patternTypes, segmentErrors}
 
-	pass, errorMsgs, nodeLists = p.parseOptions(op2, op1, op3)
+	pass, errorMsgs = p.parseOptions(op2, op1, op3)
 
 	if !pass {
-		return false, errorMsgs, ast.NullChildNode{}
+		return false, errorMsgs
 	}
 
-	args.Type = nodeLists[0][0].(ast.DataNode).Type
-	args.StrVal = nodeLists[1][0].(ast.DataNode).StrVal
-	args.ChildListOne = (nodeLists[2][0]).(ast.DataNode).Nodes
-	args.ChildListTwo = (nodeLists[3][0]).(ast.DataNode).Nodes
-	node = ast.FunctionNode{}.BuildNode(args)
-
-	return true, []string{}, ast.ProgramNode{}.BuildNode(ast.BuildArguments{})
+	return true, []string{}
 }
 
-func (p *parser) parseAssignRHS() (bool, []string, ast.Node) {
-	var pass = false           // True iff the tokens match a (assign-RHS) def
-	var errorMsgs []string     // An array of error messages
-	var nodeLists [][]ast.Node // An array of a list of nodes
-	var node ast.Node
-
-	var args ast.BuildArguments
-	args.Pos = p.currTok.Pos
+func (p *parser) parseAssignRHS() (bool, []string) {
+	var pass = false       // True iff the tokens match a (assign-RHS) def
+	var errorMsgs []string // An array of error messages
 
 	//Place holders
 	expected := []grammar.ItemType{}
@@ -905,23 +813,18 @@ func (p *parser) parseAssignRHS() (bool, []string, ast.Node) {
 
 	op5 := patternArgs{expected, parseTypes, patternTypes, segmentErrors}
 
-	pass, errorMsgs, _ = p.parseOptions(op1, op2, op3, op4, op5)
+	pass, errorMsgs = p.parseOptions(op1, op2, op3, op4, op5)
 
 	if !pass {
-		return false, errorMsgs, ast.ProgramNode{}.BuildNode(ast.BuildArguments{})
+		return false, errorMsgs
 	}
 
-	return true, []string{}, ast.ProgramNode{}.BuildNode(ast.BuildArguments{})
+	return true, []string{}
 }
 
-func (p *parser) parseArgList() (bool, []string, ast.Node) {
-	var pass = false           // True iff the tokens match a (arg-list) def
-	var errorMsgs []string     // An array of error messages
-	var nodeLists [][]ast.Node // An array of a list of nodes
-	var node ast.Node
-
-	var args ast.BuildArguments
-	args.Pos = p.currTok.Pos
+func (p *parser) parseArgList() (bool, []string) {
+	var pass = false       // True iff the tokens match a (arg-list) def
+	var errorMsgs []string // An array of error messages
 
 	// <arg-list> := <expr> ( ',' <expr> )*
 
@@ -930,23 +833,18 @@ func (p *parser) parseArgList() (bool, []string, ast.Node) {
 	patternTypes := []patternType{ONCE, ZEROMORE}
 	segmentErrors := []string{"", ""}
 
-	pass, errorMsgs, _ = p.parsePattern(expected, parseTypes, patternTypes, segmentErrors)
+	pass, errorMsgs = p.parsePattern(expected, parseTypes, patternTypes, segmentErrors)
 
 	if !pass {
-		return false, errorMsgs, ast.ProgramNode{}.BuildNode(ast.BuildArguments{})
+		return false, errorMsgs
 	}
 
-	return true, []string{}, ast.ProgramNode{}.BuildNode(ast.BuildArguments{})
+	return true, []string{}
 }
 
-func (p *parser) parseExtraArg() (bool, []string, ast.Node) {
+func (p *parser) parseExtraArg() (bool, []string) {
 	var pass = false
-	var errorMsgs []string     // An array of error messages
-	var nodeLists [][]ast.Node // An array of a list of nodes
-	var node ast.Node
-
-	var args ast.BuildArguments
-	args.Pos = p.currTok.Pos
+	var errorMsgs []string // An array of error messages
 
 	// Helper parse function for parseArgList
 	// extram param := ',' <expr>
@@ -956,23 +854,18 @@ func (p *parser) parseExtraArg() (bool, []string, ast.Node) {
 	patternTypes := []patternType{EXPECT, ONCE}
 	segmentErrors := []string{"", "Expected an argument after comma"}
 
-	pass, errorMsgs, _ = p.parsePattern(expected, parseTypes, patternTypes, segmentErrors)
+	pass, errorMsgs = p.parsePattern(expected, parseTypes, patternTypes, segmentErrors)
 
 	if !pass {
-		return false, errorMsgs, ast.ProgramNode{}.BuildNode(ast.BuildArguments{})
+		return false, errorMsgs
 	}
 
-	return true, []string{}, ast.ProgramNode{}.BuildNode(ast.BuildArguments{})
+	return true, []string{}
 }
 
-func (p *parser) parsePairElem() (bool, []string, ast.Node) {
-	var pass = false           // True iff the tokens match a (pair-elem) def
-	var errorMsgs []string     // An array of error messages
-	var nodeLists [][]ast.Node // An array of a list of nodes
-	var node ast.Node
-
-	var args ast.BuildArguments
-	args.Pos = p.currTok.Pos
+func (p *parser) parsePairElem() (bool, []string) {
+	var pass = false       // True iff the tokens match a (pair-elem) def
+	var errorMsgs []string // An array of error messages
 
 	//Place holders
 	expected := []grammar.ItemType{}
@@ -996,23 +889,18 @@ func (p *parser) parsePairElem() (bool, []string, ast.Node) {
 
 	op2 := patternArgs{expected, parseTypes, patternTypes, segmentErrors}
 
-	pass, errorMsgs, _ = p.parseOptions(op1, op2)
+	pass, errorMsgs = p.parseOptions(op1, op2)
 
 	if !pass {
-		return false, errorMsgs, ast.ProgramNode{}.BuildNode(ast.BuildArguments{})
+		return false, errorMsgs
 	}
 
-	return true, []string{}, ast.ProgramNode{}.BuildNode(ast.BuildArguments{})
+	return true, []string{}
 }
 
-func (p *parser) parseType() (bool, []string, ast.Node) {
-	var pass = false           // True iff the tokens match a <type> def
-	var errorMsgs []string     // An array of error messages
-	var nodeLists [][]ast.Node // An array of a list of nodes
-	var node ast.Node
-
-	var args ast.BuildArguments
-	args.Pos = p.currTok.Pos
+func (p *parser) parseType() (bool, []string) {
+	var pass = false       // True iff the tokens match a <type> def
+	var errorMsgs []string // An array of error messages
 
 	//Place holders
 	expected := []grammar.ItemType{}
@@ -1036,23 +924,18 @@ func (p *parser) parseType() (bool, []string, ast.Node) {
 	parseTypes = []parseType{p.parsePairType}
 	op3 := patternArgs{expected, parseTypes, patternTypes, segmentErrors}
 
-	pass, errorMsgs, _ = p.parseOptions(op2, op1, op3)
+	pass, errorMsgs = p.parseOptions(op2, op1, op3)
 
 	if !pass {
-		return false, errorMsgs, ast.ProgramNode{}.BuildNode(ast.BuildArguments{})
+		return false, errorMsgs
 	}
 
-	return true, []string{}, ast.ProgramNode{}.BuildNode(ast.BuildArguments{})
+	return true, []string{}
 }
 
-func (p *parser) parseBaseType() (bool, []string, ast.Node) {
-	var errorMsgs []string     // An array of error messages
-	var pass = false           // True iff the tokens match a <base-type> def
-	var nodeLists [][]ast.Node // An array of a list of nodes
-	var node ast.Node
-
-	var args ast.BuildArguments
-	args.Pos = p.currTok.Pos
+func (p *parser) parseBaseType() (bool, []string) {
+	var errorMsgs []string // An array of error messages
+	var pass = false       // True iff the tokens match a <base-type> def
 
 	// base-type := 'int' | 'bool' | 'char' | 'string'
 
@@ -1082,24 +965,19 @@ func (p *parser) parseBaseType() (bool, []string, ast.Node) {
 	expected = []grammar.ItemType{grammar.STRING}
 	op4 := patternArgs{expected, parseTypes, patternTypes, segmentErrors}
 
-	pass, errorMsgs, _ = p.parseOptions(op1, op2, op3, op4)
+	pass, errorMsgs = p.parseOptions(op1, op2, op3, op4)
 
 	if !pass {
-		return false, errorMsgs, ast.ProgramNode{}.BuildNode(ast.BuildArguments{})
+		return false, errorMsgs
 	}
 
-	return true, []string{}, ast.ProgramNode{}.BuildNode(ast.BuildArguments{})
+	return true, []string{}
 }
 
-func (p *parser) parseArrayType() (bool, []string, ast.Node) {
+func (p *parser) parseArrayType() (bool, []string) {
 	var pass = false
 	var errorMsgs []string // An array of error messages
 	var errorMsgTemp []string
-	var nodeLists [][]ast.Node // An array of a list of nodes
-	var node ast.Node
-
-	var args ast.BuildArguments
-	args.Pos = p.currTok.Pos
 
 	//Place holders
 	expected := []grammar.ItemType{}
@@ -1121,11 +999,11 @@ func (p *parser) parseArrayType() (bool, []string, ast.Node) {
 	parseTypes = []parseType{p.parsePairType}
 	op2 := patternArgs{expected, parseTypes, patternTypes, segmentErrors}
 
-	pass, errorMsgs, _ = p.parseOptions(op1, op2)
+	pass, errorMsgs = p.parseOptions(op1, op2)
 
 	// if <type> != <base-type> or <pair-type> then check if <type> = <array-type>
 	if !pass {
-		return false, errorMsgs, ast.ProgramNode{}.BuildNode(ast.BuildArguments{})
+		return false, errorMsgs
 		// NOT IMPLEMENTED
 	}
 
@@ -1135,24 +1013,19 @@ func (p *parser) parseArrayType() (bool, []string, ast.Node) {
 	patternTypes = []patternType{ONEMORE}
 	segmentErrors = []string{""}
 
-	pass, errorMsgTemp, _ = p.parsePattern(expected, parseTypes, patternTypes, segmentErrors)
+	pass, errorMsgTemp = p.parsePattern(expected, parseTypes, patternTypes, segmentErrors)
 	errorMsgs = append(errorMsgs, errorMsgTemp...)
 
 	if !pass {
-		return false, errorMsgs, ast.ProgramNode{}.BuildNode(ast.BuildArguments{})
+		return false, errorMsgs
 	}
 
-	return true, []string{}, ast.ProgramNode{}.BuildNode(ast.BuildArguments{})
+	return true, []string{}
 }
 
-func (p *parser) parseArrayDimension() (bool, []string, ast.Node) {
+func (p *parser) parseArrayDimension() (bool, []string) {
 	var pass = false
-	var errorMsgs []string     // An array of error messages
-	var nodeLists [][]ast.Node // An array of a list of nodes
-	var node ast.Node
-
-	var args ast.BuildArguments
-	args.Pos = p.currTok.Pos
+	var errorMsgs []string // An array of error messages
 
 	// parseArrayType helper function
 	// Check for '[' ']'
@@ -1161,23 +1034,18 @@ func (p *parser) parseArrayDimension() (bool, []string, ast.Node) {
 	patternTypes := []patternType{EXPECT, EXPECT}
 	segmentErrors := []string{"", "Expected '[' after type", "Expected ']'"}
 
-	pass, errorMsgs, _ = p.parsePattern(expected, parseTypes, patternTypes, segmentErrors)
+	pass, errorMsgs = p.parsePattern(expected, parseTypes, patternTypes, segmentErrors)
 
 	if !pass {
-		return false, errorMsgs, ast.ProgramNode{}.BuildNode(ast.BuildArguments{})
+		return false, errorMsgs
 	}
 
-	return true, []string{}, ast.ProgramNode{}.BuildNode(ast.BuildArguments{})
+	return true, []string{}
 }
 
-func (p *parser) parsePairType() (bool, []string, ast.Node) {
-	var pass = false           // True iff the tokens match a (pair-type) def
-	var errorMsgs []string     // An array of error messages
-	var nodeLists [][]ast.Node // An array of a list of nodes
-	var node ast.Node
-
-	var args ast.BuildArguments
-	args.Pos = p.currTok.Pos
+func (p *parser) parsePairType() (bool, []string) {
+	var pass = false       // True iff the tokens match a (pair-type) def
+	var errorMsgs []string // An array of error messages
 
 	// <pair-type> := 'pair' '(' <pair-elem-type> ',' <pair-elem-type> ')'
 
@@ -1191,23 +1059,18 @@ func (p *parser) parsePairType() (bool, []string, ast.Node) {
 		"Expected pair-element type",
 		"Expected ')' at the end of pair type"}
 
-	pass, errorMsgs, _ = p.parsePattern(expected, parseTypes, patternTypes, segmentErrors)
+	pass, errorMsgs = p.parsePattern(expected, parseTypes, patternTypes, segmentErrors)
 
 	if !pass {
-		return false, errorMsgs, ast.ProgramNode{}.BuildNode(ast.BuildArguments{})
+		return false, errorMsgs
 	}
 
-	return true, []string{}, ast.ProgramNode{}.BuildNode(ast.BuildArguments{})
+	return true, []string{}
 }
 
-func (p *parser) parsePairElemType() (bool, []string, ast.Node) {
-	var pass = false           // True iff the tokens match a (elem-type) def
-	var errorMsgs []string     // An array of error messages
-	var nodeLists [][]ast.Node // An array of a list of nodes
-	var node ast.Node
-
-	var args ast.BuildArguments
-	args.Pos = p.currTok.Pos
+func (p *parser) parsePairElemType() (bool, []string) {
+	var pass = false       // True iff the tokens match a (elem-type) def
+	var errorMsgs []string // An array of error messages
 
 	//Place holders
 	expected := []grammar.ItemType{}
@@ -1233,25 +1096,20 @@ func (p *parser) parsePairElemType() (bool, []string, ast.Node) {
 	patternTypes = []patternType{EXPECT}
 	op3 := patternArgs{expected, parseTypes, patternTypes, segmentErrors}
 
-	pass, errorMsgs, _ = p.parseOptions(op2, op1, op3)
+	pass, errorMsgs = p.parseOptions(op2, op1, op3)
 
 	if !pass {
-		return false, errorMsgs, ast.ProgramNode{}.BuildNode(ast.BuildArguments{})
+		return false, errorMsgs
 	}
 
-	return true, []string{}, ast.ProgramNode{}.BuildNode(ast.BuildArguments{})
+	return true, []string{}
 }
 
-func (p *parser) parseExpr() (bool, []string, ast.Node) {
+func (p *parser) parseExpr() (bool, []string) {
 	var pass = false
 	var binaryExpr = false // true iff <expr> <binary-oper> is parsed
 	var errorMsgs []string // An array of error messages
 	var errorMsgsTemp []string
-	var nodeLists [][]ast.Node // An array of a list of nodes
-	var node ast.Node
-
-	var args ast.BuildArguments
-	args.Pos = p.currTok.Pos
 
 	//Place holders
 	expected := []grammar.ItemType{}
@@ -1304,7 +1162,7 @@ func (p *parser) parseExpr() (bool, []string, ast.Node) {
 	segmentErrors = []string{"", "", ""}
 	op9 := patternArgs{expected, parseTypes, patternTypes, segmentErrors}
 
-	pass, errorMsgs, _ = p.parseOptions(op7, op6, op1, op2, op3, op4, op5, op8, op9)
+	pass, errorMsgs = p.parseOptions(op7, op6, op1, op2, op3, op4, op5, op8, op9)
 
 	if pass {
 		// <binary-oper> <expr>
@@ -1313,30 +1171,25 @@ func (p *parser) parseExpr() (bool, []string, ast.Node) {
 		patternTypes = []patternType{ONCE}
 		segmentErrors = []string{""}
 
-		binaryExpr, _, _ = p.parsePattern(expected, parseTypes, patternTypes, segmentErrors)
+		binaryExpr, _ = p.parsePattern(expected, parseTypes, patternTypes, segmentErrors)
 
 		if binaryExpr {
-			pass, errorMsgsTemp, _ = p.parseExpr()
+			pass, errorMsgsTemp = p.parseExpr()
 			errorMsgs = append(errorMsgs, errorMsgsTemp...)
 		}
 
 	}
 
 	if !pass {
-		return false, errorMsgs, ast.ProgramNode{}.BuildNode(ast.BuildArguments{})
+		return false, errorMsgs
 	}
 
-	return true, []string{}, ast.ProgramNode{}.BuildNode(ast.BuildArguments{})
+	return true, []string{}
 }
 
-func (p *parser) parseUnaryOp() (bool, []string, ast.Node) {
-	var errorMsgs []string     // An array of error messages
-	var pass = false           // True iff the tokens match a <unary-oper> def
-	var nodeLists [][]ast.Node // An array of a list of nodes
-	var node ast.Node
-
-	var args ast.BuildArguments
-	args.Pos = p.currTok.Pos
+func (p *parser) parseUnaryOp() (bool, []string) {
+	var errorMsgs []string // An array of error messages
+	var pass = false       // True iff the tokens match a ⟨unary-oper⟩ def
 
 	// <unary-oper> ::= ‘!’ | ‘-’ | ‘len’ | ‘ord’ | ‘chr’
 	expected := []grammar.ItemType{}
@@ -1372,23 +1225,18 @@ func (p *parser) parseUnaryOp() (bool, []string, ast.Node) {
 	expected = []grammar.ItemType{grammar.CHR}
 	op5 := patternArgs{expected, parseTypes, patternTypes, segmentErrors}
 
-	pass, errorMsgs, _ = p.parseOptions(op1, op2, opN, op3, op4, op5)
+	pass, errorMsgs = p.parseOptions(op1, op2, opN, op3, op4, op5)
 
 	if !pass {
-		return false, errorMsgs, ast.ProgramNode{}.BuildNode(ast.BuildArguments{})
+		return false, errorMsgs
 	}
 
-	return true, []string{}, ast.ProgramNode{}.BuildNode(ast.BuildArguments{})
+	return true, []string{}
 }
 
-func (p *parser) parseBinaryOp() (bool, []string, ast.Node) {
-	var errorMsgs []string     // An array of error messages
-	var pass = false           // True iff the tokens match a <binary-oper> def
-	var nodeLists [][]ast.Node // An array of a list of nodes
-	var node ast.Node
-
-	var args ast.BuildArguments
-	args.Pos = p.currTok.Pos
+func (p *parser) parseBinaryOp() (bool, []string) {
+	var errorMsgs []string // An array of error messages
+	var pass = false       // True iff the tokens match a ⟨binary-oper⟩ def
 
 	// <binary-oper> ::= ‘*’ | ‘/’ | ‘%’ | ‘+’ | ‘-’ | ‘>’ | ‘>=’ | ‘<’ | ‘<=’ | ‘==’ | ‘!=’ | ‘&&’ | ‘||’
 	expected := []grammar.ItemType{}
@@ -1456,23 +1304,18 @@ func (p *parser) parseBinaryOp() (bool, []string, ast.Node) {
 	expected = []grammar.ItemType{grammar.OR}
 	op13 := patternArgs{expected, parseTypes, patternTypes, segmentErrors}
 
-	pass, errorMsgs, _ = p.parseOptions(op1, op2, op3, op4, op5, opN, op6, op7, op8, op9, op10, op11, op12, op13)
+	pass, errorMsgs = p.parseOptions(op1, op2, op3, op4, op5, opN, op6, op7, op8, op9, op10, op11, op12, op13)
 
 	if !pass {
-		return false, errorMsgs, ast.ProgramNode{}.BuildNode(ast.BuildArguments{})
+		return false, errorMsgs
 	}
 
-	return true, []string{}, ast.ProgramNode{}.BuildNode(ast.BuildArguments{})
+	return true, []string{}
 }
 
-func (p *parser) parseIdent() (bool, []string, ast.Node) {
+func (p *parser) parseIdent() (bool, []string) {
 	var pass = false
-	var errorMsgs []string     // An array of error messages
-	var nodeLists [][]ast.Node // An array of a list of nodes
-	var node ast.Node
-
-	var args ast.BuildArguments
-	args.Pos = p.currTok.Pos
+	var errorMsgs []string // An array of error messages
 
 	// <ident> := valid identifer
 
@@ -1481,23 +1324,18 @@ func (p *parser) parseIdent() (bool, []string, ast.Node) {
 	patternTypes := []patternType{EXPECT}
 	segmentErrors := []string{""}
 
-	pass, errorMsgs, _ = p.parsePattern(expected, parseTypes, patternTypes, segmentErrors)
+	pass, errorMsgs = p.parsePattern(expected, parseTypes, patternTypes, segmentErrors)
 
 	if !pass {
-		return false, errorMsgs, ast.ProgramNode{}.BuildNode(ast.BuildArguments{})
+		return false, errorMsgs
 	}
 
-	return true, []string{}, ast.ProgramNode{}.BuildNode(ast.BuildArguments{})
+	return true, []string{}
 }
 
-func (p *parser) parseArrayElem() (bool, []string, ast.Node) {
-	var pass = false           // True iff the tokens match a (array-elem) def
-	var errorMsgs []string     // An array of error messages
-	var nodeLists [][]ast.Node // An array of a list of nodes
-	var node ast.Node
-
-	var args ast.BuildArguments
-	args.Pos = p.currTok.Pos
+func (p *parser) parseArrayElem() (bool, []string) {
+	var pass = false       // True iff the tokens match a (array-elem) def
+	var errorMsgs []string // An array of error messages
 
 	// <array-elem> ::= <ident> (‘[’ <expr> ‘]’)+
 	expected := []grammar.ItemType{}
@@ -1505,23 +1343,18 @@ func (p *parser) parseArrayElem() (bool, []string, ast.Node) {
 	patternTypes := []patternType{ONCE, ONEMORE}
 	segmentErrors := []string{"", ""}
 
-	pass, errorMsgs, _ = p.parsePattern(expected, parseTypes, patternTypes, segmentErrors)
+	pass, errorMsgs = p.parsePattern(expected, parseTypes, patternTypes, segmentErrors)
 
 	if !pass {
-		return false, errorMsgs, ast.ProgramNode{}.BuildNode(ast.BuildArguments{})
+		return false, errorMsgs
 	}
 
-	return true, []string{}, ast.ProgramNode{}.BuildNode(ast.BuildArguments{})
+	return true, []string{}
 }
 
-func (p *parser) parseArrayElemHelper() (bool, []string, ast.Node) {
-	var pass = false           // True iff the tokens match a (array-elem) def
-	var errorMsgs []string     // An array of error messages
-	var nodeLists [][]ast.Node // An array of a list of nodes
-	var node ast.Node
-
-	var args ast.BuildArguments
-	args.Pos = p.currTok.Pos
+func (p *parser) parseArrayElemHelper() (bool, []string) {
+	var pass = false       // True iff the tokens match a (array-elem) def
+	var errorMsgs []string // An array of error messages
 
 	// Partial implementation of array-elem
 	// <array-elem-dimension> ::= ‘[’ <expr> ‘]’
@@ -1530,24 +1363,18 @@ func (p *parser) parseArrayElemHelper() (bool, []string, ast.Node) {
 	patternTypes := []patternType{EXPECT, OPTIONAL, EXPECT}
 	segmentErrors := []string{"", "", ""}
 
-	pass, errorMsgs, _ = p.parsePattern(expected, parseTypes, patternTypes, segmentErrors)
+	pass, errorMsgs = p.parsePattern(expected, parseTypes, patternTypes, segmentErrors)
 
 	if !pass {
-		return false, errorMsgs, ast.ProgramNode{}.BuildNode(ast.BuildArguments{})
+		return false, errorMsgs
 	}
 
-	return true, []string{}, ast.ProgramNode{}.BuildNode(ast.BuildArguments{})
+	return true, []string{}
 }
 
-func (p *parser) parseIntLiteral() (bool, []string, ast.Node) {
-	var pass = false           // True iff the tokens match a (int-liter) def
-	var errorMsgs []string     // An array of error messages
-	var nodeLists [][]ast.Node // An array of a list of nodes
-	var node ast.Node
-
-	var args ast.BuildArguments
-	args.Pos = p.currTok.Pos
-
+func (p *parser) parseIntLiteral() (bool, []string) {
+	var pass = false       // True iff the tokens match a (int-liter) def
+	var errorMsgs []string // An array of error messages
 	var intLexeme string
 
 	if p.tokens[p.curr].Typ == grammar.ADD || p.tokens[p.curr].Typ == grammar.SUB {
@@ -1566,30 +1393,25 @@ func (p *parser) parseIntLiteral() (bool, []string, ast.Node) {
 	patternTypes := []patternType{OPTIONAL, EXPECT}
 	segmentErrors := []string{"", ""}
 
-	pass, errorMsgs, _ = p.parsePattern(expected, parseTypes, patternTypes, segmentErrors)
+	pass, errorMsgs = p.parsePattern(expected, parseTypes, patternTypes, segmentErrors)
 
 	if !pass {
-		return false, errorMsgs, ast.ProgramNode{}.BuildNode(ast.BuildArguments{})
+		return false, errorMsgs
 	}
 
 	i, _ := strconv.ParseFloat(intLexeme, 64)
 
 	if intOutOfRange(i) {
 		p.addErrors(&errorMsgs, []string{"Integer overflow"})
-		return false, errorMsgs, ast.ProgramNode{}.BuildNode(ast.BuildArguments{})
+		return false, errorMsgs
 	}
 
-	return true, []string{}, ast.ProgramNode{}.BuildNode(ast.BuildArguments{})
+	return true, []string{}
 }
 
-func (p *parser) parseIntSign() (bool, []string, ast.Node) {
-	var errorMsgs []string     // An array of error messages
-	var pass = false           // True iff the tokens match a <int-sign> def
-	var nodeLists [][]ast.Node // An array of a list of nodes
-	var node ast.Node
-
-	var args ast.BuildArguments
-	args.Pos = p.currTok.Pos
+func (p *parser) parseIntSign() (bool, []string) {
+	var errorMsgs []string // An array of error messages
+	var pass = false       // True iff the tokens match a <int-sign> def
 
 	// int-sign := '+' | '-'
 	expected := []grammar.ItemType{}
@@ -1609,23 +1431,18 @@ func (p *parser) parseIntSign() (bool, []string, ast.Node) {
 	expected = []grammar.ItemType{grammar.SUB}
 	op2 := patternArgs{expected, parseTypes, patternTypes, segmentErrors}
 
-	pass, errorMsgs, _ = p.parseOptions(op1, op2)
+	pass, errorMsgs = p.parseOptions(op1, op2)
 
 	if !pass {
-		return false, errorMsgs, ast.ProgramNode{}.BuildNode(ast.BuildArguments{})
+		return false, errorMsgs
 	}
 
-	return true, []string{}, ast.ProgramNode{}.BuildNode(ast.BuildArguments{})
+	return true, []string{}
 }
 
-func (p *parser) parseBoolLiteral() (bool, []string, ast.Node) {
-	var errorMsgs []string     // An array of error messages
-	var pass = false           // True iff the tokens match a <bool-liter> def
-	var nodeLists [][]ast.Node // An array of a list of nodes
-	var node ast.Node
-
-	var args ast.BuildArguments
-	args.Pos = p.currTok.Pos
+func (p *parser) parseBoolLiteral() (bool, []string) {
+	var errorMsgs []string // An array of error messages
+	var pass = false       // True iff the tokens match a <bool-liter> def
 
 	// <bool-liter> := 'true' | 'false'
 
@@ -1647,23 +1464,18 @@ func (p *parser) parseBoolLiteral() (bool, []string, ast.Node) {
 	expected = []grammar.ItemType{grammar.FALSE}
 	op2 := patternArgs{expected, parseTypes, patternTypes, segmentErrors}
 
-	pass, errorMsgs, _ = p.parseOptions(op2, op1)
+	pass, errorMsgs = p.parseOptions(op2, op1)
 
 	if !pass {
-		return false, errorMsgs, ast.ProgramNode{}.BuildNode(ast.BuildArguments{})
+		return false, errorMsgs
 	}
 
-	return true, []string{}, ast.ProgramNode{}.BuildNode(ast.BuildArguments{})
+	return true, []string{}
 }
 
-func (p *parser) parseCharLiteral() (bool, []string, ast.Node) {
-	var pass = false           // True iff the tokens match a (char-liter) def
-	var errorMsgs []string     // An array of error messages
-	var nodeLists [][]ast.Node // An array of a list of nodes
-	var node ast.Node
-
-	var args ast.BuildArguments
-	args.Pos = p.currTok.Pos
+func (p *parser) parseCharLiteral() (bool, []string) {
+	var pass = false       // True iff the tokens match a (char-liter) def
+	var errorMsgs []string // An array of error messages
 
 	// <char-liter> ::= CHARLITER
 	expected := []grammar.ItemType{grammar.CHARLITER}
@@ -1671,23 +1483,18 @@ func (p *parser) parseCharLiteral() (bool, []string, ast.Node) {
 	patternTypes := []patternType{EXPECT}
 	segmentErrors := []string{""}
 
-	pass, errorMsgs, _ = p.parsePattern(expected, parseTypes, patternTypes, segmentErrors)
+	pass, errorMsgs = p.parsePattern(expected, parseTypes, patternTypes, segmentErrors)
 
 	if !pass {
-		return false, errorMsgs, ast.ProgramNode{}.BuildNode(ast.BuildArguments{})
+		return false, errorMsgs
 	}
 
-	return true, []string{}, ast.ProgramNode{}.BuildNode(ast.BuildArguments{})
+	return true, []string{}
 }
 
-func (p *parser) parseStrLiteral() (bool, []string, ast.Node) {
-	var pass = false           // True iff the tokens match a (str-liter) def
-	var errorMsgs []string     // An array of error messages
-	var nodeLists [][]ast.Node // An array of a list of nodes
-	var node ast.Node
-
-	var args ast.BuildArguments
-	args.Pos = p.currTok.Pos
+func (p *parser) parseStrLiteral() (bool, []string) {
+	var pass = false       // True iff the tokens match a (str-liter) def
+	var errorMsgs []string // An array of error messages
 
 	// (str-liter) ::= STRINGLITER
 	expected := []grammar.ItemType{grammar.STRINGLITER}
@@ -1696,23 +1503,18 @@ func (p *parser) parseStrLiteral() (bool, []string, ast.Node) {
 	patternTypes := []patternType{EXPECT}
 	segmentErrors := []string{""}
 
-	pass, errorMsgs, _ = p.parsePattern(expected, parseTypes, patternTypes, segmentErrors)
+	pass, errorMsgs = p.parsePattern(expected, parseTypes, patternTypes, segmentErrors)
 
 	if !pass {
-		return false, errorMsgs, ast.ProgramNode{}.BuildNode(ast.BuildArguments{})
+		return false, errorMsgs
 	}
 
-	return true, []string{}, ast.ProgramNode{}.BuildNode(ast.BuildArguments{})
+	return true, []string{}
 }
 
-func (p *parser) parseEscapedCharacter() (bool, []string, ast.Node) {
-	var errorMsgs []string     // An array of error messages
-	var pass = false           // True iff the tokens match a <escaped-char> def
-	var nodeLists [][]ast.Node // An array of a list of nodes
-	var node ast.Node
-
-	var args ast.BuildArguments
-	args.Pos = p.currTok.Pos
+func (p *parser) parseEscapedCharacter() (bool, []string) {
+	var errorMsgs []string // An array of error messages
+	var pass = false       // True iff the tokens match a <escaped-char> def
 
 	// <escaped-char> ::= ‘0’ | ‘b’ | ‘t’ | ‘n’ | ‘f’ | ‘r’ | ‘"’ | ‘’’ | ‘\’
 
@@ -1762,23 +1564,18 @@ func (p *parser) parseEscapedCharacter() (bool, []string, ast.Node) {
 	expected = []grammar.ItemType{grammar.BACKSLASH}
 	op9 := patternArgs{expected, parseTypes, patternTypes, segmentErrors}
 
-	pass, errorMsgs, _ = p.parseOptions(op1, op2, op3, op4, op5, op6, op7, op8, op9)
+	pass, errorMsgs = p.parseOptions(op1, op2, op3, op4, op5, op6, op7, op8, op9)
 
 	if !pass {
-		return false, errorMsgs, ast.ProgramNode{}.BuildNode(ast.BuildArguments{})
+		return false, errorMsgs
 	}
 
-	return true, []string{}, ast.ProgramNode{}.BuildNode(ast.BuildArguments{})
+	return true, []string{}
 }
 
-func (p *parser) parseArrayLiteral() (bool, []string, ast.Node) {
-	var pass = false           // True iff the tokens match a (array-liter) def
-	var errorMsgs []string     // An array of error messages
-	var nodeLists [][]ast.Node // An array of a list of nodes
-	var node ast.Node
-
-	var args ast.BuildArguments
-	args.Pos = p.currTok.Pos
+func (p *parser) parseArrayLiteral() (bool, []string) {
+	var pass = false       // True iff the tokens match a (array-liter) def
+	var errorMsgs []string // An array of error messages
 
 	// <array-liter> ::= ‘[’ (expr (‘,’ <expr>)*)? ‘]’
 	expected := []grammar.ItemType{grammar.OPEN_SQUARE, grammar.CLOSE_SQUARE}
@@ -1786,23 +1583,18 @@ func (p *parser) parseArrayLiteral() (bool, []string, ast.Node) {
 	patternTypes := []patternType{EXPECT, OPTIONAL, EXPECT}
 	segmentErrors := []string{"", "", ""}
 
-	pass, errorMsgs, _ = p.parsePattern(expected, parseTypes, patternTypes, segmentErrors)
+	pass, errorMsgs = p.parsePattern(expected, parseTypes, patternTypes, segmentErrors)
 
 	if !pass {
-		return false, errorMsgs, ast.ProgramNode{}.BuildNode(ast.BuildArguments{})
+		return false, errorMsgs
 	}
 
-	return true, []string{}, ast.ProgramNode{}.BuildNode(ast.BuildArguments{})
+	return true, []string{}
 }
 
-func (p *parser) parseArrayExtra() (bool, []string, ast.Node) {
+func (p *parser) parseArrayExtra() (bool, []string) {
 	var pass = false
-	var errorMsgs []string     // An array of error messages
-	var nodeLists [][]ast.Node // An array of a list of nodes
-	var node ast.Node
-
-	var args ast.BuildArguments
-	args.Pos = p.currTok.Pos
+	var errorMsgs []string // An array of error messages
 
 	// Partial grammar for array-liter
 	// <array-liter> ::= <expr> (‘,’ <expr>)*
@@ -1811,23 +1603,18 @@ func (p *parser) parseArrayExtra() (bool, []string, ast.Node) {
 	patternTypes := []patternType{ONCE, ZEROMORE}
 	segmentErrors := []string{"", ""}
 
-	pass, errorMsgs, _ = p.parsePattern(expected, parseTypes, patternTypes, segmentErrors)
+	pass, errorMsgs = p.parsePattern(expected, parseTypes, patternTypes, segmentErrors)
 
 	if !pass {
-		return false, errorMsgs, ast.ProgramNode{}.BuildNode(ast.BuildArguments{})
+		return false, errorMsgs
 	}
 
-	return true, []string{}, ast.ProgramNode{}.BuildNode(ast.BuildArguments{})
+	return true, []string{}
 }
 
-func (p *parser) parsePairLiteral() (bool, []string, ast.Node) {
-	var errorMsgs []string     // An array of error messages
-	var pass = false           // True iff the tokens match a ⟨pair-liter⟩ def
-	var nodeLists [][]ast.Node // An array of a list of nodes
-	var node ast.Node
-
-	var args ast.BuildArguments
-	args.Pos = p.currTok.Pos
+func (p *parser) parsePairLiteral() (bool, []string) {
+	var errorMsgs []string // An array of error messages
+	var pass = false       // True iff the tokens match a ⟨pair-liter⟩ def
 
 	// <pair-liter> ::= ‘null’
 	expected := []grammar.ItemType{grammar.NULL}
@@ -1835,17 +1622,17 @@ func (p *parser) parsePairLiteral() (bool, []string, ast.Node) {
 	patternTypes := []patternType{EXPECT}
 	segmentErrors := []string{""}
 
-	pass, errorMsgs, _ = p.parsePattern(expected, parseTypes, patternTypes, segmentErrors)
+	pass, errorMsgs = p.parsePattern(expected, parseTypes, patternTypes, segmentErrors)
 
 	if !pass {
-		return false, errorMsgs, ast.ProgramNode{}.BuildNode(ast.BuildArguments{})
+		return false, errorMsgs
 	}
 
-	return true, []string{}, ast.ProgramNode{}.BuildNode(ast.BuildArguments{})
+	return true, []string{}
 }
 
-func (p *parser) parseComment() (bool, []string, ast.Node) {
-	return true, []string{}, ast.ProgramNode{}.BuildNode(ast.BuildArguments{})
+func (p *parser) parseComment() (bool, []string) {
+	return true, []string{}
 }
 
 /* PARSE HELPERS */
@@ -1855,16 +1642,15 @@ func (p *parser) parseComment() (bool, []string, ast.Node) {
 // This function is obligated to accept one parseCheck
 // returns true iff the parseCheck was accepted
 // Error obtained are appended to errorMsgs
-func (p *parser) parseOne(parseCheck parseType, errorMsgs *[]string) (bool, ast.Node) {
+func (p *parser) parseOne(parseCheck parseType, errorMsgs *[]string) bool {
 	var errorMsgTemp []string
-	var node ast.Node
 	var match = false
 
-	match, errorMsgTemp, node = parseCheck()
+	match, errorMsgTemp = parseCheck()
 
 	*errorMsgs = append(*errorMsgs, errorMsgTemp...)
 
-	return match, node
+	return match
 }
 
 // Returns true iff currTok matches the expectedType.
@@ -1883,24 +1669,20 @@ func (p *parser) expectToken(expectedType grammar.ItemType) bool {
 // This function has no obligation to parse anything, but it may still add
 // possible error messages
 // Error obtained are appended to errorMsgs
-func (p *parser) parseOptional(parseCheck parseType, errorMsgs *[]string) ast.Node {
+func (p *parser) parseOptional(parseCheck parseType, errorMsgs *[]string) {
 	defer p.removeSave()
 	var errorMsgTemp []string
 	var match = false
-	var node ast.Node
 
 	p.saveToken()
 
-	match, errorMsgTemp, node = parseCheck()
+	match, errorMsgTemp = parseCheck()
 
 	*errorMsgs = append(*errorMsgs, errorMsgTemp...)
 
 	if !match {
-		node = ast.NullChildNode{}
 		p.backTrack()
 	}
-
-	return node
 
 }
 
@@ -1909,17 +1691,14 @@ func (p *parser) parseOptional(parseCheck parseType, errorMsgs *[]string) ast.No
 // This function has no obligation to parse anything, but it may still add
 // possible error messages
 // Error obtained are appended to errorMsgs
-func (p *parser) parseZeroOrMore(parseCheck parseType, errorMsgs *[]string) []ast.Node {
+func (p *parser) parseZeroOrMore(parseCheck parseType, errorMsgs *[]string) {
 	defer p.removeSave()
 	var errorMsgTemp []string
 	var match = false
-	var nodeList []ast.Node
-	var nodeTemp ast.Node
 
 	p.saveToken()
 
-	match, errorMsgTemp, nodeTemp = parseCheck()
-	addNodeToList(&nodeList, nodeTemp)
+	match, errorMsgTemp = parseCheck()
 
 	for {
 		if !match {
@@ -1929,13 +1708,10 @@ func (p *parser) parseZeroOrMore(parseCheck parseType, errorMsgs *[]string) []as
 
 		} else {
 			p.reSave()
-			match, errorMsgTemp, nodeTemp = parseCheck()
-			addNodeToList(&nodeList, nodeTemp)
+			match, errorMsgTemp = parseCheck()
 		}
 
 	}
-
-	return nodeList
 }
 
 // Attempts to parse one or patterns based on parseCheck
@@ -1943,20 +1719,17 @@ func (p *parser) parseZeroOrMore(parseCheck parseType, errorMsgs *[]string) []as
 // This function is obligated to accept at least one parseCheck
 // returns true iff the first parseCheck was accepted
 // Error obtained are appended to errorMsgs
-func (p *parser) parseOneOrMore(parseCheck parseType, errorMsgs *[]string) (bool, []ast.Node) {
+func (p *parser) parseOneOrMore(parseCheck parseType, errorMsgs *[]string) bool {
 	var errorMsgTemp []string
 	var match = false
-	var nodeList []ast.Node
-	var nodeTemp ast.Node
 
-	match, errorMsgTemp, nodeTemp = parseCheck()
-	addNodeToList(&nodeList, nodeTemp)
+	match, errorMsgTemp = parseCheck()
 
 	// fail parse iff the first Check failed
 	if !match {
 		*errorMsgs = append(*errorMsgs, errorMsgTemp...)
 
-		return false, nil
+		return false
 	}
 
 	for {
@@ -1965,13 +1738,12 @@ func (p *parser) parseOneOrMore(parseCheck parseType, errorMsgs *[]string) (bool
 			break
 
 		} else {
-			match, errorMsgTemp, nodeTemp = parseCheck()
-			addNodeToList(&nodeList, nodeTemp)
+			match, errorMsgTemp = parseCheck()
 		}
 
 	}
 
-	return true, nodeList
+	return true
 }
 
 // Attempts to parse a pattern using a series of pattern match request
@@ -1983,13 +1755,14 @@ func (p *parser) parseOneOrMore(parseCheck parseType, errorMsgs *[]string) (bool
 // segmentErrors: An array of error messages added to errorMsgTemp when its
 //                respected segment/expectArgs (depends on ORDER) fails the check
 // PRE: len(expArgs) + len(segments) == len(typs)
-func (p *parser) parsePattern(expArgs []grammar.ItemType, segments []parseType,
-	typs []patternType, segmentErrors []string) (bool, []string, [][]ast.Node) {
+func (p *parser) parsePattern(expArgs []grammar.ItemType, segments []parseType, typs []patternType, segmentErrors []string) (bool, []string) {
 	defer p.removeSave()
 	var errorMsgTemp []string
-	var nodeLists [][]ast.Node
-	var nodeListTemp []ast.Node
-	var nodeTemp ast.Node
+
+	// For debugging
+	/*fmt.Println("Error IDEN = ", segmentErrors[0])
+	fmt.Println("Len seg + exp = ", len(expArgs)+len(segments), " len typs = ", len(typs), " len errors = ", len(segmentErrors))
+	fmt.Print("\n")*/
 
 	p.saveToken()
 
@@ -1998,7 +1771,7 @@ func (p *parser) parsePattern(expArgs []grammar.ItemType, segments []parseType,
 		case EXPECT:
 			if !p.expectToken(expArgs[0]) {
 				p.addErrors(&errorMsgTemp, []string{segmentErrors[i]})
-				return false, errorMsgTemp, nil
+				return false, errorMsgTemp
 			}
 
 			if len(expArgs) > 1 {
@@ -2007,52 +1780,41 @@ func (p *parser) parsePattern(expArgs []grammar.ItemType, segments []parseType,
 			break
 
 		case ONCE:
-			var pass, nodeTemp = p.parseOne(segments[0], &errorMsgTemp)
-
-			if !pass {
+			if !p.parseOne(segments[0], &errorMsgTemp) {
 				p.addErrors(&errorMsgTemp, []string{segmentErrors[i]})
-				return false, errorMsgTemp, nil
+				return false, errorMsgTemp
 			}
 
 			if len(segments) > 1 {
 				segments = segments[1:] // Pop front of the list
 			}
-
-			addNodeListToList(&nodeLists, makeNodeList(nodeTemp))
 			break
 
 		case OPTIONAL:
-			nodeTemp = p.parseOptional(segments[0], &errorMsgTemp)
+			p.parseOptional(segments[0], &errorMsgTemp)
 
 			if len(segments) > 1 {
 				segments = segments[1:] // Pop front of the list
 			}
-
-			addNodeListToList(&nodeLists, makeNodeList(nodeTemp))
 			break
 
 		case ZEROMORE:
-			nodeListTemp = p.parseZeroOrMore(segments[0], &errorMsgTemp)
+			p.parseZeroOrMore(segments[0], &errorMsgTemp)
 
 			if len(segments) > 1 {
 				segments = segments[1:] // Pop front of the list
 			}
-
-			addNodeListToList(&nodeLists, nodeListTemp)
 			break
 
 		case ONEMORE:
-			var pass, nodeListTemp = p.parseOneOrMore(segments[0], &errorMsgTemp)
-			if !pass {
+			if !p.parseOneOrMore(segments[0], &errorMsgTemp) {
 				p.addErrors(&errorMsgTemp, []string{segmentErrors[i]})
-				return false, errorMsgTemp, nil
+				return false, errorMsgTemp
 			}
 
 			if len(segments) > 1 {
 				segments = segments[1:] // Pop front of the list
 			}
-
-			addNodeListToList(&nodeLists, nodeListTemp)
 			break
 
 		}
@@ -2060,7 +1822,7 @@ func (p *parser) parsePattern(expArgs []grammar.ItemType, segments []parseType,
 		p.reSave()
 	}
 
-	return true, []string{}, nodeLists
+	return true, []string{}
 }
 
 // Attempts to parse at least one pattern (from a list of possible parsePattern
@@ -2069,9 +1831,8 @@ func (p *parser) parsePattern(expArgs []grammar.ItemType, segments []parseType,
 //       important. Hence make sure to avoid any overlapping options by
 //       rearranging options (or by hard coding the options manually)
 // args: A list of arguments to the function parsePattern
-func (p *parser) parseOptions(args ...patternArgs) (bool, []string, [][]ast.Node) {
-	var pass = false // Pattern check bool place holder
-	var nodeLists [][]ast.Node = [][]ast.Node{[]ast.Node{ast.ProgramNode{}.BuildNode(ast.BuildArguments{})}}
+func (p *parser) parseOptions(args ...patternArgs) (bool, []string) {
+	var pass = false           // Pattern check bool place holder
 	var errorMsgs []string     // Error messages returned by each pattern check
 	var errorMsgsTemp []string // Error message place holder
 
@@ -2080,48 +1841,23 @@ func (p *parser) parseOptions(args ...patternArgs) (bool, []string, [][]ast.Node
 	p.saveToken()
 
 	for _, patternArg := range args {
-		pass, errorMsgsTemp, nodeLists = p.parsePattern(patternArg.expArgs, patternArg.checks, patternArg.typs, patternArg.segErrors)
+		pass, errorMsgsTemp = p.parsePattern(patternArg.expArgs, patternArg.checks, patternArg.typs, patternArg.segErrors)
 
 		errorMsgs = append(errorMsgs, errorMsgsTemp...)
 
 		if pass {
-			return true, []string{}, nodeLists
+			return true, []string{}
 		}
 
 		p.backTrack()
 
 	}
 
-	return pass, errorMsgs, nodeLists
+	return pass, errorMsgs
 }
 
 /* ---------------------------------------------------------------------------*/
 
-// True iff int value is within two's compliment 32 bit range
 func intOutOfRange(n float64) bool {
 	return n < -math.Pow(2, 31) || n > math.Pow(2, 31)-1
-}
-
-// Adds a Node to a slice of Nodes iff the node is not a NullChildNode
-func addNodeToList(nodes *[]ast.Node, node ast.Node) {
-	switch t := node.(type) {
-	case ast.NullChildNode:
-		return
-	}
-
-	*nodes = append(*nodes, node)
-}
-
-// Creates a new slice of Nodes and returns it
-func makeNodeList(node ast.Node) []ast.Node {
-	return []ast.Node{node}
-}
-
-// Adds a slice of Nodes to a Slice iff they are not empty
-func addNodeListToList(nodeLists *[][]ast.Node, nodeList []ast.Node) {
-	if nodeList == nil {
-		return
-	}
-
-	*nodeLists = append(*nodeLists, nodeList)
 }
