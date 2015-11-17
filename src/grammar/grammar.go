@@ -51,8 +51,8 @@ type ArrayType struct {
 	BaseType BaseType
 }
 type PairType struct {
-	FstType AllType
-	SndType AllType
+	FstType Type
+	SndType Type
 }
 
 func (arrayType ArrayType) getMainType() AllType {
