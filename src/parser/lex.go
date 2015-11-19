@@ -1,11 +1,15 @@
 package parse
 
 import (
-  	"fmt"
+	"fmt"
+
+	"github.com/wacc_19/src/grammar"
+	//	"grammar"
+	"sort"
+	"strconv"
 	"strings"
-  "strconv"
 	"unicode"
-	"grammar"
+	"unicode/utf8"
 )
 
 // stateFn represents the state of the scanner as a function that returns the next state.
@@ -18,15 +22,17 @@ type Token struct {
 }
 
 type Lexer struct {
-	name    string
-	input   string
-	state   stateFn
-	start   int
-	pos     int
-	width   int
-	lastPos int // position of most recent item returned by nextItem
-	Items   chan Token
-  prog *Program // The parsed program
+	name       string
+	input      string
+	state      stateFn
+	start      int
+	pos        int
+	width      int
+	lastPos    int // position of most recent item returned by nextItem
+	Items      chan Token
+	prog       *Program // The parsed program
+	lastItem   item     // The last item emitted
+	parseError bool
 }
 
 // Returns line number and column number of token in .wacc file
@@ -56,6 +62,7 @@ func (l *Lexer) run() {
 func (l *Lexer) NextItem() Token {
 	item := <-l.Items
 	l.lastPos = item.Pos
+	l.lastItem = item
 	return item
 }
 
@@ -241,7 +248,6 @@ func isAlphaNumeric(r rune) bool {
 	return r == '_' || unicode.IsLetter(r) || unicode.IsDigit(r)
 }
 
-
 func lexIdentifier(l *Lexer) stateFn {
 	if !(unicode.IsLetter(l.peek()) || l.peek() == '_') {
 		l.next()
@@ -307,7 +313,6 @@ func lexNumber(l *Lexer) stateFn {
 	l.emit(grammar.NUMBER)
 	return lexInsideProgram
 }
-
 
 type ItemTypeSlice []grammar.ItemType
 
@@ -378,10 +383,6 @@ func lexInsideProgram(l *Lexer) stateFn {
 	case unicode.IsSpace(r):
 		l.ignore()
 		return lexInsideProgram
-		/*	case r == '\'':
-				return lexChar
-			case r == '"':
-				return lexString  */
 	case '0' <= r && r <= '9':
 		l.backup()
 		return lexNumber
@@ -447,9 +448,9 @@ func (l *Lexer) emit(t grammar.ItemType) {
 func (l *Lexer) errorf(format string, args ...interface{}) stateFn {
 	line, col := l.currLocation()
 	fmt.Printf("At %d:%d :: ", line, col)
-//	fmt.Printf(format, args)
+	// fmt.Printf(format, args)
 	l.Items <- Token{Typ: grammar.ERROR, Lexeme: fmt.Sprintf(format, args...), Pos: l.start}
-  fmt.Println(fmt.Sprintf(format, args...))
+	fmt.Println(fmt.Sprintf(format, args...))
 	return nil
 }
 
@@ -458,6 +459,12 @@ func isAlphaNumeric(r rune) bool {
 	return r == '_' || unicode.IsLetter(r) || unicode.IsDigit(r)
 }
 
+// Error is used by the yacc-generated parser to signal errors.
+func (l *Lexer) Error(e string) {
+	l.parseError = true
+	line, col := l.currLocation()
+	fmt.Printf("%q, %d:%d %s at or near %s\n", l.name, line, col, e, printItem(l.lastItem, true))
+}
 
 // Lex is used by the yacc-generated parser to fetch the next Lexeme.
 func (l *Lexer) Lex(lval *yySymType) int {
