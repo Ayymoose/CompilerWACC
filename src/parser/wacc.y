@@ -3,10 +3,12 @@ package parser
 %}
 
 %union {
+line int
+  null string
   str  string
   prog *Program
-  func *Function
-  funcs []*Function
+  funct *Function
+  functs []*Functions
   stat *Statement
   stats []*Statement
   param *Param
@@ -16,7 +18,7 @@ package parser
   args []*Arg
   arg *Arg
   pairElem *PairElem
-  type *Type
+  typeDef *Type
   base_type *BaseType
   array_type *ArrayType
 pair_type *PairType
@@ -58,13 +60,12 @@ pair_liter *PairLiter
 %token <str> POSITIVE NEGATIVE
 %token <str> TRUE FALSE                                    // Booleans
 %token <str> CHARACTER
-%token <str> NULL
 
 // Nonterminal return types of actions
 
 %type <prog>  program
-%type <funcs> functions
-%type <func>  function
+%type <functs> functions
+%type <funct>  function
 %type <stats> statements
 %type <stat>  statement
 %type <param> param
@@ -75,7 +76,7 @@ pair_liter *PairLiter
 %type <arg> arg
 %type <args> arg_list
 %type <pairElem> pair_elem
-%type <type> type     // NAMING ERRORRRRR????
+%type <typDefe> typeDef
 %type <base_type> base_type
 %type <array_type> array_type
 %type <pair_type> pair_type
@@ -91,6 +92,8 @@ pair_liter *PairLiter
 %type <str_liter> str_liter
 %type <exprs> aexprs
 %type <pair_liter> pair_liter
+%type <null> NULL
+
 
 /* Associativity and Precedence operators specification start -----------*/
 
@@ -114,23 +117,56 @@ program : BEGIN functions statements END
           }
         ;
 
-functions : function { $$ = []*Function{$1} }
-          | functions function { $$ = append($1, $2) }
-		  | /* empty */
+// CORRESPONDING ACTIONS HAVE TO BE IN GOOOO
+
+functions : $$ = NULL
+          | function
+            { $$ = &Functions{$1} }
+          | functions function
+            { $$ = append($1, $2) }
           ;
 
-function : type ident '(' params ')' IS statement END
-           { $$ = &Function{Type : S1, Ident : $2, Params : $4, Stat : $7} }
+function : typeDef ident '(' params ')' IS statement END
+           { $$ = &Function{Type : $1, Ident : $2, Params : $4, Stat : $7} }
          ;
+
+
+
+optional_param_list
+    : param_list { $$.Params = $1.Params }
+    |
+    ;
+
+param_list
+    : param ',' param_list { $$.Params = append([]Param{$1.Param}, $3.Params...) }
+    | param { $$.Params = []Param{$1.Param} }
+    ;
+
+param
+    : type identifier { $$.Param = Param{$1.Position, $1.Type, $2.Expr.(*IdentExpr), $2.Position} }
+    ;
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 params : param
          { $$ = []*Param{$1} }
-       | param ',' paramList     
+       | param ',' paramList
          { $$ = append($1, $2) }
 	   |
        ;
 
-param : type ident
+param : typeDef ident
         { $$ = &Param{Type : $1, Ident : $2} }
       ;
 
@@ -147,7 +183,7 @@ statements : statement    // WHAT IF PROGRAM IS EMPTY ??????
 
 statement : SKIP    // NOT sure what to do with this
             { $$ = &Statement{Ident : $1} }
-          | type ident '=' assign_rhs
+          | typeDef ident '=' assign_rhs
             { $$ = &Statement{Type : $1, Ident : $2, AssignRHS : $4} }
           | assign_lhs '=' assign_rhs
             { $$ = &Statement{AssignLHS : $1, AssignRHS : $3} }
@@ -228,7 +264,7 @@ base_type : INT
             { $$ = &BaseType{$1} }
           ;
 
-array_type : type '[' ']'
+array_type : typeDef '[' ']'
              { $$ = &ArrayType{Type : $1} }
            ;
 
@@ -292,7 +328,7 @@ int_liter : int_sign INTEGER { $$ = &IntLiter{Sign : $1, Num : $2} } ;
 
 int_sign :  POSITIVE { $$ = &IntSign{Sign : $1} }
           | NEGATIVE { $$ = &IntSign{Sign : $1} }
-          | 
+          |
 		  ;
 
 bool_liter : TRUE { $$ = &BoolLiter{Bool : $1}}
@@ -301,7 +337,7 @@ bool_liter : TRUE { $$ = &BoolLiter{Bool : $1}}
 
 str_liter : CHARACTER { &StrLiter{Char : $1} } ;
 
-array_liter : '[' ']' 
+array_liter : '[' ']'
             | '[' aexprs expr ']'
             ;
 
@@ -311,5 +347,3 @@ aexprs : expr { $$ = []*Expr{Expr : $1}}
 	   ;
 
 pair_liter : NULL { $$ = &PairLiter{Val : $1} }
-
-

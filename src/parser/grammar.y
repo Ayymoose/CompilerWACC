@@ -5,8 +5,8 @@ package parser
 %union {
   str  string
   prog *Program
-  func *Function
-  funcs []*Function
+  function *Function
+  functions []*Function
   stat *Statement
   stats []*Statement
   param *Param
@@ -16,7 +16,7 @@ package parser
   args []*Arg
   arg *Arg
   pairElem *PairElem
-  type *Type
+  typeDef *Type
   base_type *BaseType
   array_type *ArrayType
 pair_type *PairType
@@ -64,8 +64,8 @@ pair_liter *PairLiter
 // Nonterminal return types of actions
 
 %type <prog>  program
-%type <funcs> functions
-%type <func>  function
+%type <functions> functions
+%type <function>  function
 %type <stats> statements
 %type <stat>  statement
 %type <param> param
@@ -76,7 +76,7 @@ pair_liter *PairLiter
 %type <arg> arg
 %type <args> arg_list
 %type <pairElem> pair_elem
-%type <type> type     // NAMING ERRORRRRR????
+%type <typeDef> typeDef     // NAMING ERRORRRRR????
 %type <base_type> base_type
 %type <array_type> array_type
 %type <pair_type> pair_type
@@ -116,9 +116,9 @@ program : BEGIN functions statements END
           }
         ;
 
-functions : /* */
-//            { $$ = nil }
-          | function
+functions : // / *  * /
+     // { $$ = nil }
+          function
             {
             $$ = []*Function{$1}
             }
@@ -128,14 +128,15 @@ functions : /* */
             }
           ;
 
-function : type ident '(' params ')' IS statement END
+function : typeDef ident '(' params ')' IS statement END
            {
-           $$ = &Function{Type : S1, Ident : $2, Params : $4, Stat : $7}
+           $$ = &Function{Type : $1, Ident : $2, Params : $4, Stat : $7}
            }
          ;
 
-params : /* */
-         { $$ = nil }
+params :
+// / *  * /
+     // { $$ = nil }
        | param
          {
          $$ = []*Param{$1}
@@ -146,14 +147,15 @@ params : /* */
          }
        ;
 
-param : type ident
+param : typeDef ident
         {
         $$ = &Param{Type : $1, Ident : $2}
         }
       ;
 
-paramList : /* */
-            { $$ = nil}
+paramList :
+// / *  * /
+     // { $$ = nil }
           | ',' param
             {
             $$ = []*Param{$2}
@@ -174,7 +176,7 @@ statement : SKIP    // NOT sure what to do with this
             {
             $$ = &Statement{Ident : $1}
             }
-          | type ident '=' assign_rhs
+          | typeDef ident '=' assign_rhs
             {
             $$ = &Statement{Type : $1, Ident : $2, AssignRHS : $4}
             }
@@ -260,8 +262,9 @@ assign_rhs : expr
              }
            ;
 
-arg_list : /* */
-           { $$ = nil }
+arg_list :
+// / *  * /
+     // { $$ = nil }
          | arg
            {
            $$ = []*Arg{$1}
@@ -288,7 +291,7 @@ pair_elem : FST expr
             }
           ;
 
-type : base_type
+typeDef : base_type
        {
        $$ = &Type{Type : $1}
        }
@@ -312,7 +315,7 @@ base_type : INT
             { $$ = &BaseType{$1} }
           ;
 
-array_type : type '[' ']'
+array_type : typeDef '[' ']'
              {
              $$ = &ArrayType{Type : $1}
              }
@@ -384,8 +387,9 @@ exprs : expr { $$ = []*Expr{Expr : $1}}
 
 int_liter : int_sign INTEGER { $$ = &IntLiter{Sign : $1, Num : $2} } ;
 
-int_sign : /* */
-           { $$ = nil }
+int_sign :
+// / *  * /
+     // { $$ = nil }
           | POSITIVE { $$ = &IntSign{Sign : $1} }
           | NEGATIVE { $$ = &IntSign{Sign : $1} }
           ;
@@ -400,8 +404,10 @@ array_liter : '[' ']' { $$ = nil }
             | '[' aexprs expr ']'
 
 
-aexprs : /* */ { $$ = nil }
-      | expr { $$ = []*Expr{Expr : $1}}
+aexprs :
+      // / *  * /
+           // { $$ = nil }
+| expr { $$ = []*Expr{Expr : $1}}
       | exprs expr { $$ = append($1, $2) }
       ;
 

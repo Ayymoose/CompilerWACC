@@ -1,10 +1,2655 @@
 
-69 terminals, 30 nonterminals
-1 grammar rules, 0/2000 states
-0 shift/reduce, 0 reduce/reduce conflicts reported
-0 working sets used
-memory: parser 0/30000
-0 extra closures
-0 shift entries, 0 exceptions
-0 goto entries
-0 entries saved by goto default
+state 0
+	$accept: .program $end 
+
+	BEGIN  shift 2
+	.  error
+
+	program  goto 1
+
+state 1
+	$accept:  program.$end 
+
+	$end  accept
+	.  error
+
+
+2: shift/reduce conflict (shift 9(0), red'n 4(0)) on INT
+2: shift/reduce conflict (shift 10(0), red'n 4(0)) on BOOL
+2: shift/reduce conflict (shift 11(0), red'n 4(0)) on CHAR
+2: shift/reduce conflict (shift 12(0), red'n 4(0)) on STRING
+2: shift/reduce conflict (shift 13(0), red'n 4(0)) on PAIR
+state 2
+	program:  BEGIN.functions statement END 
+	functions: .    (4)
+
+	INT  shift 9
+	BOOL  shift 10
+	CHAR  shift 11
+	STRING  shift 12
+	PAIR  shift 13
+	.  reduce 4 (src line 104)
+
+	functions  goto 3
+	function  goto 4
+	typeDef  goto 5
+	base_type  goto 6
+	array_type  goto 7
+	pair_type  goto 8
+
+state 3
+	program:  BEGIN functions.statement END 
+
+	BEGIN  shift 25
+	READ  shift 17
+	FREE  shift 18
+	RETURN  shift 19
+	EXIT  shift 20
+	PRINT  shift 21
+	PRINTLN  shift 22
+	IF  shift 23
+	WHILE  shift 24
+	FST  shift 30
+	SND  shift 31
+	INT  shift 9
+	BOOL  shift 10
+	CHAR  shift 11
+	STRING  shift 12
+	PAIR  shift 13
+	IDENTIFIER  shift 29
+	.  error
+
+	statement  goto 14
+	typeDef  goto 15
+	base_type  goto 6
+	array_type  goto 7
+	pair_type  goto 8
+	ident  goto 26
+	assign_lhs  goto 16
+	array_elem  goto 27
+	pair_elem  goto 28
+
+4: shift/reduce conflict (shift 9(0), red'n 3(0)) on INT
+4: shift/reduce conflict (shift 10(0), red'n 3(0)) on BOOL
+4: shift/reduce conflict (shift 11(0), red'n 3(0)) on CHAR
+4: shift/reduce conflict (shift 12(0), red'n 3(0)) on STRING
+4: shift/reduce conflict (shift 13(0), red'n 3(0)) on PAIR
+ 4: reduce/reduce conflict  (red'ns 3 and 4) on BEGIN
+ 4: reduce/reduce conflict  (red'ns 3 and 4) on READ
+ 4: reduce/reduce conflict  (red'ns 3 and 4) on FREE
+ 4: reduce/reduce conflict  (red'ns 3 and 4) on RETURN
+ 4: reduce/reduce conflict  (red'ns 3 and 4) on EXIT
+ 4: reduce/reduce conflict  (red'ns 3 and 4) on PRINT
+ 4: reduce/reduce conflict  (red'ns 3 and 4) on PRINTLN
+ 4: reduce/reduce conflict  (red'ns 3 and 4) on IF
+ 4: reduce/reduce conflict  (red'ns 3 and 4) on WHILE
+ 4: reduce/reduce conflict  (red'ns 3 and 4) on FST
+ 4: reduce/reduce conflict  (red'ns 3 and 4) on SND
+4: shift/reduce conflict (shift 9(0), red'n 4(0)) on INT
+4: shift/reduce conflict (shift 10(0), red'n 4(0)) on BOOL
+4: shift/reduce conflict (shift 11(0), red'n 4(0)) on CHAR
+4: shift/reduce conflict (shift 12(0), red'n 4(0)) on STRING
+4: shift/reduce conflict (shift 13(0), red'n 4(0)) on PAIR
+ 4: reduce/reduce conflict  (red'ns 3 and 4) on IDENTIFIER
+state 4
+	functions:  function.functions 
+	functions:  function.    (3)
+	functions: .    (4)
+
+	INT  shift 9
+	BOOL  shift 10
+	CHAR  shift 11
+	STRING  shift 12
+	PAIR  shift 13
+	.  reduce 3 (src line 103)
+
+	functions  goto 32
+	function  goto 4
+	typeDef  goto 5
+	base_type  goto 6
+	array_type  goto 7
+	pair_type  goto 8
+
+state 5
+	function:  typeDef.ident ( optional_param_list ) IS statement END 
+	array_type:  typeDef.[ ] 
+
+	IDENTIFIER  shift 29
+	[  shift 34
+	.  error
+
+	ident  goto 33
+
+state 6
+	typeDef:  base_type.    (37)
+
+	.  reduce 37 (src line 163)
+
+
+state 7
+	typeDef:  array_type.    (38)
+
+	.  reduce 38 (src line 164)
+
+
+state 8
+	typeDef:  pair_type.    (39)
+
+	.  reduce 39 (src line 165)
+
+
+state 9
+	base_type:  INT.    (40)
+
+	.  reduce 40 (src line 168)
+
+
+state 10
+	base_type:  BOOL.    (41)
+
+	.  reduce 41 (src line 169)
+
+
+state 11
+	base_type:  CHAR.    (42)
+
+	.  reduce 42 (src line 170)
+
+
+state 12
+	base_type:  STRING.    (43)
+
+	.  reduce 43 (src line 171)
+
+
+state 13
+	pair_type:  PAIR.( pair_elem_type , pair_elem_type ) 
+
+	(  shift 35
+	.  error
+
+
+state 14
+	program:  BEGIN functions statement.END 
+	statement:  statement.; statement 
+
+	END  shift 36
+	;  shift 37
+	.  error
+
+
+state 15
+	statement:  typeDef.ident = assign_rhs 
+	array_type:  typeDef.[ ] 
+
+	IDENTIFIER  shift 29
+	[  shift 34
+	.  error
+
+	ident  goto 38
+
+state 16
+	statement:  assign_lhs.= assign_rhs 
+
+	=  shift 39
+	.  error
+
+
+state 17
+	statement:  READ.assign_lhs 
+
+	FST  shift 30
+	SND  shift 31
+	IDENTIFIER  shift 29
+	.  error
+
+	ident  goto 26
+	assign_lhs  goto 40
+	array_elem  goto 27
+	pair_elem  goto 28
+
+state 18
+	statement:  FREE.expr 
+	optional_sign: .    (84)
+
+	IDENTIFIER  shift 29
+	NOT  shift 57
+	NEG  shift 58
+	LEN  shift 59
+	ORD  shift 60
+	CHR  shift 61
+	POSITIVE  shift 62
+	NEGATIVE  shift 63
+	TRUE  shift 52
+	FALSE  shift 53
+	NULL  shift 56
+	(  shift 50
+	’  shift 54
+	"  shift 55
+	.  reduce 84 (src line 245)
+
+	ident  goto 47
+	expr  goto 41
+	array_elem  goto 48
+	int_liter  goto 42
+	bool_liter  goto 43
+	char_liter  goto 44
+	str_liter  goto 45
+	pair_liter  goto 46
+	unaryOp  goto 49
+	optional_sign  goto 51
+
+state 19
+	statement:  RETURN.expr 
+	optional_sign: .    (84)
+
+	IDENTIFIER  shift 29
+	NOT  shift 57
+	NEG  shift 58
+	LEN  shift 59
+	ORD  shift 60
+	CHR  shift 61
+	POSITIVE  shift 62
+	NEGATIVE  shift 63
+	TRUE  shift 52
+	FALSE  shift 53
+	NULL  shift 56
+	(  shift 50
+	’  shift 54
+	"  shift 55
+	.  reduce 84 (src line 245)
+
+	ident  goto 47
+	expr  goto 64
+	array_elem  goto 48
+	int_liter  goto 42
+	bool_liter  goto 43
+	char_liter  goto 44
+	str_liter  goto 45
+	pair_liter  goto 46
+	unaryOp  goto 49
+	optional_sign  goto 51
+
+state 20
+	statement:  EXIT.expr 
+	optional_sign: .    (84)
+
+	IDENTIFIER  shift 29
+	NOT  shift 57
+	NEG  shift 58
+	LEN  shift 59
+	ORD  shift 60
+	CHR  shift 61
+	POSITIVE  shift 62
+	NEGATIVE  shift 63
+	TRUE  shift 52
+	FALSE  shift 53
+	NULL  shift 56
+	(  shift 50
+	’  shift 54
+	"  shift 55
+	.  reduce 84 (src line 245)
+
+	ident  goto 47
+	expr  goto 65
+	array_elem  goto 48
+	int_liter  goto 42
+	bool_liter  goto 43
+	char_liter  goto 44
+	str_liter  goto 45
+	pair_liter  goto 46
+	unaryOp  goto 49
+	optional_sign  goto 51
+
+state 21
+	statement:  PRINT.expr 
+	optional_sign: .    (84)
+
+	IDENTIFIER  shift 29
+	NOT  shift 57
+	NEG  shift 58
+	LEN  shift 59
+	ORD  shift 60
+	CHR  shift 61
+	POSITIVE  shift 62
+	NEGATIVE  shift 63
+	TRUE  shift 52
+	FALSE  shift 53
+	NULL  shift 56
+	(  shift 50
+	’  shift 54
+	"  shift 55
+	.  reduce 84 (src line 245)
+
+	ident  goto 47
+	expr  goto 66
+	array_elem  goto 48
+	int_liter  goto 42
+	bool_liter  goto 43
+	char_liter  goto 44
+	str_liter  goto 45
+	pair_liter  goto 46
+	unaryOp  goto 49
+	optional_sign  goto 51
+
+state 22
+	statement:  PRINTLN.expr 
+	optional_sign: .    (84)
+
+	IDENTIFIER  shift 29
+	NOT  shift 57
+	NEG  shift 58
+	LEN  shift 59
+	ORD  shift 60
+	CHR  shift 61
+	POSITIVE  shift 62
+	NEGATIVE  shift 63
+	TRUE  shift 52
+	FALSE  shift 53
+	NULL  shift 56
+	(  shift 50
+	’  shift 54
+	"  shift 55
+	.  reduce 84 (src line 245)
+
+	ident  goto 47
+	expr  goto 67
+	array_elem  goto 48
+	int_liter  goto 42
+	bool_liter  goto 43
+	char_liter  goto 44
+	str_liter  goto 45
+	pair_liter  goto 46
+	unaryOp  goto 49
+	optional_sign  goto 51
+
+state 23
+	statement:  IF.expr THEN statement ELSE statement FI 
+	optional_sign: .    (84)
+
+	IDENTIFIER  shift 29
+	NOT  shift 57
+	NEG  shift 58
+	LEN  shift 59
+	ORD  shift 60
+	CHR  shift 61
+	POSITIVE  shift 62
+	NEGATIVE  shift 63
+	TRUE  shift 52
+	FALSE  shift 53
+	NULL  shift 56
+	(  shift 50
+	’  shift 54
+	"  shift 55
+	.  reduce 84 (src line 245)
+
+	ident  goto 47
+	expr  goto 68
+	array_elem  goto 48
+	int_liter  goto 42
+	bool_liter  goto 43
+	char_liter  goto 44
+	str_liter  goto 45
+	pair_liter  goto 46
+	unaryOp  goto 49
+	optional_sign  goto 51
+
+state 24
+	statement:  WHILE.expr DO statement DONE 
+	optional_sign: .    (84)
+
+	IDENTIFIER  shift 29
+	NOT  shift 57
+	NEG  shift 58
+	LEN  shift 59
+	ORD  shift 60
+	CHR  shift 61
+	POSITIVE  shift 62
+	NEGATIVE  shift 63
+	TRUE  shift 52
+	FALSE  shift 53
+	NULL  shift 56
+	(  shift 50
+	’  shift 54
+	"  shift 55
+	.  reduce 84 (src line 245)
+
+	ident  goto 47
+	expr  goto 69
+	array_elem  goto 48
+	int_liter  goto 42
+	bool_liter  goto 43
+	char_liter  goto 44
+	str_liter  goto 45
+	pair_liter  goto 46
+	unaryOp  goto 49
+	optional_sign  goto 51
+
+state 25
+	statement:  BEGIN.statement END 
+
+	BEGIN  shift 25
+	READ  shift 17
+	FREE  shift 18
+	RETURN  shift 19
+	EXIT  shift 20
+	PRINT  shift 21
+	PRINTLN  shift 22
+	IF  shift 23
+	WHILE  shift 24
+	FST  shift 30
+	SND  shift 31
+	INT  shift 9
+	BOOL  shift 10
+	CHAR  shift 11
+	STRING  shift 12
+	PAIR  shift 13
+	IDENTIFIER  shift 29
+	.  error
+
+	statement  goto 70
+	typeDef  goto 15
+	base_type  goto 6
+	array_type  goto 7
+	pair_type  goto 8
+	ident  goto 26
+	assign_lhs  goto 16
+	array_elem  goto 27
+	pair_elem  goto 28
+
+state 26
+	assign_lhs:  ident.    (23)
+	array_elem:  ident.expr_list 
+
+	[  shift 72
+	.  reduce 23 (src line 137)
+
+	expr_list  goto 71
+
+state 27
+	assign_lhs:  array_elem.    (24)
+
+	.  reduce 24 (src line 138)
+
+
+state 28
+	assign_lhs:  pair_elem.    (25)
+
+	.  reduce 25 (src line 139)
+
+
+state 29
+	ident:  IDENTIFIER.    (77)
+
+	.  reduce 77 (src line 230)
+
+
+state 30
+	pair_elem:  FST.expr 
+	optional_sign: .    (84)
+
+	IDENTIFIER  shift 29
+	NOT  shift 57
+	NEG  shift 58
+	LEN  shift 59
+	ORD  shift 60
+	CHR  shift 61
+	POSITIVE  shift 62
+	NEGATIVE  shift 63
+	TRUE  shift 52
+	FALSE  shift 53
+	NULL  shift 56
+	(  shift 50
+	’  shift 54
+	"  shift 55
+	.  reduce 84 (src line 245)
+
+	ident  goto 47
+	expr  goto 73
+	array_elem  goto 48
+	int_liter  goto 42
+	bool_liter  goto 43
+	char_liter  goto 44
+	str_liter  goto 45
+	pair_liter  goto 46
+	unaryOp  goto 49
+	optional_sign  goto 51
+
+state 31
+	pair_elem:  SND.expr 
+	optional_sign: .    (84)
+
+	IDENTIFIER  shift 29
+	NOT  shift 57
+	NEG  shift 58
+	LEN  shift 59
+	ORD  shift 60
+	CHR  shift 61
+	POSITIVE  shift 62
+	NEGATIVE  shift 63
+	TRUE  shift 52
+	FALSE  shift 53
+	NULL  shift 56
+	(  shift 50
+	’  shift 54
+	"  shift 55
+	.  reduce 84 (src line 245)
+
+	ident  goto 47
+	expr  goto 74
+	array_elem  goto 48
+	int_liter  goto 42
+	bool_liter  goto 43
+	char_liter  goto 44
+	str_liter  goto 45
+	pair_liter  goto 46
+	unaryOp  goto 49
+	optional_sign  goto 51
+
+state 32
+	functions:  function functions.    (2)
+
+	.  reduce 2 (src line 102)
+
+
+state 33
+	function:  typeDef ident.( optional_param_list ) IS statement END 
+
+	(  shift 75
+	.  error
+
+
+state 34
+	array_type:  typeDef [.] 
+
+	]  shift 76
+	.  error
+
+
+state 35
+	pair_type:  PAIR (.pair_elem_type , pair_elem_type ) 
+
+	INT  shift 9
+	BOOL  shift 10
+	CHAR  shift 11
+	STRING  shift 12
+	PAIR  shift 80
+	.  error
+
+	typeDef  goto 81
+	base_type  goto 78
+	array_type  goto 79
+	pair_type  goto 8
+	pair_elem_type  goto 77
+
+state 36
+	program:  BEGIN functions statement END.    (1)
+
+	.  reduce 1 (src line 96)
+
+
+state 37
+	statement:  statement ;.statement 
+
+	BEGIN  shift 25
+	READ  shift 17
+	FREE  shift 18
+	RETURN  shift 19
+	EXIT  shift 20
+	PRINT  shift 21
+	PRINTLN  shift 22
+	IF  shift 23
+	WHILE  shift 24
+	FST  shift 30
+	SND  shift 31
+	INT  shift 9
+	BOOL  shift 10
+	CHAR  shift 11
+	STRING  shift 12
+	PAIR  shift 13
+	IDENTIFIER  shift 29
+	.  error
+
+	statement  goto 82
+	typeDef  goto 15
+	base_type  goto 6
+	array_type  goto 7
+	pair_type  goto 8
+	ident  goto 26
+	assign_lhs  goto 16
+	array_elem  goto 27
+	pair_elem  goto 28
+
+state 38
+	statement:  typeDef ident.= assign_rhs 
+
+	=  shift 83
+	.  error
+
+
+state 39
+	statement:  assign_lhs =.assign_rhs 
+	optional_sign: .    (84)
+
+	NEW_PAIR  shift 87
+	CALL  shift 89
+	FST  shift 30
+	SND  shift 31
+	IDENTIFIER  shift 29
+	NOT  shift 57
+	NEG  shift 58
+	LEN  shift 59
+	ORD  shift 60
+	CHR  shift 61
+	POSITIVE  shift 62
+	NEGATIVE  shift 63
+	TRUE  shift 52
+	FALSE  shift 53
+	NULL  shift 56
+	(  shift 50
+	[  shift 90
+	’  shift 54
+	"  shift 55
+	.  reduce 84 (src line 245)
+
+	ident  goto 47
+	assign_rhs  goto 84
+	expr  goto 85
+	array_elem  goto 48
+	pair_elem  goto 88
+	array_liter  goto 86
+	int_liter  goto 42
+	bool_liter  goto 43
+	char_liter  goto 44
+	str_liter  goto 45
+	pair_liter  goto 46
+	unaryOp  goto 49
+	optional_sign  goto 51
+
+state 40
+	statement:  READ assign_lhs.    (13)
+
+	.  reduce 13 (src line 125)
+
+
+state 41
+	statement:  FREE expr.    (14)
+	expr:  expr.!= expr 
+	expr:  expr.== expr 
+	expr:  expr.>= expr 
+	expr:  expr.<= expr 
+	expr:  expr.> expr 
+	expr:  expr.< expr 
+	expr:  expr.binaryOp expr 
+
+	MULT  shift 98
+	DIV  shift 99
+	MOD  shift 100
+	ADD  shift 101
+	SUB  shift 102
+	AND  shift 103
+	OR  shift 104
+	>=  shift 93
+	<=  shift 94
+	>  shift 95
+	<  shift 96
+	!=  shift 91
+	==  shift 92
+	.  reduce 14 (src line 126)
+
+	binaryOp  goto 97
+
+state 42
+	expr:  int_liter.    (49)
+
+	.  reduce 49 (src line 185)
+
+
+state 43
+	expr:  bool_liter.    (50)
+
+	.  reduce 50 (src line 186)
+
+
+state 44
+	expr:  char_liter.    (51)
+
+	.  reduce 51 (src line 187)
+
+
+state 45
+	expr:  str_liter.    (52)
+
+	.  reduce 52 (src line 188)
+
+
+state 46
+	expr:  pair_liter.    (53)
+
+	.  reduce 53 (src line 189)
+
+
+47: shift/reduce conflict (shift 72(0), red'n 54(0)) on [
+state 47
+	expr:  ident.    (54)
+	array_elem:  ident.expr_list 
+
+	[  shift 72
+	.  reduce 54 (src line 190)
+
+	expr_list  goto 71
+
+state 48
+	expr:  array_elem.    (55)
+
+	.  reduce 55 (src line 191)
+
+
+state 49
+	expr:  unaryOp.expr 
+	optional_sign: .    (84)
+
+	IDENTIFIER  shift 29
+	NOT  shift 57
+	NEG  shift 58
+	LEN  shift 59
+	ORD  shift 60
+	CHR  shift 61
+	POSITIVE  shift 62
+	NEGATIVE  shift 63
+	TRUE  shift 52
+	FALSE  shift 53
+	NULL  shift 56
+	(  shift 50
+	’  shift 54
+	"  shift 55
+	.  reduce 84 (src line 245)
+
+	ident  goto 47
+	expr  goto 105
+	array_elem  goto 48
+	int_liter  goto 42
+	bool_liter  goto 43
+	char_liter  goto 44
+	str_liter  goto 45
+	pair_liter  goto 46
+	unaryOp  goto 49
+	optional_sign  goto 51
+
+state 50
+	expr:  (.expr ) 
+	optional_sign: .    (84)
+
+	IDENTIFIER  shift 29
+	NOT  shift 57
+	NEG  shift 58
+	LEN  shift 59
+	ORD  shift 60
+	CHR  shift 61
+	POSITIVE  shift 62
+	NEGATIVE  shift 63
+	TRUE  shift 52
+	FALSE  shift 53
+	NULL  shift 56
+	(  shift 50
+	’  shift 54
+	"  shift 55
+	.  reduce 84 (src line 245)
+
+	ident  goto 47
+	expr  goto 106
+	array_elem  goto 48
+	int_liter  goto 42
+	bool_liter  goto 43
+	char_liter  goto 44
+	str_liter  goto 45
+	pair_liter  goto 46
+	unaryOp  goto 49
+	optional_sign  goto 51
+
+state 51
+	int_liter:  optional_sign.INTEGER 
+
+	INTEGER  shift 107
+	.  error
+
+
+state 52
+	bool_liter:  TRUE.    (85)
+
+	.  reduce 85 (src line 248)
+
+
+state 53
+	bool_liter:  FALSE.    (86)
+
+	.  reduce 86 (src line 249)
+
+
+state 54
+	char_liter:  ’.character ’ 
+
+	CHARACTER  shift 109
+	.  error
+
+	character  goto 108
+
+state 55
+	str_liter:  \".characters \" 
+
+	CHARACTER  shift 109
+	.  error
+
+	character  goto 111
+	characters  goto 110
+
+state 56
+	pair_liter:  NULL.    (93)
+
+	.  reduce 93 (src line 267)
+
+
+state 57
+	unaryOp:  NOT.    (65)
+
+	.  reduce 65 (src line 214)
+
+
+state 58
+	unaryOp:  NEG.    (66)
+
+	.  reduce 66 (src line 215)
+
+
+state 59
+	unaryOp:  LEN.    (67)
+
+	.  reduce 67 (src line 216)
+
+
+state 60
+	unaryOp:  ORD.    (68)
+
+	.  reduce 68 (src line 217)
+
+
+state 61
+	unaryOp:  CHR.    (69)
+
+	.  reduce 69 (src line 218)
+
+
+state 62
+	optional_sign:  POSITIVE.    (82)
+
+	.  reduce 82 (src line 243)
+
+
+state 63
+	optional_sign:  NEGATIVE.    (83)
+
+	.  reduce 83 (src line 244)
+
+
+state 64
+	statement:  RETURN expr.    (15)
+	expr:  expr.!= expr 
+	expr:  expr.== expr 
+	expr:  expr.>= expr 
+	expr:  expr.<= expr 
+	expr:  expr.> expr 
+	expr:  expr.< expr 
+	expr:  expr.binaryOp expr 
+
+	MULT  shift 98
+	DIV  shift 99
+	MOD  shift 100
+	ADD  shift 101
+	SUB  shift 102
+	AND  shift 103
+	OR  shift 104
+	>=  shift 93
+	<=  shift 94
+	>  shift 95
+	<  shift 96
+	!=  shift 91
+	==  shift 92
+	.  reduce 15 (src line 127)
+
+	binaryOp  goto 97
+
+state 65
+	statement:  EXIT expr.    (16)
+	expr:  expr.!= expr 
+	expr:  expr.== expr 
+	expr:  expr.>= expr 
+	expr:  expr.<= expr 
+	expr:  expr.> expr 
+	expr:  expr.< expr 
+	expr:  expr.binaryOp expr 
+
+	MULT  shift 98
+	DIV  shift 99
+	MOD  shift 100
+	ADD  shift 101
+	SUB  shift 102
+	AND  shift 103
+	OR  shift 104
+	>=  shift 93
+	<=  shift 94
+	>  shift 95
+	<  shift 96
+	!=  shift 91
+	==  shift 92
+	.  reduce 16 (src line 128)
+
+	binaryOp  goto 97
+
+state 66
+	statement:  PRINT expr.    (17)
+	expr:  expr.!= expr 
+	expr:  expr.== expr 
+	expr:  expr.>= expr 
+	expr:  expr.<= expr 
+	expr:  expr.> expr 
+	expr:  expr.< expr 
+	expr:  expr.binaryOp expr 
+
+	MULT  shift 98
+	DIV  shift 99
+	MOD  shift 100
+	ADD  shift 101
+	SUB  shift 102
+	AND  shift 103
+	OR  shift 104
+	>=  shift 93
+	<=  shift 94
+	>  shift 95
+	<  shift 96
+	!=  shift 91
+	==  shift 92
+	.  reduce 17 (src line 129)
+
+	binaryOp  goto 97
+
+state 67
+	statement:  PRINTLN expr.    (18)
+	expr:  expr.!= expr 
+	expr:  expr.== expr 
+	expr:  expr.>= expr 
+	expr:  expr.<= expr 
+	expr:  expr.> expr 
+	expr:  expr.< expr 
+	expr:  expr.binaryOp expr 
+
+	MULT  shift 98
+	DIV  shift 99
+	MOD  shift 100
+	ADD  shift 101
+	SUB  shift 102
+	AND  shift 103
+	OR  shift 104
+	>=  shift 93
+	<=  shift 94
+	>  shift 95
+	<  shift 96
+	!=  shift 91
+	==  shift 92
+	.  reduce 18 (src line 130)
+
+	binaryOp  goto 97
+
+state 68
+	statement:  IF expr.THEN statement ELSE statement FI 
+	expr:  expr.!= expr 
+	expr:  expr.== expr 
+	expr:  expr.>= expr 
+	expr:  expr.<= expr 
+	expr:  expr.> expr 
+	expr:  expr.< expr 
+	expr:  expr.binaryOp expr 
+
+	THEN  shift 112
+	MULT  shift 98
+	DIV  shift 99
+	MOD  shift 100
+	ADD  shift 101
+	SUB  shift 102
+	AND  shift 103
+	OR  shift 104
+	>=  shift 93
+	<=  shift 94
+	>  shift 95
+	<  shift 96
+	!=  shift 91
+	==  shift 92
+	.  error
+
+	binaryOp  goto 97
+
+state 69
+	statement:  WHILE expr.DO statement DONE 
+	expr:  expr.!= expr 
+	expr:  expr.== expr 
+	expr:  expr.>= expr 
+	expr:  expr.<= expr 
+	expr:  expr.> expr 
+	expr:  expr.< expr 
+	expr:  expr.binaryOp expr 
+
+	DO  shift 113
+	MULT  shift 98
+	DIV  shift 99
+	MOD  shift 100
+	ADD  shift 101
+	SUB  shift 102
+	AND  shift 103
+	OR  shift 104
+	>=  shift 93
+	<=  shift 94
+	>  shift 95
+	<  shift 96
+	!=  shift 91
+	==  shift 92
+	.  error
+
+	binaryOp  goto 97
+
+state 70
+	statement:  BEGIN statement.END 
+	statement:  statement.; statement 
+
+	END  shift 114
+	;  shift 37
+	.  error
+
+
+state 71
+	array_elem:  ident expr_list.    (78)
+
+	.  reduce 78 (src line 232)
+
+
+state 72
+	expr_list:  [.expr expr_list ] 
+	expr_list:  [.expr ] 
+	optional_sign: .    (84)
+
+	IDENTIFIER  shift 29
+	NOT  shift 57
+	NEG  shift 58
+	LEN  shift 59
+	ORD  shift 60
+	CHR  shift 61
+	POSITIVE  shift 62
+	NEGATIVE  shift 63
+	TRUE  shift 52
+	FALSE  shift 53
+	NULL  shift 56
+	(  shift 50
+	’  shift 54
+	"  shift 55
+	.  reduce 84 (src line 245)
+
+	ident  goto 47
+	expr  goto 115
+	array_elem  goto 48
+	int_liter  goto 42
+	bool_liter  goto 43
+	char_liter  goto 44
+	str_liter  goto 45
+	pair_liter  goto 46
+	unaryOp  goto 49
+	optional_sign  goto 51
+
+state 73
+	pair_elem:  FST expr.    (35)
+	expr:  expr.!= expr 
+	expr:  expr.== expr 
+	expr:  expr.>= expr 
+	expr:  expr.<= expr 
+	expr:  expr.> expr 
+	expr:  expr.< expr 
+	expr:  expr.binaryOp expr 
+
+	MULT  shift 98
+	DIV  shift 99
+	MOD  shift 100
+	ADD  shift 101
+	SUB  shift 102
+	AND  shift 103
+	OR  shift 104
+	>=  shift 93
+	<=  shift 94
+	>  shift 95
+	<  shift 96
+	!=  shift 91
+	==  shift 92
+	.  reduce 35 (src line 159)
+
+	binaryOp  goto 97
+
+state 74
+	pair_elem:  SND expr.    (36)
+	expr:  expr.!= expr 
+	expr:  expr.== expr 
+	expr:  expr.>= expr 
+	expr:  expr.<= expr 
+	expr:  expr.> expr 
+	expr:  expr.< expr 
+	expr:  expr.binaryOp expr 
+
+	MULT  shift 98
+	DIV  shift 99
+	MOD  shift 100
+	ADD  shift 101
+	SUB  shift 102
+	AND  shift 103
+	OR  shift 104
+	>=  shift 93
+	<=  shift 94
+	>  shift 95
+	<  shift 96
+	!=  shift 91
+	==  shift 92
+	.  reduce 36 (src line 160)
+
+	binaryOp  goto 97
+
+state 75
+	function:  typeDef ident (.optional_param_list ) IS statement END 
+	optional_param_list: .    (7)
+
+	INT  shift 9
+	BOOL  shift 10
+	CHAR  shift 11
+	STRING  shift 12
+	PAIR  shift 13
+	.  reduce 7 (src line 112)
+
+	typeDef  goto 119
+	base_type  goto 6
+	array_type  goto 7
+	pair_type  goto 8
+	optional_param_list  goto 116
+	param_list  goto 117
+	param  goto 118
+
+state 76
+	array_type:  typeDef [ ].    (44)
+
+	.  reduce 44 (src line 174)
+
+
+state 77
+	pair_type:  PAIR ( pair_elem_type., pair_elem_type ) 
+
+	,  shift 120
+	.  error
+
+
+state 78
+	typeDef:  base_type.    (37)
+	pair_elem_type:  base_type.    (46)
+
+	[  reduce 37 (src line 163)
+	.  reduce 46 (src line 180)
+
+
+state 79
+	typeDef:  array_type.    (38)
+	pair_elem_type:  array_type.    (47)
+
+	[  reduce 38 (src line 164)
+	.  reduce 47 (src line 181)
+
+
+state 80
+	pair_type:  PAIR.( pair_elem_type , pair_elem_type ) 
+	pair_elem_type:  PAIR.    (48)
+
+	(  shift 35
+	.  reduce 48 (src line 182)
+
+
+state 81
+	array_type:  typeDef.[ ] 
+
+	[  shift 34
+	.  error
+
+
+82: shift/reduce conflict (shift 37(0), red'n 22(0)) on ;
+state 82
+	statement:  statement.; statement 
+	statement:  statement ; statement.    (22)
+
+	;  shift 37
+	.  reduce 22 (src line 134)
+
+
+state 83
+	statement:  typeDef ident =.assign_rhs 
+	optional_sign: .    (84)
+
+	NEW_PAIR  shift 87
+	CALL  shift 89
+	FST  shift 30
+	SND  shift 31
+	IDENTIFIER  shift 29
+	NOT  shift 57
+	NEG  shift 58
+	LEN  shift 59
+	ORD  shift 60
+	CHR  shift 61
+	POSITIVE  shift 62
+	NEGATIVE  shift 63
+	TRUE  shift 52
+	FALSE  shift 53
+	NULL  shift 56
+	(  shift 50
+	[  shift 90
+	’  shift 54
+	"  shift 55
+	.  reduce 84 (src line 245)
+
+	ident  goto 47
+	assign_rhs  goto 121
+	expr  goto 85
+	array_elem  goto 48
+	pair_elem  goto 88
+	array_liter  goto 86
+	int_liter  goto 42
+	bool_liter  goto 43
+	char_liter  goto 44
+	str_liter  goto 45
+	pair_liter  goto 46
+	unaryOp  goto 49
+	optional_sign  goto 51
+
+state 84
+	statement:  assign_lhs = assign_rhs.    (12)
+
+	.  reduce 12 (src line 124)
+
+
+state 85
+	assign_rhs:  expr.    (26)
+	expr:  expr.!= expr 
+	expr:  expr.== expr 
+	expr:  expr.>= expr 
+	expr:  expr.<= expr 
+	expr:  expr.> expr 
+	expr:  expr.< expr 
+	expr:  expr.binaryOp expr 
+
+	MULT  shift 98
+	DIV  shift 99
+	MOD  shift 100
+	ADD  shift 101
+	SUB  shift 102
+	AND  shift 103
+	OR  shift 104
+	>=  shift 93
+	<=  shift 94
+	>  shift 95
+	<  shift 96
+	!=  shift 91
+	==  shift 92
+	.  reduce 26 (src line 142)
+
+	binaryOp  goto 97
+
+state 86
+	assign_rhs:  array_liter.    (27)
+
+	.  reduce 27 (src line 143)
+
+
+state 87
+	assign_rhs:  NEW_PAIR.( expr , expr ) 
+
+	(  shift 122
+	.  error
+
+
+state 88
+	assign_rhs:  pair_elem.    (29)
+
+	.  reduce 29 (src line 145)
+
+
+state 89
+	assign_rhs:  CALL.ident ( optional_arg_list ) 
+
+	IDENTIFIER  shift 29
+	.  error
+
+	ident  goto 123
+
+state 90
+	array_liter:  [.expr optional_expr_list ] 
+	optional_sign: .    (84)
+
+	IDENTIFIER  shift 29
+	NOT  shift 57
+	NEG  shift 58
+	LEN  shift 59
+	ORD  shift 60
+	CHR  shift 61
+	POSITIVE  shift 62
+	NEGATIVE  shift 63
+	TRUE  shift 52
+	FALSE  shift 53
+	NULL  shift 56
+	(  shift 50
+	’  shift 54
+	"  shift 55
+	.  reduce 84 (src line 245)
+
+	ident  goto 47
+	expr  goto 124
+	array_elem  goto 48
+	int_liter  goto 42
+	bool_liter  goto 43
+	char_liter  goto 44
+	str_liter  goto 45
+	pair_liter  goto 46
+	unaryOp  goto 49
+	optional_sign  goto 51
+
+state 91
+	expr:  expr !=.expr 
+	optional_sign: .    (84)
+
+	IDENTIFIER  shift 29
+	NOT  shift 57
+	NEG  shift 58
+	LEN  shift 59
+	ORD  shift 60
+	CHR  shift 61
+	POSITIVE  shift 62
+	NEGATIVE  shift 63
+	TRUE  shift 52
+	FALSE  shift 53
+	NULL  shift 56
+	(  shift 50
+	’  shift 54
+	"  shift 55
+	.  reduce 84 (src line 245)
+
+	ident  goto 47
+	expr  goto 125
+	array_elem  goto 48
+	int_liter  goto 42
+	bool_liter  goto 43
+	char_liter  goto 44
+	str_liter  goto 45
+	pair_liter  goto 46
+	unaryOp  goto 49
+	optional_sign  goto 51
+
+state 92
+	expr:  expr ==.expr 
+	optional_sign: .    (84)
+
+	IDENTIFIER  shift 29
+	NOT  shift 57
+	NEG  shift 58
+	LEN  shift 59
+	ORD  shift 60
+	CHR  shift 61
+	POSITIVE  shift 62
+	NEGATIVE  shift 63
+	TRUE  shift 52
+	FALSE  shift 53
+	NULL  shift 56
+	(  shift 50
+	’  shift 54
+	"  shift 55
+	.  reduce 84 (src line 245)
+
+	ident  goto 47
+	expr  goto 126
+	array_elem  goto 48
+	int_liter  goto 42
+	bool_liter  goto 43
+	char_liter  goto 44
+	str_liter  goto 45
+	pair_liter  goto 46
+	unaryOp  goto 49
+	optional_sign  goto 51
+
+state 93
+	expr:  expr >=.expr 
+	optional_sign: .    (84)
+
+	IDENTIFIER  shift 29
+	NOT  shift 57
+	NEG  shift 58
+	LEN  shift 59
+	ORD  shift 60
+	CHR  shift 61
+	POSITIVE  shift 62
+	NEGATIVE  shift 63
+	TRUE  shift 52
+	FALSE  shift 53
+	NULL  shift 56
+	(  shift 50
+	’  shift 54
+	"  shift 55
+	.  reduce 84 (src line 245)
+
+	ident  goto 47
+	expr  goto 127
+	array_elem  goto 48
+	int_liter  goto 42
+	bool_liter  goto 43
+	char_liter  goto 44
+	str_liter  goto 45
+	pair_liter  goto 46
+	unaryOp  goto 49
+	optional_sign  goto 51
+
+state 94
+	expr:  expr <=.expr 
+	optional_sign: .    (84)
+
+	IDENTIFIER  shift 29
+	NOT  shift 57
+	NEG  shift 58
+	LEN  shift 59
+	ORD  shift 60
+	CHR  shift 61
+	POSITIVE  shift 62
+	NEGATIVE  shift 63
+	TRUE  shift 52
+	FALSE  shift 53
+	NULL  shift 56
+	(  shift 50
+	’  shift 54
+	"  shift 55
+	.  reduce 84 (src line 245)
+
+	ident  goto 47
+	expr  goto 128
+	array_elem  goto 48
+	int_liter  goto 42
+	bool_liter  goto 43
+	char_liter  goto 44
+	str_liter  goto 45
+	pair_liter  goto 46
+	unaryOp  goto 49
+	optional_sign  goto 51
+
+state 95
+	expr:  expr >.expr 
+	optional_sign: .    (84)
+
+	IDENTIFIER  shift 29
+	NOT  shift 57
+	NEG  shift 58
+	LEN  shift 59
+	ORD  shift 60
+	CHR  shift 61
+	POSITIVE  shift 62
+	NEGATIVE  shift 63
+	TRUE  shift 52
+	FALSE  shift 53
+	NULL  shift 56
+	(  shift 50
+	’  shift 54
+	"  shift 55
+	.  reduce 84 (src line 245)
+
+	ident  goto 47
+	expr  goto 129
+	array_elem  goto 48
+	int_liter  goto 42
+	bool_liter  goto 43
+	char_liter  goto 44
+	str_liter  goto 45
+	pair_liter  goto 46
+	unaryOp  goto 49
+	optional_sign  goto 51
+
+state 96
+	expr:  expr <.expr 
+	optional_sign: .    (84)
+
+	IDENTIFIER  shift 29
+	NOT  shift 57
+	NEG  shift 58
+	LEN  shift 59
+	ORD  shift 60
+	CHR  shift 61
+	POSITIVE  shift 62
+	NEGATIVE  shift 63
+	TRUE  shift 52
+	FALSE  shift 53
+	NULL  shift 56
+	(  shift 50
+	’  shift 54
+	"  shift 55
+	.  reduce 84 (src line 245)
+
+	ident  goto 47
+	expr  goto 130
+	array_elem  goto 48
+	int_liter  goto 42
+	bool_liter  goto 43
+	char_liter  goto 44
+	str_liter  goto 45
+	pair_liter  goto 46
+	unaryOp  goto 49
+	optional_sign  goto 51
+
+state 97
+	expr:  expr binaryOp.expr 
+	optional_sign: .    (84)
+
+	IDENTIFIER  shift 29
+	NOT  shift 57
+	NEG  shift 58
+	LEN  shift 59
+	ORD  shift 60
+	CHR  shift 61
+	POSITIVE  shift 62
+	NEGATIVE  shift 63
+	TRUE  shift 52
+	FALSE  shift 53
+	NULL  shift 56
+	(  shift 50
+	’  shift 54
+	"  shift 55
+	.  reduce 84 (src line 245)
+
+	ident  goto 47
+	expr  goto 131
+	array_elem  goto 48
+	int_liter  goto 42
+	bool_liter  goto 43
+	char_liter  goto 44
+	str_liter  goto 45
+	pair_liter  goto 46
+	unaryOp  goto 49
+	optional_sign  goto 51
+
+state 98
+	binaryOp:  MULT.    (70)
+
+	.  reduce 70 (src line 221)
+
+
+state 99
+	binaryOp:  DIV.    (71)
+
+	.  reduce 71 (src line 222)
+
+
+state 100
+	binaryOp:  MOD.    (72)
+
+	.  reduce 72 (src line 223)
+
+
+state 101
+	binaryOp:  ADD.    (73)
+
+	.  reduce 73 (src line 224)
+
+
+state 102
+	binaryOp:  SUB.    (74)
+
+	.  reduce 74 (src line 225)
+
+
+state 103
+	binaryOp:  AND.    (75)
+
+	.  reduce 75 (src line 226)
+
+
+state 104
+	binaryOp:  OR.    (76)
+
+	.  reduce 76 (src line 227)
+
+
+105: shift/reduce conflict (shift 98(0), red'n 56(0)) on MULT
+105: shift/reduce conflict (shift 99(0), red'n 56(0)) on DIV
+105: shift/reduce conflict (shift 100(0), red'n 56(0)) on MOD
+105: shift/reduce conflict (shift 101(0), red'n 56(0)) on ADD
+105: shift/reduce conflict (shift 102(0), red'n 56(0)) on SUB
+105: shift/reduce conflict (shift 103(0), red'n 56(0)) on AND
+105: shift/reduce conflict (shift 104(0), red'n 56(0)) on OR
+105: shift/reduce conflict (shift 93(3), red'n 56(0)) on >=
+105: shift/reduce conflict (shift 94(4), red'n 56(0)) on <=
+105: shift/reduce conflict (shift 95(3), red'n 56(0)) on >
+105: shift/reduce conflict (shift 96(4), red'n 56(0)) on <
+105: shift/reduce conflict (shift 91(4), red'n 56(0)) on !=
+105: shift/reduce conflict (shift 92(4), red'n 56(0)) on ==
+state 105
+	expr:  unaryOp expr.    (56)
+	expr:  expr.!= expr 
+	expr:  expr.== expr 
+	expr:  expr.>= expr 
+	expr:  expr.<= expr 
+	expr:  expr.> expr 
+	expr:  expr.< expr 
+	expr:  expr.binaryOp expr 
+
+	MULT  shift 98
+	DIV  shift 99
+	MOD  shift 100
+	ADD  shift 101
+	SUB  shift 102
+	AND  shift 103
+	OR  shift 104
+	>=  shift 93
+	<=  shift 94
+	>  shift 95
+	<  shift 96
+	!=  shift 91
+	==  shift 92
+	.  reduce 56 (src line 202)
+
+	binaryOp  goto 97
+
+state 106
+	expr:  expr.!= expr 
+	expr:  expr.== expr 
+	expr:  expr.>= expr 
+	expr:  expr.<= expr 
+	expr:  expr.> expr 
+	expr:  expr.< expr 
+	expr:  expr.binaryOp expr 
+	expr:  ( expr.) 
+
+	MULT  shift 98
+	DIV  shift 99
+	MOD  shift 100
+	ADD  shift 101
+	SUB  shift 102
+	AND  shift 103
+	OR  shift 104
+	>=  shift 93
+	<=  shift 94
+	>  shift 95
+	<  shift 96
+	!=  shift 91
+	==  shift 92
+	)  shift 132
+	.  error
+
+	binaryOp  goto 97
+
+state 107
+	int_liter:  optional_sign INTEGER.    (81)
+
+	.  reduce 81 (src line 240)
+
+
+state 108
+	char_liter:  ’ character.’ 
+
+	’  shift 133
+	.  error
+
+
+state 109
+	character:  CHARACTER.    (91)
+
+	.  reduce 91 (src line 262)
+
+
+state 110
+	str_liter:  \" characters.\" 
+
+	"  shift 134
+	.  error
+
+
+state 111
+	characters:  character.characters 
+	characters:  character.    (90)
+
+	CHARACTER  shift 109
+	.  reduce 90 (src line 259)
+
+	character  goto 111
+	characters  goto 135
+
+state 112
+	statement:  IF expr THEN.statement ELSE statement FI 
+
+	BEGIN  shift 25
+	READ  shift 17
+	FREE  shift 18
+	RETURN  shift 19
+	EXIT  shift 20
+	PRINT  shift 21
+	PRINTLN  shift 22
+	IF  shift 23
+	WHILE  shift 24
+	FST  shift 30
+	SND  shift 31
+	INT  shift 9
+	BOOL  shift 10
+	CHAR  shift 11
+	STRING  shift 12
+	PAIR  shift 13
+	IDENTIFIER  shift 29
+	.  error
+
+	statement  goto 136
+	typeDef  goto 15
+	base_type  goto 6
+	array_type  goto 7
+	pair_type  goto 8
+	ident  goto 26
+	assign_lhs  goto 16
+	array_elem  goto 27
+	pair_elem  goto 28
+
+state 113
+	statement:  WHILE expr DO.statement DONE 
+
+	BEGIN  shift 25
+	READ  shift 17
+	FREE  shift 18
+	RETURN  shift 19
+	EXIT  shift 20
+	PRINT  shift 21
+	PRINTLN  shift 22
+	IF  shift 23
+	WHILE  shift 24
+	FST  shift 30
+	SND  shift 31
+	INT  shift 9
+	BOOL  shift 10
+	CHAR  shift 11
+	STRING  shift 12
+	PAIR  shift 13
+	IDENTIFIER  shift 29
+	.  error
+
+	statement  goto 137
+	typeDef  goto 15
+	base_type  goto 6
+	array_type  goto 7
+	pair_type  goto 8
+	ident  goto 26
+	assign_lhs  goto 16
+	array_elem  goto 27
+	pair_elem  goto 28
+
+state 114
+	statement:  BEGIN statement END.    (21)
+
+	.  reduce 21 (src line 133)
+
+
+state 115
+	expr:  expr.!= expr 
+	expr:  expr.== expr 
+	expr:  expr.>= expr 
+	expr:  expr.<= expr 
+	expr:  expr.> expr 
+	expr:  expr.< expr 
+	expr:  expr.binaryOp expr 
+	expr_list:  [ expr.expr_list ] 
+	expr_list:  [ expr.] 
+
+	MULT  shift 98
+	DIV  shift 99
+	MOD  shift 100
+	ADD  shift 101
+	SUB  shift 102
+	AND  shift 103
+	OR  shift 104
+	>=  shift 93
+	<=  shift 94
+	>  shift 95
+	<  shift 96
+	!=  shift 91
+	==  shift 92
+	[  shift 72
+	]  shift 139
+	.  error
+
+	expr_list  goto 138
+	binaryOp  goto 97
+
+state 116
+	function:  typeDef ident ( optional_param_list.) IS statement END 
+
+	)  shift 140
+	.  error
+
+
+state 117
+	optional_param_list:  param_list.    (6)
+
+	.  reduce 6 (src line 111)
+
+
+state 118
+	param_list:  param., param_list 
+	param_list:  param.    (9)
+
+	,  shift 141
+	.  reduce 9 (src line 116)
+
+
+state 119
+	param:  typeDef.ident 
+	array_type:  typeDef.[ ] 
+
+	IDENTIFIER  shift 29
+	[  shift 34
+	.  error
+
+	ident  goto 142
+
+state 120
+	pair_type:  PAIR ( pair_elem_type ,.pair_elem_type ) 
+
+	INT  shift 9
+	BOOL  shift 10
+	CHAR  shift 11
+	STRING  shift 12
+	PAIR  shift 80
+	.  error
+
+	typeDef  goto 81
+	base_type  goto 78
+	array_type  goto 79
+	pair_type  goto 8
+	pair_elem_type  goto 143
+
+state 121
+	statement:  typeDef ident = assign_rhs.    (11)
+
+	.  reduce 11 (src line 123)
+
+
+state 122
+	assign_rhs:  NEW_PAIR (.expr , expr ) 
+	optional_sign: .    (84)
+
+	IDENTIFIER  shift 29
+	NOT  shift 57
+	NEG  shift 58
+	LEN  shift 59
+	ORD  shift 60
+	CHR  shift 61
+	POSITIVE  shift 62
+	NEGATIVE  shift 63
+	TRUE  shift 52
+	FALSE  shift 53
+	NULL  shift 56
+	(  shift 50
+	’  shift 54
+	"  shift 55
+	.  reduce 84 (src line 245)
+
+	ident  goto 47
+	expr  goto 144
+	array_elem  goto 48
+	int_liter  goto 42
+	bool_liter  goto 43
+	char_liter  goto 44
+	str_liter  goto 45
+	pair_liter  goto 46
+	unaryOp  goto 49
+	optional_sign  goto 51
+
+state 123
+	assign_rhs:  CALL ident.( optional_arg_list ) 
+
+	(  shift 145
+	.  error
+
+
+state 124
+	expr:  expr.!= expr 
+	expr:  expr.== expr 
+	expr:  expr.>= expr 
+	expr:  expr.<= expr 
+	expr:  expr.> expr 
+	expr:  expr.< expr 
+	expr:  expr.binaryOp expr 
+	array_liter:  [ expr.optional_expr_list ] 
+
+	MULT  shift 98
+	DIV  shift 99
+	MOD  shift 100
+	ADD  shift 101
+	SUB  shift 102
+	AND  shift 103
+	OR  shift 104
+	>=  shift 93
+	<=  shift 94
+	>  shift 95
+	<  shift 96
+	!=  shift 91
+	==  shift 92
+	,  shift 147
+	.  error
+
+	optional_expr_list  goto 146
+	binaryOp  goto 97
+
+125: shift/reduce conflict (shift 98(0), red'n 57(4)) on MULT
+125: shift/reduce conflict (shift 99(0), red'n 57(4)) on DIV
+125: shift/reduce conflict (shift 100(0), red'n 57(4)) on MOD
+125: shift/reduce conflict (shift 101(0), red'n 57(4)) on ADD
+125: shift/reduce conflict (shift 102(0), red'n 57(4)) on SUB
+125: shift/reduce conflict (shift 103(0), red'n 57(4)) on AND
+125: shift/reduce conflict (shift 104(0), red'n 57(4)) on OR
+state 125
+	expr:  expr.!= expr 
+	expr:  expr != expr.    (57)
+	expr:  expr.== expr 
+	expr:  expr.>= expr 
+	expr:  expr.<= expr 
+	expr:  expr.> expr 
+	expr:  expr.< expr 
+	expr:  expr.binaryOp expr 
+
+	MULT  shift 98
+	DIV  shift 99
+	MOD  shift 100
+	ADD  shift 101
+	SUB  shift 102
+	AND  shift 103
+	OR  shift 104
+	<=  error
+	<  error
+	!=  error
+	==  error
+	.  reduce 57 (src line 203)
+
+	binaryOp  goto 97
+
+126: shift/reduce conflict (shift 98(0), red'n 58(4)) on MULT
+126: shift/reduce conflict (shift 99(0), red'n 58(4)) on DIV
+126: shift/reduce conflict (shift 100(0), red'n 58(4)) on MOD
+126: shift/reduce conflict (shift 101(0), red'n 58(4)) on ADD
+126: shift/reduce conflict (shift 102(0), red'n 58(4)) on SUB
+126: shift/reduce conflict (shift 103(0), red'n 58(4)) on AND
+126: shift/reduce conflict (shift 104(0), red'n 58(4)) on OR
+state 126
+	expr:  expr.!= expr 
+	expr:  expr.== expr 
+	expr:  expr == expr.    (58)
+	expr:  expr.>= expr 
+	expr:  expr.<= expr 
+	expr:  expr.> expr 
+	expr:  expr.< expr 
+	expr:  expr.binaryOp expr 
+
+	MULT  shift 98
+	DIV  shift 99
+	MOD  shift 100
+	ADD  shift 101
+	SUB  shift 102
+	AND  shift 103
+	OR  shift 104
+	<=  error
+	<  error
+	!=  error
+	==  error
+	.  reduce 58 (src line 204)
+
+	binaryOp  goto 97
+
+127: shift/reduce conflict (shift 98(0), red'n 59(3)) on MULT
+127: shift/reduce conflict (shift 99(0), red'n 59(3)) on DIV
+127: shift/reduce conflict (shift 100(0), red'n 59(3)) on MOD
+127: shift/reduce conflict (shift 101(0), red'n 59(3)) on ADD
+127: shift/reduce conflict (shift 102(0), red'n 59(3)) on SUB
+127: shift/reduce conflict (shift 103(0), red'n 59(3)) on AND
+127: shift/reduce conflict (shift 104(0), red'n 59(3)) on OR
+state 127
+	expr:  expr.!= expr 
+	expr:  expr.== expr 
+	expr:  expr.>= expr 
+	expr:  expr >= expr.    (59)
+	expr:  expr.<= expr 
+	expr:  expr.> expr 
+	expr:  expr.< expr 
+	expr:  expr.binaryOp expr 
+
+	MULT  shift 98
+	DIV  shift 99
+	MOD  shift 100
+	ADD  shift 101
+	SUB  shift 102
+	AND  shift 103
+	OR  shift 104
+	>=  error
+	<=  shift 94
+	>  error
+	<  shift 96
+	!=  shift 91
+	==  shift 92
+	.  reduce 59 (src line 205)
+
+	binaryOp  goto 97
+
+128: shift/reduce conflict (shift 98(0), red'n 60(4)) on MULT
+128: shift/reduce conflict (shift 99(0), red'n 60(4)) on DIV
+128: shift/reduce conflict (shift 100(0), red'n 60(4)) on MOD
+128: shift/reduce conflict (shift 101(0), red'n 60(4)) on ADD
+128: shift/reduce conflict (shift 102(0), red'n 60(4)) on SUB
+128: shift/reduce conflict (shift 103(0), red'n 60(4)) on AND
+128: shift/reduce conflict (shift 104(0), red'n 60(4)) on OR
+state 128
+	expr:  expr.!= expr 
+	expr:  expr.== expr 
+	expr:  expr.>= expr 
+	expr:  expr.<= expr 
+	expr:  expr <= expr.    (60)
+	expr:  expr.> expr 
+	expr:  expr.< expr 
+	expr:  expr.binaryOp expr 
+
+	MULT  shift 98
+	DIV  shift 99
+	MOD  shift 100
+	ADD  shift 101
+	SUB  shift 102
+	AND  shift 103
+	OR  shift 104
+	<=  error
+	<  error
+	!=  error
+	==  error
+	.  reduce 60 (src line 206)
+
+	binaryOp  goto 97
+
+129: shift/reduce conflict (shift 98(0), red'n 61(3)) on MULT
+129: shift/reduce conflict (shift 99(0), red'n 61(3)) on DIV
+129: shift/reduce conflict (shift 100(0), red'n 61(3)) on MOD
+129: shift/reduce conflict (shift 101(0), red'n 61(3)) on ADD
+129: shift/reduce conflict (shift 102(0), red'n 61(3)) on SUB
+129: shift/reduce conflict (shift 103(0), red'n 61(3)) on AND
+129: shift/reduce conflict (shift 104(0), red'n 61(3)) on OR
+state 129
+	expr:  expr.!= expr 
+	expr:  expr.== expr 
+	expr:  expr.>= expr 
+	expr:  expr.<= expr 
+	expr:  expr.> expr 
+	expr:  expr > expr.    (61)
+	expr:  expr.< expr 
+	expr:  expr.binaryOp expr 
+
+	MULT  shift 98
+	DIV  shift 99
+	MOD  shift 100
+	ADD  shift 101
+	SUB  shift 102
+	AND  shift 103
+	OR  shift 104
+	>=  error
+	<=  shift 94
+	>  error
+	<  shift 96
+	!=  shift 91
+	==  shift 92
+	.  reduce 61 (src line 207)
+
+	binaryOp  goto 97
+
+130: shift/reduce conflict (shift 98(0), red'n 62(4)) on MULT
+130: shift/reduce conflict (shift 99(0), red'n 62(4)) on DIV
+130: shift/reduce conflict (shift 100(0), red'n 62(4)) on MOD
+130: shift/reduce conflict (shift 101(0), red'n 62(4)) on ADD
+130: shift/reduce conflict (shift 102(0), red'n 62(4)) on SUB
+130: shift/reduce conflict (shift 103(0), red'n 62(4)) on AND
+130: shift/reduce conflict (shift 104(0), red'n 62(4)) on OR
+state 130
+	expr:  expr.!= expr 
+	expr:  expr.== expr 
+	expr:  expr.>= expr 
+	expr:  expr.<= expr 
+	expr:  expr.> expr 
+	expr:  expr.< expr 
+	expr:  expr < expr.    (62)
+	expr:  expr.binaryOp expr 
+
+	MULT  shift 98
+	DIV  shift 99
+	MOD  shift 100
+	ADD  shift 101
+	SUB  shift 102
+	AND  shift 103
+	OR  shift 104
+	<=  error
+	<  error
+	!=  error
+	==  error
+	.  reduce 62 (src line 208)
+
+	binaryOp  goto 97
+
+131: shift/reduce conflict (shift 98(0), red'n 63(0)) on MULT
+131: shift/reduce conflict (shift 99(0), red'n 63(0)) on DIV
+131: shift/reduce conflict (shift 100(0), red'n 63(0)) on MOD
+131: shift/reduce conflict (shift 101(0), red'n 63(0)) on ADD
+131: shift/reduce conflict (shift 102(0), red'n 63(0)) on SUB
+131: shift/reduce conflict (shift 103(0), red'n 63(0)) on AND
+131: shift/reduce conflict (shift 104(0), red'n 63(0)) on OR
+131: shift/reduce conflict (shift 93(3), red'n 63(0)) on >=
+131: shift/reduce conflict (shift 94(4), red'n 63(0)) on <=
+131: shift/reduce conflict (shift 95(3), red'n 63(0)) on >
+131: shift/reduce conflict (shift 96(4), red'n 63(0)) on <
+131: shift/reduce conflict (shift 91(4), red'n 63(0)) on !=
+131: shift/reduce conflict (shift 92(4), red'n 63(0)) on ==
+state 131
+	expr:  expr.!= expr 
+	expr:  expr.== expr 
+	expr:  expr.>= expr 
+	expr:  expr.<= expr 
+	expr:  expr.> expr 
+	expr:  expr.< expr 
+	expr:  expr.binaryOp expr 
+	expr:  expr binaryOp expr.    (63)
+
+	MULT  shift 98
+	DIV  shift 99
+	MOD  shift 100
+	ADD  shift 101
+	SUB  shift 102
+	AND  shift 103
+	OR  shift 104
+	>=  shift 93
+	<=  shift 94
+	>  shift 95
+	<  shift 96
+	!=  shift 91
+	==  shift 92
+	.  reduce 63 (src line 210)
+
+	binaryOp  goto 97
+
+state 132
+	expr:  ( expr ).    (64)
+
+	.  reduce 64 (src line 211)
+
+
+state 133
+	char_liter:  ’ character ’.    (87)
+
+	.  reduce 87 (src line 252)
+
+
+state 134
+	str_liter:  \" characters \".    (88)
+
+	.  reduce 88 (src line 255)
+
+
+state 135
+	characters:  character characters.    (89)
+
+	.  reduce 89 (src line 258)
+
+
+state 136
+	statement:  IF expr THEN statement.ELSE statement FI 
+	statement:  statement.; statement 
+
+	ELSE  shift 148
+	;  shift 37
+	.  error
+
+
+state 137
+	statement:  WHILE expr DO statement.DONE 
+	statement:  statement.; statement 
+
+	DONE  shift 149
+	;  shift 37
+	.  error
+
+
+state 138
+	expr_list:  [ expr expr_list.] 
+
+	]  shift 150
+	.  error
+
+
+state 139
+	expr_list:  [ expr ].    (80)
+
+	.  reduce 80 (src line 237)
+
+
+state 140
+	function:  typeDef ident ( optional_param_list ).IS statement END 
+
+	IS  shift 151
+	.  error
+
+
+state 141
+	param_list:  param ,.param_list 
+
+	INT  shift 9
+	BOOL  shift 10
+	CHAR  shift 11
+	STRING  shift 12
+	PAIR  shift 13
+	.  error
+
+	typeDef  goto 119
+	base_type  goto 6
+	array_type  goto 7
+	pair_type  goto 8
+	param_list  goto 152
+	param  goto 118
+
+state 142
+	param:  typeDef ident.    (10)
+
+	.  reduce 10 (src line 119)
+
+
+state 143
+	pair_type:  PAIR ( pair_elem_type , pair_elem_type.) 
+
+	)  shift 153
+	.  error
+
+
+state 144
+	assign_rhs:  NEW_PAIR ( expr., expr ) 
+	expr:  expr.!= expr 
+	expr:  expr.== expr 
+	expr:  expr.>= expr 
+	expr:  expr.<= expr 
+	expr:  expr.> expr 
+	expr:  expr.< expr 
+	expr:  expr.binaryOp expr 
+
+	MULT  shift 98
+	DIV  shift 99
+	MOD  shift 100
+	ADD  shift 101
+	SUB  shift 102
+	AND  shift 103
+	OR  shift 104
+	>=  shift 93
+	<=  shift 94
+	>  shift 95
+	<  shift 96
+	!=  shift 91
+	==  shift 92
+	,  shift 154
+	.  error
+
+	binaryOp  goto 97
+
+state 145
+	assign_rhs:  CALL ident (.optional_arg_list ) 
+	optional_arg_list: .    (32)
+	optional_sign: .    (84)
+
+	IDENTIFIER  shift 29
+	NOT  shift 57
+	NEG  shift 58
+	LEN  shift 59
+	ORD  shift 60
+	CHR  shift 61
+	POSITIVE  shift 62
+	NEGATIVE  shift 63
+	TRUE  shift 52
+	FALSE  shift 53
+	NULL  shift 56
+	(  shift 50
+	)  reduce 32 (src line 150)
+	’  shift 54
+	"  shift 55
+	.  reduce 84 (src line 245)
+
+	ident  goto 47
+	expr  goto 157
+	array_elem  goto 48
+	optional_arg_list  goto 155
+	arg_list  goto 156
+	int_liter  goto 42
+	bool_liter  goto 43
+	char_liter  goto 44
+	str_liter  goto 45
+	pair_liter  goto 46
+	unaryOp  goto 49
+	optional_sign  goto 51
+
+state 146
+	array_liter:  [ expr optional_expr_list.] 
+
+	]  shift 158
+	.  error
+
+
+state 147
+	optional_expr_list:  ,.expr 
+	optional_sign: .    (84)
+
+	IDENTIFIER  shift 29
+	NOT  shift 57
+	NEG  shift 58
+	LEN  shift 59
+	ORD  shift 60
+	CHR  shift 61
+	POSITIVE  shift 62
+	NEGATIVE  shift 63
+	TRUE  shift 52
+	FALSE  shift 53
+	NULL  shift 56
+	(  shift 50
+	’  shift 54
+	"  shift 55
+	.  reduce 84 (src line 245)
+
+	ident  goto 47
+	expr  goto 159
+	array_elem  goto 48
+	int_liter  goto 42
+	bool_liter  goto 43
+	char_liter  goto 44
+	str_liter  goto 45
+	pair_liter  goto 46
+	unaryOp  goto 49
+	optional_sign  goto 51
+
+state 148
+	statement:  IF expr THEN statement ELSE.statement FI 
+
+	BEGIN  shift 25
+	READ  shift 17
+	FREE  shift 18
+	RETURN  shift 19
+	EXIT  shift 20
+	PRINT  shift 21
+	PRINTLN  shift 22
+	IF  shift 23
+	WHILE  shift 24
+	FST  shift 30
+	SND  shift 31
+	INT  shift 9
+	BOOL  shift 10
+	CHAR  shift 11
+	STRING  shift 12
+	PAIR  shift 13
+	IDENTIFIER  shift 29
+	.  error
+
+	statement  goto 160
+	typeDef  goto 15
+	base_type  goto 6
+	array_type  goto 7
+	pair_type  goto 8
+	ident  goto 26
+	assign_lhs  goto 16
+	array_elem  goto 27
+	pair_elem  goto 28
+
+state 149
+	statement:  WHILE expr DO statement DONE.    (20)
+
+	.  reduce 20 (src line 132)
+
+
+state 150
+	expr_list:  [ expr expr_list ].    (79)
+
+	.  reduce 79 (src line 236)
+
+
+state 151
+	function:  typeDef ident ( optional_param_list ) IS.statement END 
+
+	BEGIN  shift 25
+	READ  shift 17
+	FREE  shift 18
+	RETURN  shift 19
+	EXIT  shift 20
+	PRINT  shift 21
+	PRINTLN  shift 22
+	IF  shift 23
+	WHILE  shift 24
+	FST  shift 30
+	SND  shift 31
+	INT  shift 9
+	BOOL  shift 10
+	CHAR  shift 11
+	STRING  shift 12
+	PAIR  shift 13
+	IDENTIFIER  shift 29
+	.  error
+
+	statement  goto 161
+	typeDef  goto 15
+	base_type  goto 6
+	array_type  goto 7
+	pair_type  goto 8
+	ident  goto 26
+	assign_lhs  goto 16
+	array_elem  goto 27
+	pair_elem  goto 28
+
+state 152
+	param_list:  param , param_list.    (8)
+
+	.  reduce 8 (src line 115)
+
+
+state 153
+	pair_type:  PAIR ( pair_elem_type , pair_elem_type ).    (45)
+
+	.  reduce 45 (src line 177)
+
+
+state 154
+	assign_rhs:  NEW_PAIR ( expr ,.expr ) 
+	optional_sign: .    (84)
+
+	IDENTIFIER  shift 29
+	NOT  shift 57
+	NEG  shift 58
+	LEN  shift 59
+	ORD  shift 60
+	CHR  shift 61
+	POSITIVE  shift 62
+	NEGATIVE  shift 63
+	TRUE  shift 52
+	FALSE  shift 53
+	NULL  shift 56
+	(  shift 50
+	’  shift 54
+	"  shift 55
+	.  reduce 84 (src line 245)
+
+	ident  goto 47
+	expr  goto 162
+	array_elem  goto 48
+	int_liter  goto 42
+	bool_liter  goto 43
+	char_liter  goto 44
+	str_liter  goto 45
+	pair_liter  goto 46
+	unaryOp  goto 49
+	optional_sign  goto 51
+
+state 155
+	assign_rhs:  CALL ident ( optional_arg_list.) 
+
+	)  shift 163
+	.  error
+
+
+state 156
+	optional_arg_list:  arg_list.    (31)
+
+	.  reduce 31 (src line 149)
+
+
+state 157
+	arg_list:  expr.optional_expr_list 
+	expr:  expr.!= expr 
+	expr:  expr.== expr 
+	expr:  expr.>= expr 
+	expr:  expr.<= expr 
+	expr:  expr.> expr 
+	expr:  expr.< expr 
+	expr:  expr.binaryOp expr 
+
+	MULT  shift 98
+	DIV  shift 99
+	MOD  shift 100
+	ADD  shift 101
+	SUB  shift 102
+	AND  shift 103
+	OR  shift 104
+	>=  shift 93
+	<=  shift 94
+	>  shift 95
+	<  shift 96
+	!=  shift 91
+	==  shift 92
+	,  shift 147
+	.  error
+
+	optional_expr_list  goto 164
+	binaryOp  goto 97
+
+state 158
+	array_liter:  [ expr optional_expr_list ].    (92)
+
+	.  reduce 92 (src line 264)
+
+
+state 159
+	optional_expr_list:  , expr.    (34)
+	expr:  expr.!= expr 
+	expr:  expr.== expr 
+	expr:  expr.>= expr 
+	expr:  expr.<= expr 
+	expr:  expr.> expr 
+	expr:  expr.< expr 
+	expr:  expr.binaryOp expr 
+
+	MULT  shift 98
+	DIV  shift 99
+	MOD  shift 100
+	ADD  shift 101
+	SUB  shift 102
+	AND  shift 103
+	OR  shift 104
+	>=  shift 93
+	<=  shift 94
+	>  shift 95
+	<  shift 96
+	!=  shift 91
+	==  shift 92
+	.  reduce 34 (src line 156)
+
+	binaryOp  goto 97
+
+state 160
+	statement:  IF expr THEN statement ELSE statement.FI 
+	statement:  statement.; statement 
+
+	FI  shift 165
+	;  shift 37
+	.  error
+
+
+state 161
+	function:  typeDef ident ( optional_param_list ) IS statement.END 
+	statement:  statement.; statement 
+
+	END  shift 166
+	;  shift 37
+	.  error
+
+
+state 162
+	assign_rhs:  NEW_PAIR ( expr , expr.) 
+	expr:  expr.!= expr 
+	expr:  expr.== expr 
+	expr:  expr.>= expr 
+	expr:  expr.<= expr 
+	expr:  expr.> expr 
+	expr:  expr.< expr 
+	expr:  expr.binaryOp expr 
+
+	MULT  shift 98
+	DIV  shift 99
+	MOD  shift 100
+	ADD  shift 101
+	SUB  shift 102
+	AND  shift 103
+	OR  shift 104
+	>=  shift 93
+	<=  shift 94
+	>  shift 95
+	<  shift 96
+	!=  shift 91
+	==  shift 92
+	)  shift 167
+	.  error
+
+	binaryOp  goto 97
+
+state 163
+	assign_rhs:  CALL ident ( optional_arg_list ).    (30)
+
+	.  reduce 30 (src line 146)
+
+
+state 164
+	arg_list:  expr optional_expr_list.    (33)
+
+	.  reduce 33 (src line 153)
+
+
+state 165
+	statement:  IF expr THEN statement ELSE statement FI.    (19)
+
+	.  reduce 19 (src line 131)
+
+
+state 166
+	function:  typeDef ident ( optional_param_list ) IS statement END.    (5)
+
+	.  reduce 5 (src line 107)
+
+
+state 167
+	assign_rhs:  NEW_PAIR ( expr , expr ).    (28)
+
+	.  reduce 28 (src line 144)
+
+
+77 terminals, 34 nonterminals
+94 grammar rules, 168/2000 states
+85 shift/reduce, 12 reduce/reduce conflicts reported
+83 working sets used
+memory: parser 660/30000
+119 extra closures
+878 shift entries, 24 exceptions
+104 goto entries
+306 entries saved by goto default
+Optimizer space used: output 410/30000
+410 table entries, 75 zero
+maximum spread: 77, maximum offset: 157
