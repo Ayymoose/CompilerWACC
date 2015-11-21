@@ -72,6 +72,10 @@ const TRUE = 57394
 const FALSE = 57395
 const CHARACTER = 57396
 const NULL = 57397
+const EqEq = 57398
+const NEq = 57399
+const AndAnd = 57400
+const OrOr = 57401
 
 var parserToknames = []string{
 	"BEGIN",
@@ -126,19 +130,25 @@ var parserToknames = []string{
 	"FALSE",
 	"CHARACTER",
 	"NULL",
-	" >=",
-	" <=",
-	" >",
-	" <",
-	" !=",
-	" ==",
-	" *",
+	" -",
+	" +",
+	" !",
 	" /",
 	" %",
-	" +",
-	" -",
-	" &&",
-	" ||",
+	" <",
+	" >",
+	"EqEq",
+	"NEq",
+	"AndAnd",
+	"OrOr",
+	" ;",
+	" =",
+	" [",
+	" ]",
+	" (",
+	" )",
+	" ,",
+	" *",
 }
 var parserStatenames = []string{}
 
@@ -151,209 +161,192 @@ var parserExca = []int{
 	-1, 1,
 	1, -1,
 	-2, 0,
-	-1, 78,
-	74, 37,
-	-2, 46,
-	-1, 79,
-	74, 38,
-	-2, 47,
-	-1, 125,
-	57, 0,
-	59, 0,
-	60, 0,
-	61, 0,
-	-2, 57,
-	-1, 126,
-	57, 0,
-	59, 0,
-	60, 0,
-	61, 0,
-	-2, 58,
-	-1, 127,
-	56, 0,
-	58, 0,
-	-2, 59,
-	-1, 128,
-	57, 0,
-	59, 0,
-	60, 0,
-	61, 0,
-	-2, 60,
-	-1, 129,
-	56, 0,
-	58, 0,
-	-2, 61,
-	-1, 130,
-	57, 0,
-	59, 0,
-	60, 0,
-	61, 0,
-	-2, 62,
-	-1, 145,
-	70, 32,
-	-2, 84,
+	-1, 6,
+	69, 45,
+	-2, 37,
+	-1, 8,
+	69, 46,
+	-2, 39,
+	-1, 43,
+	69, 45,
+	-2, 48,
+	-1, 62,
+	72, 75,
+	-2, 82,
+	-1, 142,
+	72, 75,
+	-2, 82,
+	-1, 153,
+	72, 32,
+	-2, 82,
 }
 
-const parserNprod = 94
+const parserNprod = 93
 const parserPrivate = 57344
 
 var parserTokenNames []string
 var parserStates []string
 
-const parserLast = 410
+const parserLast = 468
 
 var parserAct = []int{
 
-	85, 146, 14, 117, 71, 15, 7, 6, 5, 77,
-	5, 47, 134, 133, 158, 26, 84, 33, 150, 41,
-	64, 65, 66, 67, 68, 69, 48, 38, 70, 26,
-	27, 73, 74, 29, 28, 76, 149, 26, 110, 166,
-	82, 81, 79, 78, 27, 34, 165, 72, 148, 26,
-	105, 106, 27, 114, 36, 37, 87, 89, 30, 31,
-	83, 39, 141, 120, 27, 29, 57, 58, 59, 60,
-	61, 163, 153, 115, 88, 140, 145, 34, 122, 35,
-	75, 119, 111, 29, 109, 62, 63, 52, 53, 37,
-	56, 124, 125, 126, 127, 128, 129, 130, 131, 107,
-	121, 123, 37, 151, 50, 37, 2, 37, 3, 90,
-	1, 54, 55, 32, 51, 136, 137, 97, 88, 49,
-	138, 37, 37, 144, 26, 26, 81, 79, 78, 46,
-	143, 142, 9, 10, 11, 12, 13, 108, 16, 27,
-	27, 45, 30, 31, 44, 152, 157, 119, 159, 29,
-	135, 160, 43, 42, 161, 162, 40, 156, 155, 164,
-	26, 86, 118, 26, 29, 57, 58, 59, 60, 61,
-	9, 10, 11, 12, 80, 27, 116, 8, 27, 4,
-	0, 0, 0, 0, 62, 63, 52, 53, 0, 56,
-	0, 0, 98, 99, 100, 101, 102, 103, 104, 0,
-	0, 0, 0, 50, 0, 0, 0, 0, 0, 0,
-	54, 55, 93, 94, 95, 96, 91, 92, 98, 99,
-	100, 101, 102, 103, 104, 0, 0, 0, 0, 0,
-	72, 139, 0, 0, 0, 0, 0, 0, 93, 94,
-	95, 96, 91, 92, 98, 99, 100, 101, 102, 103,
-	104, 0, 0, 147, 0, 0, 0, 98, 99, 100,
-	101, 102, 103, 104, 93, 94, 95, 96, 91, 92,
-	98, 99, 100, 101, 102, 103, 104, 0, 94, 154,
-	96, 91, 92, 98, 99, 100, 101, 102, 103, 104,
-	93, 94, 95, 96, 91, 92, 98, 99, 100, 101,
-	102, 103, 104, 0, 167, 113, 0, 0, 0, 0,
-	112, 0, 0, 0, 0, 0, 93, 94, 95, 96,
-	91, 92, 98, 99, 100, 101, 102, 103, 104, 0,
-	132, 98, 99, 100, 101, 102, 103, 104, 0, 0,
-	0, 0, 93, 94, 95, 96, 91, 92, 0, 0,
-	0, 93, 94, 95, 96, 91, 92, 98, 99, 100,
-	101, 102, 103, 104, 0, 0, 0, 0, 0, 0,
-	0, 0, 0, 0, 0, 0, 0, 93, 94, 95,
-	96, 91, 92, 25, 0, 0, 0, 17, 18, 19,
-	20, 21, 22, 23, 0, 0, 0, 24, 0, 0,
-	0, 0, 30, 31, 9, 10, 11, 12, 13, 29,
+	89, 154, 110, 78, 115, 37, 24, 83, 144, 5,
+	143, 5, 122, 86, 23, 171, 151, 141, 121, 58,
+	88, 153, 8, 7, 42, 126, 21, 40, 51, 71,
+	72, 73, 74, 75, 76, 6, 36, 174, 165, 80,
+	81, 41, 57, 79, 46, 44, 36, 85, 18, 77,
+	159, 20, 87, 169, 36, 92, 119, 43, 49, 35,
+	107, 108, 109, 111, 173, 158, 102, 48, 101, 35,
+	16, 114, 157, 116, 97, 98, 112, 35, 96, 95,
+	120, 97, 98, 99, 100, 103, 104, 105, 106, 19,
+	149, 22, 2, 92, 175, 128, 129, 130, 131, 132,
+	133, 134, 135, 136, 137, 138, 139, 140, 125, 46,
+	44, 124, 16, 1, 16, 16, 96, 95, 16, 97,
+	98, 145, 43, 16, 38, 39, 25, 152, 123, 85,
+	150, 19, 146, 147, 3, 63, 127, 36, 36, 17,
+	113, 56, 47, 111, 55, 156, 15, 54, 53, 91,
+	93, 38, 39, 50, 164, 52, 166, 163, 19, 162,
+	35, 35, 170, 168, 160, 90, 172, 84, 19, 36,
+	82, 13, 167, 4, 0, 0, 0, 36, 69, 70,
+	64, 65, 0, 68, 59, 60, 61, 0, 69, 70,
+	64, 65, 35, 68, 59, 60, 61, 94, 0, 62,
+	35, 0, 0, 66, 67, 102, 0, 101, 0, 62,
+	0, 0, 0, 66, 67, 0, 0, 96, 95, 0,
+	97, 98, 99, 100, 103, 104, 105, 106, 102, 0,
+	101, 0, 0, 0, 155, 9, 10, 11, 12, 14,
+	96, 95, 0, 97, 98, 99, 100, 103, 104, 105,
+	106, 102, 0, 101, 0, 0, 0, 161, 9, 10,
+	11, 12, 45, 96, 95, 0, 97, 98, 99, 100,
+	103, 104, 105, 106, 102, 0, 101, 118, 0, 0,
+	142, 0, 0, 0, 0, 0, 96, 95, 0, 97,
+	98, 99, 100, 103, 104, 105, 106, 117, 0, 0,
+	148, 0, 102, 0, 101, 0, 0, 0, 0, 0,
+	0, 0, 0, 0, 96, 95, 0, 97, 98, 99,
+	100, 103, 104, 105, 106, 0, 102, 0, 101, 0,
+	0, 0, 0, 0, 0, 0, 0, 0, 96, 95,
+	0, 97, 98, 99, 100, 103, 104, 105, 106, 102,
+	0, 101, 0, 0, 0, 0, 0, 0, 0, 0,
+	0, 96, 95, 0, 97, 98, 99, 100, 103, 104,
+	105, 106, 102, 0, 101, 0, 0, 0, 0, 0,
+	0, 0, 0, 0, 96, 95, 0, 97, 98, 99,
+	100, 103, 104, 105, 102, 0, 101, 0, 0, 0,
+	0, 0, 0, 102, 0, 101, 96, 95, 0, 97,
+	98, 99, 100, 103, 104, 96, 95, 0, 97, 98,
+	99, 100, 102, 104, 101, 0, 0, 0, 0, 0,
+	0, 0, 0, 0, 96, 95, 0, 97, 98, 99,
+	100, 34, 0, 0, 0, 26, 27, 28, 29, 30,
+	31, 32, 0, 0, 0, 33, 0, 0, 0, 0,
+	38, 39, 9, 10, 11, 12, 14, 19,
 }
 var parserPact = []int{
 
-	102, -1000, 107, 379, 107, 3, -1000, -1000, -1000, -1000,
-	-1000, -1000, -1000, 10, 49, 3, -11, 119, 134, 134,
-	134, 134, 134, 134, 134, 379, -27, -1000, -1000, -1000,
-	134, 134, -1000, 11, -40, 145, -1000, 379, -12, 35,
-	-1000, 321, -1000, -1000, -1000, -1000, -1000, -27, -1000, 134,
-	134, 50, -1000, -1000, 30, 30, -1000, -1000, -1000, -1000,
-	-1000, -1000, -1000, -1000, 321, 321, 321, 321, 295, 286,
-	48, -1000, 134, 321, 321, 107, -1000, -8, -1000, -1000,
-	10, -29, -18, 35, -1000, 321, -1000, 9, -1000, 53,
-	134, 134, 134, 134, 134, 134, 134, 134, -1000, -1000,
-	-1000, -1000, -1000, -1000, -1000, 321, 260, -1000, -63, -1000,
-	-65, 30, 379, 379, -1000, 156, 5, -1000, -9, 3,
-	145, -1000, 134, 7, 182, 247, 247, 221, 247, 221,
-	247, 321, -1000, -1000, -1000, -1000, 32, 16, -57, -1000,
-	97, 107, -1000, 2, 208, 134, -61, 134, 379, -1000,
-	-1000, 379, -1000, -1000, 134, 1, -1000, 182, -1000, 321,
-	29, 34, 234, -1000, -1000, -1000, -1000, -1000,
+	88, -1000, 210, 3, 210, 59, -1000, -1000, -1000, -1000,
+	-1000, -1000, -1000, -18, -45, 86, 437, -1000, -44, -1000,
+	-29, 233, -1000, 3, 59, -10, 101, 138, 138, 138,
+	138, 138, 138, 138, 437, -26, -1000, -1000, 138, 138,
+	210, -1000, -60, -1000, -1000, -45, -1000, -1000, -16, 128,
+	-1000, 305, -1000, -1000, -1000, -1000, -1000, -26, -1000, 138,
+	138, 138, 138, 27, -1000, -1000, 17, 17, -1000, -1000,
+	-1000, 305, 305, 305, 305, 282, 258, 51, -1000, 138,
+	305, 305, -54, -1000, -61, 59, 233, 128, -1000, 305,
+	-1000, -46, -1000, 59, 138, 138, 138, 138, 138, 138,
+	138, 138, 138, 138, 138, 138, 138, 15, 15, -1000,
+	-55, 207, -1000, -65, -1000, -68, 17, 437, 437, -1000,
+	230, 84, 210, -1000, -56, -1000, 138, -50, 161, 15,
+	15, -1000, -1000, 60, 60, 60, 60, 359, 378, 350,
+	328, -1000, 138, -1000, -1000, -1000, 56, 45, -19, 437,
+	-1000, -1000, 184, 138, -32, 138, -1000, 437, -1000, -26,
+	48, 138, -57, -1000, 161, -1000, 305, 47, -33, -1000,
+	22, -1000, -1000, -1000, -1000, -1000,
 }
 var parserPgo = []int{
 
-	0, 108, 179, 2, 5, 7, 6, 177, 9, 11,
-	176, 3, 162, 16, 138, 0, 1, 4, 26, 34,
-	161, 158, 157, 153, 152, 144, 141, 129, 119, 117,
-	114, 82, 38, 110,
+	0, 134, 173, 142, 14, 6, 35, 23, 22, 24,
+	171, 42, 170, 7, 167, 20, 126, 0, 1, 3,
+	2, 19, 5, 165, 159, 157, 155, 148, 147, 144,
+	141, 135, 73, 4, 113,
 }
 var parserR1 = []int{
 
-	0, 33, 1, 1, 1, 2, 10, 10, 11, 11,
-	12, 3, 3, 3, 3, 3, 3, 3, 3, 3,
-	3, 3, 3, 14, 14, 14, 13, 13, 13, 13,
-	13, 21, 21, 22, 16, 19, 19, 4, 4, 4,
-	5, 5, 5, 5, 6, 7, 8, 8, 8, 15,
-	15, 15, 15, 15, 15, 15, 15, 15, 15, 15,
-	15, 15, 15, 15, 15, 28, 28, 28, 28, 28,
-	29, 29, 29, 29, 29, 29, 29, 9, 18, 17,
-	17, 23, 30, 30, 30, 24, 24, 25, 26, 32,
-	32, 31, 20, 27,
+	0, 34, 1, 1, 2, 12, 12, 13, 13, 14,
+	4, 4, 4, 4, 4, 4, 4, 4, 4, 4,
+	4, 4, 3, 16, 16, 16, 15, 15, 15, 15,
+	15, 24, 24, 25, 18, 22, 22, 5, 5, 5,
+	6, 6, 6, 6, 7, 10, 10, 8, 9, 9,
+	9, 17, 17, 17, 17, 17, 17, 17, 17, 17,
+	17, 17, 17, 17, 17, 17, 17, 17, 17, 17,
+	17, 17, 17, 17, 20, 20, 21, 19, 19, 26,
+	31, 31, 31, 27, 27, 28, 29, 33, 33, 32,
+	23, 30, 11,
 }
 var parserR2 = []int{
 
-	0, 4, 2, 1, 0, 8, 1, 0, 3, 1,
-	2, 4, 3, 2, 2, 2, 2, 2, 2, 7,
-	5, 3, 3, 1, 1, 1, 1, 1, 6, 1,
+	0, 4, 2, 1, 8, 1, 0, 3, 1, 2,
+	4, 3, 2, 2, 2, 2, 2, 2, 7, 5,
+	3, 2, 2, 1, 1, 1, 1, 1, 6, 1,
 	5, 1, 0, 2, 2, 2, 2, 1, 1, 1,
-	1, 1, 1, 1, 3, 6, 1, 1, 1, 1,
-	1, 1, 1, 1, 1, 1, 2, 3, 3, 3,
-	3, 3, 3, 3, 3, 1, 1, 1, 1, 1,
-	1, 1, 1, 1, 1, 1, 1, 1, 2, 4,
-	3, 2, 1, 1, 0, 1, 1, 3, 3, 2,
-	1, 1, 4, 1,
+	1, 1, 1, 1, 3, 1, 1, 6, 1, 1,
+	1, 1, 1, 1, 1, 1, 1, 1, 2, 2,
+	2, 3, 3, 3, 3, 3, 3, 3, 3, 3,
+	3, 3, 3, 3, 3, 0, 2, 6, 3, 2,
+	1, 1, 0, 1, 1, 3, 3, 2, 1, 1,
+	4, 1, 1,
 }
 var parserChk = []int{
 
-	-1000, -33, 4, -1, -2, -4, -5, -6, -7, 25,
-	26, 27, 28, 29, -3, -4, -14, 8, 9, 10,
-	11, 12, 13, 14, 18, 4, -9, -18, -19, 30,
-	23, 24, -1, -9, 74, 69, 5, 73, -9, 72,
-	-14, -15, -23, -24, -25, -26, -27, -9, -18, -28,
-	69, -30, 52, 53, 76, 77, 55, 31, 32, 33,
-	34, 35, 50, 51, -15, -15, -15, -15, -15, -15,
-	-3, -17, 74, -15, -15, 69, 75, -8, -5, -6,
-	29, -4, -3, 72, -13, -15, -20, 21, -19, 22,
-	74, 60, 61, 56, 57, 58, 59, -29, 36, 37,
-	38, 39, 40, 41, 42, -15, -15, 49, -31, 54,
-	-32, -31, 15, 19, 5, -15, -10, -11, -12, -4,
-	71, -13, 69, -9, -15, -15, -15, -15, -15, -15,
-	-15, -15, 70, 76, 77, -32, -3, -3, -17, 75,
-	70, 71, -9, -8, -15, 69, -16, 71, 16, 20,
-	75, 6, -11, 70, 71, -21, -22, -15, 75, -15,
-	-3, -3, -15, 70, -16, 17, 5, 70,
+	-1000, -34, 4, -1, -2, -5, -6, -7, -8, 25,
+	26, 27, 28, -10, 29, -3, 67, -1, -11, 30,
+	69, 71, 5, -4, -5, -16, 8, 9, 10, 11,
+	12, 13, 14, 18, 4, -11, -21, -22, 23, 24,
+	71, 70, -9, -6, -7, 29, -8, -3, -11, 68,
+	-16, -17, -26, -27, -28, -29, -30, -11, -21, 56,
+	57, 58, 71, -31, 52, 53, 75, 76, 55, 50,
+	51, -17, -17, -17, -17, -17, -17, -4, -19, 69,
+	-17, -17, -12, -13, -14, -5, 73, 68, -15, -17,
+	-23, 21, -22, 22, 69, 57, 56, 59, 60, 61,
+	62, 46, 44, 63, 64, 65, 66, -17, -17, -17,
+	-20, -17, 49, -32, 54, -33, -32, 15, 19, 5,
+	-17, 72, 73, -11, -9, -15, 71, -11, -17, -17,
+	-17, -17, -17, -17, -17, -17, -17, -17, -17, -17,
+	-17, 72, 73, 75, 76, -33, -4, -4, 70, 6,
+	-13, 72, -17, 71, -18, 73, -20, 16, 20, 69,
+	-4, 73, -24, -25, -17, 70, -17, -4, -19, 5,
+	-17, 72, -18, 17, 70, 72,
 }
 var parserDef = []int{
 
-	0, -2, 4, 0, 3, 0, 37, 38, 39, 40,
-	41, 42, 43, 0, 0, 0, 0, 0, 84, 84,
-	84, 84, 84, 84, 84, 0, 23, 24, 25, 77,
-	84, 84, 2, 0, 0, 0, 1, 0, 0, 84,
-	13, 14, 49, 50, 51, 52, 53, 54, 55, 84,
-	84, 0, 85, 86, 0, 0, 93, 65, 66, 67,
-	68, 69, 82, 83, 15, 16, 17, 18, 0, 0,
-	0, 78, 84, 35, 36, 7, 44, 0, -2, -2,
-	48, 0, 22, 84, 12, 26, 27, 0, 29, 0,
-	84, 84, 84, 84, 84, 84, 84, 84, 70, 71,
-	72, 73, 74, 75, 76, 56, 0, 81, 0, 91,
-	0, 90, 0, 0, 21, 0, 0, 6, 9, 0,
-	0, 11, 84, 0, 0, -2, -2, -2, -2, -2,
-	-2, 63, 64, 87, 88, 89, 0, 0, 0, 80,
-	0, 0, 10, 0, 0, -2, 0, 84, 0, 20,
-	79, 0, 8, 45, 84, 0, 31, 0, 92, 34,
-	0, 0, 0, 30, 33, 19, 5, 28,
+	0, -2, 0, 0, 3, 0, -2, 38, -2, 40,
+	41, 42, 43, 0, 0, 0, 0, 2, 0, 92,
+	0, 0, 1, 22, 0, 0, 0, 82, 82, 82,
+	82, 82, 82, 82, 0, 23, 24, 25, 82, 82,
+	6, 44, 0, -2, 49, 50, 46, 21, 0, 82,
+	12, 13, 51, 52, 53, 54, 55, 56, 57, 82,
+	82, 82, -2, 0, 83, 84, 0, 0, 91, 80,
+	81, 14, 15, 16, 17, 0, 0, 0, 76, 82,
+	35, 36, 0, 5, 8, 0, 0, 82, 11, 26,
+	27, 0, 29, 0, 82, 82, 82, 82, 82, 82,
+	82, 82, 82, 82, 82, 82, 82, 58, 59, 60,
+	0, 0, 79, 0, 89, 0, 88, 0, 0, 20,
+	0, 0, 0, 9, 0, 10, 82, 0, 0, 61,
+	62, 63, 64, 65, 66, 67, 68, 69, 70, 71,
+	72, 73, -2, 85, 86, 87, 0, 0, 78, 0,
+	7, 47, 0, -2, 0, 82, 74, 0, 19, 0,
+	0, 82, 0, 31, 0, 90, 34, 0, 0, 4,
+	0, 30, 33, 18, 77, 28,
 }
 var parserTok1 = []int{
 
 	1, 3, 3, 3, 3, 3, 3, 3, 3, 3,
 	3, 3, 3, 3, 3, 3, 3, 3, 3, 3,
 	3, 3, 3, 3, 3, 3, 3, 3, 3, 3,
-	3, 3, 3, 60, 77, 3, 3, 64, 67, 3,
-	69, 70, 62, 65, 71, 66, 3, 63, 3, 3,
-	3, 3, 3, 3, 3, 3, 3, 3, 3, 73,
-	59, 72, 58, 3, 3, 3, 3, 3, 3, 3,
+	3, 3, 3, 58, 76, 3, 3, 60, 3, 3,
+	71, 72, 74, 57, 73, 56, 3, 59, 3, 3,
+	3, 3, 3, 3, 3, 3, 3, 3, 3, 67,
+	61, 68, 62, 3, 3, 3, 3, 3, 3, 3,
 	3, 3, 3, 3, 3, 3, 3, 3, 3, 3,
 	3, 3, 3, 3, 3, 3, 3, 3, 3, 3,
-	3, 74, 3, 75, 3, 3, 3, 3, 3, 3,
-	3, 3, 3, 3, 3, 3, 3, 3, 3, 3,
-	3, 3, 3, 3, 3, 3, 3, 3, 3, 3,
-	3, 3, 3, 3, 68,
+	3, 69, 3, 70,
 }
 var parserTok2 = []int{
 
@@ -362,10 +355,10 @@ var parserTok2 = []int{
 	22, 23, 24, 25, 26, 27, 28, 29, 30, 31,
 	32, 33, 34, 35, 36, 37, 38, 39, 40, 41,
 	42, 43, 44, 45, 46, 47, 48, 49, 50, 51,
-	52, 53, 54, 55,
+	52, 53, 54, 55, 63, 64, 65, 66,
 }
 var parserTok3 = []int{
-	8217, 76, 0,
+	8217, 75, 0,
 }
 
 //line yaccpar:1
@@ -594,468 +587,463 @@ parserdefault:
 	switch parsernt {
 
 	case 1:
-		//line new.y:97
+		//line new.y:98
 		{
-			yylex.(*lexer).prog = &Program{Functions: parserS[parserpt-2].functions, Statements: parserS[parserpt-1].statement}
+			yylex.(*lexer).prog = &Program{Functions: parserS[parserpt-2].functions, Statements: parserS[parserpt-1].statements}
 			return 0
 		}
 	case 2:
-		//line new.y:102
+		//line new.y:103
 		{
 			parserVAL.functions = append([]Function{parserS[parserpt-1].function}, parserS[parserpt-0].functions...)
 		}
 	case 3:
-		//line new.y:103
+		//line new.y:104
 		{
 			parserVAL.functions = []Function{parserS[parserpt-0].function}
 		}
 	case 4:
-		//line new.y:104
-		{
-			parserVAL.functions
-		}
-	case 5:
-		//line new.y:108
+		//line new.y:109
 		{
 			parserVAL.function = &Function{Type: parserS[parserpt-7].typeDef, Ident: parserS[parserpt-6].str, Params: parserS[parserpt-4].params, Stat: parserS[parserpt-1].statement}
 		}
-	case 6:
-		//line new.y:111
+	case 5:
+		//line new.y:112
 		{
 			parserVAL.params = parserS[parserpt-0].params
 		}
-	case 7:
-		//line new.y:112
+	case 6:
+		//line new.y:113
 		{
 			parserVAL.params
 		}
-	case 8:
-		//line new.y:115
+	case 7:
+		//line new.y:116
 		{
 			parserVAL.params = append([]Parameter{parserS[parserpt-2].param}, parserS[parserpt-0].params...)
 		}
-	case 9:
-		//line new.y:116
+	case 8:
+		//line new.y:117
 		{
 			parserVAL.params = []Parameter{parserS[parserpt-0].param}
 		}
-	case 10:
-		//line new.y:119
+	case 9:
+		//line new.y:120
 		{
 			parserVAL.param = Parameter{Type: parserS[parserpt-1].typeDef, Ident: parserS[parserpt-0].str}
 		}
-	case 11:
-		//line new.y:123
+	case 10:
+		//line new.y:124
 		{
 			parserVAL.statement = Statement{Type: parserS[parserpt-3].typeDef, Ident: parserS[parserpt-2].str, AssignRHS: parserS[parserpt-0].assign_rhs}
 		}
-	case 12:
-		//line new.y:124
+	case 11:
+		//line new.y:125
 		{
 			parserVAL.statement = Statement{AssignLHS: parserS[parserpt-2].assign_lhs, AssignRHS: parserS[parserpt-0].assign_rhs}
 		}
-	case 13:
-		//line new.y:125
+	case 12:
+		//line new.y:126
 		{
 			parserVAL.statement = Statement{AssignLHS: parserS[parserpt-0].assign_lhs}
 		}
-	case 14:
-		//line new.y:126
-		{
-			parserVAL.statement = Statement{Expr: parserS[parserpt-0].expr}
-		}
-	case 15:
+	case 13:
 		//line new.y:127
 		{
 			parserVAL.statement = Statement{Expr: parserS[parserpt-0].expr}
 		}
-	case 16:
+	case 14:
 		//line new.y:128
 		{
 			parserVAL.statement = Statement{Expr: parserS[parserpt-0].expr}
 		}
-	case 17:
+	case 15:
 		//line new.y:129
 		{
 			parserVAL.statement = Statement{Expr: parserS[parserpt-0].expr}
 		}
-	case 18:
+	case 16:
 		//line new.y:130
 		{
 			parserVAL.statement = Statement{Expr: parserS[parserpt-0].expr}
 		}
-	case 19:
+	case 17:
 		//line new.y:131
+		{
+			parserVAL.statement = Statement{Expr: parserS[parserpt-0].expr}
+		}
+	case 18:
+		//line new.y:132
 		{
 			parserVAL.statement = Statement{Expr: parserS[parserpt-5].expr, StatL: parserS[parserpt-3].statement, StatR: parserS[parserpt-1].statement}
 		}
-	case 20:
-		//line new.y:132
+	case 19:
+		//line new.y:133
 		{
 			parserVAL.statement = Statement{Expr: parserS[parserpt-3].expr, Stat: parserS[parserpt-1].statement}
 		}
-	case 21:
-		//line new.y:133
+	case 20:
+		//line new.y:134
 		{
 			parserVAL.statement = Statement{Stat: parserS[parserpt-1].statement}
 		}
-	case 22:
-		//line new.y:134
+	case 21:
+		//line new.y:135
 		{
-			parserVAL.statement = append([]Statement{parserS[parserpt-2].statement}, parserS[parserpt-0].statement...)
+			parserVAL.statement = append([]Statement{parserS[parserpt-1].statement}, parserS[parserpt-0].statements...)
+		}
+	case 22:
+		//line new.y:140
+		{
+			parserVAL.statements = Statement{Stat: parserS[parserpt-1].op}
 		}
 	case 23:
-		//line new.y:137
+		//line new.y:144
 		{
 			parserVAL.assign_lhs = AssignLHS{Ident: parserS[parserpt-0].str}
 		}
 	case 24:
-		//line new.y:138
+		//line new.y:145
 		{
 			parserVAL.assign_lhs = AssignLHS{ArrayElem: parserS[parserpt-0].array_elem}
 		}
 	case 25:
-		//line new.y:139
+		//line new.y:146
 		{
 			parserVAL.assign_lhs = AssignLHS{PairElem: parserS[parserpt-0].pair_elem}
 		}
 	case 26:
-		//line new.y:142
+		//line new.y:149
 		{
 			parserVAL.assign_rhs = AssignRHS{Expr: parserS[parserpt-0].expr}
 		}
 	case 27:
-		//line new.y:143
+		//line new.y:150
 		{
 			parserVAL.assign_rhs = AssignRHS{ArrayLiter: parserS[parserpt-0].array_liter}
 		}
 	case 28:
-		//line new.y:144
+		//line new.y:151
 		{
 			parserVAL.assign_rhs = AssignRHS{ExprL: parserS[parserpt-3].expr, ExprR: parserS[parserpt-1].expr}
 		}
 	case 29:
-		//line new.y:145
+		//line new.y:152
 		{
 			parserVAL.assign_rhs = AssignRHS{PairElem: parserS[parserpt-0].pair_elem}
 		}
 	case 30:
-		//line new.y:146
+		//line new.y:153
 		{
 			parserVAL.assign_rhs = AssignRHS{Ident: parserS[parserpt-3].str, Args: parserS[parserpt-1].arg}
 		}
 	case 31:
-		//line new.y:149
+		//line new.y:156
 		{
 			parserVAL.arg = parserS[parserpt-0].arg
 		}
 	case 32:
-		//line new.y:150
+		//line new.y:157
 		{
 			parserVAL.arg
 		}
 	case 33:
-		//line new.y:153
+		//line new.y:160
 		{
 			parserVAL.arg = append([]Expr{parserS[parserpt-1].expr}, parserS[parserpt-0].expr...)
 		}
 	case 34:
-		//line new.y:156
+		//line new.y:163
 		{
 			parserVAL.expr = Expr{Expr: parserS[parserpt-0].expr}
 		}
 	case 35:
-		//line new.y:159
+		//line new.y:166
 		{
 			parserVAL.pair_elem = PairElem{Expr: parserS[parserpt-0].expr}
 		}
 	case 36:
-		//line new.y:160
+		//line new.y:167
 		{
 			parserVAL.pair_elem = PairElem{Expr: parserS[parserpt-0].expr}
 		}
 	case 37:
-		//line new.y:163
+		//line new.y:170
 		{
 			parserVAL.typeDef = TypeDef{Type: parserS[parserpt-0].typeDef}
 		}
 	case 38:
-		//line new.y:164
+		//line new.y:171
 		{
 			parserVAL.typeDef = TypeDef{Type: parserS[parserpt-0].typeDef}
 		}
 	case 39:
-		//line new.y:165
+		//line new.y:172
 		{
 			parserVAL.typeDef = TypeDef{Type: parserS[parserpt-0].typeDef}
 		}
 	case 40:
-		//line new.y:168
+		//line new.y:175
 		{
 			parserVAL.typeDef = BaseType{Type: parserS[parserpt-0].str}
 		}
 	case 41:
-		//line new.y:169
+		//line new.y:176
 		{
 			parserVAL.typeDef = BaseType{Type: parserS[parserpt-0].str}
 		}
 	case 42:
-		//line new.y:170
+		//line new.y:177
 		{
 			parserVAL.typeDef = BaseType{Type: parserS[parserpt-0].str}
 		}
 	case 43:
-		//line new.y:171
+		//line new.y:178
 		{
 			parserVAL.typeDef = BaseType{Type: parserS[parserpt-0].str}
 		}
 	case 44:
-		//line new.y:174
+		//line new.y:181
 		{
 			parserVAL.typeDef = ArrayType{Type: parserS[parserpt-2].typeDef}
 		}
 	case 45:
-		//line new.y:177
+		//line new.y:184
+		{
+			parserVAL.typeDef = TypeDef{Type: parserS[parserpt-0].typeDef}
+		}
+	case 46:
+		//line new.y:185
+		{
+			parserVAL.typeDef = TypeDef{Type: parserS[parserpt-0].typeDef}
+		}
+	case 47:
+		//line new.y:188
 		{
 			parserVAL.typeDef = PairType{Lpair: parserS[parserpt-3].typeDef, Rpair: parserS[parserpt-1].typeDef}
 		}
-	case 46:
-		//line new.y:180
-		{
-			parserVAL.typeDef = PairElemType{Type: parserS[parserpt-0].typeDef}
-		}
-	case 47:
-		//line new.y:181
-		{
-			parserVAL.typeDef = PairElemType{Type: parserS[parserpt-0].typeDef}
-		}
 	case 48:
-		//line new.y:182
+		//line new.y:191
+		{
+			parserVAL.typeDef = PairElemType{Type: parserS[parserpt-0].typeDef}
+		}
+	case 49:
+		//line new.y:192
+		{
+			parserVAL.typeDef = PairElemType{Type: parserS[parserpt-0].typeDef}
+		}
+	case 50:
+		//line new.y:193
 		{
 			parserVAL.typeDef = PairElemType{Type: parserS[parserpt-0].str}
 		}
-	case 49:
-		//line new.y:185
+	case 51:
+		//line new.y:196
 		{
 			parserVAL.expr = Expr{Expr: parserS[parserpt-0].int}
 		}
-	case 50:
-		//line new.y:186
+	case 52:
+		//line new.y:197
 		{
 			parserVAL.expr = Expr{Expr: parserS[parserpt-0].bool}
 		}
-	case 51:
-		//line new.y:187
+	case 53:
+		//line new.y:198
 		{
 			parserVAL.expr = Expr{Expr: parserS[parserpt-0].rune}
 		}
-	case 52:
-		//line new.y:188
-		{
-			parserVAL.expr = Expr{Expr: parserS[parserpt-0].str}
-		}
-	case 53:
-		//line new.y:189
-		{
-			parserVAL.expr = Expr{Expr: parserS[parserpt-0].pair}
-		}
 	case 54:
-		//line new.y:190
+		//line new.y:199
 		{
 			parserVAL.expr = Expr{Expr: parserS[parserpt-0].str}
 		}
 	case 55:
-		//line new.y:191
+		//line new.y:200
+		{
+			parserVAL.expr = Expr{Expr: parserS[parserpt-0].pair}
+		}
+	case 56:
+		//line new.y:201
+		{
+			parserVAL.expr = Expr{Expr: parserS[parserpt-0].str}
+		}
+	case 57:
+		//line new.y:202
 		{
 			parserVAL.expr = Expr{Expr: parserS[parserpt-0].array_elem}
 		}
-	case 56:
-		//line new.y:202
-		{
-			parserVAL.expr = Expr{UnaryOp: parserS[parserpt-1].uop, Expr: parserS[parserpt-0].expr}
-		}
-	case 57:
+	case 58:
 		//line new.y:203
 		{
-			parserVAL.expr = Expr{Lexpr: parserS[parserpt-2].expr, BinaryOp: parserS[parserpt-1].not, Rexpr: parserS[parserpt-0].expr}
-		}
-	case 58:
-		//line new.y:204
-		{
-			parserVAL.expr = Expr{Lexpr: parserS[parserpt-2].expr, BinaryOp: parserS[parserpt-1].eq, Rexpr: parserS[parserpt-0].expr}
+			parserVAL.expr = Expr{UnaryOp: parserS[parserpt-1].op, Expr: parserS[parserpt-0].expr}
 		}
 	case 59:
-		//line new.y:205
+		//line new.y:204
 		{
-			parserVAL.expr = Expr{Lexpr: parserS[parserpt-2].expr, BinaryOp: parserS[parserpt-1].gte, Rexpr: parserS[parserpt-0].expr}
+			parserVAL.expr = Expr{UnaryOp: parserS[parserpt-1].op, Expr: parserS[parserpt-0].expr}
 		}
 	case 60:
-		//line new.y:206
+		//line new.y:205
 		{
-			parserVAL.expr = Expr{Lexpr: parserS[parserpt-2].expr, BinaryOp: parserS[parserpt-1].lte, Rexpr: parserS[parserpt-0].expr}
+			parserVAL.expr = Expr{UnaryOp: parserS[parserpt-1].op, Expr: parserS[parserpt-0].expr}
 		}
 	case 61:
-		//line new.y:207
+		//line new.y:209
 		{
-			parserVAL.expr = Expr{Lexpr: parserS[parserpt-2].expr, BinaryOp: parserS[parserpt-1].gt, Rexpr: parserS[parserpt-0].expr}
+			parserVAL.expr = Expr{Lexpr: parserS[parserpt-2].expr, BinaryOp: parserS[parserpt-1].op, Rexpr: parserS[parserpt-0].expr}
 		}
 	case 62:
-		//line new.y:208
-		{
-			parserVAL.expr = Expr{Lexpr: parserS[parserpt-2].expr, BinaryOp: parserS[parserpt-1].lt, Rexpr: parserS[parserpt-0].expr}
-		}
-	case 63:
 		//line new.y:210
 		{
-			parserVAL.expr = Expr{Lexpr: parserS[parserpt-2].expr, BinaryOp: parserS[parserpt-1].bop, Rexpr: parserS[parserpt-0].expr}
+			parserVAL.expr = Expr{Lexpr: parserS[parserpt-2].expr, BinaryOp: parserS[parserpt-1].op, Rexpr: parserS[parserpt-0].expr}
+		}
+	case 63:
+		//line new.y:211
+		{
+			parserVAL.expr = Expr{Lexpr: parserS[parserpt-2].expr, BinaryOp: parserS[parserpt-1].op, Rexpr: parserS[parserpt-0].expr}
 		}
 	case 64:
-		//line new.y:211
+		//line new.y:212
+		{
+			parserVAL.expr = Expr{Lexpr: parserS[parserpt-2].expr, BinaryOp: parserS[parserpt-1].op, Rexpr: parserS[parserpt-0].expr}
+		}
+	case 65:
+		//line new.y:213
+		{
+			parserVAL.expr = Expr{Lexpr: parserS[parserpt-2].expr, BinaryOp: parserS[parserpt-1].op, Rexpr: parserS[parserpt-0].expr}
+		}
+	case 66:
+		//line new.y:214
+		{
+			parserVAL.expr = Expr{Lexpr: parserS[parserpt-2].expr, BinaryOp: parserS[parserpt-1].op, Rexpr: parserS[parserpt-0].expr}
+		}
+	case 67:
+		//line new.y:215
+		{
+			parserVAL.expr = Expr{Lexpr: parserS[parserpt-2].expr, BinaryOp: parserS[parserpt-1].str, Rexpr: parserS[parserpt-0].expr}
+		}
+	case 68:
+		//line new.y:216
+		{
+			parserVAL.expr = Expr{Lexpr: parserS[parserpt-2].expr, BinaryOp: parserS[parserpt-1].str, Rexpr: parserS[parserpt-0].expr}
+		}
+	case 69:
+		//line new.y:217
+		{
+			parserVAL.expr = Expr{Lexpr: parserS[parserpt-2].expr, BinaryOp: parserS[parserpt-1].op, Rexpr: parserS[parserpt-0].expr}
+		}
+	case 70:
+		//line new.y:218
+		{
+			parserVAL.expr = Expr{Lexpr: parserS[parserpt-2].expr, BinaryOp: parserS[parserpt-1].op, Rexpr: parserS[parserpt-0].expr}
+		}
+	case 71:
+		//line new.y:219
+		{
+			parserVAL.expr = Expr{Lexpr: parserS[parserpt-2].expr, BinaryOp: parserS[parserpt-1].op, Rexpr: parserS[parserpt-0].expr}
+		}
+	case 72:
+		//line new.y:220
+		{
+			parserVAL.expr = Expr{Lexpr: parserS[parserpt-2].expr, BinaryOp: parserS[parserpt-1].op, Rexpr: parserS[parserpt-0].expr}
+		}
+	case 73:
+		//line new.y:223
 		{
 			parserVAL.expr = Expr{Expr: parserS[parserpt-1].expr}
 		}
-	case 65:
-		//line new.y:214
-		{
-			parserVAL.uop = UnaryOp{Op: parserS[parserpt-0].str}
-		}
-	case 66:
-		//line new.y:215
-		{
-			parserVAL.uop = UnaryOp{Op: parserS[parserpt-0].str}
-		}
-	case 67:
-		//line new.y:216
-		{
-			parserVAL.uop = UnaryOp{Op: parserS[parserpt-0].str}
-		}
-	case 68:
-		//line new.y:217
-		{
-			parserVAL.uop = UnaryOp{Op: parserS[parserpt-0].str}
-		}
-	case 69:
-		//line new.y:218
-		{
-			parserVAL.uop = UnaryOp{Op: parserS[parserpt-0].str}
-		}
-	case 70:
-		//line new.y:221
-		{
-			parserVAL.bop = BinaryOp{Op: parserS[parserpt-0].str}
-		}
-	case 71:
-		//line new.y:222
-		{
-			parserVAL.bop = BinaryOp{Op: parserS[parserpt-0].str}
-		}
-	case 72:
-		//line new.y:223
-		{
-			parserVAL.bop = BinaryOp{Op: parserS[parserpt-0].str}
-		}
-	case 73:
-		//line new.y:224
-		{
-			parserVAL.bop = BinaryOp{Op: parserS[parserpt-0].str}
-		}
 	case 74:
-		//line new.y:225
-		{
-			parserVAL.bop = BinaryOp{Op: parserS[parserpt-0].str}
-		}
-	case 75:
 		//line new.y:226
 		{
-			parserVAL.bop = BinaryOp{Op: parserS[parserpt-0].str}
+			parserVAL.expr = append([]Expr{parserS[parserpt-2].expr}, parserS[parserpt-0].expr)
 		}
-	case 76:
+	case 75:
 		//line new.y:227
 		{
-			parserVAL.bop = BinaryOp{Op: parserS[parserpt-0].str}
+			parserVAL.expr
 		}
-	case 77:
-		parserVAL.str = parserS[parserpt-0].str
-	case 78:
-		//line new.y:232
+	case 76:
+		//line new.y:230
 		{
 			parserVAL.array_elem = ArrayElem{Ident: parserS[parserpt-1].str, Exprs: parserS[parserpt-0].expr}
 		}
-	case 79:
-		//line new.y:236
+	case 77:
+		//line new.y:234
 		{
-			parserVAL.expr = append([]Expr{parserS[parserpt-2].expr}, parserS[parserpt-1].expr...)
+			parserVAL.expr = append([]Expr{parserS[parserpt-4].expr}, parserS[parserpt-1].expr...)
 		}
-	case 80:
-		//line new.y:237
+	case 78:
+		//line new.y:235
 		{
 			parserVAL.expr = []Expr{parserS[parserpt-1].expr}
 		}
-	case 81:
-		//line new.y:240
+	case 79:
+		//line new.y:239
 		{
 			parserVAL.int = IntLiter{Sign: parserS[parserpt-1].sign, Int: parserS[parserpt-0].str}
 		}
-	case 82:
+	case 80:
+		//line new.y:242
+		{
+			parserVAL.sign = Sign{Sign: parserS[parserpt-0].str}
+		}
+	case 81:
 		//line new.y:243
 		{
 			parserVAL.sign = Sign{Sign: parserS[parserpt-0].str}
 		}
-	case 83:
+	case 82:
 		//line new.y:244
-		{
-			parserVAL.sign = Sign{Sign: parserS[parserpt-0].str}
-		}
-	case 84:
-		//line new.y:245
 		{
 			parserVAL.sign
 		}
-	case 85:
+	case 83:
+		//line new.y:247
+		{
+			parserVAL.bool = Bool{Bool: parserS[parserpt-0].str}
+		}
+	case 84:
 		//line new.y:248
 		{
 			parserVAL.bool = Bool{Bool: parserS[parserpt-0].str}
 		}
-	case 86:
-		//line new.y:249
-		{
-			parserVAL.bool = Bool{Bool: parserS[parserpt-0].str}
-		}
-	case 87:
-		//line new.y:252
+	case 85:
+		//line new.y:251
 		{
 			parserVAL.rune = Char{Char: parserS[parserpt-1].chr}
 		}
-	case 88:
-		//line new.y:255
+	case 86:
+		//line new.y:254
 		{
 			parserVAL.str = Str{Chars: parserS[parserpt-1].chr}
 		}
-	case 89:
-		//line new.y:258
+	case 87:
+		//line new.y:257
 		{
 			parserVAL.chr = append([]Char{parserS[parserpt-1].chr}, parserS[parserpt-0].chr...)
 		}
-	case 90:
-		//line new.y:259
+	case 88:
+		//line new.y:258
 		{
 			parserVAL.chr = []Char{parserS[parserpt-0].chr}
 		}
-	case 91:
-		//line new.y:262
+	case 89:
+		//line new.y:261
 		{
 			parserVAL.chr = Char{Char: parserS[parserpt-0].str}
 		}
-	case 92:
-		//line new.y:264
+	case 90:
+		//line new.y:263
 		{
 			parserVAL.array_liter = append([]Expr{parserS[parserpt-2].expr}, parserS[parserpt-1].expr...)
 		}
-	case 93:
-		//line new.y:267
+	case 91:
+		//line new.y:266
 		{
 			parserVAL.pair = PairLiter{PairLit: parserS[parserpt-0].str}
 		}
+	case 92:
+		parserVAL.str = parserS[parserpt-0].str
 	}
 	goto parserstack /* stack new state and value */
 }

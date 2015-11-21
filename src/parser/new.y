@@ -32,7 +32,7 @@ char        *Char
 %token <str> INT BOOL CHAR STRING                          // Base types
 %token <str> PAIR
 %token <str> IDENTIFIER
-%token <str> NOT NEG LEN ORD CHR                           // Unary ops
+%token <str> NOT NEG LEN ORD CHR                           // Unary ops   DO WE NEED THESEEEE
 %token <str> MULT DIV MOD ADD SUB AND OR                   // Binary ops
 %token <str> GT GTE LT LTE EQ NEQ
 %token <str> INTEGER
@@ -43,13 +43,13 @@ char        *Char
 
 %type <functions> functions
 %type <function>  function
-//%type <statements> statements
-%type <statement> statement
+%type <statements> statements
+%type <statement> statement // statement_list
 %type <typeDef>  typeDef
 %type <typeDef>  base_type
 %type <typeDef>  array_type
 %type <typeDef>  pair_type
-%type <typeDef>  pair_elem_type
+%type <typeDef>  pair_elem_type  array_elem_type
 %type <str> ident
 %type <params> optional_param_list
 %type <params> param_list
@@ -58,7 +58,7 @@ char        *Char
 %type <assign_lhs> assign_lhs
 %type <expr> expr
 %type <expr> optional_expr_list
-%type <expr> expr_list
+%type <expr> expr_list  exprs
 %type <array_elem> array_elem
 %type <pair_elem> pair_elem
 %type <array_liter> array_liter
@@ -69,31 +69,32 @@ char        *Char
 %type <rune> char_liter
 %type <str> str_liter
 %type <pair> pair_liter
-%type <uop> unaryOp
-%type <bop> binaryOp
+//%type <uop> unaryOp
+//%type <bop> binaryOp
 %type <sign> optional_sign
 %type <chr> character
 %type <chr> characters
-%type <gte> '>='
-%type <lte> '<='
-%type <gt>  '>'
-%type <lt>  '<' 
-%type <not> '!='
-%type <eq>  '=='
 
+%token <op> '-' '+' '!' '/' '%' '<' '>' EqEq NEq AndAnd OrOr ';'
 
 /* Associativity and Precedence operators specification start -----------*/
-
-%left     NOT NEG LEN ORD CHR
-%left     '*' '/' '%' '+' '-' '&&' '||'
-%nonassoc '>' '>='
-%nonassoc  '<' '<=' '==' '!='
+%right '=' '[' ']' '(' ')' ';'
+%left ','
+%left OrOr
+%left AndAnd
+%left EqEq
+%left NEq
+%left '<' '>' LTE GTE
+%left '+' '-'
+%left '*' '/' '%'
+%left '!'  
+%nonassoc IDENTIFIER
 
 /* Associativity and Precedence operators end --------------------------------*/
 
 %%
 
-program : BEGIN functions statement END
+program : BEGIN functions statements END
           { yylex.(*lexer).prog = &Program{Functions : $2, Statements : $3}
             return 0
           }
@@ -101,7 +102,7 @@ program : BEGIN functions statement END
 
 functions : function functions  { $$ = append([]Function{$1}, $2...) }
           | function            { $$ = []Function{$1} }
-          | { $$ } // IS THIS EVEN LEGAL????
+        //  | { $$ } // IS THIS EVEN LEGAL????
           ;
 
 function : typeDef ident '(' optional_param_list ')' IS statement END
@@ -131,8 +132,14 @@ statement : typeDef ident '=' assign_rhs { $$ = Statement{Type : $1, Ident : $2,
           | IF expr THEN statement ELSE statement FI  { $$ = Statement{Expr : $2, StatL : $4, StatR : $6} }
           | WHILE expr DO statement DONE { $$ = Statement{Expr : $2, Stat : $4} } 
           | BEGIN statement END          { $$ = Statement{Stat : $2} }
-          | statement ';' statement      { $$ = append([]Statement{$1}, $3...) }  
+          | statement statements     { $$ = append([]Statement{$1}, $2...) }  
           ; 
+
+//statement_list : statements { $$ = $1 } ;
+
+statements : ';' statement                { $$ = Statement{Stat : $1} }
+           ;
+
 
 assign_lhs : ident      { $$ = AssignLHS{Ident : $1} }
            | array_elem { $$ = AssignLHS{ArrayElem : $1} }
@@ -168,14 +175,18 @@ typeDef : base_type  { $$ = TypeDef{Type : $1} }
 base_type : INT    { $$ = BaseType{Type : $1} } 
           | BOOL   { $$ = BaseType{Type : $1} } 
           | CHAR   { $$ = BaseType{Type : $1} } 
-          | STRING { $$ = BaseType{Type : $1} } 
-          ;
+          | STRING { $$ = BaseType{Type : $1} }           
+;
 
-array_type : typeDef '[' ']' { $$ = ArrayType{Type : $1} }
+array_type : array_elem_type '[' ']' { $$ = ArrayType{Type : $1} }
            ;
 
-pair_type : PAIR '(' pair_elem_type ',' pair_elem_type ')'  { $$ = PairType{Lpair : $3, Rpair : $5} }
-          ;
+array_elem_type : base_type { $$ = TypeDef{Type : $1} }
+                | pair_type { $$ = TypeDef{Type : $1} }
+                ;
+
+pair_type : PAIR '(' pair_elem_type ',' pair_elem_type ')'  { $$ = PairType{Lpair : $3, Rpair : $5} }          
+;
 
 pair_elem_type : base_type  { $$ = PairElemType{Type : $1} } 
                | array_type { $$ = PairElemType{Type : $1} } 
@@ -189,52 +200,40 @@ expr : int_liter    { $$ = Expr{Expr : $1} }
      | pair_liter   { $$ = Expr{Expr : $1} } 
      | ident        { $$ = Expr{Expr : $1} } 
      | array_elem   { $$ = Expr{Expr : $1} } 
-   //  | '!' expr     { $$ = Expr{UnaryOp : $1, Expr : $2} }
-   //  | '-' expr     { $$ = Expr{UnaryOp : $1, Expr : $2} }
-   //  | '  
-
-//%left     NOT NEG LEN ORD CHR
-//%left     '*' '/' '%' '+' '-' '&&' '||'
-//%nonassoc '>' '>='
-//%nonassoc  '<' '<=' '==' '!='
-
-
-     | unaryOp expr { $$ = Expr{UnaryOp : $1, Expr : $2} }
-     | expr '!=' expr { $$ = Expr{Lexpr : $1, BinaryOp : $2, Rexpr : $3} }
-     | expr '==' expr { $$ = Expr{Lexpr : $1, BinaryOp : $2, Rexpr : $3} }
-     | expr '>=' expr { $$ = Expr{Lexpr : $1, BinaryOp : $2, Rexpr : $3} }
-     | expr '<=' expr { $$ = Expr{Lexpr : $1, BinaryOp : $2, Rexpr : $3} }
-     | expr '>' expr { $$ = Expr{Lexpr : $1, BinaryOp : $2, Rexpr : $3} }
-     | expr '<' expr { $$ = Expr{Lexpr : $1, BinaryOp : $2, Rexpr : $3} }
+     | '-' expr     { $$ = Expr{UnaryOp : $1, Expr : $2} }
+     | '+' expr     { $$ = Expr{UnaryOp : $1, Expr : $2} }
+     | '!' expr     { $$ = Expr{UnaryOp : $1, Expr : $2} }
  
-     | expr binaryOp expr { $$ = Expr{Lexpr : $1, BinaryOp : $2, Rexpr : $3} }
-     | '(' expr ')'  { $$ = Expr{Expr : $2} } 
+//     | unaryOp expr { $$ = Expr{UnaryOp : $1, Expr : $2} }
+ 
+     | expr '+' expr { $$ = Expr{Lexpr : $1, BinaryOp : $2, Rexpr : $3} }
+     | expr '-' expr { $$ = Expr{Lexpr : $1, BinaryOp : $2, Rexpr : $3} }
+     | expr '/' expr { $$ = Expr{Lexpr : $1, BinaryOp : $2, Rexpr : $3} }
+     | expr '%' expr { $$ = Expr{Lexpr : $1, BinaryOp : $2, Rexpr : $3} }
+     | expr '<' expr { $$ = Expr{Lexpr : $1, BinaryOp : $2, Rexpr : $3} }
+     | expr '>' expr { $$ = Expr{Lexpr : $1, BinaryOp : $2, Rexpr : $3} }
+     | expr LTE expr { $$ = Expr{Lexpr : $1, BinaryOp : $2, Rexpr : $3} }
+     | expr GTE expr { $$ = Expr{Lexpr : $1, BinaryOp : $2, Rexpr : $3} }
+     | expr EqEq expr { $$ = Expr{Lexpr : $1, BinaryOp : $2, Rexpr : $3} }
+     | expr NEq expr { $$ = Expr{Lexpr : $1, BinaryOp : $2, Rexpr : $3} }
+     | expr AndAnd expr { $$ = Expr{Lexpr : $1, BinaryOp : $2, Rexpr : $3} }
+     | expr OrOr expr { $$ = Expr{Lexpr : $1, BinaryOp : $2, Rexpr : $3} }
+
+//     | expr binaryOp expr { $$ = Expr{Lexpr : $1, BinaryOp : $2, Rexpr : $3} }
+     | '(' exprs ')'  { $$ = Expr{Expr : $2} } 
      ;
 
-unaryOp : NOT { $$ = UnaryOp{Op : $1} }
-        | NEG { $$ = UnaryOp{Op : $1} }
-        | LEN { $$ = UnaryOp{Op : $1} }
-        | ORD { $$ = UnaryOp{Op : $1} }
-        | CHR { $$ = UnaryOp{Op : $1} }
-        ;
-
-binaryOp : MULT { $$ = BinaryOp{Op : $1} }
-         | DIV  { $$ = BinaryOp{Op : $1} }
-         | MOD  { $$ = BinaryOp{Op : $1} }
-         | ADD  { $$ = BinaryOp{Op : $1} }
-         | SUB  { $$ = BinaryOp{Op : $1} }
-         | AND  { $$ = BinaryOp{Op : $1} }
-         | OR   { $$ = BinaryOp{Op : $1} }
-         ;
-
-ident : IDENTIFIER ;
+exprs : expr ',' exprs { $$ = append([]Expr{$1}, $3) }
+      | { $$ }
+      ; 
 
 array_elem : ident expr_list { $$ = ArrayElem{Ident : $1, Exprs : $2} }
            ;
 
 // NOT SURE ABOUT THIS IMPLEMENTATION>>
-expr_list : '[' expr expr_list ']' { $$ = append([]Expr{$2}, $3...) }
+expr_list : '[' expr ']' '[' expr_list ']' { $$ = append([]Expr{$2}, $5...) }
           | '[' expr ']'       { $$ = []Expr{$2} } 
+          
           ;
 
 int_liter : optional_sign INTEGER { $$ = IntLiter{Sign : $1, Int : $2} }
@@ -264,4 +263,7 @@ character : CHARACTER { $$ = Char{Char : $1} } ;
 array_liter : '[' expr optional_expr_list ']'  { $$ = append([]Expr{$2}, $3...)}
             ;
 
-pair_liter : NULL { $$ = PairLiter{PairLit : $1} }
+pair_liter : NULL { $$ = PairLiter{PairLit : $1} } ;
+
+ident : IDENTIFIER 
+      ;
