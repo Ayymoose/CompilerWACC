@@ -7,11 +7,11 @@
 
 begin
   char c1 = 'f';
-  char c2 = 'F';	
-  if c1 == c2 
-  then 
+  char c2 = 'F';
+  if c1 == c2
+  then
     println "incorrect"
-  else 
+  else
     println "correct"
   fi
 end

@@ -22,6 +22,22 @@ type Token struct {
 	Pos    int    // The starting position, in bytes, of this item in the input string.
 }
 
+func (token Token) String() string {
+	switch token.Typ {
+	case eof:
+		return "EOF"
+	case ERROR:
+		return token.Lexeme
+	}
+	if _, ok := TokenKeywordStrings[token.Lexeme]; ok {
+		return fmt.Sprintf("%q", token.Lexeme)
+	}
+	if _, ok := TokenStrings[token.Lexeme]; ok {
+		return fmt.Sprintf("%q", token.Lexeme)
+	}
+	return fmt.Sprint("Const: ", token.Lexeme)
+}
+
 // Lexer is  a struct
 type Lexer struct {
 	name       string
@@ -204,26 +220,24 @@ func lexInsideProgram(l *Lexer) stateFn {
 			//		s := grammar.Token_strings[str]
 			l.width = len(str)
 			l.pos += l.width
-			switch str {
-			case "\"":
-				return lexString
-			case "'":
-				return lexChar
-			case "\\0", "\b", "\t", "\n", "\f", "\r":
-				l.ignore()
-				return lexInsideProgram
-			case "#":
-				for l.next() != '\n' {
-					l.ignore()
-				}
-				l.backup()
-				return lexInsideProgram
-			}
 			l.emit(TokenStrings[str])
 			return lexInsideProgram
 		}
 	}
 	switch r := l.next(); {
+	case r == '"':
+		return lexString
+	case r == '\'':
+		return lexChar
+	case r == '\b', r == '\t', r == '\n', r == '\f', r == '\r':
+		l.ignore()
+		return lexInsideProgram
+	case r == '#':
+		for l.next() != '\n' {
+			l.ignore()
+		}
+		l.backup()
+		return lexInsideProgram
 	case unicode.IsSpace(r):
 		l.ignore()
 		return lexInsideProgram
@@ -326,9 +340,10 @@ Loop:
 		case '\\':
 			if ok := runeIsEscape(l.peek()); !ok {
 				return l.errorf("Not an escape character %s", strconv.QuoteRuneToASCII(l.next()))
+			} else {
+				l.next()
+				break
 			}
-			l.next()
-			break
 			fallthrough
 		case eof, '\n':
 			return l.errorf("unterminated character constant")
@@ -377,6 +392,7 @@ func (l *Lexer) Error(e string) {
 // Lex is used by the yacc-generated parser to fetch the next Lexeme.
 func (l *Lexer) Lex(lval *parserSymType) int {
 	token := l.NextItem()
+	//	fmt.Println(token, token.Typ)
 	switch token.Typ {
 	case STRINGCONST, IDENTIFIER, CHARACTER:
 		*lval = parserSymType{str: token.Lexeme}

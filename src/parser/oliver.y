@@ -76,18 +76,20 @@ pairelemtype Type
 
 %%
 
-program : BEGIN functions statements END
-          { parserlex.(*Lexer).prog = &Program{functionlist : $2 , statList : $3 , symbolTable : &SymbolTable{Table: make(map[string]Type)}}
-            return 0
-          }
+program : BEGIN functions statements END {
+                                          parserlex.(*Lexer).prog = &Program{functionlist : $2 , statList : $3 , symbolTable : &SymbolTable{Table: make(map[string]Type)}}
+                                         }
 
-functions : functions function  {$$ = append($1, $2)}
-          |                     {$$ = []*Function{}}
+functions : functions function  { $$ = append($1, $2)}
+          |                     { $$ = []*Function{} }
 
 function : typeDef IDENTIFIER OPENROUND CLOSEROUND IS statement END
-           { $$ = &Function{ident : $2, returnType : $1, statlist : $6} }
+           { $$ = &Function{ident : $2, returnType : $1, statlist : $6}
+           }
          | typeDef IDENTIFIER OPENROUND paramlist CLOSEROUND IS statement END
-           { $$ = &Function{ident : $2, returnType : $1, statlist : $7, parameterTypes : $4} }
+           {
+           $$ = &Function{ident : $2, returnType : $1, statlist : $7, parameterTypes : $4}
+           }
 
 paramlist : paramlist COMMA param { $$ = append($1, $3)}
           | param                 { $$ = []Param{ $1 } }
@@ -105,6 +107,7 @@ assignrhs : expr                                           {$$ = $1}
           | CALL IDENTIFIER OPENROUND exprlist CLOSEROUND  { $$ = Call{ident : $2, exprlist : $4} }
 
 statements : statements SEMICOLON statement           { $$ = append($1,$3) }
+           | statement                                { $$ = []interface{}{$1} }
            |                                          { $$ = []interface{}{} }
 
 statement : typeDef IDENTIFIER ASSIGNMENT assignrhs   { $$ = Declare{Type : $1, lhs : $2, rhs : $4} }
