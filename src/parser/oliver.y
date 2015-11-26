@@ -108,7 +108,7 @@ assignrhs : expr                                           {$$ = $1}
 
 statements : statements SEMICOLON statement           { $$ = append($1,$3) }
            | statement                                { $$ = []interface{}{$1} }
-           |                                          { $$ = []interface{}{} }
+        
 
 statement : SKIP                                      { $$ = $1 }
           | typeDef IDENTIFIER ASSIGNMENT assignrhs   { $$ = Declare{Type : $1, lhs : $2, rhs : $4} }
