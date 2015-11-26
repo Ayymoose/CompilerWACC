@@ -17,6 +17,7 @@ const SEMANTIC_ERROR = 200
 // wacc_examples\valid\while\fibonacciFullIt.wacc
 // wacc_examples\valid\function\simple_functions\functionDeclaration.wacc
 // wacc_examples\valid\function\simple_functions\functionReturnPair.wacc
+// wacc_examples\valid\function\simple_functions\functionManyArguments.wacc
 
 func main() {
 	file := os.Args[1] // index 1 is file path

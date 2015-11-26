@@ -163,7 +163,7 @@ const parserEofCode = 1
 const parserErrCode = 2
 const parserMaxDepth = 200
 
-//line oliver.y:188
+//line oliver.y:189
 
 //line yacctab:1
 var parserExca = [...]int{
@@ -171,90 +171,89 @@ var parserExca = [...]int{
 	1, -1,
 	-2, 0,
 	-1, 106,
-	53, 73,
-	-2, 70,
-	-1, 107,
 	53, 74,
 	-2, 71,
+	-1, 107,
+	53, 75,
+	-2, 72,
 }
 
-const parserNprod = 81
+const parserNprod = 82
 const parserPrivate = 57344
 
 var parserTokenNames []string
 var parserStates []string
 
-const parserLast = 403
+const parserLast = 392
 
 var parserAct = [...]int{
 
-	73, 4, 112, 62, 20, 117, 24, 7, 72, 19,
-	116, 136, 38, 55, 56, 57, 58, 59, 60, 105,
-	61, 35, 46, 30, 31, 35, 23, 35, 146, 161,
-	140, 66, 67, 23, 102, 145, 34, 160, 138, 144,
-	139, 23, 70, 75, 162, 157, 101, 36, 92, 93,
-	94, 95, 96, 97, 98, 32, 23, 143, 69, 156,
-	144, 70, 22, 35, 71, 104, 103, 33, 142, 109,
-	107, 33, 65, 113, 115, 106, 64, 75, 33, 114,
-	118, 119, 120, 121, 122, 123, 124, 125, 126, 127,
-	128, 129, 130, 25, 26, 27, 28, 29, 33, 33,
-	33, 132, 133, 150, 134, 137, 2, 21, 44, 33,
-	6, 25, 26, 27, 28, 29, 141, 25, 26, 27,
-	28, 108, 23, 23, 110, 63, 81, 83, 82, 79,
-	80, 90, 91, 85, 87, 84, 86, 88, 89, 149,
-	109, 107, 151, 113, 68, 154, 106, 155, 153, 152,
-	9, 74, 158, 159, 111, 5, 148, 3, 1, 0,
-	23, 37, 0, 76, 77, 30, 31, 0, 23, 0,
-	0, 0, 47, 23, 48, 49, 50, 0, 0, 0,
-	52, 51, 0, 0, 0, 0, 0, 0, 0, 0,
-	0, 0, 40, 41, 54, 78, 53, 0, 0, 0,
-	0, 0, 0, 43, 45, 39, 42, 18, 0, 0,
-	8, 10, 11, 12, 13, 14, 15, 16, 0, 0,
-	0, 17, 0, 0, 0, 0, 30, 31, 25, 26,
-	27, 28, 29, 0, 0, 47, 0, 48, 49, 50,
-	0, 0, 0, 52, 51, 0, 0, 0, 0, 0,
-	0, 0, 0, 0, 0, 40, 41, 54, 0, 53,
-	0, 0, 0, 0, 0, 22, 43, 45, 39, 42,
-	81, 83, 82, 79, 80, 90, 91, 85, 87, 84,
-	86, 88, 89, 0, 0, 0, 0, 0, 0, 0,
-	0, 163, 81, 83, 82, 79, 80, 90, 91, 85,
-	87, 84, 86, 88, 89, 0, 0, 0, 0, 0,
-	0, 0, 0, 131, 81, 83, 82, 79, 80, 90,
-	91, 85, 87, 84, 86, 88, 89, 0, 0, 0,
-	0, 0, 0, 0, 147, 81, 83, 82, 79, 80,
-	90, 91, 85, 87, 84, 86, 88, 89, 100, 0,
-	0, 0, 0, 0, 0, 135, 0, 99, 0, 0,
-	0, 0, 0, 0, 81, 83, 82, 79, 80, 90,
-	91, 85, 87, 84, 86, 88, 89, 81, 83, 82,
-	79, 80, 90, 91, 85, 87, 84, 86, 88, 89,
-	81, 83, 82, 79, 80, 90, 91, 85, 87, 84,
-	86, 88, 89,
+	73, 4, 112, 117, 62, 24, 116, 72, 7, 163,
+	158, 20, 38, 55, 56, 57, 58, 59, 60, 105,
+	61, 35, 46, 30, 31, 35, 23, 19, 35, 162,
+	141, 66, 67, 23, 102, 144, 147, 34, 145, 137,
+	101, 23, 75, 161, 139, 145, 140, 70, 92, 93,
+	94, 95, 96, 97, 98, 36, 23, 146, 32, 157,
+	35, 71, 22, 33, 33, 104, 151, 143, 65, 69,
+	109, 33, 70, 115, 113, 33, 75, 107, 114, 118,
+	119, 120, 121, 122, 123, 124, 125, 126, 127, 128,
+	129, 130, 131, 106, 33, 103, 76, 77, 30, 31,
+	33, 133, 134, 64, 135, 47, 138, 48, 49, 50,
+	9, 2, 33, 52, 51, 21, 142, 6, 44, 63,
+	74, 37, 23, 23, 111, 40, 41, 54, 78, 53,
+	5, 25, 26, 27, 28, 29, 43, 45, 39, 42,
+	150, 3, 109, 152, 118, 113, 155, 154, 156, 107,
+	1, 68, 0, 159, 160, 0, 0, 149, 0, 0,
+	0, 23, 110, 0, 0, 106, 0, 0, 0, 23,
+	0, 0, 18, 0, 23, 8, 10, 11, 12, 13,
+	14, 15, 16, 0, 0, 0, 17, 0, 0, 0,
+	0, 30, 31, 25, 26, 27, 28, 29, 0, 0,
+	47, 0, 48, 49, 50, 0, 0, 0, 52, 51,
+	25, 26, 27, 28, 29, 25, 26, 27, 28, 108,
+	40, 41, 54, 0, 53, 0, 0, 0, 0, 0,
+	22, 43, 45, 39, 42, 81, 83, 82, 79, 80,
+	90, 91, 85, 87, 84, 86, 88, 89, 0, 0,
+	0, 0, 0, 0, 0, 0, 0, 0, 153, 81,
+	83, 82, 79, 80, 90, 91, 85, 87, 84, 86,
+	88, 89, 0, 0, 0, 0, 0, 0, 0, 0,
+	164, 81, 83, 82, 79, 80, 90, 91, 85, 87,
+	84, 86, 88, 89, 0, 0, 0, 0, 0, 0,
+	0, 0, 132, 81, 83, 82, 79, 80, 90, 91,
+	85, 87, 84, 86, 88, 89, 0, 0, 0, 0,
+	0, 0, 0, 148, 81, 83, 82, 79, 80, 90,
+	91, 85, 87, 84, 86, 88, 89, 100, 0, 0,
+	0, 0, 0, 0, 136, 0, 99, 0, 0, 0,
+	0, 0, 0, 81, 83, 82, 79, 80, 90, 91,
+	85, 87, 84, 86, 88, 89, 81, 83, 82, 79,
+	80, 90, 91, 85, 87, 84, 86, 88, 89, 81,
+	83, 82, 79, 80, 90, 91, 85, 87, 84, 86,
+	88, 89,
 }
 var parserPact = [...]int{
 
-	102, -1000, -1000, 203, 50, -1000, -1000, -26, -1000, -10,
-	0, 205, 205, 205, 205, 205, 205, 205, 203, -1000,
-	-1000, -1000, 23, -1000, -1000, -1000, -1000, -1000, -1000, 18,
-	205, 205, -1000, 203, 4, 9, 142, -1000, 355, -1000,
-	-1000, -1000, -1000, -1000, -1000, 23, -1000, 205, 205, 205,
-	205, 205, 205, 205, -1000, 355, 355, 355, 355, 342,
-	329, 41, -28, 13, 205, 92, 355, 355, -1000, 68,
-	142, -1000, -1000, 355, -1000, -1000, 20, -52, -1000, 205,
-	205, 205, 205, 205, 205, 205, 205, 205, 205, 205,
-	205, 205, -1000, -1000, -1000, -1000, -1000, -1000, 257, 203,
-	203, -1000, -15, 205, 300, -47, -1000, -1000, 18, 10,
-	99, -18, -1000, -32, -1000, 205, 14, 2, -1000, -1000,
+	107, -1000, -1000, 168, 53, -1000, -1000, -25, -1000, -2,
+	0, 170, 170, 170, 170, 170, 170, 170, 168, -1000,
+	-1000, -1000, 50, -1000, -1000, -1000, -1000, -1000, -1000, 14,
+	170, 170, -1000, 168, 15, 6, 75, -1000, 344, -1000,
+	-1000, -1000, -1000, -1000, -1000, 50, -1000, 170, 170, 170,
+	170, 170, 170, 170, -1000, 344, 344, 344, 344, 331,
+	318, 35, -28, 42, 170, 190, 344, 344, -1000, 106,
+	75, -1000, -1000, 344, -1000, -1000, 19, -56, 170, 170,
+	170, 170, 170, 170, 170, 170, 170, 170, 170, 170,
+	170, 170, -1000, -1000, -1000, -1000, -1000, -1000, 246, 168,
+	168, -1000, -10, 170, 289, -19, -1000, -1000, 14, 7,
+	100, -12, -1000, -32, -1000, 170, 13, -20, 344, -1000,
 	-1000, -1000, -1000, -1000, -1000, -1000, -1000, -1000, -1000, -1000,
-	-1000, -1000, 19, 8, 279, -1000, 92, 203, 97, 86,
-	-1000, 91, -1000, -1000, 205, 203, -1000, -1000, 3, 40,
-	203, -1000, 205, -19, 355, 12, -1000, -1000, 39, 235,
-	-1000, -1000, -1000, -1000,
+	-1000, -1000, -1000, 41, 16, 268, -1000, 190, 168, 60,
+	185, -1000, 200, 170, -1000, 170, 168, -1000, -1000, 3,
+	5, 168, -1000, 170, -13, 344, 12, -1000, -1000, 4,
+	224, -1000, -1000, -1000, -1000,
 }
 var parserPgo = [...]int{
 
-	0, 158, 157, 155, 110, 1, 8, 150, 0, 5,
-	154, 2, 6, 151, 22, 125, 108, 9, 3, 4,
-	107, 19,
+	0, 150, 141, 130, 117, 1, 7, 110, 0, 3,
+	124, 2, 5, 120, 22, 119, 118, 27, 4, 11,
+	115, 19,
 }
 var parserR1 = [...]int{
 
@@ -264,9 +263,9 @@ var parserR1 = [...]int{
 	4, 4, 8, 8, 8, 8, 8, 8, 8, 8,
 	8, 8, 8, 8, 8, 8, 8, 8, 8, 8,
 	8, 8, 8, 8, 8, 8, 8, 8, 8, 8,
-	13, 9, 9, 14, 15, 15, 16, 12, 12, 20,
-	21, 21, 21, 18, 18, 18, 17, 17, 17, 17,
-	19,
+	13, 9, 9, 9, 14, 15, 15, 16, 12, 12,
+	20, 21, 21, 21, 18, 18, 18, 17, 17, 17,
+	17, 19,
 }
 var parserR2 = [...]int{
 
@@ -276,9 +275,9 @@ var parserR2 = [...]int{
 	5, 3, 1, 1, 1, 1, 1, 1, 1, 1,
 	2, 2, 2, 2, 2, 2, 3, 3, 3, 3,
 	3, 3, 3, 3, 3, 3, 3, 3, 3, 3,
-	3, 3, 0, 2, 4, 3, 1, 2, 2, 6,
-	1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
-	3,
+	3, 3, 1, 0, 2, 4, 3, 1, 2, 2,
+	6, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+	1, 3,
 }
 var parserChk = [...]int{
 
@@ -295,30 +294,30 @@ var parserChk = [...]int{
 	19, 5, 62, 53, -8, -21, -17, -19, 29, -18,
 	56, -10, -11, -18, -6, 54, 62, -9, -8, -8,
 	-8, -8, -8, -8, -8, -8, -8, -8, -8, -8,
-	-8, 56, -5, -5, -8, 55, 58, 6, 56, 58,
-	62, -8, 54, 55, 58, 16, 20, 55, -21, -5,
-	6, -11, 58, -9, -8, -5, 56, 5, -5, -8,
-	56, 17, 5, 56,
+	-8, -8, 56, -5, -5, -8, 55, 58, 6, 56,
+	58, 62, -8, 54, 55, 58, 16, 20, 55, -21,
+	-5, 6, -11, 58, -9, -8, -5, 56, 5, -5,
+	-8, 56, 17, 5, 56,
 }
 var parserDef = [...]int{
 
 	0, -2, 3, 19, 0, 2, 18, 0, 20, 0,
-	0, 0, 0, 0, 0, 0, 0, 0, 19, 73,
-	74, 75, 9, 10, 11, 76, 77, 78, 79, 0,
+	0, 0, 0, 0, 0, 0, 0, 0, 19, 74,
+	75, 76, 9, 10, 11, 77, 78, 79, 80, 0,
 	0, 0, 1, 0, 0, 0, 0, 23, 24, 32,
 	33, 34, 35, 36, 37, 38, 39, 0, 0, 0,
-	0, 0, 0, 0, 66, 25, 26, 27, 28, 0,
-	0, 0, 0, 63, 0, 0, 67, 68, 17, 0,
-	0, 80, 22, 12, 13, 14, 0, 0, 62, 0,
+	0, 0, 0, 0, 67, 25, 26, 27, 28, 0,
+	0, 0, 0, 64, 0, 0, 68, 69, 17, 0,
+	0, 81, 22, 12, 13, 14, 0, 0, 63, 0,
 	0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
 	0, 0, 40, 41, 42, 43, 44, 45, 0, 19,
-	19, 31, 0, 0, 0, 0, -2, -2, 72, 0,
-	0, 0, 7, 0, 21, 0, 0, 0, 46, 47,
-	48, 49, 50, 51, 52, 53, 54, 55, 56, 57,
-	58, 59, 0, 0, 0, 65, 0, 19, 0, 0,
-	8, 0, 62, 60, 0, 19, 30, 64, 0, 0,
-	19, 6, 0, 0, 61, 0, 69, 4, 0, 0,
-	16, 29, 5, 15,
+	19, 31, 0, 0, 0, 0, -2, -2, 73, 0,
+	0, 0, 7, 0, 21, 0, 0, 0, 62, 46,
+	47, 48, 49, 50, 51, 52, 53, 54, 55, 56,
+	57, 58, 59, 0, 0, 0, 66, 0, 19, 0,
+	0, 8, 0, 63, 60, 0, 19, 30, 65, 0,
+	0, 19, 6, 0, 0, 61, 0, 70, 4, 0,
+	0, 16, 29, 5, 15,
 }
 var parserTok1 = [...]int{
 
@@ -1045,58 +1044,58 @@ parserdefault:
 			parserVAL.exprs = append(parserDollar[1].exprs, parserDollar[3].expr)
 		}
 	case 62:
-		parserDollar = parserS[parserpt-0 : parserpt+1]
+		parserDollar = parserS[parserpt-1 : parserpt+1]
 		//line oliver.y:159
+		{
+			parserVAL.exprs = []interface{}{parserDollar[1].expr}
+		}
+	case 63:
+		parserDollar = parserS[parserpt-0 : parserpt+1]
+		//line oliver.y:160
 		{
 			parserVAL.exprs = []interface{}{}
 		}
-	case 63:
+	case 64:
 		parserDollar = parserS[parserpt-2 : parserpt+1]
-		//line oliver.y:161
+		//line oliver.y:162
 		{
 			parserVAL.arrayelem = ArrayElem{ident: parserDollar[1].str, exprs: parserDollar[2].bracketed}
 		}
-	case 64:
+	case 65:
 		parserDollar = parserS[parserpt-4 : parserpt+1]
-		//line oliver.y:163
+		//line oliver.y:164
 		{
 			parserVAL.bracketed = append(parserDollar[1].bracketed, parserDollar[3].expr)
 		}
-	case 65:
+	case 66:
 		parserDollar = parserS[parserpt-3 : parserpt+1]
-		//line oliver.y:164
+		//line oliver.y:165
 		{
 			parserVAL.bracketed = []interface{}{parserDollar[2].expr}
 		}
-	case 66:
+	case 67:
 		parserDollar = parserS[parserpt-1 : parserpt+1]
-		//line oliver.y:166
+		//line oliver.y:167
 		{
 			parserVAL.pairliter = NULL
-		}
-	case 67:
-		parserDollar = parserS[parserpt-2 : parserpt+1]
-		//line oliver.y:168
-		{
-			parserVAL.pairelem = PairElem{fsnd: FST, expr: parserDollar[2].expr}
 		}
 	case 68:
 		parserDollar = parserS[parserpt-2 : parserpt+1]
 		//line oliver.y:169
 		{
-			parserVAL.pairelem = PairElem{fsnd: SND, expr: parserDollar[2].expr}
+			parserVAL.pairelem = PairElem{fsnd: FST, expr: parserDollar[2].expr}
 		}
 	case 69:
-		parserDollar = parserS[parserpt-6 : parserpt+1]
-		//line oliver.y:171
+		parserDollar = parserS[parserpt-2 : parserpt+1]
+		//line oliver.y:170
 		{
-			parserVAL.typedefinition = PairType{fstType: parserDollar[3].pairelemtype, sndType: parserDollar[5].pairelemtype}
+			parserVAL.pairelem = PairElem{fsnd: SND, expr: parserDollar[2].expr}
 		}
 	case 70:
-		parserDollar = parserS[parserpt-1 : parserpt+1]
-		//line oliver.y:173
+		parserDollar = parserS[parserpt-6 : parserpt+1]
+		//line oliver.y:172
 		{
-			parserVAL.pairelemtype = parserDollar[1].typedefinition
+			parserVAL.typedefinition = PairType{fstType: parserDollar[3].pairelemtype, sndType: parserDollar[5].pairelemtype}
 		}
 	case 71:
 		parserDollar = parserS[parserpt-1 : parserpt+1]
@@ -1108,13 +1107,13 @@ parserdefault:
 		parserDollar = parserS[parserpt-1 : parserpt+1]
 		//line oliver.y:175
 		{
-			parserVAL.pairelemtype = Pair
+			parserVAL.pairelemtype = parserDollar[1].typedefinition
 		}
 	case 73:
 		parserDollar = parserS[parserpt-1 : parserpt+1]
-		//line oliver.y:177
+		//line oliver.y:176
 		{
-			parserVAL.typedefinition = parserDollar[1].typedefinition
+			parserVAL.pairelemtype = Pair
 		}
 	case 74:
 		parserDollar = parserS[parserpt-1 : parserpt+1]
@@ -1130,31 +1129,37 @@ parserdefault:
 		}
 	case 76:
 		parserDollar = parserS[parserpt-1 : parserpt+1]
-		//line oliver.y:181
+		//line oliver.y:180
 		{
-			parserVAL.typedefinition = Int
+			parserVAL.typedefinition = parserDollar[1].typedefinition
 		}
 	case 77:
 		parserDollar = parserS[parserpt-1 : parserpt+1]
 		//line oliver.y:182
 		{
-			parserVAL.typedefinition = Bool
+			parserVAL.typedefinition = Int
 		}
 	case 78:
 		parserDollar = parserS[parserpt-1 : parserpt+1]
 		//line oliver.y:183
 		{
-			parserVAL.typedefinition = Char
+			parserVAL.typedefinition = Bool
 		}
 	case 79:
 		parserDollar = parserS[parserpt-1 : parserpt+1]
 		//line oliver.y:184
 		{
-			parserVAL.typedefinition = String
+			parserVAL.typedefinition = Char
 		}
 	case 80:
+		parserDollar = parserS[parserpt-1 : parserpt+1]
+		//line oliver.y:185
+		{
+			parserVAL.typedefinition = String
+		}
+	case 81:
 		parserDollar = parserS[parserpt-3 : parserpt+1]
-		//line oliver.y:186
+		//line oliver.y:187
 		{
 			parserVAL.typedefinition = ArrayType{Type: parserDollar[1].typedefinition}
 		}

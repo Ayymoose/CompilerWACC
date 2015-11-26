@@ -156,6 +156,7 @@ expr : INTEGER       { $$ =  $1 }
 arrayliter : OPENSQUARE exprlist CLOSESQUARE { $$ = ArrayLiter{$2}}
 
 exprlist : exprlist COMMA expr {$$ = append($1, $3)}
+         | expr                {$$ = []interface{}{$1}}
          |                     {$$ = []interface{}{}}
 
 arrayelem : IDENTIFIER bracketed {$$ = ArrayElem{ident: $1, exprs : $2}}
