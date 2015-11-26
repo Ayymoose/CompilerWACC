@@ -1,10 +1,8 @@
-package parse
+package parser
 
 import (
 	"fmt"
-
-	"github.com/wacc_19/src/grammar"
-	//	"grammar"
+	"os"
 	"sort"
 	"strconv"
 	"strings"
@@ -12,15 +10,19 @@ import (
 	"unicode/utf8"
 )
 
+const eof = -1
+
 // stateFn represents the state of the scanner as a function that returns the next state.
 type stateFn func(*Lexer) stateFn
 
+// Token is a token
 type Token struct {
-	Typ    grammar.ItemType // The type of this item.
-	Lexeme string           // The value of this item.
-	Pos    int              // The starting position, in bytes, of this item in the input string.
+	Typ    int    // The type of this item.
+	Lexeme string // The value of this item.
+	Pos    int    // The starting position, in bytes, of this item in the input string.
 }
 
+// Lexer is  a struct
 type Lexer struct {
 	name       string
 	input      string
@@ -31,11 +33,82 @@ type Lexer struct {
 	lastPos    int // position of most recent item returned by nextItem
 	Items      chan Token
 	prog       *Program // The parsed program
-	lastItem   item     // The last item emitted
+	lastItem   Token    // The last item emitted
 	parseError bool
 }
 
-// Returns line number and column number of token in .wacc file
+var escapeChars = []rune{'0', 'b', 't', 'n', 'f', 'r', '\\', '\'', '"'}
+
+// TokenKeywordStrings key is a map of keywords: string keyword to integer type.
+var TokenKeywordStrings = map[string]int{
+	"begin":   BEGIN,
+	"end":     END,
+	"is":      IS,
+	"skip":    SKIP,
+	"read":    READ,
+	"free":    FREE,
+	"return":  RETURN,
+	"exit":    EXIT,
+	"println": PRINTLN,
+	"print":   PRINT,
+	"if":      IF,
+	"then":    THEN,
+	"else":    ELSE,
+	"fi":      FI,
+	"while":   WHILE,
+	"done":    DONE,
+	"do":      DO,
+	"newpair": NEWPAIR,
+	"call":    CALL,
+	"fst":     FST,
+	"snd":     SND,
+	"null":    NULL,
+	"int":     INT,
+	"bool":    BOOL,
+	"char":    CHAR,
+	"string":  STRING,
+	"pair":    PAIR,
+	"len":     LEN,
+	"ord":     ORD,
+	"chr":     CHR,
+	"true":    TRUE,
+	"false":   FALSE,
+}
+
+// TokenStrings map
+var TokenStrings = map[string]int{
+	",": COMMA,
+	";": SEMICOLON,
+	/*"\b": BACKSPACE,
+	"\t": TAB,
+	"\n": LINE_FEED,
+	"\f": FORM_FEED,
+	"\r": CARRIAGE_RETURN,
+	"\"": DOUBLEQUOTE,
+	"'":  SINGLEQUOTE,
+	"\\": BACKSLASH,    */
+	"%":  MOD,
+	"*":  MUL,
+	"/":  DIV,
+	"+":  PLUS,
+	"-":  SUB,
+	">=": GTE,
+	"<=": LTE,
+	">":  GT,
+	"<":  LT,
+	"==": EQ,
+	"!=": NEQ,
+	"!":  NOT,
+	"&&": AND,
+	"||": OR,
+	"[":  OPENSQUARE,
+	"(":  OPENROUND,
+	"]":  CLOSESQUARE,
+	")":  CLOSEROUND,
+	"=":  ASSIGNMENT,
+}
+
+// TokenLocation returns line number and column number of token in .wacc file
 func (l *Lexer) TokenLocation(t Token) (line int, col int) {
 	line = 1 + strings.Count(l.input[:t.Pos], "\n")
 	col = t.Pos - strings.LastIndex(l.input[:t.Pos], "\n")
@@ -57,7 +130,7 @@ func (l *Lexer) run() {
 	close(l.Items)
 }
 
-// nextItem returns the next item from the input.
+// NextItem returns the next item from the input.
 // Called by the parser, not in the lexing goroutine.
 func (l *Lexer) NextItem() Token {
 	item := <-l.Items
@@ -70,27 +143,27 @@ func (l *Lexer) NextItem() Token {
 func lexText(l *Lexer) stateFn {
 	for {
 		_ = "breakpoint"
-		if strings.HasPrefix(l.input[l.pos:], grammar.Token_keyword_strings[grammar.BEGIN]) {
+		if strings.HasPrefix(l.input[l.pos:], "begin") {
 			/*	if l.pos > l.start {
 				l.emit(PLAINTEXT)
 			}     */
 			l.ignore()
 			return lexInsideProgram
 		}
-		if l.next() == grammar.Eof {
+		if l.next() == eof {
 			break
 		}
 	}
 	//Correclty reached eof
-	if l.pos > l.start {
-		l.emit(grammar.PLAINTEXT)
-	}
-	l.emit(grammar.EOF)
+	/*	if l.pos > l.start {
+			l.emit(grammar.PLAINTEXT)
+		}
+		l.emit(grammar.EOF)  */
 	return nil
 }
 
-// lex creates a new scanner for the input string.
-func Lex(name string, input string) *Lexer {
+// Lex creates a new scanner for the input string.
+func newLex(name string, input string) *Lexer {
 	l := &Lexer{
 		name:  name,
 		input: input,
@@ -100,68 +173,53 @@ func Lex(name string, input string) *Lexer {
 	return l
 }
 
-type ItemTypeSlice []grammar.ItemType
-
-func (i ItemTypeSlice) Len() int {
-	return len(i)
-}
-
-func (g ItemTypeSlice) Less(i, j int) bool {
-	if g[i] < g[j] {
-		return true
-	}
-	return false
-}
-
-func (g ItemTypeSlice) Swap(i, j int) {
-	g[i], g[j] = g[j], g[i]
-}
-
 // lexInsideAction scans the elements inside action delimiters.
 func lexInsideProgram(l *Lexer) stateFn {
-	var keysForKeywords ItemTypeSlice
-	for k := range grammar.Token_keyword_strings {
-		keysForKeywords = append(keysForKeywords, k)
+	var keysForKeywords sort.StringSlice
+	for key := range TokenKeywordStrings {
+		keysForKeywords = append(keysForKeywords, key)
 	}
-	sort.Sort(keysForKeywords)
-	for _, key := range keysForKeywords {
-		if strings.HasPrefix(l.input[l.pos:], grammar.Token_keyword_strings[key]) {
-			s := grammar.Token_keyword_strings[key]
-			l.width = len(s)
+	keysForKeywords.Sort()
+	sort.Sort(sort.Reverse(keysForKeywords))
+	for _, str := range keysForKeywords {
+		if strings.HasPrefix(l.input[l.pos:], str) {
+			//		s := grammar.Token_keyword_strings[key]
+			l.width = len(str)
 			l.pos += l.width
 			if isAlphaNumeric(l.peek()) || l.peek() == '_' {
 				return lexIdentifier
 			}
-			l.emit(grammar.ItemType(key))
+			l.emit(TokenKeywordStrings[str])
 			return lexInsideProgram
 		}
 	}
-	var keysForTokens ItemTypeSlice
-	for k := range grammar.Token_strings {
-		keysForTokens = append(keysForTokens, k)
+	var keysForTokens sort.StringSlice
+	for key := range TokenStrings {
+		keysForTokens = append(keysForTokens, key)
 	}
-	sort.Sort(keysForTokens)
-	for _, key := range keysForTokens {
-		if strings.HasPrefix(l.input[l.pos:], grammar.Token_strings[key]) {
-			s := grammar.Token_strings[key]
-			l.width = len(s)
+	keysForTokens.Sort()
+	sort.Sort(sort.Reverse(keysForTokens))
+	for _, str := range keysForTokens {
+		if strings.HasPrefix(l.input[l.pos:], str) {
+			//		s := grammar.Token_strings[str]
+			l.width = len(str)
 			l.pos += l.width
-			switch key {
-			case grammar.DOUBLE_QUOTE:
+			switch str {
+			case "\"":
 				return lexString
-			case grammar.SINGLE_QUOTE:
+			case "'":
 				return lexChar
-			case grammar.NULL_TERMINATOR, grammar.BACKSPACE, grammar.TAB, grammar.LINE_FEED, grammar.FORM_FEED, grammar.CARRIAGE_RETURN:
+			case "\\0", "\b", "\t", "\n", "\f", "\r":
 				l.ignore()
 				return lexInsideProgram
-			case grammar.COMMENT_LINE:
+			case "#":
 				for l.next() != '\n' {
 					l.ignore()
 				}
 				l.backup()
 				return lexInsideProgram
 			}
-			l.emit(grammar.ItemType(key))
+			l.emit(TokenStrings[str])
 			return lexInsideProgram
 		}
 	}
@@ -169,17 +227,13 @@ func lexInsideProgram(l *Lexer) stateFn {
 	case unicode.IsSpace(r):
 		l.ignore()
 		return lexInsideProgram
-		/*	case r == '\'':
-				return lexChar
-			case r == '"':
-				return lexString  */
 	case '0' <= r && r <= '9':
 		l.backup()
 		return lexNumber
 	case isAlphaNumeric(r) || r == '_':
 		l.backup()
 		return lexIdentifier
-	case r == grammar.Eof:
+	case r == eof:
 		return nil
 	}
 	return l.errorf("Item Not in WACC lanuage: %s", l.input[l.start:l.start+l.width])
@@ -189,7 +243,7 @@ func lexInsideProgram(l *Lexer) stateFn {
 func (l *Lexer) next() (char rune) {
 	if l.pos >= len(l.input) {
 		l.width = 0
-		return grammar.Eof
+		return eof
 	}
 	char, l.width = utf8.DecodeRuneInString(l.input[l.pos:])
 	l.pos += l.width
@@ -230,7 +284,7 @@ func (l *Lexer) acceptRun(valid string) {
 }
 
 // emit passes an item back to the client.
-func (l *Lexer) emit(t grammar.ItemType) {
+func (l *Lexer) emit(t int) {
 	l.Items <- Token{Typ: t, Lexeme: l.input[l.start:l.pos], Pos: l.start}
 	l.start = l.pos
 }
@@ -239,7 +293,7 @@ func (l *Lexer) errorf(format string, args ...interface{}) stateFn {
 	line, col := l.currLocation()
 	fmt.Printf("At %d:%d :: ", line, col)
 	fmt.Printf(format, args)
-	l.Items <- Token{Typ: grammar.ERROR, Lexeme: fmt.Sprintf(format, args...), Pos: l.start}
+	l.Items <- Token{Typ: ERROR, Lexeme: fmt.Sprintf(format, args...), Pos: l.start}
 	return nil
 }
 
@@ -256,7 +310,7 @@ func lexIdentifier(l *Lexer) stateFn {
 	for isAlphaNumeric(l.peek()) || l.peek() == '_' {
 		l.next()
 	}
-	l.emit(grammar.IDENTIFIER)
+	l.emit(IDENTIFIER)
 	return lexInsideProgram
 }
 
@@ -270,20 +324,19 @@ Loop:
 				return l.errorf("unescaped char %s", string(l.input[l.pos-1]))
 			}
 		case '\\':
-			if _, ok := grammar.EscapeChars[l.peek()]; !ok {
+			if ok := runeIsEscape(l.peek()); !ok {
 				return l.errorf("Not an escape character %s", strconv.QuoteRuneToASCII(l.next()))
-			} else {
-				l.next()
-				break
 			}
+			l.next()
+			break
 			fallthrough
-		case grammar.Eof, '\n':
+		case eof, '\n':
 			return l.errorf("unterminated character constant")
 		case '\'':
 			break Loop
 		}
 	}
-	l.emit(grammar.CHARLITER)
+	l.emit(CHARACTER)
 	return lexInsideProgram
 }
 
@@ -292,17 +345,17 @@ Loop:
 	for {
 		switch l.next() {
 		case '\\':
-			if r := l.next(); r != grammar.Eof && r != '\n' {
+			if r := l.next(); r != eof && r != '\n' {
 				break
 			}
 			fallthrough
-		case grammar.Eof, '\n':
+		case eof, '\n':
 			return l.errorf("unterminated quoted string")
 		case '"':
 			break Loop
 		}
 	}
-	l.emit(grammar.STRINGLITER)
+	l.emit(STRINGCONST)
 	return lexInsideProgram
 }
 
@@ -310,165 +363,39 @@ func lexNumber(l *Lexer) stateFn {
 	l.accept("+-")
 	digits := "0123456789"
 	l.acceptRun(digits)
-	l.emit(grammar.NUMBER)
+	l.emit(INTEGER)
 	return lexInsideProgram
-}
-
-type ItemTypeSlice []grammar.ItemType
-
-func (i ItemTypeSlice) Len() int {
-	return len(i)
-}
-
-func (g ItemTypeSlice) Less(i, j int) bool {
-	if g[i] < g[j] {
-		return true
-	}
-	return false
-}
-
-func (g ItemTypeSlice) Swap(i, j int) {
-	g[i], g[j] = g[j], g[i]
-}
-
-// lexInsideAction scans the elements inside action delimiters.
-func lexInsideProgram(l *Lexer) stateFn {
-	var keysForKeywords ItemTypeSlice
-	for k := range grammar.Token_keyword_strings {
-		keysForKeywords = append(keysForKeywords, k)
-	}
-	sort.Sort(keysForKeywords)
-	for _, key := range keysForKeywords {
-		if strings.HasPrefix(l.input[l.pos:], grammar.Token_keyword_strings[key]) {
-			s := grammar.Token_keyword_strings[key]
-			l.width = len(s)
-			l.pos += l.width
-			if isAlphaNumeric(l.peek()) || l.peek() == '_' {
-				return lexIdentifier
-			}
-			l.emit(grammar.ItemType(key))
-			return lexInsideProgram
-		}
-	}
-	var keysForTokens ItemTypeSlice
-	for k := range grammar.Token_strings {
-		keysForTokens = append(keysForTokens, k)
-	}
-	sort.Sort(keysForTokens)
-	for _, key := range keysForTokens {
-		if strings.HasPrefix(l.input[l.pos:], grammar.Token_strings[key]) {
-			s := grammar.Token_strings[key]
-			l.width = len(s)
-			l.pos += l.width
-			switch key {
-			case grammar.DOUBLE_QUOTE:
-				return lexString
-			case grammar.SINGLE_QUOTE:
-				return lexChar
-			case grammar.NULL_TERMINATOR, grammar.BACKSPACE, grammar.TAB, grammar.LINE_FEED, grammar.FORM_FEED, grammar.CARRIAGE_RETURN:
-				l.ignore()
-				return lexInsideProgram
-			case grammar.COMMENT_LINE:
-				for l.next() != '\n' {
-					l.ignore()
-				}
-				l.backup()
-				return lexInsideProgram
-			}
-			l.emit(grammar.ItemType(key))
-			return lexInsideProgram
-		}
-	}
-	switch r := l.next(); {
-	case unicode.IsSpace(r):
-		l.ignore()
-		return lexInsideProgram
-	case '0' <= r && r <= '9':
-		l.backup()
-		return lexNumber
-	case isAlphaNumeric(r) || r == '_':
-		l.backup()
-		return lexIdentifier
-	case r == grammar.Eof:
-		return nil
-	}
-	return l.errorf("Item Not in WACC lanuage: %s", l.input[l.start:l.start+l.width])
-}
-
-// next returns the next rune in the input.
-func (l *Lexer) next() (char rune) {
-	if l.pos >= len(l.input) {
-		l.width = 0
-		return grammar.Eof
-	}
-	char, l.width = utf8.DecodeRuneInString(l.input[l.pos:])
-	l.pos += l.width
-	return char
-}
-
-// ignore skips over the pending input before this point.
-func (l *Lexer) ignore() {
-	l.start = l.pos
-}
-
-// backup steps back one rune. Can only be called once per call of next.
-func (l *Lexer) backup() {
-	l.pos -= l.width
-}
-
-// peek returns but does not consume the next rune in the input.
-func (l *Lexer) peek() rune {
-	char := l.next()
-	l.backup()
-	return char
-}
-
-// accept consumes the next rune if it's from the valid set.
-func (l *Lexer) accept(vaild string) bool {
-	if strings.IndexRune(vaild, l.next()) >= 0 {
-		return true
-	}
-	l.backup()
-	return false
-}
-
-// acceptRun consumes a run of runes from the valid set.
-func (l *Lexer) acceptRun(valid string) {
-	for strings.IndexRune(valid, l.next()) >= 0 {
-	}
-	l.backup()
-}
-
-// emit passes an item back to the client.
-func (l *Lexer) emit(t grammar.ItemType) {
-	l.Items <- Token{Typ: t, Lexeme: l.input[l.start:l.pos], Pos: l.start}
-	l.start = l.pos
-}
-
-func (l *Lexer) errorf(format string, args ...interface{}) stateFn {
-	line, col := l.currLocation()
-	fmt.Printf("At %d:%d :: ", line, col)
-	// fmt.Printf(format, args)
-	l.Items <- Token{Typ: grammar.ERROR, Lexeme: fmt.Sprintf(format, args...), Pos: l.start}
-	fmt.Println(fmt.Sprintf(format, args...))
-	return nil
-}
-
-// isAlphaNumeric reports whether r is an alphabetic, digit, or underscore.
-func isAlphaNumeric(r rune) bool {
-	return r == '_' || unicode.IsLetter(r) || unicode.IsDigit(r)
 }
 
 // Error is used by the yacc-generated parser to signal errors.
 func (l *Lexer) Error(e string) {
 	l.parseError = true
 	line, col := l.currLocation()
-	fmt.Printf("%q, %d:%d %s at or near %s\n", l.name, line, col, e, printItem(l.lastItem, true))
+	fmt.Printf("%q, %d:%d %s at or near %s\n", l.name, line, col, e, fmt.Sprintf(l.lastItem.Lexeme))
 }
 
 // Lex is used by the yacc-generated parser to fetch the next Lexeme.
-func (l *Lexer) Lex(lval *yySymType) int {
+func (l *Lexer) Lex(lval *parserSymType) int {
 	token := l.NextItem()
-	*lval = yySymType{str: i.Typ, line: l.lineNumber()}
-	return i.typ
+	switch token.Typ {
+	case STRINGCONST, IDENTIFIER, CHARACTER:
+		*lval = parserSymType{str: token.Lexeme}
+	case INTEGER:
+		num, err := strconv.Atoi(token.Lexeme)
+		if err != nil {
+			fmt.Println(err)
+			os.Exit(100)
+		}
+		*lval = parserSymType{number: num}
+	}
+	return token.Typ
+}
+
+func runeIsEscape(a rune) bool {
+	for _, b := range escapeChars {
+		if b == a {
+			return true
+		}
+	}
+	return false
 }

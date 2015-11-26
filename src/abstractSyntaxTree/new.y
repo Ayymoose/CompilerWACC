@@ -87,7 +87,7 @@ char        *Char
 %left '<' '>' LTE GTE
 %left '+' '-'
 %left '*' '/' '%'
-%left '!'  
+%left '!'
 %nonassoc IDENTIFIER
 
 /* Associativity and Precedence operators end --------------------------------*/
@@ -107,14 +107,14 @@ functions : function functions  { $$ = append([]Function{$1}, $2...) }
 
 function : typeDef ident '(' optional_param_list ')' IS statement END
            { $$ = &Function{Type : $1, Ident : $2, Params : $4, Stat : $7} }
-         ; 
+         ;
 
 optional_param_list : param_list { $$ = $1 }
                     | { $$ } // IS THIS EVEN LEGAL????
                     ;
 
 param_list : param ',' param_list { $$ = append([]Parameter{$1}, $3...) }
-           | param                { $$ = []Parameter{$1} } 
+           | param                { $$ = []Parameter{$1} }
            ;
 
 param : typeDef ident { $$ = Parameter{Type : $1, Ident : $2} }
@@ -127,13 +127,13 @@ statement : typeDef ident '=' assign_rhs { $$ = Statement{Type : $1, Ident : $2,
           | FREE expr                    { $$ = Statement{Expr : $2} }
           | RETURN expr                  { $$ = Statement{Expr : $2} }
           | EXIT expr                    { $$ = Statement{Expr : $2} }
-          | PRINT expr                   { $$ = Statement{Expr : $2} } 
-          | PRINTLN expr                 { $$ = Statement{Expr : $2} } 
+          | PRINT expr                   { $$ = Statement{Expr : $2} }
+          | PRINTLN expr                 { $$ = Statement{Expr : $2} }
           | IF expr THEN statement ELSE statement FI  { $$ = Statement{Expr : $2, StatL : $4, StatR : $6} }
-          | WHILE expr DO statement DONE { $$ = Statement{Expr : $2, Stat : $4} } 
+          | WHILE expr DO statement DONE { $$ = Statement{Expr : $2, Stat : $4} }
           | BEGIN statement END          { $$ = Statement{Stat : $2} }
-          | statement statements     { $$ = append([]Statement{$1}, $2...) }  
-          ; 
+          | statement statements     { $$ = append([]Statement{$1}, $2...) }
+          ;
 
 //statement_list : statements { $$ = $1 } ;
 
@@ -148,10 +148,10 @@ assign_lhs : ident      { $$ = AssignLHS{Ident : $1} }
 
  assign_rhs : expr                                  { $$ = AssignRHS{Expr : $1} }
             | array_liter                           { $$ = AssignRHS{ArrayLiter : $1} }
-            | NEW_PAIR '(' expr ',' expr ')'        { $$ = AssignRHS{ExprL : $3, ExprR : $5} } 
+            | NEW_PAIR '(' expr ',' expr ')'        { $$ = AssignRHS{ExprL : $3, ExprR : $5} }
             | pair_elem                             { $$ = AssignRHS{PairElem : $1} }
             | CALL ident '(' optional_arg_list ')'  { $$ = AssignRHS{Ident : $2, Args : $4} }
-            ; 
+            ;
 
 optional_arg_list : arg_list { $$ = $1 }
                   | { $$ } // IS THIS EVAN LEGAL????
@@ -161,7 +161,7 @@ arg_list : expr optional_expr_list { $$ = append([]Expr{$1}, $2...) }
          ;
 
 optional_expr_list : ',' expr { $$ = Expr{Expr : $2} }
-                   ; 
+                   ;
 
 pair_elem : FST expr { $$ = PairElem{Expr : $2} }
           | SND expr { $$ = PairElem{Expr : $2} }
@@ -171,11 +171,11 @@ typeDef : base_type  { $$ = TypeDef{Type : $1} }
         | array_type { $$ = TypeDef{Type : $1} }
         | pair_type  { $$ = TypeDef{Type : $1} }
         ;
-    
-base_type : INT    { $$ = BaseType{Type : $1} } 
-          | BOOL   { $$ = BaseType{Type : $1} } 
-          | CHAR   { $$ = BaseType{Type : $1} } 
-          | STRING { $$ = BaseType{Type : $1} }           
+
+base_type : INT    { $$ = BaseType{Type : $1} }
+          | BOOL   { $$ = BaseType{Type : $1} }
+          | CHAR   { $$ = BaseType{Type : $1} }
+          | STRING { $$ = BaseType{Type : $1} }
 ;
 
 array_type : array_elem_type '[' ']' { $$ = ArrayType{Type : $1} }
@@ -185,27 +185,27 @@ array_elem_type : base_type { $$ = TypeDef{Type : $1} }
                 | pair_type { $$ = TypeDef{Type : $1} }
                 ;
 
-pair_type : PAIR '(' pair_elem_type ',' pair_elem_type ')'  { $$ = PairType{Lpair : $3, Rpair : $5} }          
+pair_type : PAIR '(' pair_elem_type ',' pair_elem_type ')'  { $$ = PairType{Lpair : $3, Rpair : $5} }
 ;
 
-pair_elem_type : base_type  { $$ = PairElemType{Type : $1} } 
-               | array_type { $$ = PairElemType{Type : $1} } 
-               | PAIR       { $$ = PairElemType{Type : $1} }   
+pair_elem_type : base_type  { $$ = PairElemType{Type : $1} }
+               | array_type { $$ = PairElemType{Type : $1} }
+               | PAIR       { $$ = PairElemType{Type : $1} }
                ;
 
-expr : int_liter    { $$ = Expr{Expr : $1} } 
-     | bool_liter   { $$ = Expr{Expr : $1} } 
-     | char_liter   { $$ = Expr{Expr : $1} } 
-     | str_liter    { $$ = Expr{Expr : $1} } 
-     | pair_liter   { $$ = Expr{Expr : $1} } 
-     | ident        { $$ = Expr{Expr : $1} } 
-     | array_elem   { $$ = Expr{Expr : $1} } 
+expr : int_liter    { $$ = Expr{Expr : $1} }
+     | bool_liter   { $$ = Expr{Expr : $1} }
+     | char_liter   { $$ = Expr{Expr : $1} }
+     | str_liter    { $$ = Expr{Expr : $1} }
+     | pair_liter   { $$ = Expr{Expr : $1} }
+     | ident        { $$ = Expr{Expr : $1} }
+     | array_elem   { $$ = Expr{Expr : $1} }
      | '-' expr     { $$ = Expr{UnaryOp : $1, Expr : $2} }
      | '+' expr     { $$ = Expr{UnaryOp : $1, Expr : $2} }
      | '!' expr     { $$ = Expr{UnaryOp : $1, Expr : $2} }
- 
+
 //     | unaryOp expr { $$ = Expr{UnaryOp : $1, Expr : $2} }
- 
+
      | expr '+' expr { $$ = Expr{Lexpr : $1, BinaryOp : $2, Rexpr : $3} }
      | expr '-' expr { $$ = Expr{Lexpr : $1, BinaryOp : $2, Rexpr : $3} }
      | expr '/' expr { $$ = Expr{Lexpr : $1, BinaryOp : $2, Rexpr : $3} }
@@ -220,20 +220,20 @@ expr : int_liter    { $$ = Expr{Expr : $1} }
      | expr OrOr expr { $$ = Expr{Lexpr : $1, BinaryOp : $2, Rexpr : $3} }
 
 //     | expr binaryOp expr { $$ = Expr{Lexpr : $1, BinaryOp : $2, Rexpr : $3} }
-     | '(' exprs ')'  { $$ = Expr{Expr : $2} } 
+     | '(' exprs ')'  { $$ = Expr{Expr : $2} }
      ;
 
 exprs : expr ',' exprs { $$ = append([]Expr{$1}, $3) }
       | { $$ }
-      ; 
+      ;
 
 array_elem : ident expr_list { $$ = ArrayElem{Ident : $1, Exprs : $2} }
            ;
 
 // NOT SURE ABOUT THIS IMPLEMENTATION>>
 expr_list : '[' expr ']' '[' expr_list ']' { $$ = append([]Expr{$2}, $5...) }
-          | '[' expr ']'       { $$ = []Expr{$2} } 
-          
+          | '[' expr ']'       { $$ = []Expr{$2} }
+
           ;
 
 int_liter : optional_sign INTEGER { $$ = IntLiter{Sign : $1, Int : $2} }
@@ -246,16 +246,16 @@ optional_sign : POSITIVE { $$ = Sign{Sign : $1} }
 
 bool_liter : TRUE  { $$ = Bool{Bool : $1} }
            | FALSE { $$ = Bool{Bool : $1} }
-           ; 
+           ;
 
 char_liter : '’' character  '’' { $$ = Char{Char : $2} }
            ;
- 
+
 str_liter : '"' characters '"' { $$ = Str{Chars : $2} }
           ;
 
-characters : character characters { $$ = append([]Char{$1}, $2...) } 
-           | character            { $$ = []Char{$1} } 
+characters : character characters { $$ = append([]Char{$1}, $2...) }
+           | character            { $$ = []Char{$1} }
            ;
 
 character : CHARACTER { $$ = Char{Char : $1} } ;
@@ -265,5 +265,5 @@ array_liter : '[' expr optional_expr_list ']'  { $$ = append([]Expr{$2}, $3...)}
 
 pair_liter : NULL { $$ = PairLiter{PairLit : $1} } ;
 
-ident : IDENTIFIER 
+ident : IDENTIFIER
       ;

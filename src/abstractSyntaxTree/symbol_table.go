@@ -1,4 +1,4 @@
-package abstractSyntaxTree
+package parser
 
 import "grammar"
 

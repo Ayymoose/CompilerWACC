@@ -4,13 +4,13 @@ import (
 	"fmt"
 	"io/ioutil"
 	"os"
-
-	"grammar"
-	"parse"
+	"parser"
 )
 
 const SYNTAX_ERROR = 100
 const SEMANTIC_ERROR = 200
+
+// "wacc_examples\valid\expressions\andExpr.wacc"
 
 func main() {
 	file := os.Args[1] // index 1 is file path
@@ -20,32 +20,9 @@ func main() {
 		os.Exit(1)
 	}
 	s := string(b)
-	var tokens []parse.Token
-	lexer := parse.Lex("Something", s)
-	for item := range lexer.Items {
-		tokens = append(tokens, item)
-	}
-
-	for x, token := range tokens {
-		if x%2 == 0 {
-			fmt.Println()
-		}
-		fmt.Print(token, ", ")
-	}
-	if tokens[len(tokens)-1].Typ == grammar.ERROR {
-		fmt.Println("#syntax_error#(Lex)")
+	root, err := parser.ParseFile(file, s)
+	if err != nil {
 		os.Exit(SYNTAX_ERROR)
 	}
-	parser := lexer.ConstructParser(tokens)
-	passed, errs := parser.Parse()
-	fmt.Println("\n------ Parsing Complete ------\n")
-	for _, parseError := range errs {
-		fmt.Println(parseError)
-	}
-
-	if !passed {
-		fmt.Println("#syntax_error#(Parse)")
-		os.Exit(SYNTAX_ERROR)
-	}
-
+	fmt.Println(root)
 }
