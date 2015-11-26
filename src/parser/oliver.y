@@ -57,6 +57,7 @@ pairelemtype Type
 %type <function> function
 %type <stmt> statement
 %type <stmts> statements
+%type <stmts> funcstats
 %type <assignrhs> assignrhs
 %type <assignlhs> assignlhs
 %type	<expr>		expr
@@ -83,13 +84,16 @@ program : BEGIN functions statements END {
 functions : functions function  { $$ = append($1, $2)}
           |                     { $$ = []*Function{} }
 
-function : typeDef IDENTIFIER OPENROUND CLOSEROUND IS statements END
+function : typeDef IDENTIFIER OPENROUND CLOSEROUND IS funcstats END
            { $$ = &Function{ident : $2, returnType : $1, statlist : $6}
            }
-         | typeDef IDENTIFIER OPENROUND paramlist CLOSEROUND IS statements END
+         | typeDef IDENTIFIER OPENROUND paramlist CLOSEROUND IS funcstats END
            {
            $$ = &Function{ident : $2, returnType : $1, statlist : $7, parameterTypes : $4}
            }
+
+funcstats : statements SEMICOLON RETURN expr   { $$ = append($1, Return{$4}) }
+          | RETURN expr                        { $$ = []interface{}{Return{$2}} }
 
 paramlist : paramlist COMMA param { $$ = append($1, $3)}
           | param                 { $$ = []Param{ $1 } }
@@ -108,7 +112,7 @@ assignrhs : expr                                           {$$ = $1}
 
 statements : statements SEMICOLON statement           { $$ = append($1,$3) }
            | statement                                { $$ = []interface{}{$1} }
-        
+
 
 statement : SKIP                                      { $$ = $1 }
           | typeDef IDENTIFIER ASSIGNMENT assignrhs   { $$ = Declare{Type : $1, lhs : $2, rhs : $4} }
