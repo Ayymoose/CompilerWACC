@@ -15,6 +15,9 @@ const SEMANTIC_ERROR = 200
 // wacc_examples\valid\expressions\andExpr.wacc
 // wacc_examples\valid\if\if6.wacc
 // wacc_examples\valid\while\fibonacciFullIt.wacc
+// wacc_examples\valid\function\simple_functions\functionDeclaration.wacc
+// wacc_examples\valid\function\simple_functions\functionReturnPair.wacc
+
 func main() {
 	file := os.Args[1] // index 1 is file path
 	b, err := ioutil.ReadFile(file)

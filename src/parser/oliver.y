@@ -29,7 +29,7 @@ pairelemtype Type
 
 %token BEGIN END                                     // Program delimiters
 %token IS
-%token SKIP
+%token <number> SKIP
 %token READ FREE RETURN EXIT PRINT PRINTLN
 %token IF THEN ELSE FI                               // If statement
 %token WHILE DO DONE                                 // While statement
@@ -83,10 +83,10 @@ program : BEGIN functions statements END {
 functions : functions function  { $$ = append($1, $2)}
           |                     { $$ = []*Function{} }
 
-function : typeDef IDENTIFIER OPENROUND CLOSEROUND IS statement END
+function : typeDef IDENTIFIER OPENROUND CLOSEROUND IS statements END
            { $$ = &Function{ident : $2, returnType : $1, statlist : $6}
            }
-         | typeDef IDENTIFIER OPENROUND paramlist CLOSEROUND IS statement END
+         | typeDef IDENTIFIER OPENROUND paramlist CLOSEROUND IS statements END
            {
            $$ = &Function{ident : $2, returnType : $1, statlist : $7, parameterTypes : $4}
            }
@@ -110,7 +110,8 @@ statements : statements SEMICOLON statement           { $$ = append($1,$3) }
            | statement                                { $$ = []interface{}{$1} }
            |                                          { $$ = []interface{}{} }
 
-statement : typeDef IDENTIFIER ASSIGNMENT assignrhs   { $$ = Declare{Type : $1, lhs : $2, rhs : $4} }
+statement : SKIP                                      { $$ = $1 }
+          | typeDef IDENTIFIER ASSIGNMENT assignrhs   { $$ = Declare{Type : $1, lhs : $2, rhs : $4} }
           | assignlhs ASSIGNMENT assignrhs            { $$ = Assignment{lhs : $1, rhs : $3} }
           | READ assignlhs                            { $$ = Read{$2} }
           | FREE expr                                 { $$ = Free{$2} }
