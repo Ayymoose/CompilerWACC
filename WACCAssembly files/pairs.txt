@@ -1,0 +1,76 @@
+Make pair ---
+e.g. pair(int,string) p = new pair(5, "Nanani")
+
+sub sp, sp, #4 // create var space for 1 pair addr
+
+mov r0, #4 // Set 4(int) bytes to be allocated for the first int pair as a parameter
+BL malloc
+
+str =5, [r0] // store pair.fst value in pair.fst addr from the malloc return
+push {r0} // save pair.fst addr
+
+mov r0, #4 // Set 4(addr) bytes to be allocated for the second string pair as a parameter
+BL malloc
+
+str =msg_0, [r0] // store pair.snd value in pair.snd addr from the malloc return
+push {r0} // save pair.snd addr
+
+mov r0, #8 // Set 8(2 addr) bytes to be allocated for the addr of pair and its second addr
+BL malloc
+
+pop {r1, r2} // pop pair elem addrs r1 = pair.sendAddr/ r2 = pair.fstAddr
+str r2, [r0] // [pair addr] (from malloc return) = pair.fst addr
+str r1, [r0, #4] // [pair addr + 4] (snd) = pair.snd addr
+str r0, [sp, #(m-4)] // save pair addr on to variable stack
+
+---
+
+Free pair ---
+.data
+
+msg_1:
+  .word 50
+  .ascii	"NullReferenceError: dereference a null reference\n\0"
+
+msg_2:
+  .word 5
+  .ascii "%.*s\0"
+...
+
+ldr r0, [sp, #offset of pair] //Set parameter = pair addr
+BL p_free_pair
+...
+
+p_free_pair:
+  push {lr}
+
+  cmp r0, #0 // if parameter = null set error
+  LDREQ r0, msg_nullErr** // set null pointer error message addr as arg
+  BEQ p_throw_runtime_error
+
+  push r0 // else: save pair addr (param)
+  ldr r0, [r0] // r0 (argument) = pair.fst addr
+  BL free
+  ldr r0, [sp, #4] // r0 (argument) = pair.snd addr where [sp] = pair addr
+  pop {r0} // r0 = pair addr
+  BL free
+
+  pop {pc}
+
+p_throw_runtime_error:
+  BL p_print_string // Note that print_string uses the parameter as an argument
+  mov r0, #-1 // set error code
+  BL exit
+
+p_print_string:
+  push {lr}
+
+  ldr r1, [r0] // r1 = null error message (param)
+  add r2, r0, #4 // r2 = formatting string addr  ???
+  ldr r0, =msg_2 // r0 = formatting string addr
+  add r0, r0, #4 // ??? maybe to remove '\0'
+  BL printf
+  mov r0, #0 // ???
+  BL fflush  // ???
+
+  pop {pc}
