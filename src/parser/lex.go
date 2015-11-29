@@ -2,6 +2,7 @@ package parser
 
 import (
 	"fmt"
+	"math"
 	"os"
 	"sort"
 	"strconv"
@@ -402,9 +403,20 @@ func (l *Lexer) Lex(lval *parserSymType) int {
 			fmt.Println(err)
 			os.Exit(100)
 		}
+		if !checkInt(num) {
+			fmt.Println(err)
+			os.Exit(100)
+		}
 		*lval = parserSymType{number: num}
 	}
 	return token.Typ
+}
+
+func checkInt(num int) bool {
+	if float64(num) > math.Pow(2, 31)-1 || float64(num) < math.Pow(2, 31) {
+		return false
+	}
+	return true
 }
 
 func runeIsEscape(a rune) bool {
