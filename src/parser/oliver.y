@@ -84,15 +84,15 @@ functions : functions function  { $$ = append($1, $2)}
           |                     { $$ = []*Function{} }
 
 function : typeDef IDENTIFIER OPENROUND CLOSEROUND IS statements END
-           { if !checkStats($6) {
+        {   /*  if !checkStats($6) {
           	parserlex.Error("Missing return statement")
-           }
+           } */
              $$ = &Function{ident : $2, returnType : $1, statlist : $6}
            }
          | typeDef IDENTIFIER OPENROUND paramlist CLOSEROUND IS statements END
-           { if !checkStats($7) {
+        {    /* if !checkStats($7) {
             	parserlex.Error("Missing return statement")
-            }
+            } */
              $$ = &Function{ident : $2, returnType : $1, statlist : $7, parameterTypes : $4}
            }
 
