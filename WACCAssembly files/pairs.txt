@@ -30,12 +30,12 @@ pair assignement ---
 42    MOV r0, #1 // r0 = value
 43		PUSH {r0}  // save value
 
-44		LDR r0, [sp, #4] // r0 = pair addr (??? why add 4)
+44		LDR r0, [sp, #4] // r0 = pair addr ( Add 4 because of save value on the stack)
 45		BL p_check_null_pointer
 46		ADD r0, r0, #0 ** or 4 if snd ** // r0 = addr of fst or snd elem
 47		PUSH {r0} // save pair addr
 
-48		LDR r0, [r0] // p0 = fst addr
+48		LDR r0, [r0] // r0 = fst addr
 49		BL free
 
 50		MOV r0, #1 // malloc parameter e.g. 1(bool)
@@ -46,7 +46,7 @@ pair assignement ---
 
 54		MOV r1, r0 // r1 = new fst addr
 55		POP {r0}   // r0 = value
-56		STRB r0, [r1] // fst addr value = value
+56		STRB ** or STR ** r0, [r1] // fst addr value = value
 
 60	p_check_null_pointer:
 61		PUSH {lr}
