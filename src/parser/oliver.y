@@ -111,19 +111,20 @@ assignrhs : expr                                           {$$ = $1}
           | NEWPAIR OPENROUND expr COMMA expr CLOSEROUND   { $$ = NewPair{fstExpr : $3, sndExpr : $5} }
           | CALL IDENTIFIER OPENROUND exprlist CLOSEROUND  { $$ = Call{ident : $2, exprlist : $4} }
 
-statements : statements SEMICOLON statement            { $$ = append($1,$3) }
-           | statement                                 { $$ = []interface{}{$1} }
+statements : statements SEMICOLON statement           { $$ = append($1,$3) }
+           | statement                                { $$ = []interface{}{$1} }
 
-statement : SKIP                                       { $$ = $1 }
-          | typeDef IDENTIFIER ASSIGNMENT assignrhs    { $$ = Declare{Type : $1, lhs : $2, rhs : $4} }
-          | assignlhs ASSIGNMENT assignrhs             { $$ = Assignment{lhs : $1, rhs : $3} }
-          | READ assignlhs                             { $$ = Read{$2} }
-          | FREE expr                                  { $$ = Free{$2} }
-          | RETURN expr                                { $$ = Return{$2} }
-          | EXIT expr                                  { $$ = Exit{$2} }
-          | PRINT expr                                 { $$ = Print{$2} }
-          | PRINTLN expr                               { $$ = Println{$2} }
-          | IF expr THEN statements ELSE statements FI { $$ = If{conditional : $2, thenStat : $4, elseStat : $6} }
+
+statement : SKIP                                      { $$ = $1 }
+          | typeDef IDENTIFIER ASSIGNMENT assignrhs   { $$ = Declare{Type : $1, lhs : $2, rhs : $4} }
+          | assignlhs ASSIGNMENT assignrhs            { $$ = Assignment{lhs : $1, rhs : $3} }
+          | READ assignlhs                            { $$ = Read{$2} }
+          | FREE expr                                 { $$ = Free{$2} }
+          | RETURN expr                               { $$ = Return{$2} }
+          | EXIT expr                                 { $$ = Exit{$2} }
+          | PRINT expr                                { $$ = Print{$2} }
+          | PRINTLN expr                              { $$ = Println{$2} }
+          | IF expr THEN statements ELSE statements FI  { $$ = If{conditional : $2, thenStat : $4, elseStat : $6} }
           | WHILE expr DO statements DONE              { $$ = While{conditional : $2, doStat : $4} }
           | BEGIN statements END                       { $$ = Scope{statlist : $2, symbolTable : &SymbolTable{Table: make(map[string]Type)} } }
 
