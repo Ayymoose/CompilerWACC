@@ -430,7 +430,7 @@ func runeIsEscape(a rune) bool {
 
 func checkStats(stats []interface{}) bool {
 	switch stats[len(stats)-1].(type) {
-	case Return:
+	case Return, Exit:
 		return true
 	case If:
 		ifstat := stats[len(stats)-1].(If)
