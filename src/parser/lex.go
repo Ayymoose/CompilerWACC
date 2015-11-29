@@ -413,7 +413,7 @@ func (l *Lexer) Lex(lval *parserSymType) int {
 }
 
 func checkInt(num int) bool {
-	if float64(num) > math.Pow(2, 31)-1 || float64(num) < -math.Pow(2, 31) {
+	if num < math.MaxInt32 || num < math.MinInt32 {
 		return false
 	}
 	return true
