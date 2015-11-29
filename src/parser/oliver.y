@@ -55,9 +55,8 @@ pairelemtype Type
 %type <prog> program
 %type <functions> functions
 %type <function> function
-%type <stmt> statement prefuncstat
-%type <stmts> statements prefuncstats
-%type <stmts> funcstats
+%type <stmt> statement
+%type <stmts> statements
 %type <assignrhs> assignrhs
 %type <assignlhs> assignlhs
 %type	<expr>		expr
@@ -84,32 +83,18 @@ program : BEGIN functions statements END {
 functions : functions function  { $$ = append($1, $2)}
           |                     { $$ = []*Function{} }
 
-function : typeDef IDENTIFIER OPENROUND CLOSEROUND IS funcstats END
-           { $$ = &Function{ident : $2, returnType : $1, statlist : $6}
+function : typeDef IDENTIFIER OPENROUND CLOSEROUND IS statements END
+           { if !checkStats($6) {
+          	parserlex.Error("Missing return statement")
            }
-         | typeDef IDENTIFIER OPENROUND paramlist CLOSEROUND IS funcstats END
-           {
-           $$ = &Function{ident : $2, returnType : $1, statlist : $7, parameterTypes : $4}
+             $$ = &Function{ident : $2, returnType : $1, statlist : $6}
            }
-
-funcstats : prefuncstats SEMICOLON RETURN expr                               { $$ = append($1, Return{$4}) }
-          | prefuncstats SEMICOLON IF expr THEN funcstats ELSE funcstats FI  { $$ = append($1, If{conditional : $4, thenStat : $6, elseStat : $8}) }
-          | IF expr THEN funcstats ELSE funcstats FI                       { $$ = []interface{}{If{conditional : $2, thenStat : $4, elseStat : $6}} }
-          | RETURN expr                                                    { $$ = []interface{}{Return{$2}} }
-
-prefuncstat : SKIP                                       { $$ = $1 }
-            | typeDef IDENTIFIER ASSIGNMENT assignrhs    { $$ = Declare{Type : $1, lhs : $2, rhs : $4} }
-            | assignlhs ASSIGNMENT assignrhs             { $$ = Assignment{lhs : $1, rhs : $3} }
-            | READ assignlhs                             { $$ = Read{$2} }
-            | FREE expr                                  { $$ = Free{$2} }
-            | EXIT expr                                  { $$ = Exit{$2} }
-            | PRINT expr                                 { $$ = Print{$2} }
-            | PRINTLN expr                               { $$ = Println{$2} }
-            | WHILE expr DO statements DONE              { $$ = While{conditional : $2, doStat : $4} }
-            | BEGIN statements END                       { $$ = Scope{statlist : $2, symbolTable : &SymbolTable{Table: make(map[string]Type)} } }
-
-prefuncstats : prefuncstats SEMICOLON prefuncstat            { $$ = append($1,$3) }
-             | prefuncstat                                 { $$ = []interface{}{$1} }
+         | typeDef IDENTIFIER OPENROUND paramlist CLOSEROUND IS statements END
+           { if !checkStats($7) {
+            	parserlex.Error("Missing return statement")
+            }
+             $$ = &Function{ident : $2, returnType : $1, statlist : $7, parameterTypes : $4}
+           }
 
 paramlist : paramlist COMMA param { $$ = append($1, $3)}
           | param                 { $$ = []Param{ $1 } }
