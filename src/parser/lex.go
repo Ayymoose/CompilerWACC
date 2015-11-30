@@ -403,17 +403,29 @@ func (l *Lexer) Lex(lval *parserSymType) int {
 			fmt.Println(err)
 			os.Exit(100)
 		}
-		if !checkInt(num) {
-			fmt.Println(err)
-			os.Exit(100)
-		}
 		*lval = parserSymType{number: num}
 	}
 	return token.Typ
 }
 
-func checkInt(num int) bool {
-	if num > math.MaxInt32 || num < math.MinInt32 {
+func isInt(value interface{}) bool {
+	switch value.(type) {
+	case int:
+		return true
+	default:
+		return false
+	}
+}
+
+func checkNeg(num int) bool {
+	if num < math.MinInt32 {
+		return false
+	}
+	return true
+}
+
+func checkPos(num int) bool {
+	if num > math.MaxInt32 {
 		return false
 	}
 	return true
