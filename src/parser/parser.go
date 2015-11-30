@@ -7,7 +7,7 @@ func ParseFile(filename, text string) (*Program, error) {
 	l := newLex(filename, text)
 	/*	for item := range l.Items {
 		fmt.Println(item)
-	} */
+	}  */
 	e := parserParse(l)
 	if e == 0 && !l.parseError {
 		return l.prog, nil

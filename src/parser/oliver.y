@@ -128,12 +128,7 @@ statement : SKIP                                      { $$ = $1 }
           | WHILE expr DO statements DONE              { $$ = While{conditional : $2, doStat : $4} }
           | BEGIN statements END                       { $$ = Scope{statlist : $2, symbolTable : &SymbolTable{Table: make(map[string]Type)} } }
 
-expr : INTEGER       {
-                       if !checkPos($1) {
-                         parserlex.Error("Int too big")
-                       }
-                       $$ =  $1 
-                     }
+expr : INTEGER       { $$ =  $1 }
      | TRUE          { $$ =  $1 }
      | FALSE         { $$ =  $1 }
      | CHARACTER     { $$ =  $1 }
@@ -145,24 +140,8 @@ expr : INTEGER       {
      | LEN expr     { $$ = Unop{unary : $1, expr : $2} }
      | ORD expr     { $$ = Unop{unary : $1, expr : $2} }
      | CHR expr     { $$ = Unop{unary : $1, expr : $2} }
-     | SUB expr     { if isInt($2) {
-                        if checkNeg(-int($2.(int))) {
-                              $$ = -int($2.(int))
-                        } else {
-                            parserlex.Error("Int too small")
-                        }
-                    }
-                      $$ = Unop{unary : $1, expr : $2}
-                    }
-     | PLUS expr    { if isInt($2) {
-                        if checkPos(int($2.(int))) {
-                              $$ = int($2.(int))
-                        } else {
-                            parserlex.Error("Int too big")
-                        }
-                    }
-                      $$ = Unop{unary : $1, expr : $2}
-                    }
+     | SUB expr     { $$ = Unop{unary : $1, expr : $2} }
+     | PLUS expr    { $$ = Unop{unary : $1, expr : $2} }
 
      | expr PLUS expr { $$ = Binop{left : $1, binary : $2, right : $3} }
      | expr SUB expr  { $$ = Binop{left : $1, binary : $2, right : $3} }
