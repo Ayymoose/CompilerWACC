@@ -219,9 +219,10 @@ func lexInsideProgram(l *Lexer) stateFn {
 	for _, str := range keysForTokens {
 		if strings.HasPrefix(l.input[l.pos:], str) {
 			//		s := grammar.Token_strings[str]
-			if l.input[l.pos] == '+' || l.input[l.pos] == '-' && '0' <= l.input[l.pos+1] && l.input[l.pos+1] <= '9' {
+			if (l.input[l.pos] == '+' || l.input[l.pos] == '-') && '0' <= l.input[l.pos+1] && l.input[l.pos+1] <= '9' {
 				switch l.lastItem.Typ {
 				case ASSIGNMENT, OPENROUND, OPENSQUARE, COMMA, SEMICOLON:
+					fmt.Println("Worng", l.lastItem)
 					return lexNumber
 				}
 			}
