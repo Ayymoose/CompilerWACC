@@ -128,7 +128,12 @@ statement : SKIP                                      { $$ = $1 }
           | WHILE expr DO statements DONE              { $$ = While{conditional : $2, doStat : $4} }
           | BEGIN statements END                       { $$ = Scope{statlist : $2, symbolTable : &SymbolTable{Table: make(map[string]Type)} } }
 
-expr : INTEGER       { $$ =  $1 }
+expr : INTEGER       {
+                       if !checkPos($1) {
+                         parserlex.Error("Int too big")
+                       }
+                       $$ =  $1 
+                     }
      | TRUE          { $$ =  $1 }
      | FALSE         { $$ =  $1 }
      | CHARACTER     { $$ =  $1 }
