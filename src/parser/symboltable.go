@@ -2,18 +2,29 @@ package parser
 
 // SymbolTable constructor
 type SymbolTable struct {
-	Parent *SymbolTable
-	Table  map[string]Type
+	Parent     *SymbolTable
+	Table      map[string]Type
+	OffsetVals map[string]int
 }
 
 // New Constructor creates new instance of a symbolTable with pointer to its parent
 func (symbolTable *SymbolTable) New() *SymbolTable {
-	return &SymbolTable{Parent: symbolTable, Table: make(map[string]Type)}
+	return &SymbolTable{Parent: symbolTable, Table: make(map[string]Type), OffsetVals: make(map[string]int)}
 }
 
 // Inserts a given key and value into the symbol table
 func (symbolTable *SymbolTable) insert(key string, value Type) {
 	symbolTable.Table[key] = value
+}
+
+// Inserts the offset of a given key into symbol table
+func (symbolTable *SymbolTable) insertOffset(key string, offset int) {
+	symbolTable.OffsetVals[key] = offset
+}
+
+// Returns the offset of a given key
+func (symbolTable *SymbolTable) getOffset(key string) int {
+	return symbolTable.OffsetVals[key]
 }
 
 // Checks if the key is already declared in the symbol table
