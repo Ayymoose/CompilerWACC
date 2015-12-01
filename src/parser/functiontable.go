@@ -4,7 +4,7 @@ type Function struct {
 	ident          string
 	returnType     Type
 	parameterTypes []Param
-	statlist       interface{}
+	statlist       []interface{}
 }
 
 type Param struct {

@@ -3,7 +3,7 @@ package armArchitecture
 // Operand of ARM instruction set
 type Operand int
 
-// Operands in alphabetical order
+// Operand enum
 
 // CHECK WHICH OPERANDS WE DON@T USE AND REMOVE THEM
 const (
