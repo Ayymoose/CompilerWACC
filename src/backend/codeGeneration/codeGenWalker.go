@@ -16,36 +16,39 @@ func (p Program) CGvisitProgram() {
 	// traverse all statements by switching on statement type
 	for _, stat := range p.StatList {
 		// write switch statement here
-		switch statType := stat.(type) {
-		case Declare:
-			stat.(Declare).CGvisitDeclareStat()
-		case Assignment:
-			stat.(Assignment).CGvisitAssignmentStat()
-		case Read:
-			stat.(Read).CGvisitReadStat()
-		case Free:
-			stat.(Free).CGvisitFreeStat()
-		case Return:
-			stat.(Return).CGvisitReturnStat()
-		case Exit:
-			stat.(Exit).CGvisitExitStat()
-		case Print:
-			stat.(Print).CGvisitPrintStat()
-		case Println:
-			stat.(Println).CGvisitPrintlnStat()
-		case If:
-			stat.(If).CGvisitIfStat()
-		case While:
-			stat.(While).CGvisitWhileStat()
-		case Scope:
-			stat.(Scope).CGvisitWhileStat()
-		default:
-			""
-		}
-	}
+		CGevalStat(stat)
 
+	}
 }
 
+func CGevalStat(stat interface{}) {
+	switch statType := stat.(type) {
+	case Declare:
+		stat.(Declare).CGvisitDeclareStat()
+	case Assignment:
+		stat.(Assignment).CGvisitAssignmentStat()
+	case Read:
+		stat.(Read).CGvisitReadStat()
+	case Free:
+		stat.(Free).CGvisitFreeStat()
+	case Return:
+		stat.(Return).CGvisitReturnStat()
+	case Exit:
+		stat.(Exit).CGvisitExitStat()
+	case Print:
+		stat.(Print).CGvisitPrintStat()
+	case Println:
+		stat.(Println).CGvisitPrintlnStat()
+	case If:
+		stat.(If).CGvisitIfStat()
+	case While:
+		stat.(While).CGvisitWhileStat()
+	case Scope:
+		stat.(Scope).CGvisitScopeStat()
+	default:
+		""
+	}
+}
 func (f Function) CGvisitFunction() {
 	funcName := "f_" + f.Ident
 	// PUSH {lr}
