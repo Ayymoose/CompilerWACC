@@ -1,7 +1,7 @@
 package codeGeneration
 
-// need help with this import
 import . "github.com/nanaasiedu/wacc_19/src/parser"
+import . "github.com/nanaasiedu/wacc_19/src/backend/fileWriter"
 
 func (p Program) CGvisitProgram(instrs *ARMList) {
 	var assemblyString String = ""
@@ -22,12 +22,21 @@ func (p Program) CGvisitProgram(instrs *ARMList) {
 	//main:
 	appendAssembly(assemblyString, "main:", 0, 1)
 
+	// push {lr} to save the caller address
+	appendAssembly(assemblyString, "push {lr}", 1, 1)
+
 	// traverse all statements by switching on statement type
 	for _, stat := range p.StatList {
 
 		CGevalStat(stat, instrs)
 
 	}
+
+	// pop {pc} to restore the caller address as the next instruction
+	appendAssembly(assemblyString, "pop {pc}", 1, 1)
+
+	// .ltorg
+	appendAssembly(assemblyString, ".ltorg", 1, 1)
 }
 
 func CGevalStat(stat interface{}, instrs *ARMList) {
