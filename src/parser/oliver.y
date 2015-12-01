@@ -57,7 +57,6 @@ pairelemtype Type
 %type <function> function
 %type <stmt> statement
 %type <stmts> statements
-%type <stmts> funcstats
 %type <assignrhs> assignrhs
 %type <assignlhs> assignlhs
 %type	<expr>		expr
@@ -84,16 +83,18 @@ program : BEGIN functions statements END {
 functions : functions function  { $$ = append($1, $2)}
           |                     { $$ = []*Function{} }
 
-function : typeDef IDENTIFIER OPENROUND CLOSEROUND IS funcstats END
-           { $$ = &Function{ident : $2, returnType : $1, statlist : $6}
+function : typeDef IDENTIFIER OPENROUND CLOSEROUND IS statements END
+           { if !checkStats($6) {
+          	parserlex.Error("Missing return statement")
            }
-         | typeDef IDENTIFIER OPENROUND paramlist CLOSEROUND IS funcstats END
-           {
-           $$ = &Function{ident : $2, returnType : $1, statlist : $7, parameterTypes : $4}
+             $$ = &Function{ident : $2, returnType : $1, statlist : $6}
            }
-
-funcstats : statements SEMICOLON RETURN expr   { $$ = append($1, Return{$4}) }
-          | RETURN expr                        { $$ = []interface{}{Return{$2}} }
+         | typeDef IDENTIFIER OPENROUND paramlist CLOSEROUND IS statements END
+           { if !checkStats($7) {
+            	parserlex.Error("Missing return statement")
+            }
+             $$ = &Function{ident : $2, returnType : $1, statlist : $7, parameterTypes : $4}
+           }
 
 paramlist : paramlist COMMA param { $$ = append($1, $3)}
           | param                 { $$ = []Param{ $1 } }

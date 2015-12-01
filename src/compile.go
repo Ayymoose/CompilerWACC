@@ -18,6 +18,9 @@ const SEMANTIC_ERROR = 200
 // wacc_examples\valid\function\simple_functions\functionDeclaration.wacc
 // wacc_examples\valid\function\simple_functions\functionReturnPair.wacc
 // wacc_examples\valid\function\simple_functions\functionManyArguments.wacc
+// wacc_examples\invalid\syntaxErr\function\noBodyAfterFuncs.wacc
+// wacc_examples\invalid\syntaxErr\function\functionNoReturn.wacc
+// wacc_examples/valid/pairs/createPair03.wacc
 
 func main() {
 	file := os.Args[1] // index 1 is file path
@@ -29,8 +32,6 @@ func main() {
 	s := string(b)
 	root, err := parser.ParseFile(file, s)
 	if err != nil {
-		fmt.Println("Failed kinda")
-		fmt.Println(root)
 		os.Exit(SYNTAX_ERROR)
 	}
 	fmt.Println(root)

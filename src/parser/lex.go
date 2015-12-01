@@ -2,6 +2,7 @@ package parser
 
 import (
 	"fmt"
+	"math"
 	"os"
 	"sort"
 	"strconv"
@@ -218,6 +219,13 @@ func lexInsideProgram(l *Lexer) stateFn {
 	for _, str := range keysForTokens {
 		if strings.HasPrefix(l.input[l.pos:], str) {
 			//		s := grammar.Token_strings[str]
+			if (l.input[l.pos] == '+' || l.input[l.pos] == '-') && '0' <= l.input[l.pos+1] && l.input[l.pos+1] <= '9' {
+				switch l.lastItem.Typ {
+				case ASSIGNMENT, OPENROUND, OPENSQUARE, COMMA, SEMICOLON:
+					fmt.Println("Worng", l.lastItem)
+					return lexNumber
+				}
+			}
 			l.width = len(str)
 			l.pos += l.width
 			l.emit(TokenStrings[str])
@@ -299,7 +307,8 @@ func (l *Lexer) acceptRun(valid string) {
 
 // emit passes an item back to the client.
 func (l *Lexer) emit(t int) {
-	l.Items <- Token{Typ: t, Lexeme: l.input[l.start:l.pos], Pos: l.start}
+	item := Token{Typ: t, Lexeme: l.input[l.start:l.pos], Pos: l.start}
+	l.Items <- item
 	l.start = l.pos
 }
 
@@ -402,9 +411,29 @@ func (l *Lexer) Lex(lval *parserSymType) int {
 			fmt.Println(err)
 			os.Exit(100)
 		}
+		if !checkInt(num) {
+			fmt.Println("Int too big or small")
+			os.Exit(100)
+		}
 		*lval = parserSymType{number: num}
 	}
 	return token.Typ
+}
+
+func isInt(value interface{}) bool {
+	switch value.(type) {
+	case int:
+		return true
+	default:
+		return false
+	}
+}
+
+func checkInt(num int) bool {
+	if num > math.MaxInt32 || num < math.MinInt32 {
+		return false
+	}
+	return true
 }
 
 func runeIsEscape(a rune) bool {
@@ -414,4 +443,16 @@ func runeIsEscape(a rune) bool {
 		}
 	}
 	return false
+}
+
+func checkStats(stats []interface{}) bool {
+	switch stats[len(stats)-1].(type) {
+	case Return, Exit:
+		return true
+	case If:
+		ifstat := stats[len(stats)-1].(If)
+		return checkStats(ifstat.thenStat) && checkStats(ifstat.elseStat)
+	default:
+		return false
+	}
 }
