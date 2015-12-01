@@ -3,14 +3,14 @@ package codeGeneration
 // need help with this import
 import . "github.com/nanaasiedu/wacc_19/src/parser"
 
-func (p Program) CGvisitProgram() {
+func (p Program) CGvisitProgram(instrs *ARMList) {
 	var assemblyString String = ""
 
 	// CHECK FOR MSGS IN TRAVERSAL
 
 	// traverse all functions
 	for _, function := range p.Functionlist {
-		function.CGvisitFunction()
+		function.CGvisitFunction(instrs)
 	}
 
 	// .text
@@ -25,40 +25,40 @@ func (p Program) CGvisitProgram() {
 	// traverse all statements by switching on statement type
 	for _, stat := range p.StatList {
 
-		CGevalStat(stat)
+		CGevalStat(stat, instrs)
 
 	}
 }
 
-func CGevalStat(stat interface{}) {
+func CGevalStat(stat interface{}, instrs *ARMList) {
 	switch statType := stat.(type) {
 	case Declare:
-		stat.(Declare).CGvisitDeclareStat()
+		stat.(Declare).CGvisitDeclareStat(instrs)
 	case Assignment:
-		stat.(Assignment).CGvisitAssignmentStat()
+		stat.(Assignment).CGvisitAssignmentStat(instrs)
 	case Read:
-		stat.(Read).CGvisitReadStat()
+		stat.(Read).CGvisitReadStat(instrs)
 	case Free:
-		stat.(Free).CGvisitFreeStat()
+		stat.(Free).CGvisitFreeStat(instrs)
 	case Return:
-		stat.(Return).CGvisitReturnStat()
+		stat.(Return).CGvisitReturnStat(instrs)
 	case Exit:
-		stat.(Exit).CGvisitExitStat()
+		stat.(Exit).CGvisitExitStat(instrs)
 	case Print:
-		stat.(Print).CGvisitPrintStat()
+		stat.(Print).CGvisitPrintStat(instrs)
 	case Println:
-		stat.(Println).CGvisitPrintlnStat()
+		stat.(Println).CGvisitPrintlnStat(instrs)
 	case If:
-		stat.(If).CGvisitIfStat()
+		stat.(If).CGvisitIfStat(instrs)
 	case While:
-		stat.(While).CGvisitWhileStat()
+		stat.(While).CGvisitWhileStat(instrs)
 	case Scope:
-		stat.(Scope).CGvisitScopeStat()
+		stat.(Scope).CGvisitScopeStat(instrs)
 	default:
 		""
 	}
 }
-func (f Function) CGvisitFunction() {
+func (f Function) CGvisitFunction(instrs *ARMList) {
 	funcName := "f_" + f.Ident
 	// PUSH {lr}
 	if f.ParameterTypes != nil {
@@ -71,54 +71,54 @@ func (f Function) CGvisitFunction() {
 
 // statements
 
-func (d Declare) CGvisitDeclareStat() {
+func (d Declare) CGvisitDeclareStat(instrs *ARMList) {
 }
 
-func (a Assignment) CGvisitAssignmentStat() {
+func (a Assignment) CGvisitAssignmentStat(instrs *ARMList) {
 }
 
-func (r Read) CGvisitReadStat() {
+func (r Read) CGvisitReadStat(instrs *ARMList) {
 }
 
-func (f Free) CGvisitFreeStat() {
-
-}
-
-func (r Return) CGvisitReturnStat() {
+func (f Free) CGvisitFreeStat(instrs *ARMList) {
 
 }
 
-func (e Exit) CGvisitExitStat() {
+func (r Return) CGvisitReturnStat(instrs *ARMList) {
 
 }
 
-func (p Print) CGvisitPrintStat() {
+func (e Exit) CGvisitExitStat(instrs *ARMList) {
 
 }
 
-func (p Println) CGvisitPrintlnStat() {
+func (p Print) CGvisitPrintStat(instrs *ARMList) {
 
 }
 
-func (i If) CGvisitIfStat() {
+func (p Println) CGvisitPrintlnStat(instrs *ARMList) {
 
 }
 
-func (w While) CGvisitWhileStat() {
+func (i If) CGvisitIfStat(instrs *ARMList) {
 
 }
 
-func (s Scope) CGvisitScopeStat() {
+func (w While) CGvisitWhileStat(instrs *ARMList) {
+
+}
+
+func (s Scope) CGvisitScopeStat(instrs *ARMList) {
 
 }
 
 // EXPRESSIONS
 
-func (u Unop) CGvisitUnopExpr() {
+func (u Unop) CGvisitUnopExpr(instrs *ARMList) {
 
 }
 
-func (b Binop) CGvisitBinopExpr() {
+func (b Binop) CGvisitBinopExpr(instrs *ARMList) {
 
 }
 
