@@ -1,21 +1,30 @@
 package codeGeneration
 
 // need help with this import
-import . "github.com/henrykhadass/wacc_19/src/parser"
+import . "github.com/nanaasiedu/wacc_19/src/parser"
 
 func (p Program) CGvisitProgram() {
-	// .text
-	//.global main
-	//main:
+	var assemblyString String = ""
+
+	// CHECK FOR MSGS IN TRAVERSAL
 
 	// traverse all functions
 	for _, function := range p.Functionlist {
 		function.CGvisitFunction()
 	}
 
+	// .text
+	appendAssembly(assemblyString, ".text", 0, 2)
+
+	// .global main
+	appendAssembly(assemblyString, ".global main", 0, 1)
+
+	//main:
+	appendAssembly(assemblyString, "main:", 0, 1)
+
 	// traverse all statements by switching on statement type
 	for _, stat := range p.StatList {
-		// write switch statement here
+
 		CGevalStat(stat)
 
 	}
@@ -111,4 +120,18 @@ func (u Unop) CGvisitUnopExpr() {
 
 func (b Binop) CGvisitBinopExpr() {
 
+}
+
+func appendAssembly(String *str, String code, int numTabsint, int numNewLines) {
+	const default_num_tabs = 1
+
+	for i := 0; i < numTabs+default_num_tabs; i++ {
+		*str += "\t"
+	}
+
+	*str += code
+
+	for i := 0; i < numNewLines; i++ {
+		*str += "\n"
+	}
 }
