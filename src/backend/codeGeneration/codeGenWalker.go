@@ -39,6 +39,10 @@ func (p Program) CGvisitProgram(instrs *ARMList) {
 	appendAssembly(assemblyString, ".ltorg", 1, 1)
 }
 
+func (p Program) CGcreateMsgs(instrs *ARMList) map[string]string {
+	return nil
+}
+
 func CGevalStat(stat interface{}, instrs *ARMList) {
 	switch statType := stat.(type) {
 	case Declare:
