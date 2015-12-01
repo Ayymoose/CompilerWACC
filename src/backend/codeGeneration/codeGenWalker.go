@@ -1,6 +1,7 @@
 package codeGeneration
 
 // need help with this import
+import . "github.com/henrykhadass/wacc_19/src/parser"
 
 func (p Program) CGvisitProgram() {
 	// .text
@@ -8,12 +9,12 @@ func (p Program) CGvisitProgram() {
 	//main:
 
 	// traverse all functions
-	for _, function := range p.functionlist {
+	for _, function := range p.Functionlist {
 		function.CGvisitFunction()
 	}
 
 	// traverse all statements by switching on statement type
-	for _, stat := range p.statList {
+	for _, stat := range p.StatList {
 		// write switch statement here
 		switch statType := stat.(type) {
 		case Declare:
@@ -45,11 +46,11 @@ func (p Program) CGvisitProgram() {
 
 }
 
-func (f Fuction) CGvisitFunction() {
-	funcName := "f_" + f.ident
+func (f Function) CGvisitFunction() {
+	funcName := "f_" + f.Ident
 	// PUSH {lr}
-	if f.parameterTypes != nil {
-		for _, param := range f.parameterTypes {
+	if f.ParameterTypes != nil {
+		for _, param := range f.ParameterTypes {
 			//
 		}
 	}

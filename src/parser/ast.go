@@ -15,8 +15,8 @@ const (
 )
 
 const (
-	fst FSND = iota
-	snd
+	Fst FSND = iota
+	Snd
 )
 
 // ArrayType struct
@@ -26,99 +26,99 @@ type ArrayType struct {
 
 // PairType struct
 type PairType struct {
-	fstType Type
-	sndType Type
+	FstType Type
+	SndType Type
 }
 
 // Program ..
 type Program struct {
-	functionlist []*Function
-	statList     []interface{}
-	symbolTable  *SymbolTable
+	Functionlist []*Function
+	StatList     []interface{}
+	SymbolTable  *SymbolTable
 }
 
 // Binop struct
 type Binop struct {
-	binary int
-	left   interface{}
-	right  interface{}
+	Binary int
+	Left   interface{}
+	Right  interface{}
 }
 
 // Unop struct
 type Unop struct {
-	unary int
-	expr  interface{}
+	Unary int
+	Expr  interface{}
 }
 
 type NewPair struct {
-	fstExpr interface{}
-	sndExpr interface{}
+	FstExpr interface{}
+	SndExpr interface{}
 }
 
 // Declare struct
 type Declare struct {
 	Type Type
-	lhs  interface{}
-	rhs  interface{}
+	Lhs  interface{}
+	Rhs  interface{}
 }
 
 // Assignment struct
 type Assignment struct {
-	lhs interface{}
-	rhs interface{}
+	Lhs interface{}
+	Rhs interface{}
 }
 
 // If struct
 type If struct {
-	conditional interface{}
-	thenStat    []interface{}
-	elseStat    []interface{}
+	Conditional interface{}
+	ThenStat    []interface{}
+	ElseStat    []interface{}
 }
 
 // While struct
 type While struct {
-	conditional interface{}
-	doStat      []interface{}
+	Conditional interface{}
+	DoStat      []interface{}
 }
 
 type Scope struct {
-	symbolTable *SymbolTable
-	statlist    []interface{}
+	SymbolTable *SymbolTable
+	Statlist    []interface{}
 }
 
 // Read struct
 type Read struct {
-	assignLHS interface{} // should be an assignLHS
+	AssignLHS interface{} // should be an assignLHS
 }
 
 // Free struct
 type Free struct {
-	expr interface{}
+	Expr interface{}
 }
 
 // Return struct
 type Return struct {
-	expr interface{}
+	Expr interface{}
 }
 
 // Exit struct
 type Exit struct {
-	expr interface{}
+	Expr interface{}
 }
 
 // Print struct
 type Print struct {
-	expr interface{}
+	Expr interface{}
 }
 
 // Println struct
 type Println struct {
-	expr interface{}
+	Expr interface{}
 }
 
 type Call struct {
-	ident    string
-	exprlist []interface{}
+	Ident    string
+	Exprlist []interface{}
 }
 
 /*
@@ -128,15 +128,15 @@ type Ident struct {
 */
 
 type PairElem struct {
-	fsnd FSND
-	expr interface{}
+	Fsnd FSND
+	Expr interface{}
 }
 
 type ArrayLiter struct {
-	exprs []interface{}
+	Exprs []interface{}
 }
 
 type ArrayElem struct {
-	ident string
-	exprs []interface{}
+	Ident string
+	Exprs []interface{}
 }

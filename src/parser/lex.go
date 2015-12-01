@@ -451,7 +451,7 @@ func checkStats(stats []interface{}) bool {
 		return true
 	case If:
 		ifstat := stats[len(stats)-1].(If)
-		return checkStats(ifstat.thenStat) && checkStats(ifstat.elseStat)
+		return checkStats(ifstat.ThenStat) && checkStats(ifstat.ElseStat)
 	default:
 		return false
 	}
