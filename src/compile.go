@@ -1,6 +1,7 @@
 package main
 
 import (
+	"ast"
 	"fmt"
 	"io/ioutil"
 	"os"
@@ -41,6 +42,13 @@ func main() {
 		os.Exit(SYNTAX_ERROR)
 	}
 	fmt.Println(root)
-	root.CGvisitProgram(armList)
+
+	var cg ast.CodeGenerator = ast.ConstructCodeGenerator(root, armList, ast.SymbolTable{})
+	cg.GenerateCode()
+
+	for _, instr := range *armList {
+		fmt.Println(instr)
+	}
+
 	//	armList.WriteToFile(BACKENDFILE)
 }
