@@ -1,24 +1,42 @@
 package ast
 
-import . "backend/filewriter"
+import (
+	. "backend/filewriter"
+	"strconv"
+)
+
+const (
+	INT_SIZE    = 4
+	BOOL_SIZE   = 1
+	CHAR_SIZE   = 1
+	STRING_SIZE = 4
+	PAIR_SIZE   = 4
+)
 
 type CodeGenerator struct {
 	root        *Program
 	instrs      *ARMList
 	msgInstrs   ARMList
 	symTable    SymbolTable
-	globalStack scopeData
+	globalStack *scopeData
 }
 
 func ConstructCodeGenerator(cRoot *Program, cInstrs *ARMList, cSymTable SymbolTable) CodeGenerator {
 	return CodeGenerator{root: cRoot, instrs: cInstrs, msgInstrs: ARMList{},
-		symTable: cSymTable, globalStack: scopeData{}}
+		symTable: cSymTable, globalStack: &scopeData{}}
 }
 
 type scopeData struct {
 	currP       int // the current position of the pointer to the stack
 	size        int // size of the stack space in bytes
 	parentScope *scopeData
+}
+
+// Decreases current pointer to the stack by n
+// Returns new currP as a string
+func (cg CodeGenerator) subCurrP(n int) string {
+	cg.globalStack.currP = cg.globalStack.currP - n
+	return strconv.Itoa(cg.globalStack.currP)
 }
 
 // Using the ARMList pointer provided in the constructor,
@@ -47,7 +65,10 @@ func (cg CodeGenerator) cgVisitProgram(node *Program) {
 	appendAssembly(cg.instrs, "main:", 0, 1)
 
 	// push {lr} to save the caller address
-	appendAssembly(cg.instrs, "push {lr}", 1, 1)
+	appendAssembly(cg.instrs, "PUSH {lr}", 1, 1)
+
+	// sub sp, sp, #n to create variable space
+	appendAssembly(cg.instrs, "SUB sp, sp, #"+strconv.Itoa(cg.globalStack.size), 1, 1)
 
 	// traverse all statements by switching on statement type
 	for _, stat := range node.StatList {
@@ -55,6 +76,9 @@ func (cg CodeGenerator) cgVisitProgram(node *Program) {
 		cg.cgEvalStat(stat)
 
 	}
+
+	// add sp, sp, #n to remove variable space
+	appendAssembly(cg.instrs, "ADD sp, sp, #"+strconv.Itoa(cg.globalStack.size), 1, 1)
 
 	// pop {pc} to restore the caller address as the next instruction
 	appendAssembly(cg.instrs, "pop {pc}", 1, 1)
@@ -67,7 +91,47 @@ func (cg CodeGenerator) cgVisitProgram(node *Program) {
 }
 
 func GetScopeVarSize(statList []interface{}) int {
-	return 0
+	//Size in bytes for all the variables in the current scope
+	var scopeSize = 0
+	//var fail = false
+
+	for _, stat := range statList {
+		switch stat.(type) {
+
+		case Declare:
+			var t = stat.(Declare).Type
+			//var r = stat.(Declare).Rhs
+
+			switch t.(type) {
+
+			case ArrayType:
+				//The size would be the equal to
+				//(Number of elements) * sizeOf(element)
+
+				/*	switch r.(ArrayLiter).Exprs {
+					case ArrayElem:
+						fmt.Println("Array elem")
+					case ArrayLiter:
+
+					}*/
+
+				scopeSize = 1773
+
+			case ConstType:
+				switch t.(ConstType) {
+				case Int, String:
+					//String and int require 4 bytes
+					scopeSize += 4
+				case Bool, Char:
+					//char and bool require 1 byte
+					scopeSize++
+				}
+			}
+			//Anything else is just ignored
+		}
+	}
+
+	return scopeSize
 }
 
 func (cg CodeGenerator) cgCreateMsgs(instrs *ARMList) map[string]string {
@@ -120,6 +184,22 @@ func (cg CodeGenerator) cgVisitFunction(node Function) {
 // statements
 
 func (cg CodeGenerator) cgVisitDeclareStat(node Declare) {
+	// Load the value of the declaration to R4
+	appendAssembly(cg.instrs, "LDR R4, =5", 1, 1)
+
+	switch node.Type.(type) {
+	case ConstType:
+		switch node.Type.(ConstType) {
+		case Int:
+			// Store the value of declaration to stack
+			appendAssembly(cg.instrs,
+				"STR =5, [sp, #"+cg.subCurrP(INT_SIZE)+"])",
+				1, 1)
+		}
+
+	}
+
+	// Store the value of the declaration to the stack
 
 }
 
