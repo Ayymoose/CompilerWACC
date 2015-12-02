@@ -1,6 +1,7 @@
 package parser
 
 import (
+	"ast"
 	"fmt"
 	"math"
 	"os"
@@ -49,8 +50,8 @@ type Lexer struct {
 	width      int
 	lastPos    int // position of most recent item returned by nextItem
 	Items      chan Token
-	prog       *Program // The parsed program
-	lastItem   Token    // The last item emitted
+	prog       *ast.Program // The parsed program
+	lastItem   Token        // The last item emitted
 	parseError bool
 }
 
@@ -447,10 +448,10 @@ func runeIsEscape(a rune) bool {
 
 func checkStats(stats []interface{}) bool {
 	switch stats[len(stats)-1].(type) {
-	case Return, Exit:
+	case ast.Return, ast.Exit:
 		return true
-	case If:
-		ifstat := stats[len(stats)-1].(If)
+	case ast.If:
+		ifstat := stats[len(stats)-1].(ast.If)
 		return checkStats(ifstat.ThenStat) && checkStats(ifstat.ElseStat)
 	default:
 		return false

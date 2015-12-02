@@ -1,4 +1,4 @@
-package parser
+package ast
 
 // SymbolTable constructor
 type SymbolTable struct {

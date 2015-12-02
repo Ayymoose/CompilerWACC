@@ -1,9 +1,13 @@
 package parser
 
-import "errors"
+import (
+	"errors"
+
+	"ast"
+)
 
 // Parse lexes and parses the program returning root of tree
-func ParseFile(filename, text string) (*Program, error) {
+func ParseFile(filename, text string) (*ast.Program, error) {
 	l := newLex(filename, text)
 	/*	for item := range l.Items {
 		fmt.Println(item)

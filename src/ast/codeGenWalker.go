@@ -1,10 +1,12 @@
-package codeGeneration
+package ast
 
-import . "github.com/nanaasiedu/wacc_19/src/parser"
-import . "github.com/nanaasiedu/wacc_19/src/backend/fileWriter"
+import (
+	. "backend/filewriter"
+	"fmt"
+)
 
 func (p Program) CGvisitProgram(instrs *ARMList) {
-	var assemblyString String = ""
+	var assemblyString string = ""
 
 	// CHECK FOR MSGS IN TRAVERSAL
 
@@ -44,7 +46,7 @@ func (p Program) CGcreateMsgs(instrs *ARMList) map[string]string {
 }
 
 func CGevalStat(stat interface{}, instrs *ARMList) {
-	switch statType := stat.(type) {
+	switch stat.(type) {
 	case Declare:
 		stat.(Declare).CGvisitDeclareStat(instrs)
 	case Assignment:
@@ -68,14 +70,16 @@ func CGevalStat(stat interface{}, instrs *ARMList) {
 	case Scope:
 		stat.(Scope).CGvisitScopeStat(instrs)
 	default:
-		""
+		//	""
 	}
 }
 func (f Function) CGvisitFunction(instrs *ARMList) {
 	funcName := "f_" + f.Ident
+	fmt.Println(funcName)
 	// PUSH {lr}
 	if f.ParameterTypes != nil {
 		for _, param := range f.ParameterTypes {
+			fmt.Println(param)
 			//
 		}
 	}
@@ -135,16 +139,16 @@ func (b Binop) CGvisitBinopExpr(instrs *ARMList) {
 
 }
 
-func appendAssembly(String *str, String code, int numTabsint, int numNewLines) {
+func appendAssembly(str string, code string, numTabs int, numNewLines int) {
 	const default_num_tabs = 1
 
 	for i := 0; i < numTabs+default_num_tabs; i++ {
-		*str += "\t"
+		str += "\t"
 	}
 
-	*str += code
+	str += code
 
 	for i := 0; i < numNewLines; i++ {
-		*str += "\n"
+		str += "\n"
 	}
 }

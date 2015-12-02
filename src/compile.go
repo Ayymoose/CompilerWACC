@@ -5,10 +5,14 @@ import (
 	"io/ioutil"
 	"os"
 	"parser"
+
+	"backend/filewriter"
 )
 
 const SYNTAX_ERROR = 100
 const SEMANTIC_ERROR = 200
+
+const BACKENDFILE = "backendtest.s"
 
 // wacc_examples\valid\expressions\andExpr.wacc
 // wacc_examples\valid\basic\exit\exitBasic.wacc
@@ -23,6 +27,8 @@ const SEMANTIC_ERROR = 200
 // wacc_examples/valid/pairs/createPair03.wacc
 
 func main() {
+
+	armList := &filewriter.ARMList{}
 	file := os.Args[1] // index 1 is file path
 	b, err := ioutil.ReadFile(file)
 	if err != nil {
@@ -35,4 +41,6 @@ func main() {
 		os.Exit(SYNTAX_ERROR)
 	}
 	fmt.Println(root)
+	root.CGvisitProgram(armList)
+	armList.WriteToFile(BACKENDFILE)
 }

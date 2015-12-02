@@ -1,4 +1,4 @@
-package parser
+package ast
 
 type ConstType int
 type FSND int
@@ -18,6 +18,18 @@ const (
 	Fst FSND = iota
 	Snd
 )
+
+type Function struct {
+	Ident          string
+	ReturnType     Type
+	ParameterTypes []Param
+	Statlist       []interface{}
+}
+
+type Param struct {
+	Ident     string
+	ParamType Type
+}
 
 // ArrayType struct
 type ArrayType struct {

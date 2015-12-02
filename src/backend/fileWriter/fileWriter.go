@@ -1,6 +1,9 @@
-package fileWriter
+package filewriter
 
-import "os"
+import (
+	"fmt"
+	"os"
+)
 
 func check(e error) {
 	if e != nil {
@@ -23,6 +26,10 @@ func (f ARMList) WriteToFile(fileName string) {
 	defer file.Close()
 	for _, str := range f {
 		n3, err := file.WriteString(str)
+		if err != nil {
+			fmt.Println(err)
+		}
+		fmt.Println(n3)
 	}
 	file.Sync()
 }

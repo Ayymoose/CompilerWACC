@@ -1,5 +1,7 @@
 %{
 package parser
+
+import . "ast"
 %}
 
 %union{
@@ -77,7 +79,7 @@ pairelemtype Type
 %%
 
 program : BEGIN functions statements END {
-                                          parserlex.(*Lexer).prog = &Program{functionlist : $2 , statList : $3 , symbolTable : &SymbolTable{Table: make(map[string]Type)}}
+                                          parserlex.(*Lexer).prog = &Program{Functionlist : $2 , StatList : $3 , SymbolTable : &SymbolTable{Table: make(map[string]Type)}}
                                          }
 
 functions : functions function  { $$ = append($1, $2)}
@@ -87,19 +89,19 @@ function : typeDef IDENTIFIER OPENROUND CLOSEROUND IS statements END
            { if !checkStats($6) {
           	parserlex.Error("Missing return statement")
            }
-             $$ = &Function{ident : $2, returnType : $1, statlist : $6}
+             $$ = &Function{Ident : $2, ReturnType : $1, Statlist : $6}
            }
          | typeDef IDENTIFIER OPENROUND paramlist CLOSEROUND IS statements END
            { if !checkStats($7) {
             	parserlex.Error("Missing return statement")
             }
-             $$ = &Function{ident : $2, returnType : $1, statlist : $7, parameterTypes : $4}
+             $$ = &Function{Ident : $2, ReturnType : $1, Statlist : $7, ParameterTypes : $4}
            }
 
 paramlist : paramlist COMMA param { $$ = append($1, $3)}
           | param                 { $$ = []Param{ $1 } }
 
-param : typeDef IDENTIFIER { $$ = Param{paramType : $1, ident : $2} }
+param : typeDef IDENTIFIER { $$ = Param{ParamType : $1, Ident : $2} }
 
 assignlhs : IDENTIFIER    {$$ = $1}
           | arrayelem     {$$ = $1}
@@ -108,25 +110,25 @@ assignlhs : IDENTIFIER    {$$ = $1}
 assignrhs : expr                                           {$$ = $1}
           | arrayliter                                     {$$ = $1}
           | pairelem                                       {$$ = $1}
-          | NEWPAIR OPENROUND expr COMMA expr CLOSEROUND   { $$ = NewPair{fstExpr : $3, sndExpr : $5} }
-          | CALL IDENTIFIER OPENROUND exprlist CLOSEROUND  { $$ = Call{ident : $2, exprlist : $4} }
+          | NEWPAIR OPENROUND expr COMMA expr CLOSEROUND   { $$ = NewPair{FstExpr : $3, SndExpr : $5} }
+          | CALL IDENTIFIER OPENROUND exprlist CLOSEROUND  { $$ = Call{Ident : $2, Exprlist : $4} }
 
 statements : statements SEMICOLON statement           { $$ = append($1,$3) }
            | statement                                { $$ = []interface{}{$1} }
 
 
-statement : SKIP                                      { $$ = $1 }
-          | typeDef IDENTIFIER ASSIGNMENT assignrhs   { $$ = Declare{Type : $1, lhs : $2, rhs : $4} }
-          | assignlhs ASSIGNMENT assignrhs            { $$ = Assignment{lhs : $1, rhs : $3} }
-          | READ assignlhs                            { $$ = Read{$2} }
-          | FREE expr                                 { $$ = Free{$2} }
-          | RETURN expr                               { $$ = Return{$2} }
-          | EXIT expr                                 { $$ = Exit{$2} }
-          | PRINT expr                                { $$ = Print{$2} }
-          | PRINTLN expr                              { $$ = Println{$2} }
-          | IF expr THEN statements ELSE statements FI  { $$ = If{conditional : $2, thenStat : $4, elseStat : $6} }
-          | WHILE expr DO statements DONE              { $$ = While{conditional : $2, doStat : $4} }
-          | BEGIN statements END                       { $$ = Scope{statlist : $2, symbolTable : &SymbolTable{Table: make(map[string]Type)} } }
+statement : SKIP                                        { $$ = $1 }
+          | typeDef IDENTIFIER ASSIGNMENT assignrhs     { $$ = Declare{Type : $1, Lhs : $2, Rhs : $4} }
+          | assignlhs ASSIGNMENT assignrhs              { $$ = Assignment{Lhs : $1, Rhs : $3} }
+          | READ assignlhs                              { $$ = Read{$2} }
+          | FREE expr                                   { $$ = Free{$2} }
+          | RETURN expr                                 { $$ = Return{$2} }
+          | EXIT expr                                   { $$ = Exit{$2} }
+          | PRINT expr                                  { $$ = Print{$2} }
+          | PRINTLN expr                                { $$ = Println{$2} }
+          | IF expr THEN statements ELSE statements FI  { $$ = If{Conditional : $2, ThenStat : $4, ElseStat : $6} }
+          | WHILE expr DO statements DONE               { $$ = While{Conditional : $2, DoStat : $4} }
+          | BEGIN statements END                        { $$ = Scope{Statlist : $2, SymbolTable : &SymbolTable{Table: make(map[string]Type)} } }
 
 expr : INTEGER       { $$ =  $1 }
      | TRUE          { $$ =  $1 }
@@ -136,26 +138,26 @@ expr : INTEGER       { $$ =  $1 }
      | pairliter     { $$ =  $1 }
      | IDENTIFIER    { $$ =  $1 }
      | arrayelem     { $$ =  $1 }
-     | NOT expr     { $$ = Unop{unary : $1, expr : $2} }
-     | LEN expr     { $$ = Unop{unary : $1, expr : $2} }
-     | ORD expr     { $$ = Unop{unary : $1, expr : $2} }
-     | CHR expr     { $$ = Unop{unary : $1, expr : $2} }
-     | SUB expr     { $$ = Unop{unary : $1, expr : $2} }
-     | PLUS expr    { $$ = Unop{unary : $1, expr : $2} }
+     | NOT expr     { $$ = Unop{Unary : $1, Expr : $2} }
+     | LEN expr     { $$ = Unop{Unary : $1, Expr : $2} }
+     | ORD expr     { $$ = Unop{Unary : $1, Expr : $2} }
+     | CHR expr     { $$ = Unop{Unary : $1, Expr : $2} }
+     | SUB expr     { $$ = Unop{Unary : $1, Expr : $2} }
+     | PLUS expr    { $$ = Unop{Unary : $1, Expr : $2} }
 
-     | expr PLUS expr { $$ = Binop{left : $1, binary : $2, right : $3} }
-     | expr SUB expr  { $$ = Binop{left : $1, binary : $2, right : $3} }
-     | expr MUL expr  { $$ = Binop{left : $1, binary : $2, right : $3} }
-     | expr MOD expr  { $$ = Binop{left : $1, binary : $2, right : $3} }
-     | expr DIV expr  { $$ = Binop{left : $1, binary : $2, right : $3} }
-     | expr LT expr   { $$ = Binop{left : $1, binary : $2, right : $3} }
-     | expr GT expr   { $$ = Binop{left : $1, binary : $2, right : $3} }
-     | expr LTE expr  { $$ = Binop{left : $1, binary : $2, right : $3} }
-     | expr GTE expr  { $$ = Binop{left : $1, binary : $2, right : $3} }
-     | expr EQ expr   { $$ = Binop{left : $1, binary : $2, right : $3} }
-     | expr NEQ expr  { $$ = Binop{left : $1, binary : $2, right : $3} }
-     | expr AND expr  { $$ = Binop{left : $1, binary : $2, right : $3} }
-     | expr OR expr   { $$ = Binop{left : $1, binary : $2, right : $3} }
+     | expr PLUS expr { $$ = Binop{Left : $1, Binary : $2, Right : $3} }
+     | expr SUB expr  { $$ = Binop{Left : $1, Binary : $2, Right : $3} }
+     | expr MUL expr  { $$ = Binop{Left : $1, Binary : $2, Right : $3} }
+     | expr MOD expr  { $$ = Binop{Left : $1, Binary : $2, Right : $3} }
+     | expr DIV expr  { $$ = Binop{Left : $1, Binary : $2, Right : $3} }
+     | expr LT expr   { $$ = Binop{Left : $1, Binary : $2, Right : $3} }
+     | expr GT expr   { $$ = Binop{Left : $1, Binary : $2, Right : $3} }
+     | expr LTE expr  { $$ = Binop{Left : $1, Binary : $2, Right : $3} }
+     | expr GTE expr  { $$ = Binop{Left : $1, Binary : $2, Right : $3} }
+     | expr EQ expr   { $$ = Binop{Left : $1, Binary : $2, Right : $3} }
+     | expr NEQ expr  { $$ = Binop{Left : $1, Binary : $2, Right : $3} }
+     | expr AND expr  { $$ = Binop{Left : $1, Binary : $2, Right : $3} }
+     | expr OR expr   { $$ = Binop{Left : $1, Binary : $2, Right : $3} }
      | OPENROUND expr CLOSEROUND  { $$ = $2 }
 
 arrayliter : OPENSQUARE exprlist CLOSESQUARE { $$ = ArrayLiter{$2}}
@@ -164,17 +166,17 @@ exprlist : exprlist COMMA expr {$$ = append($1, $3)}
          | expr                {$$ = []interface{}{$1}}
          |                     {$$ = []interface{}{}}
 
-arrayelem : IDENTIFIER bracketed {$$ = ArrayElem{ident: $1, exprs : $2}}
+arrayelem : IDENTIFIER bracketed {$$ = ArrayElem{Ident: $1, Exprs : $2}}
 
 bracketed : bracketed OPENSQUARE expr CLOSESQUARE {$$ = append($1, $3)}
           | OPENSQUARE expr CLOSESQUARE {$$ = []interface{}{$2}}
 
 pairliter : NULL    { $$ =  NULL }
 
-pairelem : FST expr { $$ = PairElem{fsnd: FST, expr : $2} }
-         | SND expr { $$ = PairElem{fsnd: SND, expr : $2} }
+pairelem : FST expr { $$ = PairElem{Fsnd: FST, Expr : $2} }
+         | SND expr { $$ = PairElem{Fsnd: SND, Expr : $2} }
 
-pairtype : PAIR OPENROUND pairelemtype COMMA pairelemtype CLOSEROUND  { $$ = PairType{fstType : $3, sndType : $5} }
+pairtype : PAIR OPENROUND pairelemtype COMMA pairelemtype CLOSEROUND  { $$ = PairType{FstType : $3, SndType : $5} }
 
 pairelemtype : basetype  { $$ = $1 }
              | arraytype { $$ = $1 }
