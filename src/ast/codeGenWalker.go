@@ -8,6 +8,7 @@ import (
 
 const (
 	INT_SIZE    = 4
+	ARRAY_SIZE  = 4
 	BOOL_SIZE   = 1
 	CHAR_SIZE   = 1
 	STRING_SIZE = 4
@@ -94,8 +95,8 @@ func (cg CodeGenerator) cgVisitProgram(node *Program) {
 	*cg.instrs = append(cg.msgInstrs, *cg.instrs...)
 }
 
+//Size in bytes for all the variables in the current scope
 func GetScopeVarSize(statList []interface{}) int {
-	//Size in bytes for all the variables in the current scope
 	var scopeSize = 0
 
 	for _, stat := range statList {
@@ -107,16 +108,20 @@ func GetScopeVarSize(statList []interface{}) int {
 			switch t.(type) {
 			case PairType:
 				//Address of pair on the stack is 4 bytes
-				scopeSize += 4
+				scopeSize += PAIR_SIZE
 			case ArrayType:
 				var e = stat.(Declare).Rhs.(ArrayLiter)
 				var sizeOf = 0
 
 				switch t.(ArrayType).Type {
-				case Int, String:
-					sizeOf = 4
-				case Bool, Char:
-					sizeOf = 1
+				case Int:
+					sizeOf = INT_SIZE
+				case String:
+					sizeOf = STRING_SIZE
+				case Bool:
+					sizeOf = BOOL_SIZE
+				case Char:
+					sizeOf = CHAR_SIZE
 				default:
 					fmt.Println("No type found for ArrayType")
 				}
@@ -126,12 +131,14 @@ func GetScopeVarSize(statList []interface{}) int {
 
 			case ConstType:
 				switch t.(ConstType) {
-				case Int, String:
-					//String and int require 4 bytes
-					scopeSize += 4
-				case Bool, Char:
-					//char and bool require 1 byte
-					scopeSize++
+				case Int:
+					scopeSize += INT_SIZE
+				case String:
+					scopeSize += STRING_SIZE
+				case Bool:
+					scopeSize += BOOL_SIZE
+				case Char:
+					scopeSize += CHAR_SIZE
 				default:
 					fmt.Println("No type found for ConstType")
 				}
@@ -191,19 +198,32 @@ func (cg CodeGenerator) cgVisitFunction(node Function) {
 }
 
 // statements
+/*
+func getValue(node Declare) int {
+	return node.Rhs
+}*/
 
 func (cg CodeGenerator) cgVisitDeclareStat(node Declare) {
-	// Load the value of the declaration to R4
-	appendAssembly(cg.instrs, "LDR R4, =5", 1, 1)
 
 	switch node.Type.(type) {
 	case ConstType:
 		switch node.Type.(ConstType) {
+		case Bool:
+
+		case Char:
+
 		case Int:
+
+			//fmt.Println("Type", node.Rhs)
+
+			// Load the value of the declaration to R4
+			appendAssembly(cg.instrs, "LDR R4, "+strconv.Itoa(), 1, 1)
+
 			// Store the value of declaration to stack
 			appendAssembly(cg.instrs,
-				"STR =5, [sp, #"+cg.subCurrP(INT_SIZE)+"])",
-				1, 1)
+				"STR R4, [sp, #"+cg.subCurrP(INT_SIZE)+"])", 1, 1)
+		case String:
+
 		}
 
 	}

@@ -41,7 +41,7 @@ func main() {
 	if err != nil {
 		os.Exit(SYNTAX_ERROR)
 	}
-	fmt.Println(root)
+	//fmt.Println(root)
 
 	var cg ast.CodeGenerator = ast.ConstructCodeGenerator(root, armList, ast.SymbolTable{})
 	cg.GenerateCode()
