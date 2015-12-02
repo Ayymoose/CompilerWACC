@@ -1,6 +1,9 @@
 package ast
 
-import . "backend/filewriter"
+import (
+	. "backend/filewriter"
+	"fmt"
+)
 
 type CodeGenerator struct {
 	sp       int
@@ -56,29 +59,32 @@ func (cg CodeGenerator) cgVisitProgram(node *Program) {
 func GetScopeVarSize(statList []interface{}) int {
 	//Size in bytes for all the variables in the current scope
 	var scopeSize = 0
-	//var fail = false
 
 	for _, stat := range statList {
 		switch stat.(type) {
 
 		case Declare:
 			var t = stat.(Declare).Type
-			//var r = stat.(Declare).Rhs
 
 			switch t.(type) {
-
+			case PairType:
+				//Address of pair on the stack is 4 bytes
+				scopeSize += 4
 			case ArrayType:
+				var e = stat.(Declare).Rhs.(ArrayLiter)
+				var sizeOf = 0
+
+				switch t.(ArrayType).Type {
+				case Int, String:
+					sizeOf = 4
+				case Bool, Char:
+					sizeOf = 1
+				default:
+					fmt.Println("No type found for ArrayType")
+				}
 				//The size would be the equal to
-				//(Number of elements) * sizeOf(element)
-
-				/*	switch r.(ArrayLiter).Exprs {
-					case ArrayElem:
-						fmt.Println("Array elem")
-					case ArrayLiter:
-
-					}*/
-
-				scopeSize = 1773
+				//(Number of elements + 1) * sizeOf(element)
+				scopeSize += (len(e.Exprs) + 1) * sizeOf
 
 			case ConstType:
 				switch t.(ConstType) {
@@ -88,6 +94,8 @@ func GetScopeVarSize(statList []interface{}) int {
 				case Bool, Char:
 					//char and bool require 1 byte
 					scopeSize++
+				default:
+					fmt.Println("No type found for ConstType")
 				}
 			}
 			//Anything else is just ignored
