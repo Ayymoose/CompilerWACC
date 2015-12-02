@@ -53,8 +53,48 @@ func (cg CodeGenerator) cgVisitProgram(node *Program) {
 	appendAssembly(cg.instrs, ".ltorg", 1, 1)
 }
 
-func getScopeVarSize(statList []interface{}) int {
-	return 0
+func GetScopeVarSize(statList []interface{}) int {
+	//Size in bytes for all the variables in the current scope
+	var scopeSize = 0
+	//var fail = false
+
+	for _, stat := range statList {
+		switch stat.(type) {
+
+		case Declare:
+			var t = stat.(Declare).Type
+			//var r = stat.(Declare).Rhs
+
+			switch t.(type) {
+
+			case ArrayType:
+				//The size would be the equal to
+				//(Number of elements) * sizeOf(element)
+
+				/*	switch r.(ArrayLiter).Exprs {
+					case ArrayElem:
+						fmt.Println("Array elem")
+					case ArrayLiter:
+
+					}*/
+
+				scopeSize = 1773
+
+			case ConstType:
+				switch t.(ConstType) {
+				case Int, String:
+					//String and int require 4 bytes
+					scopeSize += 4
+				case Bool, Char:
+					//char and bool require 1 byte
+					scopeSize++
+				}
+			}
+			//Anything else is just ignored
+		}
+	}
+
+	return scopeSize
 }
 
 func (cg CodeGenerator) cgCreateMsgs(instrs *ARMList) map[string]string {

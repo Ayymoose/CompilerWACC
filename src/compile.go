@@ -42,6 +42,7 @@ func main() {
 		os.Exit(SYNTAX_ERROR)
 	}
 	fmt.Println(root)
+	fmt.Println("Var size: ", ast.GetScopeVarSize(root.StatList))
 
 	var cg ast.CodeGenerator = ast.ConstructCodeGenerator(root, armList, ast.SymbolTable{})
 	cg.GenerateCode()
