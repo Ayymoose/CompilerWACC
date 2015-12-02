@@ -3,14 +3,22 @@ package ast
 import . "backend/filewriter"
 
 type CodeGenerator struct {
-	sp       int
-	root     *Program
-	instrs   *ARMList
-	symTable SymbolTable
+	root        *Program
+	instrs      *ARMList
+	msgInstrs   ARMList
+	symTable    SymbolTable
+	globalStack scopeData
 }
 
 func ConstructCodeGenerator(cRoot *Program, cInstrs *ARMList, cSymTable SymbolTable) CodeGenerator {
-	return CodeGenerator{sp: 0, root: cRoot, instrs: cInstrs, symTable: cSymTable}
+	return CodeGenerator{root: cRoot, instrs: cInstrs, msgInstrs: ARMList{},
+		symTable: cSymTable, globalStack: scopeData{}}
+}
+
+type scopeData struct {
+	currP       int // the current position of the pointer to the stack
+	size        int // size of the stack space in bytes
+	parentScope *scopeData
 }
 
 // Using the ARMList pointer provided in the constructor,
@@ -20,7 +28,9 @@ func (cg CodeGenerator) GenerateCode() {
 }
 
 func (cg CodeGenerator) cgVisitProgram(node *Program) {
-	// CHECK FOR MSGS IN TRAVERSAL
+	// Set properities of global scope
+	cg.globalStack.size = GetScopeVarSize(node.StatList)
+	cg.globalStack.currP = cg.globalStack.size
 
 	// traverse all functions
 	for _, function := range node.Functionlist {
@@ -51,9 +61,12 @@ func (cg CodeGenerator) cgVisitProgram(node *Program) {
 
 	// .ltorg
 	appendAssembly(cg.instrs, ".ltorg", 1, 1)
+
+	// Adds the msg definitions to assembly instructions
+	*cg.instrs = append(cg.msgInstrs, *cg.instrs...)
 }
 
-func getScopeVarSize(statList []interface{}) int {
+func GetScopeVarSize(statList []interface{}) int {
 	return 0
 }
 
