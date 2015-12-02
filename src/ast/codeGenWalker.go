@@ -20,11 +20,14 @@ type CodeGenerator struct {
 	msgInstrs   ARMList
 	symTable    SymbolTable
 	globalStack *scopeData
+	currStack   *scopeData
 }
 
 func ConstructCodeGenerator(cRoot *Program, cInstrs *ARMList, cSymTable SymbolTable) CodeGenerator {
-	return CodeGenerator{root: cRoot, instrs: cInstrs, msgInstrs: ARMList{},
+	cg := CodeGenerator{root: cRoot, instrs: cInstrs, msgInstrs: ARMList{},
 		symTable: cSymTable, globalStack: &scopeData{}}
+	cg.currStack = cg.globalStack
+	return cg
 }
 
 type scopeData struct {
@@ -36,8 +39,8 @@ type scopeData struct {
 // Decreases current pointer to the stack by n
 // Returns new currP as a string
 func (cg CodeGenerator) subCurrP(n int) string {
-	cg.globalStack.currP = cg.globalStack.currP - n
-	return strconv.Itoa(cg.globalStack.currP)
+	cg.currStack.currP = cg.currStack.currP - n
+	return strconv.Itoa(cg.currStack.currP)
 }
 
 // Using the ARMList pointer provided in the constructor,
