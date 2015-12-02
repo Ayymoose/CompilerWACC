@@ -53,6 +53,10 @@ func (cg CodeGenerator) cgVisitProgram(node *Program) {
 	appendAssembly(cg.instrs, ".ltorg", 1, 1)
 }
 
+func getScopeVarSize(statList []interface{}) int {
+	return 0
+}
+
 func (cg CodeGenerator) cgCreateMsgs(instrs *ARMList) map[string]string {
 	return nil
 }
@@ -103,6 +107,7 @@ func (cg CodeGenerator) cgVisitFunction(node Function) {
 // statements
 
 func (cg CodeGenerator) cgVisitDeclareStat(node Declare) {
+
 }
 
 func (cg CodeGenerator) cgVisitAssignmentStat(node Assignment) {

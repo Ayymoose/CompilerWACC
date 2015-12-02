@@ -47,7 +47,7 @@ func main() {
 	cg.GenerateCode()
 
 	for _, instr := range *armList {
-		fmt.Println(instr)
+		fmt.Print(instr)
 	}
 
 	//	armList.WriteToFile(BACKENDFILE)
