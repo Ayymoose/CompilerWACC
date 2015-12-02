@@ -1,7 +1,7 @@
 package ast
 
 import (
-	. "backend/fileWriter"
+	. "backend/filewriter"
 	"fmt"
 )
 

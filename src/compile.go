@@ -6,7 +6,7 @@ import (
 	"os"
 	"parser"
 
-	"backend/fileWriter"
+	"backend/filewriter"
 )
 
 const SYNTAX_ERROR = 100
@@ -28,7 +28,7 @@ const BACKENDFILE = "backendtest.s"
 
 func main() {
 
-	armList := &fileWriter.ARMList{}
+	armList := &filewriter.ARMList{}
 	file := os.Args[1] // index 1 is file path
 	b, err := ioutil.ReadFile(file)
 	if err != nil {
