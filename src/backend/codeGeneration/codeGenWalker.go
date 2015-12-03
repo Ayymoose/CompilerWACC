@@ -3,6 +3,7 @@ package codeGeneration
 import (
 	. "ast"
 	. "backend/filewriter"
+	"fmt"
 	"strconv"
 )
 
@@ -145,6 +146,9 @@ func (cg CodeGenerator) cgVisitParameter(node Param) {
 func (cg CodeGenerator) cgVisitDeclareStat(node Declare) {
 	//Most likely need a function to get the value stored in the node
 	switch node.DecType.(type) {
+
+	case ArrayType:
+
 	case ConstType:
 		switch node.DecType.(ConstType) {
 		case Bool:
@@ -166,7 +170,8 @@ func (cg CodeGenerator) cgVisitDeclareStat(node Declare) {
 			appendAssembly(cg.instrs,
 				"STR R4, [sp, #"+cg.subCurrP(INT_SIZE)+"])", 1, 1)
 		case String:
-
+			// TODO: STRING HAS NOT BEEN IMPLEMENETED
+			fmt.Println("String not implemented")
 		}
 
 	}
