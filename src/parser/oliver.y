@@ -43,7 +43,7 @@ pairelemtype Type
 %token <number> NOT NEG LEN ORD CHR                                              // Unary ops   DO WE NEED THESEEEE
 %token <number> MUL DIV MOD PLUS SUB AND OR GT GTE LT LTE EQ NEQ                 // Binary ops
 %token POSITIVE NEGATIVE
-%token <number> TRUE FALSE                                    // Booleans
+%token TRUE FALSE                                    // Booleans
 %token NULL
 %token OPENSQUARE OPENROUND CLOSESQUARE CLOSEROUND
 %token ASSIGNMENT
