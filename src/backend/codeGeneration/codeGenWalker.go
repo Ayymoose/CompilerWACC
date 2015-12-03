@@ -70,7 +70,7 @@ func (cg CodeGenerator) cgVisitProgram(node *Program) {
 	appendAssembly(cg.instrs, ".ltorg", 1, 1)
 
 	// Adds the msg definitions to assembly instructions
-	*cg.instrs = append(cg.msgInstrs, *cg.instrs...)
+	*cg.instrs = append(*cg.msgInstrs, *cg.instrs...)
 }
 
 func (cg CodeGenerator) cgCreateMsgs(instrs *ARMList) map[string]string {
