@@ -135,7 +135,6 @@ func (cg CodeGenerator) cgVisitParameter(node Param) {
 		case Char:
 		case Int:
 		case String:
-			//	case Pair:
 		}
 	case ArrayType:
 
@@ -300,6 +299,7 @@ func (cg CodeGenerator) cgVisitReadStat(node Read) {
 	case Ident:
 	case ArrayElem:
 	case PairElem:
+	default:
 	}
 
 	if offset == 4 {
@@ -315,7 +315,7 @@ func (cg CodeGenerator) cgVisitReadStat(node Read) {
 }
 
 func (cg CodeGenerator) cgVisitFreeStat(node Free) {
-	//label := "p_free_pair"
+
 }
 
 func (cg CodeGenerator) cgVisitReturnStat(node Return) {
