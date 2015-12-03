@@ -30,7 +30,7 @@ func GetScopeVarSize(statList []interface{}) int {
 			case PairType:
 				//Address of pair on the stack is 4 bytes
 				scopeSize += PAIR_SIZE
-			case ArrayType:
+			case ArrayType, ConstType:
 				//	var e = stat.(Declare).Rhs.(ArrayLiter)
 
 				switch t.(ArrayType).Type {
@@ -45,20 +45,21 @@ func GetScopeVarSize(statList []interface{}) int {
 				default:
 					fmt.Println("No type found for ArrayType")
 				}
-
-			case ConstType:
-				switch t.(ConstType) {
-				case Int:
-					scopeSize += INT_SIZE
-				case String:
-					scopeSize += STRING_SIZE
-				case Bool:
-					scopeSize += BOOL_SIZE
-				case Char:
-					scopeSize += CHAR_SIZE
-				default:
-					fmt.Println("No type found for ConstType")
-				}
+				/*
+					case ConstType:
+						switch t.(ConstType) {
+						case Int:
+							scopeSize += INT_SIZE
+						case String:
+							scopeSize += STRING_SIZE
+						case Bool:
+							scopeSize += BOOL_SIZE
+						case Char:
+							scopeSize += CHAR_SIZE
+						default:
+							fmt.Println("No type found for ConstType")
+						}
+				*/
 			}
 			//Anything else is just ignored
 		}

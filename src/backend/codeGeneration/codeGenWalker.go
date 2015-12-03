@@ -143,32 +143,85 @@ func (cg CodeGenerator) cgVisitParameter(node Param) {
 	}
 }
 
+//Loads the array elements onto the stack
+func pushArrayElements(array []interface{}, register string) {
+
+	var arraySize = arraySize(array)
+	//Loop through the array pushing it onto the stack
+	for i := 0; i < arraySize; i++ {
+		//Array of pairs,ints,bools,chars,strings
+		var arrayItem = array[i]
+
+		switch arrayItem.(type) {
+		case ConstType:
+
+			fmt.Println("int")
+
+			/*	case Int:
+					fmt.Println("int")
+				case Bool:
+					fmt.Println("bool")
+				case Char:
+					fmt.Println("char")
+				case String:
+					fmt.Println("string")*/
+		default:
+			fmt.Println("String/Array/Pair type not implemented!")
+		}
+
+		//var arrayItem = array.[i].(int)
+		//appendAssembly(cg.instrs, "LDR r5, ="+strconv.Itoa(arrayItem), 1, 1)
+	}
+}
+
 func (cg CodeGenerator) cgVisitDeclareStat(node Declare) {
 	//Most likely need a function to get the value stored in the node
 	switch node.DecType.(type) {
 
 	case ArrayType:
 
+		//MIGHT NEED TO CHANGE THIS BACK TO SIMPLE IF STATEMENT
+		var array = node.Rhs
+		switch array.(type) {
+		case ArrayLiter:
+			//Calculate the amount of storage space required for the array
+			// = (arrayLength(array) + 1) * sizeOf(arrayType)
+			var arraySize = arraySize(array.(ArrayLiter).Exprs)
+			var arrayStorage = (arraySize + 1) * sizeOf(node.DecType)
+
+			appendAssembly(cg.instrs, "LDR r0, ="+strconv.Itoa(arrayStorage), 1, 1)
+			//Allocate memory for the array
+			appendAssembly(cg.instrs, "BL malloc", 1, 1)
+			//Move the result back into the register
+			appendAssembly(cg.instrs, "MOV r4, r0", 1, 1)
+
+			//Start loading each element in the array onto the stack
+			pushArrayElements(array.(ArrayLiter).Exprs, "r5")
+
+		}
+
 	case ConstType:
 		switch node.DecType.(ConstType) {
 		case Bool:
+
 			//Load the bool into a register
-			appendAssembly(cg.instrs, "MOV R4, #"+strconv.Itoa(node.Rhs.(int)), 1, 1)
+			appendAssembly(cg.instrs, "MOV r4, #"+strconv.Itoa(node.Rhs.(int)), 1, 1)
 			//Using STRB, store it on the stack
 			appendAssembly(cg.instrs,
-				"STRB R4, [sp, #"+cg.subCurrP(BOOL_SIZE)+"])", 1, 1)
+				"STRB r4, [sp, #"+cg.subCurrP(BOOL_SIZE)+"])", 1, 1)
+
 		case Char:
 			//Load the character into a register
-			appendAssembly(cg.instrs, "MOV R4, #"+node.Rhs.(string), 1, 1)
+			appendAssembly(cg.instrs, "MOV r4, #"+node.Rhs.(string), 1, 1)
 			//Using STRB, store it on the stack
 			appendAssembly(cg.instrs,
-				"STRB R4, [sp, #"+cg.subCurrP(CHAR_SIZE)+"])", 1, 1)
+				"STRB r4, [sp, #"+cg.subCurrP(CHAR_SIZE)+"])", 1, 1)
 		case Int:
 			// Load the value of the declaration to the register
-			appendAssembly(cg.instrs, "LDR R4, "+strconv.Itoa(node.Rhs.(int)), 1, 1)
+			appendAssembly(cg.instrs, "LDR r4, "+strconv.Itoa(node.Rhs.(int)), 1, 1)
 			// Store the value of declaration to stack
 			appendAssembly(cg.instrs,
-				"STR R4, [sp, #"+cg.subCurrP(INT_SIZE)+"])", 1, 1)
+				"STR r4, [sp, #"+cg.subCurrP(INT_SIZE)+"])", 1, 1)
 		case String:
 			// TODO: STRING HAS NOT BEEN IMPLEMENETED
 			fmt.Println("String not implemented")
@@ -178,6 +231,34 @@ func (cg CodeGenerator) cgVisitDeclareStat(node Declare) {
 
 	// Store the value of the declaration to the stack
 
+}
+
+//Calcuates the type of the array and returns the size in bytes that the array occupies
+func sizeOf(t Type) int {
+	var size = 0
+	switch t.(type) {
+	case ArrayType:
+		switch t.(ArrayType).Type {
+		case Int:
+			size = INT_SIZE
+		case String:
+			size = STRING_SIZE
+		case Bool:
+			size = BOOL_SIZE
+		case Char:
+			size = CHAR_SIZE
+		default:
+			fmt.Println("No type found!")
+		}
+	default:
+		fmt.Println("No type found!")
+	}
+	return size
+}
+
+//Calcuates the size of an array
+func arraySize(array []interface{}) int {
+	return len(array)
 }
 
 func (cg CodeGenerator) cgVisitAssignmentStat(node Assignment) {
