@@ -36,7 +36,7 @@ func (cg CodeGenerator) cgVisitProgram(node *Program) {
 	cg.globalStack.currP = cg.globalStack.size
 
 	// traverse all functions
-	for _, function := range node.FunctionList {
+	for _, function := range node.Functionlist {
 		cg.cgVisitFunction(*function)
 	}
 
@@ -197,16 +197,15 @@ func (cg CodeGenerator) cgVisitDeclareStat(node Declare) {
 	}
 
 	switch node.DecType.(type) {
+
 	case ConstType:
 		switch node.DecType.(ConstType) {
 		case Bool:
-
 			//Load the bool into a register
 			appendAssembly(cg.instrs, "MOV r4, #"+strconv.Itoa(node.Rhs.(int)), 1, 1)
 			//Using STRB, store it on the stack
 			appendAssembly(cg.instrs,
 				"STRB r4, [sp, #"+cg.subCurrP(BOOL_SIZE)+"])", 1, 1)
-
 		case Char:
 			//Load the character into a register
 			appendAssembly(cg.instrs, "MOV r4, #"+node.Rhs.(string), 1, 1)
@@ -216,6 +215,7 @@ func (cg CodeGenerator) cgVisitDeclareStat(node Declare) {
 		case Int:
 			// Load the value of the declaration to the register
 			appendAssembly(cg.instrs, "LDR r4, "+strconv.Itoa(node.Rhs.(int)), 1, 1)
+
 			//fmt.Println("Type", node.Rhs)
 
 			// Load the value of the declaration to R4
@@ -225,12 +225,10 @@ func (cg CodeGenerator) cgVisitDeclareStat(node Declare) {
 			appendAssembly(cg.instrs,
 				"STR r4, [sp, #"+cg.subCurrP(INT_SIZE)+"])", 1, 1)
 		case String:
+			fmt.Println("String not implemented")
 
 		}
-
 	}
-
-	// Store the value of the declaration to the stack
 
 }
 
@@ -300,6 +298,7 @@ func (cg CodeGenerator) cgVisitReadStat(node Read) {
 	case ArrayElem:
 	case PairElem:
 	default:
+
 	}
 
 	if offset == 4 {
@@ -315,7 +314,7 @@ func (cg CodeGenerator) cgVisitReadStat(node Read) {
 }
 
 func (cg CodeGenerator) cgVisitFreeStat(node Free) {
-
+	label := "p_free_pair"
 }
 
 func (cg CodeGenerator) cgVisitReturnStat(node Return) {
