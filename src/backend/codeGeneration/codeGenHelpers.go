@@ -31,24 +31,20 @@ func GetScopeVarSize(statList []interface{}) int {
 				//Address of pair on the stack is 4 bytes
 				scopeSize += PAIR_SIZE
 			case ArrayType:
-				var e = stat.(Declare).Rhs.(ArrayLiter)
-				var sizeOf = 0
+				//	var e = stat.(Declare).Rhs.(ArrayLiter)
 
 				switch t.(ArrayType).Type {
 				case Int:
-					sizeOf = INT_SIZE
+					scopeSize += INT_SIZE
 				case String:
-					sizeOf = STRING_SIZE
+					scopeSize += STRING_SIZE
 				case Bool:
-					sizeOf = BOOL_SIZE
+					scopeSize += BOOL_SIZE
 				case Char:
-					sizeOf = CHAR_SIZE
+					scopeSize += CHAR_SIZE
 				default:
 					fmt.Println("No type found for ArrayType")
 				}
-				//The size would be the equal to
-				//(Number of elements + 1) * sizeOf(element)
-				scopeSize += (len(e.Exprs) + 1) * sizeOf
 
 			case ConstType:
 				switch t.(ConstType) {
