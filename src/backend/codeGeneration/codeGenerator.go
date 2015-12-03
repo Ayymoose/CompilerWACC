@@ -13,10 +13,10 @@ import (
 type CodeGenerator struct {
 	root           *Program          // Root of the AST
 	instrs         *ARMList          // List of assembly instructions for the program
-	msgInstrs      ARMList           // List of assembly instructions to create msg labels
+	msgInstrs      *ARMList          // List of assembly instructions to create msg labels
 	symTable       SymbolTable       // Used to map variable identifiers to their values
-	funcInstrs     ARMList           // List of assembly instructions that define functions and their labels
-	progFuncInstrs ARMList           // List of assembly instructions that define program generated functions e.g. p_print_string
+	funcInstrs     *ARMList          // List of assembly instructions that define functions and their labels
+	progFuncInstrs *ARMList          // List of assembly instructions that define program generated functions e.g. p_print_string
 	globalStack    *scopeData        // Stack data for the global scope
 	currStack      *scopeData        // Stack data for the current scope
 	msgMap         map[string]string // Maps string values to their msg labels
@@ -24,7 +24,8 @@ type CodeGenerator struct {
 
 // Constructor for the code generator.
 func ConstructCodeGenerator(cRoot *Program, cInstrs *ARMList, cSymTable SymbolTable) CodeGenerator {
-	cg := CodeGenerator{root: cRoot, instrs: cInstrs, msgInstrs: ARMList{},
+	cg := CodeGenerator{root: cRoot, instrs: cInstrs, msgInstrs: new(ARMList),
+		funcInstrs: new(ARMList), progFuncInstrs: new(ARMList),
 		symTable: cSymTable, globalStack: &scopeData{}}
 
 	// The program starts off with the current scope as the global scope
@@ -58,9 +59,9 @@ func (cg CodeGenerator) GenerateCode() {
 
 // Using
 func (cg CodeGenerator) buildFullInstr() {
-	*cg.instrs = append(cg.funcInstrs, *cg.instrs...)
-	*cg.instrs = append(cg.msgInstrs, *cg.instrs...)
-	*cg.instrs = append(*cg.instrs, cg.progFuncInstrs...)
+	*cg.instrs = append(*cg.funcInstrs, (*cg.instrs)...)
+	*cg.instrs = append(*cg.msgInstrs, (*cg.instrs)...)
+	*cg.instrs = append(*cg.instrs, *cg.progFuncInstrs...)
 
 }
 
@@ -76,8 +77,7 @@ func (cg CodeGenerator) getMsgLabel(strValue string) string {
 	}
 
 	cg.msgMap[strValue] = "msg_" + strconv.Itoa(len(cg.msgMap))
-
-	addMsgLabel(&cg.msgInstrs, cg.msgMap[strValue], strValue)
+	addMsgLabel(cg.msgInstrs, cg.msgMap[strValue], strValue)
 
 	return "=" + cg.msgMap[strValue]
 }

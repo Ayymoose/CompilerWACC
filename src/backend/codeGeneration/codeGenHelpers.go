@@ -101,7 +101,6 @@ func addMsgLabel(msgInstrs *ARMList, label string, strValue string) {
 
 	appendAssembly(msgInstrs, ".word "+strconv.Itoa(wordSize), 1, 1)
 	appendAssembly(msgInstrs, ".ascii \""+strValue+"\"", 1, 2)
-
 }
 
 // Calculates the size of strValue in bytes

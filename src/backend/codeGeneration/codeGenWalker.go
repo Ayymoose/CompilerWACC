@@ -228,7 +228,8 @@ func (cg CodeGenerator) cgVisitPrintStat(node Print) {
 		strValue := expr.(string)
 
 		// LDR r4, =msg_n : load the string message label
-		appendAssembly(cg.instrs, "LDR r4, "+cg.getMsgLabel(strValue), 1, 1)
+		msgLabel := cg.getMsgLabel(strValue)
+		appendAssembly(cg.instrs, "LDR r4, "+msgLabel, 1, 1)
 		// MOV r0, r4 : prepare parameter for function call
 		appendAssembly(cg.instrs, "MOV r0, r4", 1, 1)
 		// BL p_print_string
