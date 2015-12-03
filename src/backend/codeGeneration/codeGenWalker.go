@@ -57,9 +57,7 @@ func (cg CodeGenerator) cgVisitProgram(node *Program) {
 
 	// traverse all statements by switching on statement type
 	for _, stat := range node.StatList {
-
-		cg.cgEvalStat(stat) // NEED A POINTER HERE TO?
-
+		cg.cgEvalStat(stat)
 	}
 
 	// add sp, sp, #n to remove variable space
@@ -137,9 +135,12 @@ func (cg CodeGenerator) cgVisitParameter(node Param) {
 		case Char:
 		case Int:
 		case String:
-		case Pair: /// WE NEED THIS RIGHT?
-			/// DO WE NEED FSND ASWELL I.E TYPE FSND SWITCH??
+			//	case Pair:
 		}
+	case ArrayType:
+
+	case PairType:
+
 	}
 }
 
@@ -175,31 +176,28 @@ func pushArrayElements(array []interface{}, register string) {
 }
 
 func (cg CodeGenerator) cgVisitDeclareStat(node Declare) {
-	//Most likely need a function to get the value stored in the node
+
+	//MIGHT NEED TO CHANGE THIS BACK TO SIMPLE IF STATEMENT
+	var array = node.Rhs
+	switch array.(type) {
+	case ArrayLiter:
+		//Calculate the amount of storage space required for the array
+		// = (arrayLength(array) + 1) * sizeOf(arrayType)
+		var arraySize = arraySize(array.(ArrayLiter).Exprs)
+		var arrayStorage = (arraySize + 1) * sizeOf(node.DecType)
+
+		appendAssembly(cg.instrs, "LDR r0, ="+strconv.Itoa(arrayStorage), 1, 1)
+		//Allocate memory for the array
+		appendAssembly(cg.instrs, "BL malloc", 1, 1)
+		//Move the result back into the register
+		appendAssembly(cg.instrs, "MOV r4, r0", 1, 1)
+
+		//Start loading each element in the array onto the stack
+		pushArrayElements(array.(ArrayLiter).Exprs, "r5")
+
+	}
+
 	switch node.DecType.(type) {
-
-	case ArrayType:
-
-		//MIGHT NEED TO CHANGE THIS BACK TO SIMPLE IF STATEMENT
-		var array = node.Rhs
-		switch array.(type) {
-		case ArrayLiter:
-			//Calculate the amount of storage space required for the array
-			// = (arrayLength(array) + 1) * sizeOf(arrayType)
-			var arraySize = arraySize(array.(ArrayLiter).Exprs)
-			var arrayStorage = (arraySize + 1) * sizeOf(node.DecType)
-
-			appendAssembly(cg.instrs, "LDR r0, ="+strconv.Itoa(arrayStorage), 1, 1)
-			//Allocate memory for the array
-			appendAssembly(cg.instrs, "BL malloc", 1, 1)
-			//Move the result back into the register
-			appendAssembly(cg.instrs, "MOV r4, r0", 1, 1)
-
-			//Start loading each element in the array onto the stack
-			pushArrayElements(array.(ArrayLiter).Exprs, "r5")
-
-		}
-
 	case ConstType:
 		switch node.DecType.(ConstType) {
 		case Bool:
@@ -219,12 +217,16 @@ func (cg CodeGenerator) cgVisitDeclareStat(node Declare) {
 		case Int:
 			// Load the value of the declaration to the register
 			appendAssembly(cg.instrs, "LDR r4, "+strconv.Itoa(node.Rhs.(int)), 1, 1)
+			//fmt.Println("Type", node.Rhs)
+
+			// Load the value of the declaration to R4
+			//appendAssembly(cg.instrs, "LDR R4, "+strconv.Itoa(), 1, 1)
+
 			// Store the value of declaration to stack
 			appendAssembly(cg.instrs,
 				"STR r4, [sp, #"+cg.subCurrP(INT_SIZE)+"])", 1, 1)
 		case String:
-			// TODO: STRING HAS NOT BEEN IMPLEMENETED
-			fmt.Println("String not implemented")
+
 		}
 
 	}
@@ -268,6 +270,7 @@ func (cg CodeGenerator) cgVisitAssignmentStat(node Assignment) {
 	default: // Ident
 	}
 
+	// eval RHS ????
 	switch node.Rhs.(type) {
 	// expr
 	case ConstType:
@@ -280,7 +283,7 @@ func (cg CodeGenerator) cgVisitAssignmentStat(node Assignment) {
 
 		case String:
 
-		case Pair:
+			//	case Pair:
 		}
 	case ArrayElem:
 	case Unop:
@@ -291,10 +294,28 @@ func (cg CodeGenerator) cgVisitAssignmentStat(node Assignment) {
 }
 
 func (cg CodeGenerator) cgVisitReadStat(node Read) {
+	label := "p_read_"
+	offset := 0
+	switch node.AssignLHS.(type) {
+	case Ident:
+	case ArrayElem:
+	case PairElem:
+	}
+
+	if offset == 4 {
+		label += "int"
+	} else if offset == 1 {
+		label += "char"
+	}
+	// p_read_int:  /char
+	//PUSH {lr}
+
+	// BL scanf
+	//POP {pc}
 }
 
 func (cg CodeGenerator) cgVisitFreeStat(node Free) {
-
+	//label := "p_free_pair"
 }
 
 func (cg CodeGenerator) cgVisitReturnStat(node Return) {

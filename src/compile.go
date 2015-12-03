@@ -1,11 +1,13 @@
 package main
 
 import (
-	"ast"
+	//	"ast"
 	"fmt"
 	"io/ioutil"
 	"os"
 	"parser"
+
+	"ast"
 
 	codeG "backend/codeGeneration"
 	"backend/filewriter"
@@ -14,7 +16,7 @@ import (
 const SYNTAX_ERROR = 100
 const SEMANTIC_ERROR = 200
 
-const BACKENDFILE = "backendtest.s"
+const BACKENDFILE = "ARMCode.s"
 
 // wacc_examples\valid\expressions\andExpr.wacc
 // wacc_examples\valid\basic\exit\exitBasic.wacc
@@ -42,14 +44,14 @@ func main() {
 	if err != nil {
 		os.Exit(SYNTAX_ERROR)
 	}
-	//fmt.Println(root)
+	fmt.Println(root)
 
-	var cg codeG.CodeGenerator = codeG.ConstructCodeGenerator(root, armList, ast.SymbolTable{})
+	cg := codeG.ConstructCodeGenerator(root, armList, ast.SymbolTable{})
 	cg.GenerateCode()
 
 	for _, instr := range *armList {
 		fmt.Print(instr)
 	}
 
-	//	armList.WriteToFile(BACKENDFILE)
+	//armList.WriteToFile(BACKENDFILE)
 }

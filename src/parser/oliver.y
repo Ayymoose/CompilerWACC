@@ -112,7 +112,7 @@ assignrhs : expr                                           {$$ = $1}
           | arrayliter                                     {$$ = $1}
           | pairelem                                       {$$ = $1}
           | NEWPAIR OPENROUND expr COMMA expr CLOSEROUND   { $$ = NewPair{FstExpr : $3, SndExpr : $5} }
-          | CALL IDENTIFIER OPENROUND exprlist CLOSEROUND  { $$ = Call{Ident : $2, ExprList : $4} }
+          | CALL IDENTIFIER OPENROUND exprlist CLOSEROUND  { $$ = Call{Ident : $2, ParamList : $4} }
 
 statements : statements SEMICOLON statement           { $$ = append($1,$3) }
            | statement                                { $$ = []interface{}{$1} }
@@ -181,7 +181,7 @@ pairtype : PAIR OPENROUND pairelemtype COMMA pairelemtype CLOSEROUND  { $$ = Pai
 
 pairelemtype : basetype  { $$ = $1 }
              | arraytype { $$ = $1 }
-             | PAIR      { $$ = Pair }
+             | PAIR      { $$ = PairType{} }
 
 typeDef : basetype  { $$ =  $1 }
         | arraytype { $$ =  $1 }

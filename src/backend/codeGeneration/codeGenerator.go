@@ -11,22 +11,26 @@ import (
 // the code generator can use the "GenerateCode" function to fill the assembly list
 // instrs with the assembly produced by traversing the tree
 type CodeGenerator struct {
-	root        *Program          // Root of the AST
-	instrs      *ARMList          // List of assembly instructions for the program
-	msgInstrs   ARMList           // List of assembly instructions to create msg labels
-	symTable    SymbolTable       // Used to map variable identifiers to their values
-	funcInstrs  ARMList           // List of assembly instructions that define functions and their labels
-	globalStack *scopeData        // Stack data for the global scope
-	currStack   *scopeData        // Stack data for the current scope
-	msgMap      map[string]string // Maps string values to their msg labels
+	root           *Program          // Root of the AST
+	instrs         *ARMList          // List of assembly instructions for the program
+	msgInstrs      ARMList           // List of assembly instructions to create msg labels
+	symTable       SymbolTable       // Used to map variable identifiers to their values
+	funcInstrs     ARMList           // List of assembly instructions that define functions and their labels
+	progFuncInstrs ARMList           // List of assembly instructions that define program generated functions e.g. p_print_string
+	globalStack    *scopeData        // Stack data for the global scope
+	currStack      *scopeData        // Stack data for the current scope
+	msgMap         map[string]string // Maps string values to their msg labels
 }
 
 // Constructor for the code generator.
 func ConstructCodeGenerator(cRoot *Program, cInstrs *ARMList, cSymTable SymbolTable) CodeGenerator {
 	cg := CodeGenerator{root: cRoot, instrs: cInstrs, msgInstrs: ARMList{},
 		symTable: cSymTable, globalStack: &scopeData{}}
+
 	// The program starts off with the current scope as the global scope
 	cg.currStack = cg.globalStack
+
+	cg.msgMap = make(map[string]string)
 	return cg
 }
 
@@ -49,6 +53,15 @@ func (cg CodeGenerator) subCurrP(n int) string {
 // based on the provided AST
 func (cg CodeGenerator) GenerateCode() {
 	cg.cgVisitProgram(cg.root)
+	cg.buildFullInstr()
+}
+
+// Using
+func (cg CodeGenerator) buildFullInstr() {
+	*cg.instrs = append(cg.funcInstrs, *cg.instrs...)
+	*cg.instrs = append(cg.msgInstrs, *cg.instrs...)
+	*cg.instrs = append(*cg.instrs, cg.progFuncInstrs...)
+
 }
 
 // Returns a msg label value for the strValue using msgMap
