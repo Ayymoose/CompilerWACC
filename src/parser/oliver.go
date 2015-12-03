@@ -566,7 +566,7 @@ parserdefault:
 	case 1:
 		//line oliver.y:82
 		{
-	                                          parserlex.(*Lexer).prog = &Program{Functionlist : parserS[parserpt-2].functions , StatList : parserS[parserpt-1].stmts , SymbolTable : &SymbolTable{Table: make(map[string]Type)}}
+	                                          parserlex.(*Lexer).prog = &Program{FunctionList : parserS[parserpt-2].functions , StatList : parserS[parserpt-1].stmts , SymbolTable : &SymbolTable{Table: make(map[string]Type)}}
 	                                         }
 	case 2:
 		//line oliver.y:86
@@ -579,14 +579,14 @@ parserdefault:
 		{ if !checkStats(parserS[parserpt-1].stmts) {
 	          	parserlex.Error("Missing return statement")
 	           }
-	             parserVAL.function = &Function{Ident : parserS[parserpt-5].str, ReturnType : parserS[parserpt-6].typedefinition, Statlist : parserS[parserpt-1].stmts}
+	             parserVAL.function = &Function{Ident : parserS[parserpt-5].str, ReturnType : parserS[parserpt-6].typedefinition, StatList : parserS[parserpt-1].stmts}
 	           }
 	case 5:
 		//line oliver.y:96
 		{ if !checkStats(parserS[parserpt-1].stmts) {
 	            	parserlex.Error("Missing return statement")
 	            }
-	             parserVAL.function = &Function{Ident : parserS[parserpt-6].str, ReturnType : parserS[parserpt-7].typedefinition, Statlist : parserS[parserpt-1].stmts, ParameterTypes : parserS[parserpt-4].params}
+	             parserVAL.function = &Function{Ident : parserS[parserpt-6].str, ReturnType : parserS[parserpt-7].typedefinition, StatList : parserS[parserpt-1].stmts, ParameterTypes : parserS[parserpt-4].params}
 	           }
 	case 6:
 		//line oliver.y:102
@@ -620,7 +620,7 @@ parserdefault:
 		{ parserVAL.assignrhs = NewPair{FstExpr : parserS[parserpt-3].expr, SndExpr : parserS[parserpt-1].expr} }
 	case 16:
 		//line oliver.y:115
-		{ parserVAL.assignrhs = Call{Ident : parserS[parserpt-3].str, Exprlist : parserS[parserpt-1].exprs} }
+		{ parserVAL.assignrhs = Call{Ident : parserS[parserpt-3].str, ExprList : parserS[parserpt-1].exprs} }
 	case 17:
 		//line oliver.y:117
 		{ parserVAL.stmts = append(parserS[parserpt-2].stmts,parserS[parserpt-0].stmt) }
@@ -662,7 +662,7 @@ parserdefault:
 		{ parserVAL.stmt = While{Conditional : parserS[parserpt-3].expr, DoStat : parserS[parserpt-1].stmts} }
 	case 30:
 		//line oliver.y:132
-		{ parserVAL.stmt = Scope{Statlist : parserS[parserpt-1].stmts, SymbolTable : &SymbolTable{Table: make(map[string]Type)} } }
+		{ parserVAL.stmt = Scope{StatList : parserS[parserpt-1].stmts, SymbolTable : &SymbolTable{Table: make(map[string]Type)} } }
 	case 31:
 		//line oliver.y:134
 		{ parserVAL.expr =  parserS[parserpt-0].number }

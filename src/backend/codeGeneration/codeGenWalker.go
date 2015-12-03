@@ -35,7 +35,7 @@ func (cg CodeGenerator) cgVisitProgram(node *Program) {
 	cg.globalStack.currP = cg.globalStack.size
 
 	// traverse all functions
-	for _, function := range node.Functionlist {
+	for _, function := range node.FunctionList {
 		cg.cgVisitFunction(*function)
 	}
 

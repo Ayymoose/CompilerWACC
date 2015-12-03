@@ -80,7 +80,7 @@ pairelemtype Type
 %%
 
 program : BEGIN functions statements END {
-                                          parserlex.(*Lexer).prog = &Program{Functionlist : $2 , StatList : $3 , SymbolTable : &SymbolTable{Table: make(map[string]Type)}}
+                                          parserlex.(*Lexer).prog = &Program{FunctionList : $2 , StatList : $3 , SymbolTable : &SymbolTable{Table: make(map[string]Type)}}
                                          }
 
 functions : functions function  { $$ = append($1, $2)}
@@ -90,13 +90,13 @@ function : typeDef IDENTIFIER OPENROUND CLOSEROUND IS statements END
            { if !checkStats($6) {
           	parserlex.Error("Missing return statement")
            }
-             $$ = &Function{Ident : $2, ReturnType : $1, Statlist : $6}
+             $$ = &Function{Ident : $2, ReturnType : $1, StatList : $6}
            }
          | typeDef IDENTIFIER OPENROUND paramlist CLOSEROUND IS statements END
            { if !checkStats($7) {
             	parserlex.Error("Missing return statement")
             }
-             $$ = &Function{Ident : $2, ReturnType : $1, Statlist : $7, ParameterTypes : $4}
+             $$ = &Function{Ident : $2, ReturnType : $1, StatList : $7, ParameterTypes : $4}
            }
 
 paramlist : paramlist COMMA param { $$ = append($1, $3)}
@@ -112,7 +112,7 @@ assignrhs : expr                                           {$$ = $1}
           | arrayliter                                     {$$ = $1}
           | pairelem                                       {$$ = $1}
           | NEWPAIR OPENROUND expr COMMA expr CLOSEROUND   { $$ = NewPair{FstExpr : $3, SndExpr : $5} }
-          | CALL IDENTIFIER OPENROUND exprlist CLOSEROUND  { $$ = Call{Ident : $2, Exprlist : $4} }
+          | CALL IDENTIFIER OPENROUND exprlist CLOSEROUND  { $$ = Call{Ident : $2, ExprList : $4} }
 
 statements : statements SEMICOLON statement           { $$ = append($1,$3) }
            | statement                                { $$ = []interface{}{$1} }
@@ -129,7 +129,7 @@ statement : SKIP                                        { $$ = $1 }
           | PRINTLN expr                                { $$ = Println{$2} }
           | IF expr THEN statements ELSE statements FI  { $$ = If{Conditional : $2, ThenStat : $4, ElseStat : $6} }
           | WHILE expr DO statements DONE               { $$ = While{Conditional : $2, DoStat : $4} }
-          | BEGIN statements END                        { $$ = Scope{Statlist : $2, SymbolTable : &SymbolTable{Table: make(map[string]Type)} } }
+          | BEGIN statements END                        { $$ = Scope{StatList : $2, SymbolTable : &SymbolTable{Table: make(map[string]Type)} } }
 
 expr : INTEGER       { $$ =  $1 }
      | TRUE          { $$ =  true }

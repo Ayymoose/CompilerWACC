@@ -24,7 +24,7 @@ func GetScopeVarSize(statList []interface{}) int {
 		switch stat.(type) {
 
 		case Declare:
-			var t = stat.(Declare).Type
+			var t = stat.(Declare).DecType
 
 			switch t.(type) {
 			case PairType:
