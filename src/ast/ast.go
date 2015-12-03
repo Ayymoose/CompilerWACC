@@ -133,11 +133,9 @@ type Call struct {
 	Exprlist []interface{}
 }
 
-/*
 type Ident struct {
 	name string
 }
-*/
 
 type PairElem struct {
 	Fsnd FSND

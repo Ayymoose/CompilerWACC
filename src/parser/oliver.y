@@ -7,6 +7,7 @@ import . "ast"
 %union{
 str string
 number int
+char  rune
 functions []*Function
 function *Function
 stmt  interface{}
@@ -52,7 +53,7 @@ pairelemtype Type
 %token <str> STRINGCONST
 %token <str> IDENTIFIER
 %token <number> INTEGER
-%token <str> CHARACTER
+%token <char> CHARACTER
 
 %type <prog> program
 %type <functions> functions
@@ -118,7 +119,7 @@ statements : statements SEMICOLON statement           { $$ = append($1,$3) }
 
 
 statement : SKIP                                        { $$ = $1 }
-          | typeDef IDENTIFIER ASSIGNMENT assignrhs     { $$ = Declare{Type : $1, Lhs : $2, Rhs : $4} }
+          | typeDef IDENTIFIER ASSIGNMENT assignrhs     { $$ = Declare{DecType : $1, Lhs : $2, Rhs : $4} }
           | assignlhs ASSIGNMENT assignrhs              { $$ = Assignment{Lhs : $1, Rhs : $3} }
           | READ assignlhs                              { $$ = Read{$2} }
           | FREE expr                                   { $$ = Free{$2} }
@@ -131,12 +132,12 @@ statement : SKIP                                        { $$ = $1 }
           | BEGIN statements END                        { $$ = Scope{Statlist : $2, SymbolTable : &SymbolTable{Table: make(map[string]Type)} } }
 
 expr : INTEGER       { $$ =  $1 }
-     | TRUE          { $$ =  $1 }
-     | FALSE         { $$ =  $1 }
+     | TRUE          { $$ =  true }
+     | FALSE         { $$ =  false }
      | CHARACTER     { $$ =  $1 }
      | STRINGCONST   { $$ =  $1 }
      | pairliter     { $$ =  $1 }
-     | IDENTIFIER    { $$ =  $1 }
+     | IDENTIFIER    { $$ =  Ident{Name : $1} }
      | arrayelem     { $$ =  $1 }
      | NOT expr     { $$ = Unop{Unary : $1, Expr : $2} }
      | LEN expr     { $$ = Unop{Unary : $1, Expr : $2} }
