@@ -2,7 +2,6 @@ package ast
 
 import (
 	. "backend/filewriter"
-	"fmt"
 	"strconv"
 )
 
@@ -15,40 +14,7 @@ const (
 	PAIR_SIZE   = 4
 )
 
-type CodeGenerator struct {
-	root        *Program
-	instrs      *ARMList
-	msgInstrs   ARMList
-	symTable    SymbolTable
-	globalStack *scopeData
-	currStack   *scopeData
-}
-
-func ConstructCodeGenerator(cRoot *Program, cInstrs *ARMList, cSymTable SymbolTable) CodeGenerator {
-	cg := CodeGenerator{root: cRoot, instrs: cInstrs, msgInstrs: ARMList{},
-		symTable: cSymTable, globalStack: &scopeData{}}
-	cg.currStack = cg.globalStack
-	return cg
-}
-
-type scopeData struct {
-	currP       int // the current position of the pointer to the stack
-	size        int // size of the stack space in bytes
-	parentScope *scopeData
-}
-
-// Decreases current pointer to the stack by n
-// Returns new currP as a string
-func (cg CodeGenerator) subCurrP(n int) string {
-	cg.currStack.currP = cg.currStack.currP - n
-	return strconv.Itoa(cg.currStack.currP)
-}
-
-// Using the ARMList pointer provided in the constructor,
-// this function will fill the slice with an array of assembly instructions
-func (cg CodeGenerator) GenerateCode() {
-	cg.cgVisitProgram(cg.root)
-}
+// VISIT FUNCTIONS -------------------------------------------------------------
 
 func (cg CodeGenerator) cgVisitProgram(node *Program) {
 	// Set properities of global scope
@@ -93,61 +59,6 @@ func (cg CodeGenerator) cgVisitProgram(node *Program) {
 
 	// Adds the msg definitions to assembly instructions
 	*cg.instrs = append(cg.msgInstrs, *cg.instrs...)
-}
-
-//Size in bytes for all the variables in the current scope
-func GetScopeVarSize(statList []interface{}) int {
-	var scopeSize = 0
-
-	for _, stat := range statList {
-		switch stat.(type) {
-
-		case Declare:
-			var t = stat.(Declare).Type
-
-			switch t.(type) {
-			case PairType:
-				//Address of pair on the stack is 4 bytes
-				scopeSize += PAIR_SIZE
-			case ArrayType:
-				var e = stat.(Declare).Rhs.(ArrayLiter)
-				var sizeOf = 0
-
-				switch t.(ArrayType).Type {
-				case Int:
-					sizeOf = INT_SIZE
-				case String:
-					sizeOf = STRING_SIZE
-				case Bool:
-					sizeOf = BOOL_SIZE
-				case Char:
-					sizeOf = CHAR_SIZE
-				default:
-					fmt.Println("No type found for ArrayType")
-				}
-				//The size would be the equal to
-				//(Number of elements + 1) * sizeOf(element)
-				scopeSize += (len(e.Exprs) + 1) * sizeOf
-
-			case ConstType:
-				switch t.(ConstType) {
-				case Int:
-					scopeSize += INT_SIZE
-				case String:
-					scopeSize += STRING_SIZE
-				case Bool:
-					scopeSize += BOOL_SIZE
-				case Char:
-					scopeSize += CHAR_SIZE
-				default:
-					fmt.Println("No type found for ConstType")
-				}
-			}
-			//Anything else is just ignored
-		}
-	}
-
-	return scopeSize
 }
 
 func (cg CodeGenerator) cgCreateMsgs(instrs *ARMList) map[string]string {
@@ -197,7 +108,7 @@ func (cg CodeGenerator) cgVisitFunction(node Function) {
 	*/
 }
 
-// statements
+// VISIT STATEMENT -------------------------------------------------------------
 /*
 func getValue(node Declare) int {
 	return node.Rhs
@@ -217,7 +128,7 @@ func (cg CodeGenerator) cgVisitDeclareStat(node Declare) {
 			//fmt.Println("Type", node.Rhs)
 
 			// Load the value of the declaration to R4
-			appendAssembly(cg.instrs, "LDR R4, "+strconv.Itoa(), 1, 1)
+			//appendAssembly(cg.instrs, "LDR R4, "+strconv.Itoa(), 1, 1)
 
 			// Store the value of declaration to stack
 			appendAssembly(cg.instrs,
@@ -270,7 +181,7 @@ func (cg CodeGenerator) cgVisitScopeStat(node Scope) {
 
 }
 
-// EXPRESSIONS
+// VISIT EXPRESSIONS -----------------------------------------------------------
 
 func (cg CodeGenerator) cgVisitUnopExpr(node Unop) {
 
@@ -278,21 +189,4 @@ func (cg CodeGenerator) cgVisitUnopExpr(node Unop) {
 
 func (cg CodeGenerator) cgVisitBinopExpr(node Binop) {
 
-}
-
-func appendAssembly(instrs *ARMList, code string, numTabs int, numNewLines int) {
-	const default_num_tabs = 1
-	var str string = ""
-
-	for i := 0; i < numTabs+default_num_tabs; i++ {
-		str += "\t"
-	}
-
-	str += code
-
-	for i := 0; i < numNewLines; i++ {
-		str += "\n"
-	}
-
-	*instrs = append(*instrs, str)
 }
