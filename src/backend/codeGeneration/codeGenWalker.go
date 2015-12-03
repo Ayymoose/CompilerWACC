@@ -148,9 +148,17 @@ func (cg CodeGenerator) cgVisitDeclareStat(node Declare) {
 	case ConstType:
 		switch node.DecType.(ConstType) {
 		case Bool:
-
+			//Load the bool into a register
+			appendAssembly(cg.instrs, "MOV R4, #"+strconv.Itoa(node.Rhs.(int)), 1, 1)
+			//Using STRB, store it on the stack
+			appendAssembly(cg.instrs,
+				"STRB R4, [sp, #"+cg.subCurrP(BOOL_SIZE)+"])", 1, 1)
 		case Char:
-
+			//Load the character into a register
+			appendAssembly(cg.instrs, "MOV R4, #"+node.Rhs.(string), 1, 1)
+			//Using STRB, store it on the stack
+			appendAssembly(cg.instrs,
+				"STRB R4, [sp, #"+cg.subCurrP(CHAR_SIZE)+"])", 1, 1)
 		case Int:
 			// Load the value of the declaration to the register
 			appendAssembly(cg.instrs, "LDR R4, "+strconv.Itoa(node.Rhs.(int)), 1, 1)
