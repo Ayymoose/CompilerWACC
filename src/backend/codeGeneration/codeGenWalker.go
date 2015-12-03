@@ -143,21 +143,25 @@ func (cg CodeGenerator) cgVisitParameter(node Param) {
 }
 
 func (cg CodeGenerator) cgVisitDeclareStat(node Declare) {
-
+	//Most likely need a function to get the value stored in the node
 	switch node.DecType.(type) {
 	case ConstType:
 		switch node.DecType.(ConstType) {
 		case Bool:
-
+			//Load the bool into a register
+			appendAssembly(cg.instrs, "MOV R4, #"+strconv.Itoa(node.Rhs.(int)), 1, 1)
+			//Using STRB, store it on the stack
+			appendAssembly(cg.instrs,
+				"STRB R4, [sp, #"+cg.subCurrP(BOOL_SIZE)+"])", 1, 1)
 		case Char:
-
+			//Load the character into a register
+			appendAssembly(cg.instrs, "MOV R4, #"+node.Rhs.(string), 1, 1)
+			//Using STRB, store it on the stack
+			appendAssembly(cg.instrs,
+				"STRB R4, [sp, #"+cg.subCurrP(CHAR_SIZE)+"])", 1, 1)
 		case Int:
-
-			//fmt.Println("Type", node.Rhs)
-
-			// Load the value of the declaration to R4
-			//appendAssembly(cg.instrs, "LDR R4, "+strconv.Itoa(), 1, 1)
-
+			// Load the value of the declaration to the register
+			appendAssembly(cg.instrs, "LDR R4, "+strconv.Itoa(node.Rhs.(int)), 1, 1)
 			// Store the value of declaration to stack
 			appendAssembly(cg.instrs,
 				"STR R4, [sp, #"+cg.subCurrP(INT_SIZE)+"])", 1, 1)

@@ -23,7 +23,7 @@ type Function struct {
 	Ident          string
 	ReturnType     Type
 	ParameterTypes []Param
-	Statlist       []interface{}
+	StatList       []interface{}
 }
 
 type Param struct {
