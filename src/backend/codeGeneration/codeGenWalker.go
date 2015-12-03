@@ -70,8 +70,6 @@ func (cg CodeGenerator) cgVisitProgram(node *Program) {
 	// .ltorg
 	appendAssembly(cg.instrs, ".ltorg", 1, 1)
 
-	// Adds the msg definitions to assembly instructions
-	*cg.instrs = append(cg.msgInstrs, *cg.instrs...)
 }
 
 func (cg CodeGenerator) cgCreateMsgs(instrs *ARMList) map[string]string {
@@ -220,9 +218,48 @@ func (cg CodeGenerator) cgVisitExitStat(node Exit) {
 }
 
 func (cg CodeGenerator) cgVisitPrintStat(node Print) {
-	expr := node.Expr
+	expr := node.Expr // expression to print
 
 	switch expr.(type) {
+	case string:
+		strValue := expr.(string)
+
+		// LDR r4, =msg_n : load the string message label
+		appendAssembly(cg.instrs, "LDR r4, "+cg.getMsgLabel(strValue), 1, 1)
+		// MOV r0, r4 : prepare parameter for function call
+		appendAssembly(cg.instrs, "MOV r0, r4", 1, 1)
+		// BL p_print_string
+		appendAssembly(cg.instrs, "BL p_print_string", 1, 1)
+
+	case int:
+		intValue := expr.(int)
+
+		// LDR r4, =i : load the value into r4
+		appendAssembly(cg.instrs, "LDR r4, ="+strconv.Itoa(intValue), 1, 1)
+		// MOV r0, r4 : prepare parameter for function call
+		appendAssembly(cg.instrs, "MOV r0, r4", 1, 1)
+		// BL p_print_int
+		appendAssembly(cg.instrs, "BL p_print_int", 1, 1)
+
+	case rune:
+		charValue := expr.(rune)
+
+		// MOV r4, #'c' : load the value into r4
+		appendAssembly(cg.instrs, "MOV r4, #"+string(charValue), 1, 1)
+		// MOV r0, r4 : prepare parameter for function call
+		appendAssembly(cg.instrs, "MOV r0, r4", 1, 1)
+		// BL putchar
+		appendAssembly(cg.instrs, "BL putchar", 1, 1)
+
+	case bool:
+		boolValue := expr.(bool)
+
+		// MOV r4, #e.g.1 : load the value into r4
+		appendAssembly(cg.instrs, "MOV r4, #"+boolInt(boolValue), 1, 1)
+		// MOV r0, r4 : prepare parameter for function call
+		appendAssembly(cg.instrs, "MOV r0, r4", 1, 1)
+		// BL p_print_bool
+		appendAssembly(cg.instrs, "BL p_print_bool", 1, 1)
 
 	}
 }

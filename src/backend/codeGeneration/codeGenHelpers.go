@@ -119,3 +119,12 @@ func calculateWordSize(strValue string) int {
 		return len(strValue)
 	}
 }
+
+// Returns "1" iff b = true. "0" otherwise
+func boolInt(b bool) string {
+	if b {
+		return "1"
+	} else {
+		return "0"
+	}
+}

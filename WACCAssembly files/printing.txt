@@ -23,7 +23,7 @@ msg_5:
 ...
 ---
 
-Print commands ---
+Print variables ---
 
 ldr r0, [sp, #offset] // r0 (arg) = int value
 BL p_print_int
@@ -37,6 +37,23 @@ BL putchar
 ldr r0, [sp, #offset] // r0 (arg) = string value
 BL p_print_string
 BL p_print_ln // ADD IF PRINTLN NOT PRINT
+
+---
+
+Print Literals ---
+
+23    LDR r4, =msg_0
+24		MOV r0, r4
+25		BL p_print_string
+26		LDR r4, =2
+27		MOV r0, r4
+28		BL p_print_int
+29		MOV r4, #'c'
+30		MOV r0, r4
+31		BL putchar
+32		MOV r4, #1
+33		MOV r0, r4
+34		BL p_print_bool
 
 ---
 
