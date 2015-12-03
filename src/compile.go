@@ -7,6 +7,7 @@ import (
 	"os"
 	"parser"
 
+	codeG "backend/codeGeneration"
 	"backend/filewriter"
 )
 
@@ -43,7 +44,7 @@ func main() {
 	}
 	//fmt.Println(root)
 
-	var cg ast.CodeGenerator = ast.ConstructCodeGenerator(root, armList, ast.SymbolTable{})
+	var cg codeG.CodeGenerator = codeG.ConstructCodeGenerator(root, armList, ast.SymbolTable{})
 	cg.GenerateCode()
 
 	for _, instr := range *armList {

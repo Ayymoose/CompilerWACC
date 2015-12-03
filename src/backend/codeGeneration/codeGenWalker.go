@@ -1,6 +1,7 @@
-package ast
+package codeGeneration
 
 import (
+	. "ast"
 	. "backend/filewriter"
 	"strconv"
 )

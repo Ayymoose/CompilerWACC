@@ -1,6 +1,7 @@
-package ast
+package codeGeneration
 
 import (
+	. "ast"
 	. "backend/filewriter"
 	"strconv"
 )
@@ -47,4 +48,12 @@ func (cg CodeGenerator) subCurrP(n int) string {
 // based on the provided AST
 func (cg CodeGenerator) GenerateCode() {
 	cg.cgVisitProgram(cg.root)
+}
+
+// Returns a msg label value for the strValue using msgMap
+// If strValue is not contained in the map then it will be added to the map
+// with a new msg label value (which will be returned)
+// e.g. =msg_0
+func (cg CodeGenerator) getMsgLabel(strValue string) string {
+	return ""
 }
