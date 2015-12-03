@@ -35,7 +35,7 @@ func (cg CodeGenerator) cgVisitProgram(node *Program) {
 	cg.globalStack.currP = cg.globalStack.size
 
 	// traverse all functions
-	for _, function := range node.Functionlist {
+	for _, function := range node.FunctionList {
 		cg.cgVisitFunction(*function)
 	}
 
@@ -134,7 +134,7 @@ func (cg CodeGenerator) cgVisitParameter(node Param) {
 		case Char:
 		case Int:
 		case String:
-		case Pair:
+			//		case Pair:
 		}
 	case ArrayType:
 
@@ -192,7 +192,7 @@ func (cg CodeGenerator) cgVisitAssignmentStat(node Assignment) {
 
 		case String:
 
-		case Pair:
+			//	case Pair:
 		}
 	case ArrayElem:
 	case Unop:
@@ -209,24 +209,23 @@ func (cg CodeGenerator) cgVisitReadStat(node Read) {
 	case Ident:
 	case ArrayElem:
 	case PairElem:
+	default:
 	}
 
 	if offset == 4 {
 		label += "int"
-	}
-	else if offset === 1 {
-	  label += "char"
+	} else if offset == 1 {
+		label += "char"
 	}
 	// p_read_int:  /char
 	//PUSH {lr}
-
 
 	// BL scanf
 	//POP {pc}
 }
 
 func (cg CodeGenerator) cgVisitFreeStat(node Free) {
-	label := "p_free_pair"
+	//	label := "p_free_pair"
 }
 
 func (cg CodeGenerator) cgVisitReturnStat(node Return) {
