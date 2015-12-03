@@ -26,8 +26,11 @@ type CodeGenerator struct {
 func ConstructCodeGenerator(cRoot *Program, cInstrs *ARMList, cSymTable SymbolTable) CodeGenerator {
 	cg := CodeGenerator{root: cRoot, instrs: cInstrs, msgInstrs: ARMList{},
 		symTable: cSymTable, globalStack: &scopeData{}}
+
 	// The program starts off with the current scope as the global scope
 	cg.currStack = cg.globalStack
+
+	cg.msgMap = make(map[string]string)
 	return cg
 }
 
