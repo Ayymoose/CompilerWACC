@@ -14,7 +14,7 @@ import (
 const SYNTAX_ERROR = 100
 const SEMANTIC_ERROR = 200
 
-const BACKENDFILE = "backendtest.s"
+const BACKENDFILE = "ARMCode.s"
 
 // wacc_examples\valid\expressions\andExpr.wacc
 // wacc_examples\valid\basic\exit\exitBasic.wacc
