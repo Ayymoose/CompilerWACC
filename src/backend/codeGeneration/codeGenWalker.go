@@ -175,7 +175,11 @@ func (cg CodeGenerator) cgVisitExitStat(node Exit) {
 }
 
 func (cg CodeGenerator) cgVisitPrintStat(node Print) {
+	expr := node.Expr
 
+	switch expr.(type) {
+
+	}
 }
 
 func (cg CodeGenerator) cgVisitPrintlnStat(node Println) {
