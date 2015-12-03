@@ -620,7 +620,7 @@ parserdefault:
 		{ parserVAL.assignrhs = NewPair{FstExpr : parserS[parserpt-3].expr, SndExpr : parserS[parserpt-1].expr} }
 	case 16:
 		//line oliver.y:115
-		{ parserVAL.assignrhs = Call{Ident : parserS[parserpt-3].str, ExprList : parserS[parserpt-1].exprs} }
+		{ parserVAL.assignrhs = Call{Ident : parserS[parserpt-3].str, ParamList : parserS[parserpt-1].exprs} }
 	case 17:
 		//line oliver.y:117
 		{ parserVAL.stmts = append(parserS[parserpt-2].stmts,parserS[parserpt-0].stmt) }
