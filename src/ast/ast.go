@@ -69,9 +69,9 @@ type NewPair struct {
 
 // Declare struct
 type Declare struct {
-	Type Type
-	Lhs  interface{}
-	Rhs  interface{}
+	DecType Type
+	Lhs     interface{}
+	Rhs     interface{}
 }
 
 // Assignment struct

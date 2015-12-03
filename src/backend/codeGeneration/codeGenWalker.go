@@ -57,7 +57,7 @@ func (cg CodeGenerator) cgVisitProgram(node *Program) {
 	// traverse all statements by switching on statement type
 	for _, stat := range node.StatList {
 
-		cg.cgEvalStat(stat)
+		cg.cgEvalStat(stat) // NEED A POINTER HERE TO?
 
 	}
 
@@ -108,30 +108,45 @@ func (cg CodeGenerator) cgEvalStat(stat interface{}) {
 }
 
 func (cg CodeGenerator) cgVisitFunction(node Function) {
-	/*funcName := "f_" + node.Ident
-	fmt.Println(funcName)
-	// PUSH {lr}
-	if f.ParameterTypes != nil {
-		for _, param := range f.ParameterTypes {
-			fmt.Println(param)
-			//
+	// f_funcName:
+	appendAssembly(cg.instrs, "f_"+node.Ident+":", 1, 1)
+
+	// push {lr} to save the caller address
+	appendAssembly(cg.instrs, "PUSH {lr}", 1, 1)
+
+	if node.ParameterTypes != nil {
+		for _, param := range node.ParameterTypes {
+			cg.cgVisitParameter(param)
 		}
 	}
-	// .ltorg
-	*/
+
+	// traverse all statements by switching on statement type
+	for _, stat := range node.StatList {
+		cg.cgEvalStat(stat)
+	}
 }
 
 // VISIT STATEMENT -------------------------------------------------------------
-/*
-func getValue(node Declare) int {
-	return node.Rhs
-}*/
+func (cg CodeGenerator) cgVisitParameter(node Param) {
+	// node.Ident
+	switch node.ParamType.(type) {
+	case ConstType:
+		switch node.ParamType.(ConstType) {
+		case Bool:
+		case Char:
+		case Int:
+		case String:
+		case Pair: /// WE NEED THIS RIGHT?
+			/// DO WE NEED FSND ASWELL I.E TYPE FSND SWITCH??
+		}
+	}
+}
 
 func (cg CodeGenerator) cgVisitDeclareStat(node Declare) {
 
-	switch node.Type.(type) {
+	switch node.DecType.(type) {
 	case ConstType:
-		switch node.Type.(ConstType) {
+		switch node.DecType.(ConstType) {
 		case Bool:
 
 		case Char:
@@ -157,6 +172,32 @@ func (cg CodeGenerator) cgVisitDeclareStat(node Declare) {
 }
 
 func (cg CodeGenerator) cgVisitAssignmentStat(node Assignment) {
+	switch node.Lhs.(type) {
+	case ArrayElem:
+	case PairElem:
+	default: // Ident
+	}
+
+	switch node.Rhs.(type) {
+	// expr
+	case ConstType:
+		switch node.Rhs.(ConstType) {
+		case Bool:
+
+		case Char:
+
+		case Int:
+
+		case String:
+
+		case Pair:
+		}
+	case ArrayElem:
+	case Unop:
+	case Binop:
+
+	default: // Ident   // NEED TO DEAL WITH '(' EXPR ')' CASE AS WELL?
+	}
 }
 
 func (cg CodeGenerator) cgVisitReadStat(node Read) {

@@ -72,8 +72,8 @@ func GetScopeVarSize(statList []interface{}) int {
 }
 
 // Adds the string code to the list of instructions instrs.
-// numTabs  /t will be added before the string and
-// numNewLines /n will be added after the string
+// numTabs  \t will be added before the string and
+// numNewLines \n will be added after the string
 func appendAssembly(instrs *ARMList, code string, numTabs int, numNewLines int) {
 	const default_num_tabs = 1
 	var str string = ""
