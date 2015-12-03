@@ -4,7 +4,17 @@ import (
 	. "ast"
 	. "backend/filewriter"
 	"fmt"
+	"strconv"
 )
+
+// Contains the size in bytes of all print format strings
+var mapPrintFormatToSize = map[string]int{
+	INT_FORMAT:    3,
+	STRING_FORMAT: 5,
+	NEW_LINE:      1,
+	TRUE_MSG:      5,
+	FALSE_MSG:     6,
+}
 
 //Size in bytes for all the variables in the current scope
 func GetScopeVarSize(statList []interface{}) int {
@@ -79,4 +89,33 @@ func appendAssembly(instrs *ARMList, code string, numTabs int, numNewLines int) 
 	}
 
 	*instrs = append(*instrs, str)
+}
+
+// Adds a msg label definition for the strValue using the msg label to the
+// list of assembly instructions msgInstrs
+func addMsgLabel(msgInstrs *ARMList, label string, strValue string) {
+	if len(*msgInstrs) == 0 {
+		appendAssembly(msgInstrs, ".data", 0, 2)
+	}
+
+	appendAssembly(msgInstrs, label+":", 0, 1)
+
+	// size of strValue in bytes
+	wordSize := calculateWordSize(strValue)
+
+	appendAssembly(msgInstrs, ".word "+strconv.Itoa(wordSize), 1, 1)
+	appendAssembly(msgInstrs, ".ascii \""+strValue+"\"", 1, 2)
+
+}
+
+// Calculates the size of strValue in bytes
+func calculateWordSize(strValue string) int {
+	size, contained := mapPrintFormatToSize[strValue]
+
+	// if strValue is a format string then
+	if contained {
+		return size
+	} else {
+		return len(strValue)
+	}
 }

@@ -55,5 +55,15 @@ func (cg CodeGenerator) GenerateCode() {
 // with a new msg label value (which will be returned)
 // e.g. =msg_0
 func (cg CodeGenerator) getMsgLabel(strValue string) string {
-	return ""
+	msgLabel, contained := cg.msgMap[strValue]
+
+	if contained {
+		return "=" + msgLabel
+	}
+
+	cg.msgMap[strValue] = "msg_" + strconv.Itoa(len(cg.msgMap))
+
+	addMsgLabel(&cg.msgInstrs, cg.msgMap[strValue], strValue)
+
+	return "=" + cg.msgMap[strValue]
 }

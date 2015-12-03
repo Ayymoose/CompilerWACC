@@ -6,6 +6,9 @@ import (
 	"strconv"
 )
 
+// CONSTANTS -------------------------------------------------------------------
+
+// Type sizes in bytes
 const (
 	INT_SIZE    = 4
 	ARRAY_SIZE  = 4
@@ -13,6 +16,15 @@ const (
 	CHAR_SIZE   = 1
 	STRING_SIZE = 4
 	PAIR_SIZE   = 4
+)
+
+// Print format strings
+const (
+	INT_FORMAT    = "%d\\0"
+	STRING_FORMAT = "%.*s\\0"
+	NEW_LINE      = "\\0"
+	TRUE_MSG      = "true\\0"
+	FALSE_MSG     = "false\\0"
 )
 
 // VISIT FUNCTIONS -------------------------------------------------------------
