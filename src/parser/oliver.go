@@ -1,34 +1,35 @@
-//line oliver.y:1
+
+//line oliver.y:2
 package parser
-
 import __yyfmt__ "fmt"
-
-//line oliver.y:3
+//line oliver.y:2
+		
 import . "ast"
 
 //line oliver.y:7
-type parserSymType struct {
-	yys            int
-	str            string
-	number         int
-	functions      []*Function
-	function       *Function
-	stmt           interface{}
-	stmts          []interface{}
-	assignrhs      interface{}
-	assignlhs      interface{}
-	expr           interface{}
-	exprs          []interface{}
-	params         []Param
-	param          Param
-	arglist        []interface{}
-	bracketed      []interface{}
-	pairliter      interface{}
-	arrayliter     ArrayLiter
-	pairelem       PairElem
-	arrayelem      ArrayElem
-	typedefinition Type
-	pairelemtype   Type
+type parserSymType struct{
+	yys int
+str string
+number int
+char  rune
+functions []*Function
+function *Function
+stmt  interface{}
+stmts []interface{}
+assignrhs interface{}
+assignlhs interface{}
+expr  interface{}
+exprs []interface{}
+params  []Param
+param Param
+arglist []interface{}
+bracketed []interface{}
+pairliter interface{}
+arrayliter ArrayLiter
+pairelem  PairElem
+arrayelem ArrayElem
+typedefinition Type
+pairelemtype Type
 }
 
 const BEGIN = 57346
@@ -93,10 +94,7 @@ const IDENTIFIER = 57404
 const INTEGER = 57405
 const CHARACTER = 57406
 
-var parserToknames = [...]string{
-	"$end",
-	"error",
-	"$unk",
+var parserToknames = []string{
 	"BEGIN",
 	"END",
 	"IS",
@@ -159,16 +157,17 @@ var parserToknames = [...]string{
 	"INTEGER",
 	"CHARACTER",
 }
-var parserStatenames = [...]string{}
+var parserStatenames = []string{}
 
 const parserEofCode = 1
 const parserErrCode = 2
 const parserMaxDepth = 200
 
-//line oliver.y:196
+//line oliver.y:197
+
 
 //line yacctab:1
-var parserExca = [...]int{
+var parserExca = []int{
 	-1, 1,
 	1, -1,
 	-2, 0,
@@ -188,7 +187,7 @@ var parserStates []string
 
 const parserLast = 392
 
-var parserAct = [...]int{
+var parserAct = []int{
 
 	73, 4, 112, 117, 62, 24, 116, 72, 7, 163,
 	158, 20, 38, 55, 56, 57, 58, 59, 60, 105,
@@ -231,7 +230,7 @@ var parserAct = [...]int{
 	83, 82, 79, 80, 90, 91, 85, 87, 84, 86,
 	88, 89,
 }
-var parserPact = [...]int{
+var parserPact = []int{
 
 	107, -1000, -1000, 168, 53, -1000, -1000, -25, -1000, -2,
 	0, 170, 170, 170, 170, 170, 170, 170, 168, -1000,
@@ -251,13 +250,13 @@ var parserPact = [...]int{
 	5, 168, -1000, 170, -13, 344, 12, -1000, -1000, 4,
 	224, -1000, -1000, -1000, -1000,
 }
-var parserPgo = [...]int{
+var parserPgo = []int{
 
 	0, 150, 141, 130, 117, 1, 7, 110, 0, 3,
 	124, 2, 5, 120, 22, 119, 118, 27, 4, 11,
 	115, 19,
 }
-var parserR1 = [...]int{
+var parserR1 = []int{
 
 	0, 1, 2, 2, 3, 3, 10, 10, 11, 7,
 	7, 7, 6, 6, 6, 6, 6, 5, 5, 4,
@@ -269,7 +268,7 @@ var parserR1 = [...]int{
 	21, 21, 21, 18, 18, 18, 17, 17, 17, 17,
 	19,
 }
-var parserR2 = [...]int{
+var parserR2 = []int{
 
 	0, 4, 2, 0, 7, 8, 3, 1, 2, 1,
 	1, 1, 1, 1, 1, 6, 5, 3, 1, 1,
@@ -281,7 +280,7 @@ var parserR2 = [...]int{
 	1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
 	3,
 }
-var parserChk = [...]int{
+var parserChk = []int{
 
 	-1000, -1, 4, -2, -5, -3, -4, -18, 7, -7,
 	8, 9, 10, 11, 12, 13, 14, 18, 4, -17,
@@ -301,7 +300,7 @@ var parserChk = [...]int{
 	-5, 6, -11, 58, -9, -8, -5, 56, 5, -5,
 	-8, 56, 17, 5, 56,
 }
-var parserDef = [...]int{
+var parserDef = []int{
 
 	0, -2, 3, 0, 0, 2, 18, 0, 19, 0,
 	0, 0, 0, 0, 0, 0, 0, 0, 0, 73,
@@ -321,11 +320,11 @@ var parserDef = [...]int{
 	0, 0, 6, 0, 0, 60, 0, 69, 4, 0,
 	0, 16, 28, 5, 15,
 }
-var parserTok1 = [...]int{
+var parserTok1 = []int{
 
 	1,
 }
-var parserTok2 = [...]int{
+var parserTok2 = []int{
 
 	2, 3, 4, 5, 6, 7, 8, 9, 10, 11,
 	12, 13, 14, 15, 16, 17, 18, 19, 20, 21,
@@ -335,56 +334,28 @@ var parserTok2 = [...]int{
 	52, 53, 54, 55, 56, 57, 58, 59, 60, 61,
 	62, 63, 64,
 }
-var parserTok3 = [...]int{
+var parserTok3 = []int{
 	0,
 }
-
-var parserErrorMessages = [...]struct {
-	state int
-	token int
-	msg   string
-}{}
 
 //line yaccpar:1
 
 /*	parser for yacc output	*/
 
-var (
-	parserDebug        = 0
-	parserErrorVerbose = false
-)
+var parserDebug = 0
 
 type parserLexer interface {
 	Lex(lval *parserSymType) int
 	Error(s string)
 }
 
-type parserParser interface {
-	Parse(parserLexer) int
-	Lookahead() int
-}
-
-type parserParserImpl struct {
-	lookahead func() int
-}
-
-func (p *parserParserImpl) Lookahead() int {
-	return p.lookahead()
-}
-
-func parserNewParser() parserParser {
-	p := &parserParserImpl{
-		lookahead: func() int { return -1 },
-	}
-	return p
-}
-
 const parserFlag = -1000
 
 func parserTokname(c int) string {
-	if c >= 1 && c-1 < len(parserToknames) {
-		if parserToknames[c-1] != "" {
-			return parserToknames[c-1]
+	// 4 is TOKSTART above
+	if c >= 4 && c-4 < len(parserToknames) {
+		if parserToknames[c-4] != "" {
+			return parserToknames[c-4]
 		}
 	}
 	return __yyfmt__.Sprintf("tok-%v", c)
@@ -399,129 +370,51 @@ func parserStatname(s int) string {
 	return __yyfmt__.Sprintf("state-%v", s)
 }
 
-func parserErrorMessage(state, lookAhead int) string {
-	const TOKSTART = 4
-
-	if !parserErrorVerbose {
-		return "syntax error"
-	}
-
-	for _, e := range parserErrorMessages {
-		if e.state == state && e.token == lookAhead {
-			return "syntax error: " + e.msg
-		}
-	}
-
-	res := "syntax error: unexpected " + parserTokname(lookAhead)
-
-	// To match Bison, suggest at most four expected tokens.
-	expected := make([]int, 0, 4)
-
-	// Look for shiftable tokens.
-	base := parserPact[state]
-	for tok := TOKSTART; tok-1 < len(parserToknames); tok++ {
-		if n := base + tok; n >= 0 && n < parserLast && parserChk[parserAct[n]] == tok {
-			if len(expected) == cap(expected) {
-				return res
-			}
-			expected = append(expected, tok)
-		}
-	}
-
-	if parserDef[state] == -2 {
-		i := 0
-		for parserExca[i] != -1 || parserExca[i+1] != state {
-			i += 2
-		}
-
-		// Look for tokens that we accept or reduce.
-		for i += 2; parserExca[i] >= 0; i += 2 {
-			tok := parserExca[i]
-			if tok < TOKSTART || parserExca[i+1] == 0 {
-				continue
-			}
-			if len(expected) == cap(expected) {
-				return res
-			}
-			expected = append(expected, tok)
-		}
-
-		// If the default action is to accept or reduce, give up.
-		if parserExca[i+1] != 0 {
-			return res
-		}
-	}
-
-	for i, tok := range expected {
-		if i == 0 {
-			res += ", expecting "
-		} else {
-			res += " or "
-		}
-		res += parserTokname(tok)
-	}
-	return res
-}
-
-func parserlex1(lex parserLexer, lval *parserSymType) (char, token int) {
-	token = 0
-	char = lex.Lex(lval)
+func parserlex1(lex parserLexer, lval *parserSymType) int {
+	c := 0
+	char := lex.Lex(lval)
 	if char <= 0 {
-		token = parserTok1[0]
+		c = parserTok1[0]
 		goto out
 	}
 	if char < len(parserTok1) {
-		token = parserTok1[char]
+		c = parserTok1[char]
 		goto out
 	}
 	if char >= parserPrivate {
 		if char < parserPrivate+len(parserTok2) {
-			token = parserTok2[char-parserPrivate]
+			c = parserTok2[char-parserPrivate]
 			goto out
 		}
 	}
 	for i := 0; i < len(parserTok3); i += 2 {
-		token = parserTok3[i+0]
-		if token == char {
-			token = parserTok3[i+1]
+		c = parserTok3[i+0]
+		if c == char {
+			c = parserTok3[i+1]
 			goto out
 		}
 	}
 
 out:
-	if token == 0 {
-		token = parserTok2[1] /* unknown char */
+	if c == 0 {
+		c = parserTok2[1] /* unknown char */
 	}
 	if parserDebug >= 3 {
-		__yyfmt__.Printf("lex %s(%d)\n", parserTokname(token), uint(char))
+		__yyfmt__.Printf("lex %s(%d)\n", parserTokname(c), uint(char))
 	}
-	return char, token
+	return c
 }
 
 func parserParse(parserlex parserLexer) int {
-	return parserNewParser().Parse(parserlex)
-}
-
-func (parserrcvr *parserParserImpl) Parse(parserlex parserLexer) int {
 	var parsern int
 	var parserlval parserSymType
 	var parserVAL parserSymType
-	var parserDollar []parserSymType
-	_ = parserDollar // silence set and not used
 	parserS := make([]parserSymType, parserMaxDepth)
 
 	Nerrs := 0   /* number of errors */
 	Errflag := 0 /* error recovery flag */
 	parserstate := 0
 	parserchar := -1
-	parsertoken := -1 // parserchar translated into internal numbering
-	parserrcvr.lookahead = func() int { return parserchar }
-	defer func() {
-		// Make sure we report no lookahead when not parsing.
-		parserstate = -1
-		parserchar = -1
-		parsertoken = -1
-	}()
 	parserp := -1
 	goto parserstack
 
@@ -534,7 +427,7 @@ ret1:
 parserstack:
 	/* put a state and value onto the stack */
 	if parserDebug >= 4 {
-		__yyfmt__.Printf("char %v in %v\n", parserTokname(parsertoken), parserStatname(parserstate))
+		__yyfmt__.Printf("char %v in %v\n", parserTokname(parserchar), parserStatname(parserstate))
 	}
 
 	parserp++
@@ -552,16 +445,15 @@ parsernewstate:
 		goto parserdefault /* simple state */
 	}
 	if parserchar < 0 {
-		parserchar, parsertoken = parserlex1(parserlex, &parserlval)
+		parserchar = parserlex1(parserlex, &parserlval)
 	}
-	parsern += parsertoken
+	parsern += parserchar
 	if parsern < 0 || parsern >= parserLast {
 		goto parserdefault
 	}
 	parsern = parserAct[parsern]
-	if parserChk[parsern] == parsertoken { /* valid shift */
+	if parserChk[parsern] == parserchar { /* valid shift */
 		parserchar = -1
-		parsertoken = -1
 		parserVAL = parserlval
 		parserstate = parsern
 		if Errflag > 0 {
@@ -575,7 +467,7 @@ parserdefault:
 	parsern = parserDef[parserstate]
 	if parsern == -2 {
 		if parserchar < 0 {
-			parserchar, parsertoken = parserlex1(parserlex, &parserlval)
+			parserchar = parserlex1(parserlex, &parserlval)
 		}
 
 		/* look through exception table */
@@ -588,7 +480,7 @@ parserdefault:
 		}
 		for xi += 2; ; xi += 2 {
 			parsern = parserExca[xi+0]
-			if parsern < 0 || parsern == parsertoken {
+			if parsern < 0 || parsern == parserchar {
 				break
 			}
 		}
@@ -601,11 +493,11 @@ parserdefault:
 		/* error ... attempt to resume parsing */
 		switch Errflag {
 		case 0: /* brand new error */
-			parserlex.Error(parserErrorMessage(parserstate, parsertoken))
+			parserlex.Error("syntax error")
 			Nerrs++
 			if parserDebug >= 1 {
 				__yyfmt__.Printf("%s", parserStatname(parserstate))
-				__yyfmt__.Printf(" saw %s\n", parserTokname(parsertoken))
+				__yyfmt__.Printf(" saw %s\n", parserTokname(parserchar))
 			}
 			fallthrough
 
@@ -633,13 +525,12 @@ parserdefault:
 
 		case 3: /* no shift yet; clobber input char */
 			if parserDebug >= 2 {
-				__yyfmt__.Printf("error recovery discards %s\n", parserTokname(parsertoken))
+				__yyfmt__.Printf("error recovery discards %s\n", parserTokname(parserchar))
 			}
-			if parsertoken == parserEofCode {
+			if parserchar == parserEofCode {
 				goto ret1
 			}
 			parserchar = -1
-			parsertoken = -1
 			goto parsernewstate /* try again in the same state */
 		}
 	}
@@ -654,13 +545,6 @@ parserdefault:
 	_ = parserpt // guard against "declared and not used"
 
 	parserp -= parserR2[parsern]
-	// parserp is now the index of $0. Perform the default action. Iff the
-	// reduced production is ε, $1 is possibly out of range.
-	if parserp+1 >= len(parserS) {
-		nyys := make([]parserSymType, len(parserS)*2)
-		copy(nyys, parserS)
-		parserS = nyys
-	}
 	parserVAL = parserS[parserp+1]
 
 	/* consult goto table to find next state */
@@ -680,491 +564,255 @@ parserdefault:
 	switch parsernt {
 
 	case 1:
-		parserDollar = parserS[parserpt-4 : parserpt+1]
-		//line oliver.y:81
+		//line oliver.y:82
 		{
-			parserlex.(*Lexer).prog = &Program{Functionlist: parserDollar[2].functions, StatList: parserDollar[3].stmts, SymbolTable: &SymbolTable{Table: make(map[string]Type)}}
-		}
+	                                          parserlex.(*Lexer).prog = &Program{FunctionList : parserS[parserpt-2].functions , StatList : parserS[parserpt-1].stmts , SymbolTable : &SymbolTable{Table: make(map[string]Type)}}
+	                                         }
 	case 2:
-		parserDollar = parserS[parserpt-2 : parserpt+1]
-		//line oliver.y:85
-		{
-			parserVAL.functions = append(parserDollar[1].functions, parserDollar[2].function)
-		}
-	case 3:
-		parserDollar = parserS[parserpt-0 : parserpt+1]
 		//line oliver.y:86
-		{
-			parserVAL.functions = []*Function{}
-		}
+		{ parserVAL.functions = append(parserS[parserpt-1].functions, parserS[parserpt-0].function)}
+	case 3:
+		//line oliver.y:87
+		{ parserVAL.functions = []*Function{} }
 	case 4:
-		parserDollar = parserS[parserpt-7 : parserpt+1]
-		//line oliver.y:89
-		{
-			if !checkStats(parserDollar[6].stmts) {
-				parserlex.Error("Missing return statement")
-			}
-			parserVAL.function = &Function{Ident: parserDollar[2].str, ReturnType: parserDollar[1].typedefinition, StatList: parserDollar[6].stmts}
-		}
+		//line oliver.y:90
+		{ if !checkStats(parserS[parserpt-1].stmts) {
+	          	parserlex.Error("Missing return statement")
+	           }
+	             parserVAL.function = &Function{Ident : parserS[parserpt-5].str, ReturnType : parserS[parserpt-6].typedefinition, StatList : parserS[parserpt-1].stmts}
+	           }
 	case 5:
-		parserDollar = parserS[parserpt-8 : parserpt+1]
-		//line oliver.y:95
-		{
-			if !checkStats(parserDollar[7].stmts) {
-				parserlex.Error("Missing return statement")
-			}
-			parserVAL.function = &Function{Ident: parserDollar[2].str, ReturnType: parserDollar[1].typedefinition, StatList: parserDollar[7].stmts, ParameterTypes: parserDollar[4].params}
-		}
+		//line oliver.y:96
+		{ if !checkStats(parserS[parserpt-1].stmts) {
+	            	parserlex.Error("Missing return statement")
+	            }
+	             parserVAL.function = &Function{Ident : parserS[parserpt-6].str, ReturnType : parserS[parserpt-7].typedefinition, StatList : parserS[parserpt-1].stmts, ParameterTypes : parserS[parserpt-4].params}
+	           }
 	case 6:
-		parserDollar = parserS[parserpt-3 : parserpt+1]
-		//line oliver.y:101
-		{
-			parserVAL.params = append(parserDollar[1].params, parserDollar[3].param)
-		}
-	case 7:
-		parserDollar = parserS[parserpt-1 : parserpt+1]
 		//line oliver.y:102
-		{
-			parserVAL.params = []Param{parserDollar[1].param}
-		}
+		{ parserVAL.params = append(parserS[parserpt-2].params, parserS[parserpt-0].param)}
+	case 7:
+		//line oliver.y:103
+		{ parserVAL.params = []Param{ parserS[parserpt-0].param } }
 	case 8:
-		parserDollar = parserS[parserpt-2 : parserpt+1]
-		//line oliver.y:104
-		{
-			parserVAL.param = Param{ParamType: parserDollar[1].typedefinition, Ident: parserDollar[2].str}
-		}
+		//line oliver.y:105
+		{ parserVAL.param = Param{ParamType : parserS[parserpt-1].typedefinition, Ident : parserS[parserpt-0].str} }
 	case 9:
-		parserDollar = parserS[parserpt-1 : parserpt+1]
-		//line oliver.y:106
-		{
-			parserVAL.assignlhs = parserDollar[1].str
-		}
-	case 10:
-		parserDollar = parserS[parserpt-1 : parserpt+1]
 		//line oliver.y:107
-		{
-			parserVAL.assignlhs = parserDollar[1].arrayelem
-		}
-	case 11:
-		parserDollar = parserS[parserpt-1 : parserpt+1]
+		{parserVAL.assignlhs = parserS[parserpt-0].str}
+	case 10:
 		//line oliver.y:108
-		{
-			parserVAL.assignlhs = parserDollar[1].pairelem
-		}
+		{parserVAL.assignlhs = parserS[parserpt-0].arrayelem}
+	case 11:
+		//line oliver.y:109
+		{parserVAL.assignlhs = parserS[parserpt-0].pairelem}
 	case 12:
-		parserDollar = parserS[parserpt-1 : parserpt+1]
-		//line oliver.y:110
-		{
-			parserVAL.assignrhs = parserDollar[1].expr
-		}
-	case 13:
-		parserDollar = parserS[parserpt-1 : parserpt+1]
 		//line oliver.y:111
-		{
-			parserVAL.assignrhs = parserDollar[1].arrayliter
-		}
-	case 14:
-		parserDollar = parserS[parserpt-1 : parserpt+1]
+		{parserVAL.assignrhs = parserS[parserpt-0].expr}
+	case 13:
 		//line oliver.y:112
-		{
-			parserVAL.assignrhs = parserDollar[1].pairelem
-		}
-	case 15:
-		parserDollar = parserS[parserpt-6 : parserpt+1]
+		{parserVAL.assignrhs = parserS[parserpt-0].arrayliter}
+	case 14:
 		//line oliver.y:113
-		{
-			parserVAL.assignrhs = NewPair{FstExpr: parserDollar[3].expr, SndExpr: parserDollar[5].expr}
-		}
-	case 16:
-		parserDollar = parserS[parserpt-5 : parserpt+1]
+		{parserVAL.assignrhs = parserS[parserpt-0].pairelem}
+	case 15:
 		//line oliver.y:114
-		{
-			parserVAL.assignrhs = Call{Ident: parserDollar[2].str, Exprlist: parserDollar[4].exprs}
-		}
+		{ parserVAL.assignrhs = NewPair{FstExpr : parserS[parserpt-3].expr, SndExpr : parserS[parserpt-1].expr} }
+	case 16:
+		//line oliver.y:115
+		{ parserVAL.assignrhs = Call{Ident : parserS[parserpt-3].str, ParamList : parserS[parserpt-1].exprs} }
 	case 17:
-		parserDollar = parserS[parserpt-3 : parserpt+1]
-		//line oliver.y:116
-		{
-			parserVAL.stmts = append(parserDollar[1].stmts, parserDollar[3].stmt)
-		}
-	case 18:
-		parserDollar = parserS[parserpt-1 : parserpt+1]
 		//line oliver.y:117
-		{
-			parserVAL.stmts = []interface{}{parserDollar[1].stmt}
-		}
+		{ parserVAL.stmts = append(parserS[parserpt-2].stmts,parserS[parserpt-0].stmt) }
+	case 18:
+		//line oliver.y:118
+		{ parserVAL.stmts = []interface{}{parserS[parserpt-0].stmt} }
 	case 19:
-		parserDollar = parserS[parserpt-1 : parserpt+1]
-		//line oliver.y:120
-		{
-			parserVAL.stmt = parserDollar[1].number
-		}
-	case 20:
-		parserDollar = parserS[parserpt-4 : parserpt+1]
 		//line oliver.y:121
-		{
-			parserVAL.stmt = Declare{DecType: parserDollar[1].typedefinition, Lhs: parserDollar[2].str, Rhs: parserDollar[4].assignrhs}
-		}
-	case 21:
-		parserDollar = parserS[parserpt-3 : parserpt+1]
+		{ parserVAL.stmt = parserS[parserpt-0].number }
+	case 20:
 		//line oliver.y:122
-		{
-			parserVAL.stmt = Assignment{Lhs: parserDollar[1].assignlhs, Rhs: parserDollar[3].assignrhs}
-		}
-	case 22:
-		parserDollar = parserS[parserpt-2 : parserpt+1]
+		{ parserVAL.stmt = Declare{DecType : parserS[parserpt-3].typedefinition, Lhs : parserS[parserpt-2].str, Rhs : parserS[parserpt-0].assignrhs} }
+	case 21:
 		//line oliver.y:123
-		{
-			parserVAL.stmt = Read{parserDollar[2].assignlhs}
-		}
-	case 23:
-		parserDollar = parserS[parserpt-2 : parserpt+1]
+		{ parserVAL.stmt = Assignment{Lhs : parserS[parserpt-2].assignlhs, Rhs : parserS[parserpt-0].assignrhs} }
+	case 22:
 		//line oliver.y:124
-		{
-			parserVAL.stmt = Free{parserDollar[2].expr}
-		}
-	case 24:
-		parserDollar = parserS[parserpt-2 : parserpt+1]
+		{ parserVAL.stmt = Read{parserS[parserpt-0].assignlhs} }
+	case 23:
 		//line oliver.y:125
-		{
-			parserVAL.stmt = Return{parserDollar[2].expr}
-		}
-	case 25:
-		parserDollar = parserS[parserpt-2 : parserpt+1]
+		{ parserVAL.stmt = Free{parserS[parserpt-0].expr} }
+	case 24:
 		//line oliver.y:126
-		{
-			parserVAL.stmt = Exit{parserDollar[2].expr}
-		}
-	case 26:
-		parserDollar = parserS[parserpt-2 : parserpt+1]
+		{ parserVAL.stmt = Return{parserS[parserpt-0].expr} }
+	case 25:
 		//line oliver.y:127
-		{
-			parserVAL.stmt = Print{parserDollar[2].expr}
-		}
-	case 27:
-		parserDollar = parserS[parserpt-2 : parserpt+1]
+		{ parserVAL.stmt = Exit{parserS[parserpt-0].expr} }
+	case 26:
 		//line oliver.y:128
-		{
-			parserVAL.stmt = Println{parserDollar[2].expr}
-		}
-	case 28:
-		parserDollar = parserS[parserpt-7 : parserpt+1]
+		{ parserVAL.stmt = Print{parserS[parserpt-0].expr} }
+	case 27:
 		//line oliver.y:129
-		{
-			parserVAL.stmt = If{Conditional: parserDollar[2].expr, ThenStat: parserDollar[4].stmts, ElseStat: parserDollar[6].stmts}
-		}
-	case 29:
-		parserDollar = parserS[parserpt-5 : parserpt+1]
+		{ parserVAL.stmt = Println{parserS[parserpt-0].expr} }
+	case 28:
 		//line oliver.y:130
-		{
-			parserVAL.stmt = While{Conditional: parserDollar[2].expr, DoStat: parserDollar[4].stmts}
-		}
-	case 30:
-		parserDollar = parserS[parserpt-3 : parserpt+1]
+		{ parserVAL.stmt = If{Conditional : parserS[parserpt-5].expr, ThenStat : parserS[parserpt-3].stmts, ElseStat : parserS[parserpt-1].stmts} }
+	case 29:
 		//line oliver.y:131
-		{
-			parserVAL.stmt = Scope{Statlist: parserDollar[2].stmts, SymbolTable: &SymbolTable{Table: make(map[string]Type)}}
-		}
+		{ parserVAL.stmt = While{Conditional : parserS[parserpt-3].expr, DoStat : parserS[parserpt-1].stmts} }
+	case 30:
+		//line oliver.y:132
+		{ parserVAL.stmt = Scope{StatList : parserS[parserpt-1].stmts, SymbolTable : &SymbolTable{Table: make(map[string]Type)} } }
 	case 31:
-		parserDollar = parserS[parserpt-1 : parserpt+1]
-		//line oliver.y:133
-		{
-			parserVAL.expr = parserDollar[1].number
-		}
-	case 32:
-		parserDollar = parserS[parserpt-1 : parserpt+1]
 		//line oliver.y:134
-		{
-			parserVAL.expr = parserDollar[1].number
-		}
-	case 33:
-		parserDollar = parserS[parserpt-1 : parserpt+1]
+		{ parserVAL.expr =  parserS[parserpt-0].number }
+	case 32:
 		//line oliver.y:135
-		{
-			parserVAL.expr = parserDollar[1].number
-		}
-	case 34:
-		parserDollar = parserS[parserpt-1 : parserpt+1]
+		{ parserVAL.expr =  true }
+	case 33:
 		//line oliver.y:136
-		{
-			parserVAL.expr = parserDollar[1].str
-		}
-	case 35:
-		parserDollar = parserS[parserpt-1 : parserpt+1]
+		{ parserVAL.expr =  false }
+	case 34:
 		//line oliver.y:137
-		{
-			parserVAL.expr = parserDollar[1].str
-		}
-	case 36:
-		parserDollar = parserS[parserpt-1 : parserpt+1]
+		{ parserVAL.expr =  parserS[parserpt-0].char }
+	case 35:
 		//line oliver.y:138
-		{
-			parserVAL.expr = parserDollar[1].pairliter
-		}
-	case 37:
-		parserDollar = parserS[parserpt-1 : parserpt+1]
+		{ parserVAL.expr =  parserS[parserpt-0].str }
+	case 36:
 		//line oliver.y:139
-		{
-			parserVAL.expr = parserDollar[1].str
-		}
-	case 38:
-		parserDollar = parserS[parserpt-1 : parserpt+1]
+		{ parserVAL.expr =  parserS[parserpt-0].pairliter }
+	case 37:
 		//line oliver.y:140
-		{
-			parserVAL.expr = parserDollar[1].arrayelem
-		}
-	case 39:
-		parserDollar = parserS[parserpt-2 : parserpt+1]
+		{ parserVAL.expr =  Ident{Name : parserS[parserpt-0].str} }
+	case 38:
 		//line oliver.y:141
-		{
-			parserVAL.expr = Unop{Unary: parserDollar[1].number, Expr: parserDollar[2].expr}
-		}
-	case 40:
-		parserDollar = parserS[parserpt-2 : parserpt+1]
+		{ parserVAL.expr =  parserS[parserpt-0].arrayelem }
+	case 39:
 		//line oliver.y:142
-		{
-			parserVAL.expr = Unop{Unary: parserDollar[1].number, Expr: parserDollar[2].expr}
-		}
-	case 41:
-		parserDollar = parserS[parserpt-2 : parserpt+1]
+		{ parserVAL.expr = Unop{Unary : parserS[parserpt-1].number, Expr : parserS[parserpt-0].expr} }
+	case 40:
 		//line oliver.y:143
-		{
-			parserVAL.expr = Unop{Unary: parserDollar[1].number, Expr: parserDollar[2].expr}
-		}
-	case 42:
-		parserDollar = parserS[parserpt-2 : parserpt+1]
+		{ parserVAL.expr = Unop{Unary : parserS[parserpt-1].number, Expr : parserS[parserpt-0].expr} }
+	case 41:
 		//line oliver.y:144
-		{
-			parserVAL.expr = Unop{Unary: parserDollar[1].number, Expr: parserDollar[2].expr}
-		}
-	case 43:
-		parserDollar = parserS[parserpt-2 : parserpt+1]
+		{ parserVAL.expr = Unop{Unary : parserS[parserpt-1].number, Expr : parserS[parserpt-0].expr} }
+	case 42:
 		//line oliver.y:145
-		{
-			parserVAL.expr = Unop{Unary: parserDollar[1].number, Expr: parserDollar[2].expr}
-		}
-	case 44:
-		parserDollar = parserS[parserpt-2 : parserpt+1]
+		{ parserVAL.expr = Unop{Unary : parserS[parserpt-1].number, Expr : parserS[parserpt-0].expr} }
+	case 43:
 		//line oliver.y:146
-		{
-			parserVAL.expr = Unop{Unary: parserDollar[1].number, Expr: parserDollar[2].expr}
-		}
+		{ parserVAL.expr = Unop{Unary : parserS[parserpt-1].number, Expr : parserS[parserpt-0].expr} }
+	case 44:
+		//line oliver.y:147
+		{ parserVAL.expr = Unop{Unary : parserS[parserpt-1].number, Expr : parserS[parserpt-0].expr} }
 	case 45:
-		parserDollar = parserS[parserpt-3 : parserpt+1]
-		//line oliver.y:148
-		{
-			parserVAL.expr = Binop{Left: parserDollar[1].expr, Binary: parserDollar[2].number, Right: parserDollar[3].expr}
-		}
-	case 46:
-		parserDollar = parserS[parserpt-3 : parserpt+1]
 		//line oliver.y:149
-		{
-			parserVAL.expr = Binop{Left: parserDollar[1].expr, Binary: parserDollar[2].number, Right: parserDollar[3].expr}
-		}
-	case 47:
-		parserDollar = parserS[parserpt-3 : parserpt+1]
+		{ parserVAL.expr = Binop{Left : parserS[parserpt-2].expr, Binary : parserS[parserpt-1].number, Right : parserS[parserpt-0].expr} }
+	case 46:
 		//line oliver.y:150
-		{
-			parserVAL.expr = Binop{Left: parserDollar[1].expr, Binary: parserDollar[2].number, Right: parserDollar[3].expr}
-		}
-	case 48:
-		parserDollar = parserS[parserpt-3 : parserpt+1]
+		{ parserVAL.expr = Binop{Left : parserS[parserpt-2].expr, Binary : parserS[parserpt-1].number, Right : parserS[parserpt-0].expr} }
+	case 47:
 		//line oliver.y:151
-		{
-			parserVAL.expr = Binop{Left: parserDollar[1].expr, Binary: parserDollar[2].number, Right: parserDollar[3].expr}
-		}
-	case 49:
-		parserDollar = parserS[parserpt-3 : parserpt+1]
+		{ parserVAL.expr = Binop{Left : parserS[parserpt-2].expr, Binary : parserS[parserpt-1].number, Right : parserS[parserpt-0].expr} }
+	case 48:
 		//line oliver.y:152
-		{
-			parserVAL.expr = Binop{Left: parserDollar[1].expr, Binary: parserDollar[2].number, Right: parserDollar[3].expr}
-		}
-	case 50:
-		parserDollar = parserS[parserpt-3 : parserpt+1]
+		{ parserVAL.expr = Binop{Left : parserS[parserpt-2].expr, Binary : parserS[parserpt-1].number, Right : parserS[parserpt-0].expr} }
+	case 49:
 		//line oliver.y:153
-		{
-			parserVAL.expr = Binop{Left: parserDollar[1].expr, Binary: parserDollar[2].number, Right: parserDollar[3].expr}
-		}
-	case 51:
-		parserDollar = parserS[parserpt-3 : parserpt+1]
+		{ parserVAL.expr = Binop{Left : parserS[parserpt-2].expr, Binary : parserS[parserpt-1].number, Right : parserS[parserpt-0].expr} }
+	case 50:
 		//line oliver.y:154
-		{
-			parserVAL.expr = Binop{Left: parserDollar[1].expr, Binary: parserDollar[2].number, Right: parserDollar[3].expr}
-		}
-	case 52:
-		parserDollar = parserS[parserpt-3 : parserpt+1]
+		{ parserVAL.expr = Binop{Left : parserS[parserpt-2].expr, Binary : parserS[parserpt-1].number, Right : parserS[parserpt-0].expr} }
+	case 51:
 		//line oliver.y:155
-		{
-			parserVAL.expr = Binop{Left: parserDollar[1].expr, Binary: parserDollar[2].number, Right: parserDollar[3].expr}
-		}
-	case 53:
-		parserDollar = parserS[parserpt-3 : parserpt+1]
+		{ parserVAL.expr = Binop{Left : parserS[parserpt-2].expr, Binary : parserS[parserpt-1].number, Right : parserS[parserpt-0].expr} }
+	case 52:
 		//line oliver.y:156
-		{
-			parserVAL.expr = Binop{Left: parserDollar[1].expr, Binary: parserDollar[2].number, Right: parserDollar[3].expr}
-		}
-	case 54:
-		parserDollar = parserS[parserpt-3 : parserpt+1]
+		{ parserVAL.expr = Binop{Left : parserS[parserpt-2].expr, Binary : parserS[parserpt-1].number, Right : parserS[parserpt-0].expr} }
+	case 53:
 		//line oliver.y:157
-		{
-			parserVAL.expr = Binop{Left: parserDollar[1].expr, Binary: parserDollar[2].number, Right: parserDollar[3].expr}
-		}
-	case 55:
-		parserDollar = parserS[parserpt-3 : parserpt+1]
+		{ parserVAL.expr = Binop{Left : parserS[parserpt-2].expr, Binary : parserS[parserpt-1].number, Right : parserS[parserpt-0].expr} }
+	case 54:
 		//line oliver.y:158
-		{
-			parserVAL.expr = Binop{Left: parserDollar[1].expr, Binary: parserDollar[2].number, Right: parserDollar[3].expr}
-		}
-	case 56:
-		parserDollar = parserS[parserpt-3 : parserpt+1]
+		{ parserVAL.expr = Binop{Left : parserS[parserpt-2].expr, Binary : parserS[parserpt-1].number, Right : parserS[parserpt-0].expr} }
+	case 55:
 		//line oliver.y:159
-		{
-			parserVAL.expr = Binop{Left: parserDollar[1].expr, Binary: parserDollar[2].number, Right: parserDollar[3].expr}
-		}
-	case 57:
-		parserDollar = parserS[parserpt-3 : parserpt+1]
+		{ parserVAL.expr = Binop{Left : parserS[parserpt-2].expr, Binary : parserS[parserpt-1].number, Right : parserS[parserpt-0].expr} }
+	case 56:
 		//line oliver.y:160
-		{
-			parserVAL.expr = Binop{Left: parserDollar[1].expr, Binary: parserDollar[2].number, Right: parserDollar[3].expr}
-		}
-	case 58:
-		parserDollar = parserS[parserpt-3 : parserpt+1]
+		{ parserVAL.expr = Binop{Left : parserS[parserpt-2].expr, Binary : parserS[parserpt-1].number, Right : parserS[parserpt-0].expr} }
+	case 57:
 		//line oliver.y:161
-		{
-			parserVAL.expr = parserDollar[2].expr
-		}
+		{ parserVAL.expr = Binop{Left : parserS[parserpt-2].expr, Binary : parserS[parserpt-1].number, Right : parserS[parserpt-0].expr} }
+	case 58:
+		//line oliver.y:162
+		{ parserVAL.expr = parserS[parserpt-1].expr }
 	case 59:
-		parserDollar = parserS[parserpt-3 : parserpt+1]
-		//line oliver.y:163
-		{
-			parserVAL.arrayliter = ArrayLiter{parserDollar[2].exprs}
-		}
+		//line oliver.y:164
+		{ parserVAL.arrayliter = ArrayLiter{parserS[parserpt-1].exprs}}
 	case 60:
-		parserDollar = parserS[parserpt-3 : parserpt+1]
-		//line oliver.y:165
-		{
-			parserVAL.exprs = append(parserDollar[1].exprs, parserDollar[3].expr)
-		}
-	case 61:
-		parserDollar = parserS[parserpt-1 : parserpt+1]
 		//line oliver.y:166
-		{
-			parserVAL.exprs = []interface{}{parserDollar[1].expr}
-		}
-	case 62:
-		parserDollar = parserS[parserpt-0 : parserpt+1]
+		{parserVAL.exprs = append(parserS[parserpt-2].exprs, parserS[parserpt-0].expr)}
+	case 61:
 		//line oliver.y:167
-		{
-			parserVAL.exprs = []interface{}{}
-		}
+		{parserVAL.exprs = []interface{}{parserS[parserpt-0].expr}}
+	case 62:
+		//line oliver.y:168
+		{parserVAL.exprs = []interface{}{}}
 	case 63:
-		parserDollar = parserS[parserpt-2 : parserpt+1]
-		//line oliver.y:169
-		{
-			parserVAL.arrayelem = ArrayElem{Ident: parserDollar[1].str, Exprs: parserDollar[2].bracketed}
-		}
+		//line oliver.y:170
+		{parserVAL.arrayelem = ArrayElem{Ident: parserS[parserpt-1].str, Exprs : parserS[parserpt-0].bracketed}}
 	case 64:
-		parserDollar = parserS[parserpt-4 : parserpt+1]
-		//line oliver.y:171
-		{
-			parserVAL.bracketed = append(parserDollar[1].bracketed, parserDollar[3].expr)
-		}
-	case 65:
-		parserDollar = parserS[parserpt-3 : parserpt+1]
 		//line oliver.y:172
-		{
-			parserVAL.bracketed = []interface{}{parserDollar[2].expr}
-		}
+		{parserVAL.bracketed = append(parserS[parserpt-3].bracketed, parserS[parserpt-1].expr)}
+	case 65:
+		//line oliver.y:173
+		{parserVAL.bracketed = []interface{}{parserS[parserpt-1].expr}}
 	case 66:
-		parserDollar = parserS[parserpt-1 : parserpt+1]
-		//line oliver.y:174
-		{
-			parserVAL.pairliter = NULL
-		}
+		//line oliver.y:175
+		{ parserVAL.pairliter =  NULL }
 	case 67:
-		parserDollar = parserS[parserpt-2 : parserpt+1]
-		//line oliver.y:176
-		{
-			parserVAL.pairelem = PairElem{Fsnd: FST, Expr: parserDollar[2].expr}
-		}
-	case 68:
-		parserDollar = parserS[parserpt-2 : parserpt+1]
 		//line oliver.y:177
-		{
-			parserVAL.pairelem = PairElem{Fsnd: SND, Expr: parserDollar[2].expr}
-		}
+		{ parserVAL.pairelem = PairElem{Fsnd: FST, Expr : parserS[parserpt-0].expr} }
+	case 68:
+		//line oliver.y:178
+		{ parserVAL.pairelem = PairElem{Fsnd: SND, Expr : parserS[parserpt-0].expr} }
 	case 69:
-		parserDollar = parserS[parserpt-6 : parserpt+1]
-		//line oliver.y:179
-		{
-			parserVAL.typedefinition = PairType{FstType: parserDollar[3].pairelemtype, SndType: parserDollar[5].pairelemtype}
-		}
+		//line oliver.y:180
+		{ parserVAL.typedefinition = PairType{FstType : parserS[parserpt-3].pairelemtype, SndType : parserS[parserpt-1].pairelemtype} }
 	case 70:
-		parserDollar = parserS[parserpt-1 : parserpt+1]
-		//line oliver.y:181
-		{
-			parserVAL.pairelemtype = parserDollar[1].typedefinition
-		}
-	case 71:
-		parserDollar = parserS[parserpt-1 : parserpt+1]
 		//line oliver.y:182
-		{
-			parserVAL.pairelemtype = parserDollar[1].typedefinition
-		}
-	case 72:
-		parserDollar = parserS[parserpt-1 : parserpt+1]
+		{ parserVAL.pairelemtype = parserS[parserpt-0].typedefinition }
+	case 71:
 		//line oliver.y:183
-		{
-			parserVAL.pairelemtype = Pair
-		}
+		{ parserVAL.pairelemtype = parserS[parserpt-0].typedefinition }
+	case 72:
+		//line oliver.y:184
+		{ parserVAL.pairelemtype = PairType{} }
 	case 73:
-		parserDollar = parserS[parserpt-1 : parserpt+1]
-		//line oliver.y:185
-		{
-			parserVAL.typedefinition = parserDollar[1].typedefinition
-		}
-	case 74:
-		parserDollar = parserS[parserpt-1 : parserpt+1]
 		//line oliver.y:186
-		{
-			parserVAL.typedefinition = parserDollar[1].typedefinition
-		}
-	case 75:
-		parserDollar = parserS[parserpt-1 : parserpt+1]
+		{ parserVAL.typedefinition =  parserS[parserpt-0].typedefinition }
+	case 74:
 		//line oliver.y:187
-		{
-			parserVAL.typedefinition = parserDollar[1].typedefinition
-		}
+		{ parserVAL.typedefinition =  parserS[parserpt-0].typedefinition }
+	case 75:
+		//line oliver.y:188
+		{ parserVAL.typedefinition =  parserS[parserpt-0].typedefinition }
 	case 76:
-		parserDollar = parserS[parserpt-1 : parserpt+1]
-		//line oliver.y:189
-		{
-			parserVAL.typedefinition = Int
-		}
-	case 77:
-		parserDollar = parserS[parserpt-1 : parserpt+1]
 		//line oliver.y:190
-		{
-			parserVAL.typedefinition = Bool
-		}
-	case 78:
-		parserDollar = parserS[parserpt-1 : parserpt+1]
+		{ parserVAL.typedefinition =  Int }
+	case 77:
 		//line oliver.y:191
-		{
-			parserVAL.typedefinition = Char
-		}
-	case 79:
-		parserDollar = parserS[parserpt-1 : parserpt+1]
+		{ parserVAL.typedefinition =  Bool }
+	case 78:
 		//line oliver.y:192
-		{
-			parserVAL.typedefinition = String
-		}
+		{ parserVAL.typedefinition =  Char }
+	case 79:
+		//line oliver.y:193
+		{ parserVAL.typedefinition =  String }
 	case 80:
-		parserDollar = parserS[parserpt-3 : parserpt+1]
-		//line oliver.y:194
-		{
-			parserVAL.typedefinition = ArrayType{Type: parserDollar[1].typedefinition}
-		}
+		//line oliver.y:195
+		{ parserVAL.typedefinition = ArrayType{Type : parserS[parserpt-2].typedefinition} }
 	}
 	goto parserstack /* stack new state and value */
 }
