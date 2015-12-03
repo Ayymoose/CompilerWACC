@@ -30,10 +30,26 @@ func GetScopeVarSize(statList []interface{}) int {
 			case PairType:
 				//Address of pair on the stack is 4 bytes
 				scopeSize += PAIR_SIZE
-			case ArrayType, ConstType:
+			case ArrayType:
 				//	var e = stat.(Declare).Rhs.(ArrayLiter)
+				scopeSize += ARRAY_SIZE //An array occupies 4 bytes
+				/*
+					switch t.(ArrayType).Type {
+					case Int:
+						scopeSize += INT_SIZE
+					case String:
+						scopeSize += STRING_SIZE
+					case Bool:
+						scopeSize += BOOL_SIZE
+					case Char:
+						scopeSize += CHAR_SIZE
+					default:
+						fmt.Println("No type found for ArrayType")
+					}
+				*/
 
-				switch t.(ArrayType).Type {
+			case ConstType:
+				switch t.(ConstType) {
 				case Int:
 					scopeSize += INT_SIZE
 				case String:
@@ -43,29 +59,52 @@ func GetScopeVarSize(statList []interface{}) int {
 				case Char:
 					scopeSize += CHAR_SIZE
 				default:
-					fmt.Println("No type found for ArrayType")
+					fmt.Println("No type found for ConstType")
 				}
-				/*
-					case ConstType:
-						switch t.(ConstType) {
-						case Int:
-							scopeSize += INT_SIZE
-						case String:
-							scopeSize += STRING_SIZE
-						case Bool:
-							scopeSize += BOOL_SIZE
-						case Char:
-							scopeSize += CHAR_SIZE
-						default:
-							fmt.Println("No type found for ConstType")
-						}
-				*/
+
 			}
 			//Anything else is just ignored
 		}
 	}
 
 	return scopeSize
+}
+
+//Converts a boolean to a string (for printing out assembly)
+func boolToString(b bool) string {
+	if b == true {
+		return "1"
+	} else {
+		return "0"
+	}
+}
+
+//Calcuates the type of the array and returns the size in bytes that the array occupies
+func sizeOf(t Type) int {
+	var size = 0
+	switch t.(type) {
+	case ArrayType:
+		switch t.(ArrayType).Type {
+		case Int:
+			size = INT_SIZE
+		case String:
+			size = STRING_SIZE
+		case Bool:
+			size = BOOL_SIZE
+		case Char:
+			size = CHAR_SIZE
+		default:
+			fmt.Println("No type found!")
+		}
+	default:
+		fmt.Println("No type found!")
+	}
+	return size
+}
+
+//Calcuates the size of an array
+func arraySize(array []interface{}) int {
+	return len(array)
 }
 
 // Adds the string code to the list of instructions instrs.
