@@ -704,7 +704,7 @@ parserdefault:
 			if !checkStats(parserDollar[6].stmts) {
 				parserlex.Error("Missing return statement")
 			}
-			parserVAL.function = &Function{Ident: parserDollar[2].str, ReturnType: parserDollar[1].typedefinition, Statlist: parserDollar[6].stmts}
+			parserVAL.function = &Function{Ident: parserDollar[2].str, ReturnType: parserDollar[1].typedefinition, StatList: parserDollar[6].stmts}
 		}
 	case 5:
 		parserDollar = parserS[parserpt-8 : parserpt+1]
@@ -713,7 +713,7 @@ parserdefault:
 			if !checkStats(parserDollar[7].stmts) {
 				parserlex.Error("Missing return statement")
 			}
-			parserVAL.function = &Function{Ident: parserDollar[2].str, ReturnType: parserDollar[1].typedefinition, Statlist: parserDollar[7].stmts, ParameterTypes: parserDollar[4].params}
+			parserVAL.function = &Function{Ident: parserDollar[2].str, ReturnType: parserDollar[1].typedefinition, StatList: parserDollar[7].stmts, ParameterTypes: parserDollar[4].params}
 		}
 	case 6:
 		parserDollar = parserS[parserpt-3 : parserpt+1]
@@ -803,7 +803,7 @@ parserdefault:
 		parserDollar = parserS[parserpt-4 : parserpt+1]
 		//line oliver.y:121
 		{
-			parserVAL.stmt = Declare{Type: parserDollar[1].typedefinition, Lhs: parserDollar[2].str, Rhs: parserDollar[4].assignrhs}
+			parserVAL.stmt = Declare{DecType: parserDollar[1].typedefinition, Lhs: parserDollar[2].str, Rhs: parserDollar[4].assignrhs}
 		}
 	case 21:
 		parserDollar = parserS[parserpt-3 : parserpt+1]
