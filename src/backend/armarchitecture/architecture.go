@@ -161,6 +161,7 @@ func (r Register) String() string {
 		offsetString = ", #" + fmt.Sprint(r.offset)
 	}
 
+	//TODO: FIX THESE MAGIC NUMBERS
 	switch r.value {
 	case 13:
 		return "sp" + offsetString

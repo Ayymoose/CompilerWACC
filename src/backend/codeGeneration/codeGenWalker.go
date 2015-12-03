@@ -57,9 +57,7 @@ func (cg CodeGenerator) cgVisitProgram(node *Program) {
 
 	// traverse all statements by switching on statement type
 	for _, stat := range node.StatList {
-
-		cg.cgEvalStat(stat) // NEED A POINTER HERE TO?
-
+		cg.cgEvalStat(stat)
 	}
 
 	// add sp, sp, #n to remove variable space
@@ -71,6 +69,8 @@ func (cg CodeGenerator) cgVisitProgram(node *Program) {
 	// .ltorg
 	appendAssembly(cg.instrs, ".ltorg", 1, 1)
 
+	// Adds the msg definitions to assembly instructions
+	*cg.instrs = append(cg.msgInstrs, *cg.instrs...)
 }
 
 func (cg CodeGenerator) cgCreateMsgs(instrs *ARMList) map[string]string {
@@ -135,45 +135,105 @@ func (cg CodeGenerator) cgVisitParameter(node Param) {
 		case Char:
 		case Int:
 		case String:
-			/// DO WE NEED FSND ASWELL I.E TYPE FSND SWITCH??
 		}
+	case ArrayType:
+
+	case PairType:
+
 	}
 }
 
-func (cg CodeGenerator) cgVisitDeclareStat(node Declare) {
-	//Most likely need a function to get the value stored in the node
-	switch node.DecType.(type) {
+//Puts the array elements onto the stack
+func (cg CodeGenerator) pushArrayElements(array []interface{}, srcReg string, dstReg string, t Type) {
 
-	case ArrayType:
+	var arraySize = arraySize(array)
+	//Loop through the array pushing it onto the stack
+	for i := 0; i < arraySize; i++ {
+		//Array of pairs,ints,bools,chars,strings
+		var arrayItem = array[i]
+		switch t.(type) {
+		case ArrayType:
+			switch t.(ArrayType).Type {
+			case Int:
+				appendAssembly(cg.instrs, "LDR "+srcReg+", ="+strconv.Itoa(arrayItem.(int)), 1, 1)
+				appendAssembly(cg.instrs, "STR "+srcReg+", ["+dstReg+", #"+strconv.Itoa(ARRAY_SIZE+INT_SIZE*i)+"]", 1, 1)
+			case String:
+				//NEED TO GET CORRECT LABEL
+				var label = "msg_"
+				appendAssembly(cg.instrs, "LDR "+srcReg+", ="+label, 1, 1)
+				appendAssembly(cg.instrs, "STR "+srcReg+", ["+dstReg+", #"+strconv.Itoa(ARRAY_SIZE+STRING_SIZE*i)+"]", 1, 1)
+				//fmt.Println(array[i])
+			case Bool:
+				appendAssembly(cg.instrs, "MOV "+srcReg+", #"+boolToString(arrayItem.(bool)), 1, 1)
+				appendAssembly(cg.instrs, "STRB "+srcReg+", ["+dstReg+", #"+strconv.Itoa(ARRAY_SIZE+BOOL_SIZE*i)+"]", 1, 1)
+			case Char:
+				//WHY DOES THIS PRINT 0 ????
+				fmt.Println(array[i])
+				//appendAssembly(cg.instrs, "MOV "+srcReg+", #"+strconv.Itoa(arrayItem.(string)), 1, 1)
+				appendAssembly(cg.instrs, "STRB "+srcReg+", ["+dstReg+", #"+strconv.Itoa(ARRAY_SIZE+CHAR_SIZE*i)+"]", 1, 1)
+			default:
+				fmt.Println("Array/Pair type not done!")
+			}
+		}
+	}
+	//Put the size of the array onto the stack
+	appendAssembly(cg.instrs, "LDR "+srcReg+", ="+strconv.Itoa(arraySize), 1, 1)
+	//Now store the address of the array onto the stack
+	appendAssembly(cg.instrs, "STR "+srcReg+", ["+dstReg+"]", 1, 1)
+	appendAssembly(cg.instrs, "STR "+dstReg+", [sp, #"+cg.subCurrP(INT_SIZE)+"]", 1, 1)
+}
+
+func (cg CodeGenerator) cgVisitDeclareStat(node Declare) {
+	//MIGHT NEED TO CHANGE THIS BACK TO SIMPLE IF STATEMENT
+	var array = node.Rhs
+	switch array.(type) {
+	case ArrayLiter:
+		//Calculate the amount of storage space required for the array
+		// = ((arrayLength(array) * sizeOf(arrayType)) + 4 (4-bytes for an address)
+		var arraySize = arraySize(array.(ArrayLiter).Exprs)
+		var arrayStorage = (arraySize * sizeOf(node.DecType)) + ARRAY_SIZE
+
+		appendAssembly(cg.instrs, "LDR r0, ="+strconv.Itoa(arrayStorage), 1, 1)
+		//Allocate memory for the array
+		appendAssembly(cg.instrs, "BL malloc", 1, 1)
+		//Move the result back into the register
+		appendAssembly(cg.instrs, "MOV r4, r0", 1, 1)
+		//Start loading each element in the array onto the stack
+		cg.pushArrayElements(array.(ArrayLiter).Exprs, "r5", "r4", node.DecType)
+	}
+
+	switch node.DecType.(type) {
 
 	case ConstType:
 		switch node.DecType.(ConstType) {
 		case Bool:
 			//Load the bool into a register
-			appendAssembly(cg.instrs, "MOV R4, #"+strconv.Itoa(node.Rhs.(int)), 1, 1)
+			appendAssembly(cg.instrs, "MOV r4, #"+strconv.Itoa(node.Rhs.(int)), 1, 1)
 			//Using STRB, store it on the stack
 			appendAssembly(cg.instrs,
-				"STRB R4, [sp, #"+cg.subCurrP(BOOL_SIZE)+"])", 1, 1)
+				"STRB r4, [sp, #"+cg.subCurrP(BOOL_SIZE)+"])", 1, 1)
 		case Char:
 			//Load the character into a register
-			appendAssembly(cg.instrs, "MOV R4, #"+node.Rhs.(string), 1, 1)
+			appendAssembly(cg.instrs, "MOV r4, #"+node.Rhs.(string), 1, 1)
 			//Using STRB, store it on the stack
 			appendAssembly(cg.instrs,
-				"STRB R4, [sp, #"+cg.subCurrP(CHAR_SIZE)+"])", 1, 1)
+				"STRB r4, [sp, #"+cg.subCurrP(CHAR_SIZE)+"])", 1, 1)
 		case Int:
 			// Load the value of the declaration to the register
-			appendAssembly(cg.instrs, "LDR R4, "+strconv.Itoa(node.Rhs.(int)), 1, 1)
+			appendAssembly(cg.instrs, "LDR r4, "+strconv.Itoa(node.Rhs.(int)), 1, 1)
+
+			//fmt.Println("Type", node.Rhs)
+
+			// Load the value of the declaration to R4
+			//appendAssembly(cg.instrs, "LDR R4, "+strconv.Itoa(), 1, 1)
+
 			// Store the value of declaration to stack
-			appendAssembly(cg.instrs,
-				"STR R4, [sp, #"+cg.subCurrP(INT_SIZE)+"])", 1, 1)
+			appendAssembly(cg.instrs, "STR r4, [sp, #"+cg.subCurrP(INT_SIZE)+"])", 1, 1)
 		case String:
-			// TODO: STRING HAS NOT BEEN IMPLEMENETED
 			fmt.Println("String not implemented")
+
 		}
-
 	}
-
-	// Store the value of the declaration to the stack
 
 }
 
@@ -184,6 +244,7 @@ func (cg CodeGenerator) cgVisitAssignmentStat(node Assignment) {
 	default: // Ident
 	}
 
+	// eval RHS ????
 	switch node.Rhs.(type) {
 	// expr
 	case ConstType:
@@ -196,6 +257,7 @@ func (cg CodeGenerator) cgVisitAssignmentStat(node Assignment) {
 
 		case String:
 
+			//	case Pair:
 		}
 	case ArrayElem:
 	case Unop:
@@ -206,10 +268,30 @@ func (cg CodeGenerator) cgVisitAssignmentStat(node Assignment) {
 }
 
 func (cg CodeGenerator) cgVisitReadStat(node Read) {
+	label := "p_read_"
+	offset := 0
+	switch node.AssignLHS.(type) {
+	case Ident:
+	case ArrayElem:
+	case PairElem:
+	default:
+
+	}
+
+	if offset == 4 {
+		label += "int"
+	} else if offset == 1 {
+		label += "char"
+	}
+	// p_read_int:  /char
+	//PUSH {lr}
+
+	// BL scanf
+	//POP {pc}
 }
 
 func (cg CodeGenerator) cgVisitFreeStat(node Free) {
-
+	//	label := "p_free_pair"
 }
 
 func (cg CodeGenerator) cgVisitReturnStat(node Return) {
@@ -221,7 +303,7 @@ func (cg CodeGenerator) cgVisitExitStat(node Exit) {
 }
 
 func (cg CodeGenerator) cgVisitPrintStat(node Print) {
-	expr := node.Expr // expression to print
+	expr := node.Expr
 
 	switch expr.(type) {
 	case string:
