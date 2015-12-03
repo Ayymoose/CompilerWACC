@@ -44,7 +44,7 @@ type PairType struct {
 
 // Program ..
 type Program struct {
-	Functionlist []*Function
+	FunctionList []*Function
 	StatList     []interface{}
 	SymbolTable  *SymbolTable
 }
@@ -95,7 +95,7 @@ type While struct {
 
 type Scope struct {
 	SymbolTable *SymbolTable
-	Statlist    []interface{}
+	StatList    []interface{}
 }
 
 // Read struct
@@ -130,14 +130,12 @@ type Println struct {
 
 type Call struct {
 	Ident    string
-	Exprlist []interface{}
+	ExprList []interface{}
 }
 
-/*
 type Ident struct {
-	name string
+	Name string
 }
-*/
 
 type PairElem struct {
 	Fsnd FSND

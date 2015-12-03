@@ -15,6 +15,7 @@ type CodeGenerator struct {
 	instrs      *ARMList          // List of assembly instructions for the program
 	msgInstrs   ARMList           // List of assembly instructions to create msg labels
 	symTable    SymbolTable       // Used to map variable identifiers to their values
+	funcInstrs  ARMList           // List of assembly instructions that define functions and their labels
 	globalStack *scopeData        // Stack data for the global scope
 	currStack   *scopeData        // Stack data for the current scope
 	msgMap      map[string]string // Maps string values to their msg labels

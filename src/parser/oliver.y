@@ -7,6 +7,7 @@ import . "ast"
 %union{
 str string
 number int
+char  rune
 functions []*Function
 function *Function
 stmt  interface{}
@@ -42,7 +43,7 @@ pairelemtype Type
 %token <number> NOT NEG LEN ORD CHR                                              // Unary ops   DO WE NEED THESEEEE
 %token <number> MUL DIV MOD PLUS SUB AND OR GT GTE LT LTE EQ NEQ                 // Binary ops
 %token POSITIVE NEGATIVE
-%token <number> TRUE FALSE                                    // Booleans
+%token TRUE FALSE                                    // Booleans
 %token NULL
 %token OPENSQUARE OPENROUND CLOSESQUARE CLOSEROUND
 %token ASSIGNMENT
@@ -52,7 +53,7 @@ pairelemtype Type
 %token <str> STRINGCONST
 %token <str> IDENTIFIER
 %token <number> INTEGER
-%token <str> CHARACTER
+%token <char> CHARACTER
 
 %type <prog> program
 %type <functions> functions
@@ -79,7 +80,7 @@ pairelemtype Type
 %%
 
 program : BEGIN functions statements END {
-                                          parserlex.(*Lexer).prog = &Program{Functionlist : $2 , StatList : $3 , SymbolTable : &SymbolTable{Table: make(map[string]Type)}}
+                                          parserlex.(*Lexer).prog = &Program{FunctionList : $2 , StatList : $3 , SymbolTable : &SymbolTable{Table: make(map[string]Type)}}
                                          }
 
 functions : functions function  { $$ = append($1, $2)}
@@ -89,13 +90,13 @@ function : typeDef IDENTIFIER OPENROUND CLOSEROUND IS statements END
            { if !checkStats($6) {
           	parserlex.Error("Missing return statement")
            }
-             $$ = &Function{Ident : $2, ReturnType : $1, Statlist : $6}
+             $$ = &Function{Ident : $2, ReturnType : $1, StatList : $6}
            }
          | typeDef IDENTIFIER OPENROUND paramlist CLOSEROUND IS statements END
            { if !checkStats($7) {
             	parserlex.Error("Missing return statement")
             }
-             $$ = &Function{Ident : $2, ReturnType : $1, Statlist : $7, ParameterTypes : $4}
+             $$ = &Function{Ident : $2, ReturnType : $1, StatList : $7, ParameterTypes : $4}
            }
 
 paramlist : paramlist COMMA param { $$ = append($1, $3)}
@@ -111,14 +112,14 @@ assignrhs : expr                                           {$$ = $1}
           | arrayliter                                     {$$ = $1}
           | pairelem                                       {$$ = $1}
           | NEWPAIR OPENROUND expr COMMA expr CLOSEROUND   { $$ = NewPair{FstExpr : $3, SndExpr : $5} }
-          | CALL IDENTIFIER OPENROUND exprlist CLOSEROUND  { $$ = Call{Ident : $2, Exprlist : $4} }
+          | CALL IDENTIFIER OPENROUND exprlist CLOSEROUND  { $$ = Call{Ident : $2, ExprList : $4} }
 
 statements : statements SEMICOLON statement           { $$ = append($1,$3) }
            | statement                                { $$ = []interface{}{$1} }
 
 
 statement : SKIP                                        { $$ = $1 }
-          | typeDef IDENTIFIER ASSIGNMENT assignrhs     { $$ = Declare{Type : $1, Lhs : $2, Rhs : $4} }
+          | typeDef IDENTIFIER ASSIGNMENT assignrhs     { $$ = Declare{DecType : $1, Lhs : $2, Rhs : $4} }
           | assignlhs ASSIGNMENT assignrhs              { $$ = Assignment{Lhs : $1, Rhs : $3} }
           | READ assignlhs                              { $$ = Read{$2} }
           | FREE expr                                   { $$ = Free{$2} }
@@ -128,15 +129,15 @@ statement : SKIP                                        { $$ = $1 }
           | PRINTLN expr                                { $$ = Println{$2} }
           | IF expr THEN statements ELSE statements FI  { $$ = If{Conditional : $2, ThenStat : $4, ElseStat : $6} }
           | WHILE expr DO statements DONE               { $$ = While{Conditional : $2, DoStat : $4} }
-          | BEGIN statements END                        { $$ = Scope{Statlist : $2, SymbolTable : &SymbolTable{Table: make(map[string]Type)} } }
+          | BEGIN statements END                        { $$ = Scope{StatList : $2, SymbolTable : &SymbolTable{Table: make(map[string]Type)} } }
 
 expr : INTEGER       { $$ =  $1 }
-     | TRUE          { $$ =  $1 }
-     | FALSE         { $$ =  $1 }
+     | TRUE          { $$ =  true }
+     | FALSE         { $$ =  false }
      | CHARACTER     { $$ =  $1 }
      | STRINGCONST   { $$ =  $1 }
      | pairliter     { $$ =  $1 }
-     | IDENTIFIER    { $$ =  $1 }
+     | IDENTIFIER    { $$ =  Ident{Name : $1} }
      | arrayelem     { $$ =  $1 }
      | NOT expr     { $$ = Unop{Unary : $1, Expr : $2} }
      | LEN expr     { $$ = Unop{Unary : $1, Expr : $2} }
