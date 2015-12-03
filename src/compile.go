@@ -1,13 +1,13 @@
 package main
 
 import (
-	"ast"
+//	"ast"
 	"fmt"
 	"io/ioutil"
 	"os"
 	"parser"
 
-	codeG "backend/codeGeneration"
+//	codeG "backend/codeGeneration"
 	"backend/filewriter"
 )
 
@@ -42,10 +42,10 @@ func main() {
 	if err != nil {
 		os.Exit(SYNTAX_ERROR)
 	}
-	//fmt.Println(root)
+	fmt.Println(root)
 
-	var cg codeG.CodeGenerator = codeG.ConstructCodeGenerator(root, armList, ast.SymbolTable{})
-	cg.GenerateCode()
+//	 cg := codeG.ConstructCodeGenerator(root, armList, ast.SymbolTable{})
+//	cg.GenerateCode()
 
 	for _, instr := range *armList {
 		fmt.Print(instr)

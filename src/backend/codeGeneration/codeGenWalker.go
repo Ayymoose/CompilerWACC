@@ -136,7 +136,6 @@ func (cg CodeGenerator) cgVisitParameter(node Param) {
 		case Char:
 		case Int:
 		case String:
-		case Pair: /// WE NEED THIS RIGHT?
 			/// DO WE NEED FSND ASWELL I.E TYPE FSND SWITCH??
 		}
 	}
@@ -194,7 +193,6 @@ func (cg CodeGenerator) cgVisitAssignmentStat(node Assignment) {
 
 		case String:
 
-		case Pair:
 		}
 	case ArrayElem:
 	case Unop:

@@ -181,7 +181,7 @@ pairtype : PAIR OPENROUND pairelemtype COMMA pairelemtype CLOSEROUND  { $$ = Pai
 
 pairelemtype : basetype  { $$ = $1 }
              | arraytype { $$ = $1 }
-             | PAIR      { $$ = Pair }
+             | PAIR      { $$ = PairType{} }
 
 typeDef : basetype  { $$ =  $1 }
         | arraytype { $$ =  $1 }

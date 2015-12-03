@@ -788,7 +788,7 @@ parserdefault:
 		{ parserVAL.pairelemtype = parserS[parserpt-0].typedefinition }
 	case 72:
 		//line oliver.y:184
-		{ parserVAL.pairelemtype = Pair }
+		{ parserVAL.pairelemtype = PairType{} }
 	case 73:
 		//line oliver.y:186
 		{ parserVAL.typedefinition =  parserS[parserpt-0].typedefinition }

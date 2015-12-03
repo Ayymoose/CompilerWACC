@@ -11,7 +11,6 @@ const (
 	Bool
 	Char
 	String
-	Pair
 )
 
 const (
