@@ -2,6 +2,7 @@ package codeGeneration
 
 import (
 	. "ast"
+	. "backend/armarchitecture"
 	. "backend/filewriter"
 	"fmt"
 	"strconv"
@@ -28,17 +29,20 @@ const (
 	FALSE_MSG     = "false\\0"
 )
 
+// FUnction global variable
+var functionList []*Function // IS IT A POINTER OR NOT??
+var paramMap map[interface{}]int
+
 // VISIT FUNCTIONS -------------------------------------------------------------
 
 func (cg CodeGenerator) cgVisitProgram(node *Program) {
-	// Set properities of global scope
+	// Set properties of global scope
 	cg.globalStack.size = GetScopeVarSize(node.StatList)
 	cg.globalStack.currP = cg.globalStack.size
 
-	// traverse all functions
-	for _, function := range node.FunctionList {
-		cg.cgVisitFunction(*function)
-	}
+	// ASSIGN functions to global variable
+	// WE WIll only traverse them if they are called
+	functionList = node.FunctionList
 
 	// .text
 	appendAssembly(cg.instrs, ".text", 0, 2)
@@ -110,23 +114,54 @@ func (cg CodeGenerator) cgEvalStat(stat interface{}) {
 	}
 }
 
-func (cg CodeGenerator) cgVisitFunction(node Function) {
-	// f_funcName:
-	appendAssembly(cg.instrs, "f_"+node.Ident+":", 1, 1)
+// ONLY VISIT FUNCTION IF IT IS CALLED
+// IE WE ONLY PUSH ONTO STACK FUNC VARIABLES WHEN A FUNCTION IS CALLED
+// but
+// WE EXECUTE WHAT IS INSIDE THE FUNCTION REGARDLESS OF WHETHER IT IS CALLED OR NOT
+func (cg CodeGenerator) cgVisitCallStat(ident string, paramList []interface{}) {
+	for _, function := range functionList {
+		if function.Ident == ident {
+			// sub sp, sp, #n to create variable space
+			appendAssembly(cg.instrs, "SUB sp, sp, #4", 1, 1)
 
-	// push {lr} to save the caller address
-	appendAssembly(cg.instrs, "PUSH {lr}", 1, 1)
+			for _, param := range paramList {
+				cg.cgVisitParameter(param.(Param)) // NED SOME KIND OF MAP HERE FROM IDENT STRING TO IDENT OFFSET INT
+				// NEED SOMEHOW TO ACCUMULATE GLOBABL OFFSET
+			}
+
+			appendAssembly(cg.instrs, "BL f_"+function.Ident, 1, 1)
+
+			if !(paramList == nil) {
+				appendAssembly(cg.instrs, "ADD sp, sp, #"+"offset", 1, 1) // ADD LOGIC WHICH GETS GLOBAL OFFSET
+			}
+			appendAssembly(cg.instrs, "MOV r4, r0", 1, 1)
+			appendAssembly(cg.instrs, "STR r4, [sp]", 1, 1)
+
+			cg.cgVisitFunction(*function)
 
 	if node.ParameterTypes != nil {
 		for _, param := range node.ParameterTypes {
 			cg.cgVisitParameter(param,0)
 		}
 	}
+}
+
+func (cg CodeGenerator) cgVisitFunction(node Function) {
+	// f_funcName:
+	appendAssembly(cg.funcInstrs, "f_"+node.Ident+":", 0, 1)
+
+	// push {lr} to save the caller address
+	appendAssembly(cg.funcInstrs, "PUSH {lr}", 1, 1)
 
 	// traverse all statements by switching on statement type
+	// BUT NEED TO KNOW THAT WE NEED TO ADD THIS TO DUNCTION MESSGES??
+	// FLAGG??
 	for _, stat := range node.StatList {
 		cg.cgEvalStat(stat)
 	}
+
+	appendAssembly(cg.funcInstrs, "POP {pc}", 1, 1) // TEST harness uses double POP don't think we need it
+	appendAssembly(cg.funcInstrs, ".ltorg", 1, 2)
 }
 
 // VISIT STATEMENT -------------------------------------------------------------
@@ -136,29 +171,34 @@ func (cg CodeGenerator) cgVisitParameter(node Param, offset int) {
 	case ConstType:
 		switch node.ParamType.(ConstType) {
 		case Bool:
-			if node.ParamType == true { // IS THIS CORRECT ????
+			boolean := node.ParamType.(bool)
+			if boolean == true { // IS THIS CORRECT ????
 				appendAssembly(cg.instrs, "MOV r4, #1", 1, 1)
 			} else {
 				appendAssembly(cg.instrs, "MOV r4, #0", 1, 1)
 			}
-			appendAssembly(cg.instrs, "STRB r4, [sp, #-1]!", 1, 1)
-			offset += 1
+			appendAssembly(cg.instrs, "STRB r4, [sp, #"+cg.subCurrP(BOOL_SIZE)+"]!", 1, 1)
+			paramMap[boolean] = BOOL_SIZE
 		case Char:
-			appendAssembly(cg.instrs, "MOV r4, #"+node.ParamType.(string), 1, 1)
-			appendAssembly(cg.instrs, "STRB r4, [sp, #-1]!", 1, 1)
-			offset += 1
+			char := node.ParamType.(rune)
+			appendAssembly(cg.instrs, "MOV r4, #"+(fmt.Sprintf("%c", char)), 1, 1)
+			appendAssembly(cg.instrs, "STRB r4, [sp, #"+cg.subCurrP(CHAR_SIZE)+"]!", 1, 1)
+			paramMap[char] = CHAR_SIZE
 		case Int:
-			appendAssembly(cg.instrs, "LDR r4, ="+strconv.Itoa(node.ParamType.(int)), 1, 1)
-			appendAssembly(cg.instrs, "STR r4, [sp, #-4]!", 1, 1)
-			offset += 4
+			integer := node.ParamType.(int)
+			appendAssembly(cg.instrs, "LDR r4, ="+strconv.Itoa(integer), 1, 1)
+			appendAssembly(cg.instrs, "STR r4, [sp, #"+cg.subCurrP(INT_SIZE)+"]!", 1, 1)
+			paramMap[integer] = INT_SIZE
 		case String: // OR char[] need to implement
 			appendAssembly(cg.instrs, "LDR r4, =msg_"+"0", 1, 1) // NEED TO ADD FUNCTIONALITY WHICH UPDATES THE MESSAGE NUMBERS
-			appendAssembly(cg.instrs, "STR r4, [sp, #-4]", 1, 1)
-			offset += 4
+			appendAssembly(cg.instrs, "STR r4, [sp, #"+cg.subCurrP(STRING_SIZE)+"]!", 1, 1)
+			paramMap["msg_0"] = STRING_SIZE // NEED TO MODIFIY THIS SHIITT
 		}
 	case ArrayType:
 
-	case PairType:
+	case PairType: // there is only a pariliteral 'null for this case'
+		appendAssembly(cg.instrs, "LDR r4, =0", 1, 1)
+		appendAssembly(cg.instrs, "STR r4, [sp, #-4]!", 1, 1)
 
 	}
 }
@@ -166,33 +206,32 @@ func (cg CodeGenerator) cgVisitParameter(node Param, offset int) {
 //Pushes a pair of elements onto the stack
 func (cg CodeGenerator) pushPair(fst interface{}, snd interface{}, typeFst Type, typeSnd Type, reg1 string, reg2 string) {
 	//Store the address in the free register
-	appendAssembly(cg.instrs, "MOV " + reg2 +", r0", 1, 1)
+	appendAssembly(cg.instrs, "MOV "+reg2+", r0", 1, 1)
 
 	//Load the first element into a register to be stored
-  //Mmmmm
+	//Mmmmm
 
 	//Allocate memory for the first element
-	var fstSize, sndSize = pairTypeSize(typeFst,typeSnd)
-  appendAssembly(cg.instrs, "LDR r0, =" + strconv.Itoa(fstSize), 1, 1)
-  appendAssembly(cg.instrs, "BL malloc", 1, 1)
+	var fstSize, sndSize = pairTypeSize(typeFst, typeSnd)
+	appendAssembly(cg.instrs, "LDR r0, ="+strconv.Itoa(fstSize), 1, 1)
+	appendAssembly(cg.instrs, "BL malloc", 1, 1)
 	//Store the first element to the newly allocated memory onto the stack
-	appendAssembly(cg.instrs, "STR " + reg1 + ", [r0]", 1, 1)
+	appendAssembly(cg.instrs, "STR "+reg1+", [r0]", 1, 1)
 	//Store the address of allocated memory block of the pair on the stack
-	appendAssembly(cg.instrs, "STR r0, [" + reg2 + "]", 1, 1)
+	appendAssembly(cg.instrs, "STR r0, ["+reg2+"]", 1, 1)
 
 	//Load the second element into a register to be stored
 
-
 	//Allocate memory for the second element
-  appendAssembly(cg.instrs, "LDR r0, =" + strconv.Itoa(sndSize), 1, 1)
-  appendAssembly(cg.instrs, "BL malloc", 1, 1)
+	appendAssembly(cg.instrs, "LDR r0, ="+strconv.Itoa(sndSize), 1, 1)
+	appendAssembly(cg.instrs, "BL malloc", 1, 1)
 	//Store the second element to the newly allocated memory onto the stack
-	appendAssembly(cg.instrs, "STR " + reg1 + ", [r0]", 1, 1)
+	appendAssembly(cg.instrs, "STR "+reg1+", [r0]", 1, 1)
 	//Store the address of allocated memory block of the pair on the stack
-	appendAssembly(cg.instrs, "STR r0, [" + reg2 + ", #4]", 1, 1)
+	appendAssembly(cg.instrs, "STR r0, ["+reg2+", #4]", 1, 1)
 
 	//Store the address of the address that contains pointers to the first and second elements
-	appendAssembly(cg.instrs, "STR " + reg2 + ", [sp]", 1, 1)
+	appendAssembly(cg.instrs, "STR "+reg2+", [sp]", 1, 1)
 
 }
 
@@ -237,13 +276,14 @@ func (cg CodeGenerator) pushArrayElements(array []interface{}, srcReg string, ds
 }
 
 func (cg CodeGenerator) cgVisitDeclareStat(node Declare) {
-
   var rhs = node.Rhs
 
 	switch node.DecType.(type) {
 	case ArrayType:
 
 		switch rhs.(type) {
+		case Call:
+				cgVisitCallStat(node.Rhs.(Call).Ident, node.Rhs.(Call).ParamList)
 		case ArrayLiter:
 			//Calculate the amount of storage space required for the array
 			// = ((arrayLength(array) * sizeOf(arrayType)) + 4 (4-bytes for an address)
@@ -318,7 +358,8 @@ func (cg CodeGenerator) cgVisitAssignmentStat(node Assignment) {
 	case ArrayElem:
 	case Unop:
 	case Binop:
-
+	case Call:
+		cgVisitCallStat(node.Rhs.(Call).Ident, node.Rhs.(Call).ParamList)
 	default: // Ident   // NEED TO DEAL WITH '(' EXPR ')' CASE AS WELL?
 	}
 }
@@ -391,7 +432,7 @@ func (cg CodeGenerator) cgVisitPrintStat(node Print) {
 		charValue := expr.(rune)
 
 		// MOV r4, #'c' : load the value into r4
-		appendAssembly(cg.instrs, "MOV r4, #"+string(charValue), 1, 1)
+		appendAssembly(cg.instrs, "MOV r4, #"+fmt.Sprintf("%c", charValue), 1, 1)
 		// MOV r0, r4 : prepare parameter for function call
 		appendAssembly(cg.instrs, "MOV r0, r4", 1, 1)
 		// BL putchar
