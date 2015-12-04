@@ -12,8 +12,7 @@ FREE: NOT STARTED ---
 RETURN: NOT STARTED ---
 - ???
 
-EXIT: NOT STARTED ---
-- ???
+EXIT: COMPLETE --------------------------------------------------
 
 PRINT: IN PROGRESS/ LITERALS COMPLETE* ---
 - *Oli needs to help print runes
