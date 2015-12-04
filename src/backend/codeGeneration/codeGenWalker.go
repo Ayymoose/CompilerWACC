@@ -2,7 +2,7 @@ package codeGeneration
 
 import (
 	. "ast"
-	. "backend/armarchitecture"
+	//. "backend/armarchitecture"
 	. "backend/filewriter"
 	"fmt"
 	"strconv"
@@ -125,7 +125,7 @@ func (cg CodeGenerator) cgVisitCallStat(ident string, paramList []interface{}) {
 			appendAssembly(cg.instrs, "SUB sp, sp, #4", 1, 1)
 
 			for _, param := range paramList {
-				cg.cgVisitParameter(param.(Param)) // NED SOME KIND OF MAP HERE FROM IDENT STRING TO IDENT OFFSET INT
+				cg.cgVisitParameter(param.(Param),0) // NED SOME KIND OF MAP HERE FROM IDENT STRING TO IDENT OFFSET INT
 				// NEED SOMEHOW TO ACCUMULATE GLOBABL OFFSET
 			}
 
@@ -139,11 +139,16 @@ func (cg CodeGenerator) cgVisitCallStat(ident string, paramList []interface{}) {
 
 			cg.cgVisitFunction(*function)
 
+/*
 	if node.ParameterTypes != nil {
 		for _, param := range node.ParameterTypes {
 			cg.cgVisitParameter(param,0)
 		}
-	}
+	}*/
+
+
+}
+}
 }
 
 func (cg CodeGenerator) cgVisitFunction(node Function) {
@@ -283,7 +288,7 @@ func (cg CodeGenerator) cgVisitDeclareStat(node Declare) {
 
 		switch rhs.(type) {
 		case Call:
-				cgVisitCallStat(node.Rhs.(Call).Ident, node.Rhs.(Call).ParamList)
+			//	cgVisitCallStat(node.Rhs.(Call).Ident, node.Rhs.(Call).ParamList)
 		case ArrayLiter:
 			//Calculate the amount of storage space required for the array
 			// = ((arrayLength(array) * sizeOf(arrayType)) + 4 (4-bytes for an address)
@@ -359,7 +364,7 @@ func (cg CodeGenerator) cgVisitAssignmentStat(node Assignment) {
 	case Unop:
 	case Binop:
 	case Call:
-		cgVisitCallStat(node.Rhs.(Call).Ident, node.Rhs.(Call).ParamList)
+	//	cgVisitCallStat(node.Rhs.(Call).Ident, node.Rhs.(Call).ParamList)
 	default: // Ident   // NEED TO DEAL WITH '(' EXPR ')' CASE AS WELL?
 	}
 }
