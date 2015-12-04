@@ -300,8 +300,7 @@ func (cg CodeGenerator) pushArrayElements(array []interface{}, srcReg string, ds
 				appendAssembly(cg.instrs, "MOV "+srcReg+", #"+boolInt(arrayItem.(bool)), 1, 1)
 				appendAssembly(cg.instrs, "STRB "+srcReg+", ["+dstReg+", #"+strconv.Itoa(ARRAY_SIZE+BOOL_SIZE*i)+"]", 1, 1)
 			case Char:
-				// Problem with AST that gives 0s instead of the actual characters
-				//appendAssembly(cg.instrs, "MOV "+srcReg+", #"+strconv.Itoa(arrayItem.(string)), 1, 1)
+				appendAssembly(cg.instrs, "MOV "+srcReg+", #"+arrayItem.(Character).Value, 1, 1)
 				appendAssembly(cg.instrs, "STRB "+srcReg+", ["+dstReg+", #"+strconv.Itoa(ARRAY_SIZE+CHAR_SIZE*i)+"]", 1, 1)
 			default:
 				fmt.Println("Array/Pair type not done!")
@@ -350,24 +349,95 @@ func (cg CodeGenerator) cgVisitDeclareStat(node Declare) {
 	case ConstType:
 		switch node.DecType.(ConstType) {
 		case Bool:
-			// Load the bool into a register
-			appendAssembly(cg.instrs, "MOV r4, #"+strconv.Itoa(node.Rhs.(int)), 1, 1)
+
+			switch rhs.(type) {
+			case PairElem:
+				fmt.Println("PairElem not implemented")
+			case Call:
+				// Henryk please fix this crash
+				// cg.cgVisitCallStat(rhs.(Call).Ident,rhs.(Call).ParamList)
+			case Binop:
+				cg.cgVisitBinopExpr(rhs.(Binop))
+			case Unop:
+				cg.cgVisitUnopExpr(rhs.(Unop))
+			case Ident:
+				// Load the address from the stack to register
+				appendAssembly(cg.instrs, "LDR r4, [sp, #"+strconv.Itoa(cg.getIdentOffset(node.Rhs.(Ident).Name)) + "]", 1, 1)
+			case ArrayElem:
+				fmt.Println("ArrayElem")
+			case Type:
+				// Load the bool into a register
+				appendAssembly(cg.instrs, "MOV r4, #"+boolInt(node.Rhs.(bool)), 1, 1)
+			}
 			// Using STRB, store it on the stack
-			appendAssembly(cg.instrs,
-				"STRB r4, [sp, #"+cg.subCurrP(BOOL_SIZE)+"])", 1, 1)
+			appendAssembly(cg.instrs, "STRB r4, [sp, #"+cg.subCurrP(BOOL_SIZE)+"]", 1, 1)
 		case Char:
-			// Load the character into a register
-			appendAssembly(cg.instrs, "MOV r4, #"+node.Rhs.(string), 1, 1)
+
+			switch rhs.(type) {
+			case PairElem:
+				fmt.Println("PairElem not implemented")
+			case Call:
+				// Henryk please fix this crash
+				// cg.cgVisitCallStat(rhs.(Call).Ident,rhs.(Call).ParamList)
+			case Binop:
+				cg.cgVisitBinopExpr(rhs.(Binop))
+			case Unop:
+				cg.cgVisitUnopExpr(rhs.(Unop))
+			case Ident:
+				// Load the address from the stack to register
+				appendAssembly(cg.instrs, "LDR r4, [sp, #"+strconv.Itoa(cg.getIdentOffset(node.Rhs.(Ident).Name)) + "]", 1, 1)
+			case ArrayElem:
+				fmt.Println("ArrayElem not implemeted")
+			case Type:
+				// Load the character into a register
+				appendAssembly(cg.instrs, "MOV r4, #"+node.Rhs.(Character).Value, 1, 1)
+			}
 			// Using STRB, store it on the stack
 			appendAssembly(cg.instrs,"STRB r4, [sp, #"+cg.subCurrP(CHAR_SIZE)+"]", 1, 1)
 		case Int:
-			// Load the value of the declaration to the register
-			appendAssembly(cg.instrs, "LDR r4, "+strconv.Itoa(node.Rhs.(int)), 1, 1)
+
+			switch rhs.(type) {
+			case PairElem:
+				fmt.Println("PairElem not implemented")
+			case Call:
+				// Henryk please fix this crash
+				// cg.cgVisitCallStat(rhs.(Call).Ident,rhs.(Call).ParamList)
+			case Binop:
+				cg.cgVisitBinopExpr(rhs.(Binop))
+			case Unop:
+				cg.cgVisitUnopExpr(rhs.(Unop))
+			case Ident:
+				// Load the address from the stack to register
+				appendAssembly(cg.instrs, "LDR r4, [sp, #"+strconv.Itoa(cg.getIdentOffset(node.Rhs.(Ident).Name)) + "]", 1, 1)
+			case ArrayElem:
+					fmt.Println("ArrayElem not implemeted")
+			case Type:
+				// Load the value of the declaration to the register
+				appendAssembly(cg.instrs, "LDR r4, ="+strconv.Itoa(node.Rhs.(int)), 1, 1)
+			}
 			// Store the value of declaration to stack
 			appendAssembly(cg.instrs, "STR r4, [sp, #"+cg.subCurrP(INT_SIZE)+"]", 1, 1)
 		case String:
-			// Load the address of the string to the register
-			appendAssembly(cg.instrs, "LDR r4, " + cg.getMsgLabel(node.Rhs.(string)), 1, 1)
+
+			switch rhs.(type) {
+			case PairElem:
+				fmt.Println("PairElem not implemented")
+			case Call:
+				// Henryk please fix this crash
+				// cg.cgVisitCallStat(rhs.(Call).Ident,rhs.(Call).ParamList)
+			case Binop:
+				cg.cgVisitBinopExpr(rhs.(Binop))
+			case Unop:
+				cg.cgVisitUnopExpr(rhs.(Unop))
+			case Ident:
+				// Load the address from the stack to register
+				appendAssembly(cg.instrs, "LDR r4, [sp, #"+strconv.Itoa(cg.getIdentOffset(node.Rhs.(Ident).Name)) + "]", 1, 1)
+			case ArrayElem:
+					fmt.Println("ArrayElem not implemeted")
+			case Type:
+				// Load the address of the string to the register
+				appendAssembly(cg.instrs, "LDR r4, " + cg.getMsgLabel(node.Rhs.(string)), 1, 1)
+			}
 			// Store the address onto the stack
 			appendAssembly(cg.instrs, "STR r4, [sp, #"+cg.subCurrP(STRING_SIZE)+"]", 1, 1)
 		default:
