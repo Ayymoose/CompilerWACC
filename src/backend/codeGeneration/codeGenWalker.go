@@ -125,7 +125,7 @@ func (cg CodeGenerator) cgVisitCallStat(ident string, paramList []interface{}) {
 			appendAssembly(cg.instrs, "SUB sp, sp, #4", 1, 1)
 
 			for _, param := range paramList {
-				cg.cgVisitParameter(param.(Param),0) // NED SOME KIND OF MAP HERE FROM IDENT STRING TO IDENT OFFSET INT
+				cg.cgVisitParameter(param.(Param), 0) // NED SOME KIND OF MAP HERE FROM IDENT STRING TO IDENT OFFSET INT
 				// NEED SOMEHOW TO ACCUMULATE GLOBABL OFFSET
 			}
 
@@ -139,16 +139,15 @@ func (cg CodeGenerator) cgVisitCallStat(ident string, paramList []interface{}) {
 
 			cg.cgVisitFunction(*function)
 
-/*
-	if node.ParameterTypes != nil {
-		for _, param := range node.ParameterTypes {
-			cg.cgVisitParameter(param,0)
+			/*
+				if node.ParameterTypes != nil {
+					for _, param := range node.ParameterTypes {
+						cg.cgVisitParameter(param,0)
+					}
+				}*/
+
 		}
-	}*/
-
-
-}
-}
+	}
 }
 
 func (cg CodeGenerator) cgVisitFunction(node Function) {
@@ -317,7 +316,7 @@ func (cg CodeGenerator) pushArrayElements(array []interface{}, srcReg string, ds
 }
 
 func (cg CodeGenerator) cgVisitDeclareStat(node Declare) {
-  var rhs = node.Rhs
+	var rhs = node.Rhs
 
 	switch node.DecType.(type) {
 	case ArrayType:
@@ -337,10 +336,11 @@ func (cg CodeGenerator) cgVisitDeclareStat(node Declare) {
 			//Start loading each element in the array onto the stack
 			cg.pushArrayElements(rhs.(ArrayLiter).Exprs, "r5", "r4", node.DecType)
 		default:
-				fmt.Println("RHS Type not implemented")
+			fmt.Println("RHS Type not implemented")
 		}
 	case PairType:
 
+<<<<<<< HEAD
 		// First allocate memory to store two addresses (8-bytes)
 		appendAssembly(cg.instrs, "LDR r0, ="+strconv.Itoa(INT_SIZE * 2), 1, 1)
 		appendAssembly(cg.instrs, "BL malloc", 1, 1)
@@ -372,7 +372,7 @@ func (cg CodeGenerator) cgVisitDeclareStat(node Declare) {
 			// Store the address onto the stack
 			appendAssembly(cg.instrs, "STR r4, [sp, #"+cg.subCurrP(STRING_SIZE)+"]", 1, 1)
 		default:
-	  	fmt.Println("Type not implemented")
+			fmt.Println("Type not implemented")
 		}
 	}
 
@@ -440,6 +440,11 @@ func (cg CodeGenerator) cgVisitReturnStat(node Return) {
 }
 
 func (cg CodeGenerator) cgVisitExitStat(node Exit) {
+	returnValue := node.Expr.(int)
+	// LDR r0, =n : loads return type to r0 argument
+	appendAssembly(cg.instrs, "LDR r0, ="+strconv.Itoa(returnValue), 1, 1)
+	// BL exit : call exit
+	appendAssembly(cg.instrs, "BL exit", 1, 1)
 
 }
 
