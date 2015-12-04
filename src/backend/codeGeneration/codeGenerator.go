@@ -17,6 +17,7 @@ type CodeGenerator struct {
 	symTable       SymbolTable       // Used to map variable identifiers to their values
 	funcInstrs     *ARMList          // List of assembly instructions that define functions and their labels
 	progFuncInstrs *ARMList          // List of assembly instructions that define program generated functions e.g. p_print_string
+	progFuncNames  *[]string         // List of program defined function names. Used to avoid program redefinitions
 	globalStack    *scopeData        // Stack data for the global scope
 	currStack      *scopeData        // Stack data for the current scope
 	msgMap         map[string]string // Maps string values to their msg labels
@@ -25,7 +26,7 @@ type CodeGenerator struct {
 // Constructor for the code generator.
 func ConstructCodeGenerator(cRoot *Program, cInstrs *ARMList, cSymTable SymbolTable) CodeGenerator {
 	cg := CodeGenerator{root: cRoot, instrs: cInstrs, msgInstrs: new(ARMList),
-		funcInstrs: new(ARMList), progFuncInstrs: new(ARMList),
+		funcInstrs: new(ARMList), progFuncInstrs: new(ARMList), progFuncNames: new([]string),
 		symTable: cSymTable, globalStack: &scopeData{}}
 
 	// The program starts off with the current scope as the global scope
@@ -62,7 +63,6 @@ func (cg CodeGenerator) buildFullInstr() {
 	*cg.instrs = append(*cg.funcInstrs, (*cg.instrs)...)
 	*cg.instrs = append(*cg.msgInstrs, (*cg.instrs)...)
 	*cg.instrs = append(*cg.instrs, *cg.progFuncInstrs...)
-
 }
 
 // Returns a msg label value for the strValue using msgMap
@@ -80,4 +80,20 @@ func (cg CodeGenerator) getMsgLabel(strValue string) string {
 	addMsgLabel(cg.msgInstrs, cg.msgMap[strValue], strValue)
 
 	return "=" + cg.msgMap[strValue]
+}
+
+// Adds the function name to cg.progFuncNames iff it isnt already in the list
+// Returns true iff funcName is already in the list
+func (cg CodeGenerator) AddCheckProgName(progName string) bool {
+	for _, s := range *cg.progFuncNames {
+		if s == progName {
+			// if progName has already been defined return true
+			return true
+		}
+	}
+
+	// else add progName to the list
+	*cg.progFuncNames = append(*cg.progFuncNames, progName)
+
+	return false
 }

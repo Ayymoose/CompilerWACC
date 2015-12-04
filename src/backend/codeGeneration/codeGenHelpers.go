@@ -11,7 +11,7 @@ import (
 var mapPrintFormatToSize = map[string]int{
 	INT_FORMAT:    3,
 	STRING_FORMAT: 5,
-	NEW_LINE:      1,
+	NEWLINE_MSG:   1,
 	TRUE_MSG:      5,
 	FALSE_MSG:     6,
 }
@@ -127,7 +127,7 @@ func addMsgLabel(msgInstrs *ARMList, label string, strValue string) {
 	wordSize := calculateWordSize(strValue)
 
 	appendAssembly(msgInstrs, ".word "+strconv.Itoa(wordSize), 1, 1)
-	appendAssembly(msgInstrs, ".ascii \""+strValue+"\"", 1, 2)
+	appendAssembly(msgInstrs, ".ascii "+strValue, 1, 2)
 }
 
 // Calculates the size of strValue in bytes
@@ -138,7 +138,20 @@ func calculateWordSize(strValue string) int {
 	if contained {
 		return size
 	} else {
-		return len(strValue)
+		quotation := 2
+		var escapedChars int
+		backSlashSeen := false
+
+		for _, c := range strValue {
+			if c == '\\' && !backSlashSeen {
+				escapedChars++
+				backSlashSeen = true
+			} else {
+				backSlashSeen = false
+			}
+		}
+
+		return len(strValue) - escapedChars - quotation
 	}
 }
 
