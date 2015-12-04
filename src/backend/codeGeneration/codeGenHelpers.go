@@ -11,7 +11,7 @@ import (
 var mapPrintFormatToSize = map[string]int{
 	INT_FORMAT:    3,
 	STRING_FORMAT: 5,
-	NEW_LINE:      1,
+	NEWLINE_MSG:   1,
 	TRUE_MSG:      5,
 	FALSE_MSG:     6,
 }
@@ -22,67 +22,37 @@ func GetScopeVarSize(statList []interface{}) int {
 
 	for _, stat := range statList {
 		switch stat.(type) {
-
 		case Declare:
-			var t = stat.(Declare).DecType
-
-			switch t.(type) {
-			case PairType:
-				//Address of pair on the stack is 4 bytes
-				scopeSize += PAIR_SIZE
-			case ArrayType:
-				//	var e = stat.(Declare).Rhs.(ArrayLiter)
-				scopeSize += ARRAY_SIZE //An array occupies 4 bytes
-				/*
-					switch t.(ArrayType).Type {
-					case Int:
-						scopeSize += INT_SIZE
-					case String:
-						scopeSize += STRING_SIZE
-					case Bool:
-						scopeSize += BOOL_SIZE
-					case Char:
-						scopeSize += CHAR_SIZE
-					default:
-						fmt.Println("No type found for ArrayType")
-					}
-				*/
-
-			case ConstType:
-				switch t.(ConstType) {
-				case Int:
-					scopeSize += INT_SIZE
-				case String:
-					scopeSize += STRING_SIZE
-				case Bool:
-					scopeSize += BOOL_SIZE
-				case Char:
-					scopeSize += CHAR_SIZE
-				default:
-					fmt.Println("No type found for ConstType")
-				}
-
-			}
-			//Anything else is just ignored
+			scopeSize += sizeOf(stat.(Declare).DecType)
 		}
 	}
 
 	return scopeSize
 }
 
-//Converts a boolean to a string (for printing out assembly)
-func boolToString(b bool) string {
-	if b == true {
-		return "1"
-	} else {
-		return "0"
-	}
+// Calculates the size of a pair type
+func pairTypeSize(typeFst Type, typeSnd Type) (int,int)  {
+	return sizeOf(typeFst),sizeOf(typeSnd)
 }
 
-//Calcuates the type of the array and returns the size in bytes that the array occupies
+// Calcuates the size of a type
 func sizeOf(t Type) int {
 	var size = 0
 	switch t.(type) {
+	case PairType:
+		size = PAIR_SIZE
+  case ConstType:
+	 switch t.(ConstType) {
+		 case Int:
+ 			size = INT_SIZE
+ 		case String:
+ 			size = STRING_SIZE
+ 		case Bool:
+ 			size = BOOL_SIZE
+ 		case Char:
+ 			size = CHAR_SIZE
+ 		//default:
+	 }
 	case ArrayType:
 		switch t.(ArrayType).Type {
 		case Int:
@@ -94,15 +64,19 @@ func sizeOf(t Type) int {
 		case Char:
 			size = CHAR_SIZE
 		default:
-			fmt.Println("No type found!")
+			//Recurse on type as it could be an array of an array
+			size = sizeOf(t.(ArrayType).Type)
 		}
+
+
 	default:
-		fmt.Println("No type found!")
+		fmt.Println("sizeOf(t) t is an unknown type")
+
 	}
 	return size
 }
 
-//Calcuates the size of an array
+// Calcuates the size of an array
 func arraySize(array []interface{}) int {
 	return len(array)
 }
@@ -140,8 +114,7 @@ func addMsgLabel(msgInstrs *ARMList, label string, strValue string) {
 	wordSize := calculateWordSize(strValue)
 
 	appendAssembly(msgInstrs, ".word "+strconv.Itoa(wordSize), 1, 1)
-	appendAssembly(msgInstrs, ".ascii \""+strValue+"\"", 1, 2)
-
+	appendAssembly(msgInstrs, ".ascii "+strValue, 1, 2)
 }
 
 // Calculates the size of strValue in bytes
@@ -152,7 +125,20 @@ func calculateWordSize(strValue string) int {
 	if contained {
 		return size
 	} else {
-		return len(strValue)
+		quotation := 2
+		var escapedChars int
+		backSlashSeen := false
+
+		for _, c := range strValue {
+			if c == '\\' && !backSlashSeen {
+				escapedChars++
+				backSlashSeen = true
+			} else {
+				backSlashSeen = false
+			}
+		}
+
+		return len(strValue) - escapedChars - quotation
 	}
 }
 
