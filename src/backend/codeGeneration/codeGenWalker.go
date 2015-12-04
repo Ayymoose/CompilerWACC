@@ -162,7 +162,7 @@ func (cg CodeGenerator) cgVisitFunction(node Function) {
 }
 
 // VISIT STATEMENT -------------------------------------------------------------
-func (cg CodeGenerator) cgVisitParameter(node Param) {
+func (cg CodeGenerator) cgVisitParameter(node Param, offset int) {
 	// node.Ident
 	switch node.ParamType.(type) {
 	case ConstType:
@@ -200,6 +200,38 @@ func (cg CodeGenerator) cgVisitParameter(node Param) {
 	}
 }
 
+//Pushes a pair of elements onto the stack
+func (cg CodeGenerator) pushPair(fst interface{}, snd interface{}, typeFst Type, typeSnd Type, reg1 string, reg2 string) {
+	//Store the address in the free register
+	appendAssembly(cg.instrs, "MOV "+reg2+", r0", 1, 1)
+
+	//Load the first element into a register to be stored
+	//Mmmmm
+
+	//Allocate memory for the first element
+	var fstSize, sndSize = pairTypeSize(typeFst, typeSnd)
+	appendAssembly(cg.instrs, "LDR r0, ="+strconv.Itoa(fstSize), 1, 1)
+	appendAssembly(cg.instrs, "BL malloc", 1, 1)
+	//Store the first element to the newly allocated memory onto the stack
+	appendAssembly(cg.instrs, "STR "+reg1+", [r0]", 1, 1)
+	//Store the address of allocated memory block of the pair on the stack
+	appendAssembly(cg.instrs, "STR r0, ["+reg2+"]", 1, 1)
+
+	//Load the second element into a register to be stored
+
+	//Allocate memory for the second element
+	appendAssembly(cg.instrs, "LDR r0, ="+strconv.Itoa(sndSize), 1, 1)
+	appendAssembly(cg.instrs, "BL malloc", 1, 1)
+	//Store the second element to the newly allocated memory onto the stack
+	appendAssembly(cg.instrs, "STR "+reg1+", [r0]", 1, 1)
+	//Store the address of allocated memory block of the pair on the stack
+	appendAssembly(cg.instrs, "STR r0, ["+reg2+", #4]", 1, 1)
+
+	//Store the address of the address that contains pointers to the first and second elements
+	appendAssembly(cg.instrs, "STR "+reg2+", [sp]", 1, 1)
+
+}
+
 //Puts the array elements onto the stack
 func (cg CodeGenerator) pushArrayElements(array []interface{}, srcReg string, dstReg string, t Type) {
 
@@ -221,7 +253,7 @@ func (cg CodeGenerator) pushArrayElements(array []interface{}, srcReg string, ds
 				appendAssembly(cg.instrs, "STR "+srcReg+", ["+dstReg+", #"+strconv.Itoa(ARRAY_SIZE+STRING_SIZE*i)+"]", 1, 1)
 				//fmt.Println(array[i])
 			case Bool:
-				appendAssembly(cg.instrs, "MOV "+srcReg+", #"+boolToString(arrayItem.(bool)), 1, 1)
+				appendAssembly(cg.instrs, "MOV "+srcReg+", #"+boolInt(arrayItem.(bool)), 1, 1)
 				appendAssembly(cg.instrs, "STRB "+srcReg+", ["+dstReg+", #"+strconv.Itoa(ARRAY_SIZE+BOOL_SIZE*i)+"]", 1, 1)
 			case Char:
 				//WHY DOES THIS PRINT 0 ????
