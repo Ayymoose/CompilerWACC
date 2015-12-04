@@ -36,7 +36,7 @@ func (cg CodeGenerator) cgVisitProgram(node *Program) {
 	cg.globalStack.currP = cg.globalStack.size
 
 	// traverse all functions
-	for _, function := range node.Functionlist {
+	for _, function := range node.FunctionList {
 		cg.cgVisitFunction(*function)
 	}
 
@@ -52,19 +52,23 @@ func (cg CodeGenerator) cgVisitProgram(node *Program) {
 	// push {lr} to save the caller address
 	appendAssembly(cg.instrs, "PUSH {lr}", 1, 1)
 
+	/// THE BELOW SUB SHOULD NOT BE HERE SHOULD BE IN INDIVIDUAL METHODS
+
 	// sub sp, sp, #n to create variable space
-	appendAssembly(cg.instrs, "SUB sp, sp, #"+strconv.Itoa(cg.globalStack.size), 1, 1)
+	//	appendAssembly(cg.instrs, "SUB sp, sp, #"+strconv.Itoa(cg.globalStack.size), 1, 1)
 
 	// traverse all statements by switching on statement type
 	for _, stat := range node.StatList {
 		cg.cgEvalStat(stat)
 	}
 
+	/// should not be here but in individual METHODS
+
 	// add sp, sp, #n to remove variable space
-	appendAssembly(cg.instrs, "ADD sp, sp, #"+strconv.Itoa(cg.globalStack.size), 1, 1)
+	//	appendAssembly(cg.instrs, "ADD sp, sp, #"+strconv.Itoa(cg.globalStack.size), 1, 1)
 
 	// pop {pc} to restore the caller address as the next instruction
-	appendAssembly(cg.instrs, "pop {pc}", 1, 1)
+	appendAssembly(cg.instrs, "POP {pc}", 1, 1)
 
 	// .ltorg
 	appendAssembly(cg.instrs, ".ltorg", 1, 1)
@@ -106,41 +110,73 @@ func (cg CodeGenerator) cgEvalStat(stat interface{}) {
 	}
 }
 
+// ONLY VISIT FUNCTION IF IT IS CALLED
 func (cg CodeGenerator) cgVisitFunction(node Function) {
 	// f_funcName:
-	appendAssembly(cg.instrs, "f_"+node.Ident+":", 1, 1)
+	appendAssembly(&cg.funcInstrs, "f_"+node.Ident+":", 0, 1)
 
 	// push {lr} to save the caller address
-	appendAssembly(cg.instrs, "PUSH {lr}", 1, 1)
+	appendAssembly(&cg.funcInstrs, "PUSH {lr}", 1, 1)
 
 	if node.ParameterTypes != nil {
 		for _, param := range node.ParameterTypes {
-			cg.cgVisitParameter(param)
+			cg.cgVisitParameter(param, 0) // NEED TO SOMEHOW ACCUMULATE THE GLOBAL OFFSET
 		}
 	}
+
+	appendAssembly(cg.instrs, "BL f_"+node.Ident, 1, 1)
+	appendAssembly(cg.instrs, "ADD sp, sp, #"+"offset", 1, 1) // ADD LOGIC WHICH GETS GLOBAL OFFSET
+	appendAssembly(cg.instrs, "MOV r4, r0", 1, 1)
+	appendAssembly(cg.instrs, "STR r4, [sp]", 1, 1)
 
 	// traverse all statements by switching on statement type
 	for _, stat := range node.StatList {
 		cg.cgEvalStat(stat)
 	}
+
+	appendAssembly(&cg.funcInstrs, "POP {pc}", 1, 1) // TEST harness uses double POP don't think we need it
+	appendAssembly(&cg.funcInstrs, ".ltorg", 1, 2)
 }
 
 // VISIT STATEMENT -------------------------------------------------------------
-func (cg CodeGenerator) cgVisitParameter(node Param) {
+func (cg CodeGenerator) cgVisitParameter(node Param, offset int) {
+	// sub sp, sp, #n to create variable space
+	appendAssembly(cg.instrs, "SUB sp, sp, #4", 1, 1)
+
 	// node.Ident
 	switch node.ParamType.(type) {
 	case ConstType:
 		switch node.ParamType.(ConstType) {
 		case Bool:
+			if node.ParamType == true { // IS THIS CORRECT ????
+				appendAssembly(cg.instrs, "MOV r4, #1", 1, 1)
+			} else {
+				appendAssembly(cg.instrs, "MOV r4, #0", 1, 1)
+			}
+			appendAssembly(cg.instrs, "STRB r4, [sp, #-1]!", 1, 1)
+			offset += 1
 		case Char:
+			appendAssembly(cg.instrs, "MOV r4, #"+node.ParamType.(string), 1, 1)
+			appendAssembly(cg.instrs, "STRB r4, [sp, #-1]!", 1, 1)
+			offset += 1
 		case Int:
-		case String:
+			appendAssembly(cg.instrs, "LDR r4, ="+strconv.Itoa(node.ParamType.(int)), 1, 1)
+			appendAssembly(cg.instrs, "STR r4, [sp, #-4]!", 1, 1)
+			offset += 4
+		case String: // OR char[] need to implement
+			appendAssembly(cg.instrs, "LDR r4, =msg_"+"0", 1, 1) // NEED TO ADD FUNCTIONALITY WHICH UPDATES THE MESSAGE NUMBERS
+			appendAssembly(cg.instrs, "STR r4, [sp, #-4]", 1, 1)
+			offset += 4
 		}
 	case ArrayType:
 
 	case PairType:
 
 	}
+
+	// add sp, sp, #n to remove variable space
+	appendAssembly(cg.instrs, "ADD sp, sp, #"+strconv.Itoa(cg.globalStack.size), 1, 1)
+
 }
 
 //Loads the array elements onto the stack
@@ -314,7 +350,7 @@ func (cg CodeGenerator) cgVisitReadStat(node Read) {
 }
 
 func (cg CodeGenerator) cgVisitFreeStat(node Free) {
-	label := "p_free_pair"
+	//	label := "p_free_pair"
 }
 
 func (cg CodeGenerator) cgVisitReturnStat(node Return) {
