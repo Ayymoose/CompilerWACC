@@ -340,7 +340,6 @@ func (cg CodeGenerator) cgVisitDeclareStat(node Declare) {
 		}
 	case PairType:
 
-<<<<<<< HEAD
 		// First allocate memory to store two addresses (8-bytes)
 		appendAssembly(cg.instrs, "LDR r0, ="+strconv.Itoa(INT_SIZE * 2), 1, 1)
 		appendAssembly(cg.instrs, "BL malloc", 1, 1)
