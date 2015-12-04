@@ -50,15 +50,6 @@ func GetScopeVarSize(statList []interface{}) int {
 	return scopeSize
 }
 
-//Converts a boolean to a string (for printing out assembly)
-func boolToString(b bool) string {
-	if b == true {
-		return "1"
-	} else {
-		return "0"
-	}
-}
-
 //Calcuates the size of a type
 func sizeOf(t Type) int {
 	var size = 0
