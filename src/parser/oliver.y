@@ -52,7 +52,7 @@ pairelemtype Type
 %token <str> STRINGCONST
 %token <str> IDENTIFIER
 %token <number> INTEGER
-%token CHARACTER
+%token <str> CHARACTER
 
 %type <prog> program
 %type <functions> functions
