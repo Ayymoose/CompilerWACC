@@ -63,8 +63,11 @@ func (cg CodeGenerator) cgVisitProgram(node *Program) {
 	// add sp, sp, #n to remove variable space
 	appendAssembly(cg.instrs, "ADD sp, sp, #"+strconv.Itoa(cg.globalStack.size), 1, 1)
 
+	// main's return 0
+	appendAssembly(cg.instrs, "LDR r0, =0", 1, 1)
+
 	// pop {pc} to restore the caller address as the next instruction
-	appendAssembly(cg.instrs, "pop {pc}", 1, 1)
+	appendAssembly(cg.instrs, "POP {pc}", 1, 1)
 
 	// .ltorg
 	appendAssembly(cg.instrs, ".ltorg", 1, 1)
@@ -143,8 +146,88 @@ func (cg CodeGenerator) cgVisitParameter(node Param) {
 	}
 }
 
+//Calculates the size of a pair type and returns (sizeOf(fst),sizeOf(snd))
+func pairTypeSize(typeFst Type, typeSnd Type) (int,int)  {
+	var fstSize = 0
+	var sndSize = 0
+
+
+
+	switch typeFst.(type) {
+	case PairType:
+		fstSize = PAIR_SIZE
+	case ConstType:
+		switch (typeFst.(ConstType)) {
+		case Int:
+			fstSize = INT_SIZE
+		case Bool:
+			fstSize = BOOL_SIZE
+		case Char:
+			fstSize = CHAR_SIZE
+		case String:
+			fstSize = STRING_SIZE
+		default:
+			fmt.Println("Unknown type1")
+	}
+}
+
+	switch typeSnd.(type) {
+	case PairType:
+		sndSize = PAIR_SIZE
+	case ConstType:
+		switch (typeSnd.(ConstType)) {
+		case Int:
+			sndSize = INT_SIZE
+		case Bool:
+			sndSize = BOOL_SIZE
+		case Char:
+			sndSize = CHAR_SIZE
+		case String:
+			sndSize = STRING_SIZE
+		default:
+			fmt.Println("Unknown type2")
+	}
+  }
+
+	return fstSize,sndSize
+}
+
+func (cg CodeGenerator) pushPair(fst interface{}, snd interface{}, typeFst Type, typeSnd Type, reg1 string, reg2 string) {
+	//Store the address in the free register
+	appendAssembly(cg.instrs, "MOV " + reg2 +", r0", 1, 1)
+
+	//Load the first element into a register to be stored
+  //Mmmmm 
+
+	//Allocate memory for the first element
+	var fstSize, sndSize = pairTypeSize(typeFst,typeSnd)
+  appendAssembly(cg.instrs, "LDR r0, =" + strconv.Itoa(fstSize), 1, 1)
+  appendAssembly(cg.instrs, "BL malloc", 1, 1)
+	//Store the first element to the newly allocated memory onto the stack
+	appendAssembly(cg.instrs, "STR " + reg1 + ", [r0]", 1, 1)
+	//Store the address of allocated memory block of the pair on the stack
+	appendAssembly(cg.instrs, "STR r0, [" + reg2 + "]", 1, 1)
+
+	//Load the second element into a register to be stored
+
+
+	//Allocate memory for the second element
+  appendAssembly(cg.instrs, "LDR r0, =" + strconv.Itoa(sndSize), 1, 1)
+  appendAssembly(cg.instrs, "BL malloc", 1, 1)
+	//Store the second element to the newly allocated memory onto the stack
+	appendAssembly(cg.instrs, "STR " + reg1 + ", [r0]", 1, 1)
+	//Store the address of allocated memory block of the pair on the stack
+	appendAssembly(cg.instrs, "STR r0, [" + reg2 + ", #4]", 1, 1)
+
+	//Store the address of the address that contains pointers to the first and second elements
+	appendAssembly(cg.instrs, "STR " + reg2 + ", [sp]", 1, 1)
+
+}
+
 //Puts the array elements onto the stack
 func (cg CodeGenerator) pushArrayElements(array []interface{}, srcReg string, dstReg string, t Type) {
+	//Store the address in the free register
+	appendAssembly(cg.instrs, "MOV " + dstReg +", r0", 1, 1)
 
 	var arraySize = arraySize(array)
 	//Loop through the array pushing it onto the stack
@@ -184,25 +267,35 @@ func (cg CodeGenerator) pushArrayElements(array []interface{}, srcReg string, ds
 }
 
 func (cg CodeGenerator) cgVisitDeclareStat(node Declare) {
-	//MIGHT NEED TO CHANGE THIS BACK TO SIMPLE IF STATEMENT
-	var array = node.Rhs
-	switch array.(type) {
-	case ArrayLiter:
-		//Calculate the amount of storage space required for the array
-		// = ((arrayLength(array) * sizeOf(arrayType)) + 4 (4-bytes for an address)
-		var arraySize = arraySize(array.(ArrayLiter).Exprs)
-		var arrayStorage = (arraySize * sizeOf(node.DecType)) + ARRAY_SIZE
 
-		appendAssembly(cg.instrs, "LDR r0, ="+strconv.Itoa(arrayStorage), 1, 1)
-		//Allocate memory for the array
-		appendAssembly(cg.instrs, "BL malloc", 1, 1)
-		//Move the result back into the register
-		appendAssembly(cg.instrs, "MOV r4, r0", 1, 1)
-		//Start loading each element in the array onto the stack
-		cg.pushArrayElements(array.(ArrayLiter).Exprs, "r5", "r4", node.DecType)
-	}
+  var rhs = node.Rhs
 
 	switch node.DecType.(type) {
+	case ArrayType:
+
+		switch rhs.(type) {
+		case ArrayLiter:
+			//Calculate the amount of storage space required for the array
+			// = ((arrayLength(array) * sizeOf(arrayType)) + 4 (4-bytes for an address)
+			var arraySize = arraySize(rhs.(ArrayLiter).Exprs)
+			var arrayStorage = (arraySize * sizeOf(node.DecType)) + ARRAY_SIZE
+
+			appendAssembly(cg.instrs, "LDR r0, ="+strconv.Itoa(arrayStorage), 1, 1)
+			//Allocate memory for the array
+			appendAssembly(cg.instrs, "BL malloc", 1, 1)
+			//Start loading each element in the array onto the stack
+			cg.pushArrayElements(rhs.(ArrayLiter).Exprs, "r5", "r4", node.DecType)
+		default:
+				fmt.Println("RHS Type not implemented")
+		}
+	case PairType:
+
+		//First allocate memory to store two addresses (8-bytes)
+		appendAssembly(cg.instrs, "LDR r0, ="+strconv.Itoa(INT_SIZE * 2), 1, 1)
+		appendAssembly(cg.instrs, "BL malloc", 1, 1)
+
+		//Push a pair of elements onto the stack
+		cg.pushPair(rhs.(NewPair).FstExpr, rhs.(NewPair).SndExpr, node.DecType.(PairType).FstType, node.DecType.(PairType).SndType,"r5","r4")
 
 	case ConstType:
 		switch node.DecType.(ConstType) {
@@ -216,22 +309,16 @@ func (cg CodeGenerator) cgVisitDeclareStat(node Declare) {
 			//Load the character into a register
 			appendAssembly(cg.instrs, "MOV r4, #"+node.Rhs.(string), 1, 1)
 			//Using STRB, store it on the stack
-			appendAssembly(cg.instrs,
-				"STRB r4, [sp, #"+cg.subCurrP(CHAR_SIZE)+"])", 1, 1)
+			appendAssembly(cg.instrs,"STRB r4, [sp, #"+cg.subCurrP(CHAR_SIZE)+"])", 1, 1)
 		case Int:
 			// Load the value of the declaration to the register
 			appendAssembly(cg.instrs, "LDR r4, "+strconv.Itoa(node.Rhs.(int)), 1, 1)
-
-			//fmt.Println("Type", node.Rhs)
-
-			// Load the value of the declaration to R4
-			//appendAssembly(cg.instrs, "LDR R4, "+strconv.Itoa(), 1, 1)
-
 			// Store the value of declaration to stack
 			appendAssembly(cg.instrs, "STR r4, [sp, #"+cg.subCurrP(INT_SIZE)+"])", 1, 1)
 		case String:
 			fmt.Println("String not implemented")
-
+		default:
+	  	fmt.Println("Type not implemented")
 		}
 	}
 

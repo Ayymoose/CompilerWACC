@@ -22,32 +22,13 @@ func GetScopeVarSize(statList []interface{}) int {
 
 	for _, stat := range statList {
 		switch stat.(type) {
-
 		case Declare:
 			var t = stat.(Declare).DecType
-
 			switch t.(type) {
 			case PairType:
-				//Address of pair on the stack is 4 bytes
 				scopeSize += PAIR_SIZE
 			case ArrayType:
-				//	var e = stat.(Declare).Rhs.(ArrayLiter)
-				scopeSize += ARRAY_SIZE //An array occupies 4 bytes
-				/*
-					switch t.(ArrayType).Type {
-					case Int:
-						scopeSize += INT_SIZE
-					case String:
-						scopeSize += STRING_SIZE
-					case Bool:
-						scopeSize += BOOL_SIZE
-					case Char:
-						scopeSize += CHAR_SIZE
-					default:
-						fmt.Println("No type found for ArrayType")
-					}
-				*/
-
+				scopeSize += ARRAY_SIZE
 			case ConstType:
 				switch t.(ConstType) {
 				case Int:
@@ -61,7 +42,6 @@ func GetScopeVarSize(statList []interface{}) int {
 				default:
 					fmt.Println("No type found for ConstType")
 				}
-
 			}
 			//Anything else is just ignored
 		}
@@ -79,10 +59,13 @@ func boolToString(b bool) string {
 	}
 }
 
-//Calcuates the type of the array and returns the size in bytes that the array occupies
+//Calcuates the size of a type
 func sizeOf(t Type) int {
 	var size = 0
 	switch t.(type) {
+
+	//Add more types here
+
 	case ArrayType:
 		switch t.(ArrayType).Type {
 		case Int:
@@ -94,10 +77,14 @@ func sizeOf(t Type) int {
 		case Char:
 			size = CHAR_SIZE
 		default:
-			fmt.Println("No type found!")
+			//Recurse on type as it could be an array of an array
+			size = sizeOf(t.(ArrayType).Type)
 		}
+
+
 	default:
 		fmt.Println("No type found!")
+
 	}
 	return size
 }
