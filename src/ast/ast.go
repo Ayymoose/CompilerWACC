@@ -1,4 +1,4 @@
-package ast
+package parser
 
 type ConstType int
 type FSND int
@@ -11,6 +11,7 @@ const (
 	Bool
 	Char
 	String
+	Null
 )
 
 const (
@@ -128,7 +129,7 @@ type Println struct {
 }
 
 type Call struct {
-	Ident    string
+	Ident     string
 	ParamList []interface{}
 }
 
@@ -148,4 +149,8 @@ type ArrayLiter struct {
 type ArrayElem struct {
 	Ident string
 	Exprs []interface{}
+}
+
+type Character struct {
+	Value string
 }

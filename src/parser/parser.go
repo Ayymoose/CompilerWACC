@@ -2,6 +2,7 @@ package parser
 
 import (
 	"errors"
+	"fmt"
 
 	"ast"
 )
@@ -13,8 +14,15 @@ func ParseFile(filename, text string) (*ast.Program, error) {
 		fmt.Println(item)
 	}*/
 	e := parserParse(l)
-	if e == 0 && !l.parseError {
-		return l.prog, nil
+	if e != 0 {
+		return nil, errors.New("Compilation halted due to lex and parse errors")
 	}
-	return nil, errors.New("Compilation halted due to lex and parse errors")
+	errors := l.prog.semanticCheck()
+	if errors != nil {
+		for _, str := range error {
+			fmt.Println(str)
+		}
+		return nil, errors.New("Semantic error")
+	}
+	return l.prog, nil
 }

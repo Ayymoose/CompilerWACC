@@ -7,7 +7,6 @@ import . "ast"
 %union{
 str string
 number int
-char  rune
 functions []*Function
 function *Function
 stmt  interface{}
@@ -53,7 +52,7 @@ pairelemtype Type
 %token <str> STRINGCONST
 %token <str> IDENTIFIER
 %token <number> INTEGER
-%token <char> CHARACTER
+%token CHARACTER
 
 %type <prog> program
 %type <functions> functions
@@ -134,7 +133,7 @@ statement : SKIP                                        { $$ = $1 }
 expr : INTEGER       { $$ =  $1 }
      | TRUE          { $$ =  true }
      | FALSE         { $$ =  false }
-     | CHARACTER     { $$ =  $1 }
+     | CHARACTER     { $$ =  Character{Value : $1} }
      | STRINGCONST   { $$ =  $1 }
      | pairliter     { $$ =  $1 }
      | IDENTIFIER    { $$ =  Ident{Name : $1} }
@@ -144,7 +143,7 @@ expr : INTEGER       { $$ =  $1 }
      | ORD expr     { $$ = Unop{Unary : $1, Expr : $2} }
      | CHR expr     { $$ = Unop{Unary : $1, Expr : $2} }
      | SUB expr     { $$ = Unop{Unary : $1, Expr : $2} }
-     | PLUS expr    { $$ = Unop{Unary : $1, Expr : $2} }
+     | PLUS expr    { $$ = $2 }
 
      | expr PLUS expr { $$ = Binop{Left : $1, Binary : $2, Right : $3} }
      | expr SUB expr  { $$ = Binop{Left : $1, Binary : $2, Right : $3} }
@@ -172,7 +171,7 @@ arrayelem : IDENTIFIER bracketed {$$ = ArrayElem{Ident: $1, Exprs : $2}}
 bracketed : bracketed OPENSQUARE expr CLOSESQUARE {$$ = append($1, $3)}
           | OPENSQUARE expr CLOSESQUARE {$$ = []interface{}{$2}}
 
-pairliter : NULL    { $$ =  NULL }
+pairliter : NULL    { $$ =  Null }
 
 pairelem : FST expr { $$ = PairElem{Fsnd: FST, Expr : $2} }
          | SND expr { $$ = PairElem{Fsnd: SND, Expr : $2} }
