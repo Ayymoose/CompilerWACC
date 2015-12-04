@@ -67,6 +67,9 @@ func (cg CodeGenerator) cgVisitProgram(node *Program) {
 		appendAssembly(cg.instrs, "ADD sp, sp, #"+strconv.Itoa(cg.globalStack.size), 1, 1)
 	}
 
+	// ldr r0, =0 to return 0 as the main return
+	appendAssembly(cg.instrs, "LDR r0, =0", 1, 1)
+
 	// pop {pc} to restore the caller address as the next instruction
 	appendAssembly(cg.instrs, "pop {pc}", 1, 1)
 
@@ -317,6 +320,8 @@ func (cg CodeGenerator) cgVisitPrintStat(node Print) {
 		appendAssembly(cg.instrs, "MOV r0, r4", 1, 1)
 		// BL p_print_string
 		appendAssembly(cg.instrs, "BL p_print_string", 1, 1)
+		// Define relevant print function definition (iff it hasnt been defined)
+		cg.cgVisitPrintStatFunc_H("p_print_string")
 
 	case int:
 		intValue := expr.(int)
@@ -327,6 +332,8 @@ func (cg CodeGenerator) cgVisitPrintStat(node Print) {
 		appendAssembly(cg.instrs, "MOV r0, r4", 1, 1)
 		// BL p_print_int
 		appendAssembly(cg.instrs, "BL p_print_int", 1, 1)
+		// Define relevant print function definition (iff it hasnt been defined)
+		cg.cgVisitPrintStatFunc_H("p_print_int")
 
 	case rune:
 		charValue := expr.(rune)
@@ -347,8 +354,25 @@ func (cg CodeGenerator) cgVisitPrintStat(node Print) {
 		appendAssembly(cg.instrs, "MOV r0, r4", 1, 1)
 		// BL p_print_bool
 		appendAssembly(cg.instrs, "BL p_print_bool", 1, 1)
-
+		// Define relevant print function definition (iff it hasnt been defined)
+		cg.cgVisitPrintStatFunc_H("p_print_bool")
 	}
+}
+
+// cgVisitPrintStat helper function
+// Adds a function definition to the progFuncInstrs ARMList depending on the
+// function name provided
+func (cg CodeGenerator) cgVisitPrintStatFunc_H(funcName string) {
+	if cg.AddCheckProgName(funcName) {
+		// if the program function has been defined previously
+		// a redefinition is unnecessary
+		return
+	}
+	// else define the print function
+
+	// funcLabel:
+	appendAssembly(cg.progFuncInstrs, funcName+":", 0, 1)
+
 }
 
 func (cg CodeGenerator) cgVisitPrintlnStat(node Println) {
