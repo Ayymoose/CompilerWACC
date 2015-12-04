@@ -62,7 +62,6 @@ func (cg CodeGenerator) buildFullInstr() {
 	*cg.instrs = append(*cg.funcInstrs, (*cg.instrs)...)
 	*cg.instrs = append(*cg.msgInstrs, (*cg.instrs)...)
 	*cg.instrs = append(*cg.instrs, *cg.progFuncInstrs...)
-
 }
 
 // Returns a msg label value for the strValue using msgMap

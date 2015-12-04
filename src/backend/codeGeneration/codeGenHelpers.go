@@ -140,7 +140,7 @@ func addMsgLabel(msgInstrs *ARMList, label string, strValue string) {
 	wordSize := calculateWordSize(strValue)
 
 	appendAssembly(msgInstrs, ".word "+strconv.Itoa(wordSize), 1, 1)
-	appendAssembly(msgInstrs, ".ascii \""+strValue+"\"", 1, 2)
+	appendAssembly(msgInstrs, ".ascii "+strValue, 1, 2)
 }
 
 // Calculates the size of strValue in bytes
@@ -151,7 +151,20 @@ func calculateWordSize(strValue string) int {
 	if contained {
 		return size
 	} else {
-		return len(strValue)
+		quotation := 2
+		var escapedChars int
+		backSlashSeen := false
+
+		for _, c := range strValue {
+			if c == '\\' && !backSlashSeen {
+				escapedChars++
+				backSlashSeen = true
+			} else {
+				backSlashSeen = false
+			}
+		}
+
+		return len(strValue) - escapedChars - quotation
 	}
 }
 

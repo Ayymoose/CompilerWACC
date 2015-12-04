@@ -53,7 +53,9 @@ func (cg CodeGenerator) cgVisitProgram(node *Program) {
 	appendAssembly(cg.instrs, "PUSH {lr}", 1, 1)
 
 	// sub sp, sp, #n to create variable space
-	appendAssembly(cg.instrs, "SUB sp, sp, #"+strconv.Itoa(cg.globalStack.size), 1, 1)
+	if cg.globalStack.size > 0 {
+		appendAssembly(cg.instrs, "SUB sp, sp, #"+strconv.Itoa(cg.globalStack.size), 1, 1)
+	}
 
 	// traverse all statements by switching on statement type
 	for _, stat := range node.StatList {
@@ -61,16 +63,15 @@ func (cg CodeGenerator) cgVisitProgram(node *Program) {
 	}
 
 	// add sp, sp, #n to remove variable space
-	appendAssembly(cg.instrs, "ADD sp, sp, #"+strconv.Itoa(cg.globalStack.size), 1, 1)
+	if cg.globalStack.size > 0 {
+		appendAssembly(cg.instrs, "ADD sp, sp, #"+strconv.Itoa(cg.globalStack.size), 1, 1)
+	}
 
 	// pop {pc} to restore the caller address as the next instruction
 	appendAssembly(cg.instrs, "pop {pc}", 1, 1)
 
 	// .ltorg
 	appendAssembly(cg.instrs, ".ltorg", 1, 1)
-
-	// Adds the msg definitions to assembly instructions
-	*cg.instrs = append(*cg.msgInstrs, *cg.instrs...)
 }
 
 func (cg CodeGenerator) cgCreateMsgs(instrs *ARMList) map[string]string {
