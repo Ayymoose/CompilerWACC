@@ -2,6 +2,7 @@ package codeGeneration
 
 import (
 	. "ast"
+	. "backend/armarchitecture"
 	. "backend/filewriter"
 	"fmt"
 	"strconv"
@@ -28,17 +29,20 @@ const (
 	FALSE_MSG     = "false\\0"
 )
 
+// FUnction global variable
+var functionList []*Function // IS IT A POINTER OR NOT??
+var reg Register
+
 // VISIT FUNCTIONS -------------------------------------------------------------
 
 func (cg CodeGenerator) cgVisitProgram(node *Program) {
-	// Set properities of global scope
+	// Set properties of global scope
 	cg.globalStack.size = GetScopeVarSize(node.StatList)
 	cg.globalStack.currP = cg.globalStack.size
 
-	// traverse all functions
-	for _, function := range node.FunctionList {
-		cg.cgVisitFunction(*function)
-	}
+	// ASSIGN functions to global variable
+	// WE WIll only traverse them if they are called
+	functionList = node.FunctionList
 
 	// .text
 	appendAssembly(cg.instrs, ".text", 0, 2)
@@ -114,36 +118,46 @@ func (cg CodeGenerator) cgEvalStat(stat interface{}) {
 // IE WE ONLY PUSH ONTO STACK FUNC VARIABLES WHEN A FUNCTION IS CALLED
 // but
 // WE EXECUTE WHAT IS INSIDE THE FUNCTION REGARDLESS OF WHETHER IT IS CALLED OR NOT
+func (cg CodeGenerator) cgVisitCallStat(ident string, paramList []interface{}) {
+	for _, function := range functionList {
+		if function.Ident == ident {
+			// sub sp, sp, #n to create variable space
+			appendAssembly(cg.instrs, "SUB sp, sp, #4", 1, 1)
+
+			for _, param := range paramList {
+				cg.cgVisitParameter(param.(Param), 0) // NED SOME KIND OF MAP HERE FROM IDENT STRING TO IDENT OFFSET INT
+				// NEED SOMEHOW TO ACCUMULATE GLOBABL OFFSET
+			}
+
+			appendAssembly(cg.instrs, "BL f_"+function.Ident, 1, 1)
+
+			if !(paramList == nil) {
+				appendAssembly(cg.instrs, "ADD sp, sp, #"+"offset", 1, 1) // ADD LOGIC WHICH GETS GLOBAL OFFSET
+			}
+			appendAssembly(cg.instrs, "MOV r4, r0", 1, 1)
+			appendAssembly(cg.instrs, "STR r4, [sp]", 1, 1)
+
+			cg.cgVisitFunction(*function)
+		}
+	}
+}
 
 func (cg CodeGenerator) cgVisitFunction(node Function) {
 	// f_funcName:
-	appendAssembly(&cg.funcInstrs, "f_"+node.Ident+":", 0, 1)
+	appendAssembly(cg.funcInstrs, "f_"+node.Ident+":", 0, 1)
 
 	// push {lr} to save the caller address
-	appendAssembly(&cg.funcInstrs, "PUSH {lr}", 1, 1)
-
-	if node.ParameterTypes != nil {
-
-		// sub sp, sp, #n to create variable space
-		appendAssembly(cg.instrs, "SUB sp, sp, #4", 1, 1)
-
-		for _, param := range node.ParameterTypes {
-			cg.cgVisitParameter(param, 0) // NEED TO SOMEHOW ACCUMULATE THE GLOBAL OFFSET
-		}
-	}
-
-	appendAssembly(cg.instrs, "BL f_"+node.Ident, 1, 1)
-	appendAssembly(cg.instrs, "ADD sp, sp, #"+"offset", 1, 1) // ADD LOGIC WHICH GETS GLOBAL OFFSET
-	appendAssembly(cg.instrs, "MOV r4, r0", 1, 1)
-	appendAssembly(cg.instrs, "STR r4, [sp]", 1, 1)
+	appendAssembly(cg.funcInstrs, "PUSH {lr}", 1, 1)
 
 	// traverse all statements by switching on statement type
+	// BUT NEED TO KNOW THAT WE NEED TO ADD THIS TO DUNCTION MESSGES??
+	// FLAGG??
 	for _, stat := range node.StatList {
 		cg.cgEvalStat(stat)
 	}
 
-	appendAssembly(&cg.funcInstrs, "POP {pc}", 1, 1) // TEST harness uses double POP don't think we need it
-	appendAssembly(&cg.funcInstrs, ".ltorg", 1, 2)
+	appendAssembly(cg.funcInstrs, "POP {pc}", 1, 1) // TEST harness uses double POP don't think we need it
+	appendAssembly(cg.funcInstrs, ".ltorg", 1, 2)
 }
 
 // VISIT STATEMENT -------------------------------------------------------------
@@ -158,24 +172,26 @@ func (cg CodeGenerator) cgVisitParameter(node Param, offset int) {
 			} else {
 				appendAssembly(cg.instrs, "MOV r4, #0", 1, 1)
 			}
-			appendAssembly(cg.instrs, "STRB r4, [sp, #-1]!", 1, 1)
+			appendAssembly(cg.instrs, "STRB r4, [sp, #"+cg.subCurrP(BOOL_SIZE)+"]!", 1, 1)
 			offset += 1
 		case Char:
 			appendAssembly(cg.instrs, "MOV r4, #"+node.ParamType.(string), 1, 1)
-			appendAssembly(cg.instrs, "STRB r4, [sp, #-1]!", 1, 1)
+			appendAssembly(cg.instrs, "STRB r4, [sp, #"+cg.subCurrP(CHAR_SIZE)+"]!", 1, 1)
 			offset += 1
 		case Int:
 			appendAssembly(cg.instrs, "LDR r4, ="+strconv.Itoa(node.ParamType.(int)), 1, 1)
-			appendAssembly(cg.instrs, "STR r4, [sp, #-4]!", 1, 1)
+			appendAssembly(cg.instrs, "STR r4, [sp, #"+cg.subCurrP(INT_SIZE)+"]!", 1, 1)
 			offset += 4
 		case String: // OR char[] need to implement
 			appendAssembly(cg.instrs, "LDR r4, =msg_"+"0", 1, 1) // NEED TO ADD FUNCTIONALITY WHICH UPDATES THE MESSAGE NUMBERS
-			appendAssembly(cg.instrs, "STR r4, [sp, #-4]", 1, 1)
+			appendAssembly(cg.instrs, "STR r4, [sp, #"+cg.subCurrP(STRING_SIZE)+"]!", 1, 1)
 			offset += 4
 		}
 	case ArrayType:
 
-	case PairType:
+	case PairType: // there is only a pariliteral 'null for this case'
+		appendAssembly(cg.instrs, "LDR r4, =0", 1, 1)
+		appendAssembly(cg.instrs, "STR r4, [sp, #-4]!", 1, 1)
 
 	}
 }
@@ -214,12 +230,11 @@ func pushArrayElements(array []interface{}, register string) {
 func (cg CodeGenerator) cgVisitDeclareStat(node Declare) {
 
 	//MIGHT NEED TO CHANGE THIS BACK TO SIMPLE IF STATEMENT
-	var array = node.Rhs
-	switch array.(type) {
+	switch node.Rhs.(type) {
 	case ArrayLiter:
 		//Calculate the amount of storage space required for the array
 		// = (arrayLength(array) + 1) * sizeOf(arrayType)
-		var arraySize = arraySize(array.(ArrayLiter).Exprs)
+		var arraySize = arraySize(node.Rhs.(ArrayLiter).Exprs)
 		var arrayStorage = (arraySize + 1) * sizeOf(node.DecType)
 
 		appendAssembly(cg.instrs, "LDR r0, ="+strconv.Itoa(arrayStorage), 1, 1)
@@ -229,8 +244,9 @@ func (cg CodeGenerator) cgVisitDeclareStat(node Declare) {
 		appendAssembly(cg.instrs, "MOV r4, r0", 1, 1)
 
 		//Start loading each element in the array onto the stack
-		pushArrayElements(array.(ArrayLiter).Exprs, "r5")
-
+		pushArrayElements(node.Rhs.(ArrayLiter).Exprs, "r5")
+	case Call:
+		cgVisitCallStat(node.Rhs.(Call).Ident, node.Rhs.(Call).ParamList)
 	}
 
 	switch node.DecType.(type) {
@@ -322,7 +338,8 @@ func (cg CodeGenerator) cgVisitAssignmentStat(node Assignment) {
 	case ArrayElem:
 	case Unop:
 	case Binop:
-
+	case Call:
+		cgVisitCallStat(node.Rhs.(Call).Ident, node.Rhs.(Call).ParamList)
 	default: // Ident   // NEED TO DEAL WITH '(' EXPR ')' CASE AS WELL?
 	}
 }
