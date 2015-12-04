@@ -111,6 +111,10 @@ func (cg CodeGenerator) cgEvalStat(stat interface{}) {
 }
 
 // ONLY VISIT FUNCTION IF IT IS CALLED
+// IE WE ONLY PUSH ONTO STACK FUNC VARIABLES WHEN A FUNCTION IS CALLED
+// but
+// WE EXECUTE WHAT IS INSIDE THE FUNCTION REGARDLESS OF WHETHER IT IS CALLED OR NOT
+
 func (cg CodeGenerator) cgVisitFunction(node Function) {
 	// f_funcName:
 	appendAssembly(&cg.funcInstrs, "f_"+node.Ident+":", 0, 1)
@@ -119,6 +123,10 @@ func (cg CodeGenerator) cgVisitFunction(node Function) {
 	appendAssembly(&cg.funcInstrs, "PUSH {lr}", 1, 1)
 
 	if node.ParameterTypes != nil {
+
+		// sub sp, sp, #n to create variable space
+		appendAssembly(cg.instrs, "SUB sp, sp, #4", 1, 1)
+
 		for _, param := range node.ParameterTypes {
 			cg.cgVisitParameter(param, 0) // NEED TO SOMEHOW ACCUMULATE THE GLOBAL OFFSET
 		}
@@ -140,9 +148,6 @@ func (cg CodeGenerator) cgVisitFunction(node Function) {
 
 // VISIT STATEMENT -------------------------------------------------------------
 func (cg CodeGenerator) cgVisitParameter(node Param, offset int) {
-	// sub sp, sp, #n to create variable space
-	appendAssembly(cg.instrs, "SUB sp, sp, #4", 1, 1)
-
 	// node.Ident
 	switch node.ParamType.(type) {
 	case ConstType:
@@ -173,10 +178,6 @@ func (cg CodeGenerator) cgVisitParameter(node Param, offset int) {
 	case PairType:
 
 	}
-
-	// add sp, sp, #n to remove variable space
-	appendAssembly(cg.instrs, "ADD sp, sp, #"+strconv.Itoa(cg.globalStack.size), 1, 1)
-
 }
 
 //Loads the array elements onto the stack
