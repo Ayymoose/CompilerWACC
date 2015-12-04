@@ -23,7 +23,7 @@ const (
 const (
 	INT_FORMAT    = "%d\\0"
 	STRING_FORMAT = "%.*s\\0"
-	NEW_LINE      = "\\0"
+	NEWLINE_MSG   = "\\0"
 	TRUE_MSG      = "true\\0"
 	FALSE_MSG     = "false\\0"
 )
@@ -71,7 +71,7 @@ func (cg CodeGenerator) cgVisitProgram(node *Program) {
 	appendAssembly(cg.instrs, "LDR r0, =0", 1, 1)
 
 	// pop {pc} to restore the caller address as the next instruction
-	appendAssembly(cg.instrs, "pop {pc}", 1, 1)
+	appendAssembly(cg.instrs, "POP {pc}", 1, 1)
 
 	// .ltorg
 	appendAssembly(cg.instrs, ".ltorg", 1, 1)
@@ -372,11 +372,61 @@ func (cg CodeGenerator) cgVisitPrintStatFunc_H(funcName string) {
 
 	// funcLabel:
 	appendAssembly(cg.progFuncInstrs, funcName+":", 0, 1)
+	// push {lr} to save the caller address
+	appendAssembly(cg.progFuncInstrs, "PUSH {lr}", 1, 1)
+
+	switch funcName {
+	case "p_print_int":
+		// r1 = int value
+		appendAssembly(cg.progFuncInstrs, "MOV r1, r0", 1, 1)
+		// r0 = int format string
+		appendAssembly(cg.progFuncInstrs, "LDR r0, "+cg.getMsgLabel(INT_FORMAT), 1, 1)
+
+	case "p_print_bool":
+		// Check bool value - 0
+		appendAssembly(cg.progFuncInstrs, "CMP r0, #0", 1, 1)
+		// If bool = true then r0 = "true"
+		appendAssembly(cg.progFuncInstrs, "LDRNE r0, "+cg.getMsgLabel(TRUE_MSG), 1, 1)
+		// If bool = false then r0 = "false"
+		appendAssembly(cg.progFuncInstrs, "LDREQ r0, "+cg.getMsgLabel(FALSE_MSG), 1, 1)
+
+	case "p_print_string":
+		// r1 = string value
+		appendAssembly(cg.progFuncInstrs, "LDR r1, [r0]", 1, 1)
+		// r2 = r0 + 4
+		appendAssembly(cg.progFuncInstrs, "ADD r2, r0, #4", 1, 1)
+		// r0 = string format string
+		appendAssembly(cg.progFuncInstrs, "LDR r0, "+cg.getMsgLabel(STRING_FORMAT), 1, 1)
+
+	case "p_print_ln":
+		// r0 = new line string
+		appendAssembly(cg.progFuncInstrs, "LDR r0, "+cg.getMsgLabel(NEWLINE_MSG), 1, 1)
+	}
+
+	//
+	appendAssembly(cg.progFuncInstrs, "ADD r0, r0, #4", 1, 1)
+	// calls printf or puts
+	if funcName == "p_print_ln" {
+		appendAssembly(cg.progFuncInstrs, "BL puts", 1, 1)
+	} else {
+		appendAssembly(cg.progFuncInstrs, "BL printf", 1, 1)
+	}
+	// Sets fflush argument
+	appendAssembly(cg.progFuncInstrs, "MOV r0, #0", 1, 1)
+	// calls fflush
+	appendAssembly(cg.progFuncInstrs, "BL fflush", 1, 1)
+
+	// pop {pc} to restore the caller address as the next instruction
+	appendAssembly(cg.progFuncInstrs, "POP {pc}", 1, 1)
 
 }
 
 func (cg CodeGenerator) cgVisitPrintlnStat(node Println) {
-
+	cg.cgVisitPrintStat(Print{Expr: node.Expr})
+	// BL p_print_ln
+	appendAssembly(cg.instrs, "BL p_print_ln", 1, 1)
+	// Define relevant print function definition (iff it hasnt been defined)
+	cg.cgVisitPrintStatFunc_H("p_print_ln")
 }
 
 func (cg CodeGenerator) cgVisitIfStat(node If) {

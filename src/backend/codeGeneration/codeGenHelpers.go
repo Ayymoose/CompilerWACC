@@ -11,7 +11,7 @@ import (
 var mapPrintFormatToSize = map[string]int{
 	INT_FORMAT:    3,
 	STRING_FORMAT: 5,
-	NEW_LINE:      1,
+	NEWLINE_MSG:   1,
 	TRUE_MSG:      5,
 	FALSE_MSG:     6,
 }
