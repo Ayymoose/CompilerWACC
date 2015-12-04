@@ -28,12 +28,12 @@ add sp, sp, #n // clears variable space
 
 Assignment -----
 
-str =5, [sp, #(m-4)]  // x (int) = 5
-str =msg_1, [sp, #(m-4)] // s (string) = "hello world"
+str =5, [sp, #offset]  // x (int) = 5
+str =msg_1, [sp, #offset] // s (string) = "hello world"
 
 ---
 
 Exit ---
 ldr r0, =2
-BL exit 
+BL exit
 ---

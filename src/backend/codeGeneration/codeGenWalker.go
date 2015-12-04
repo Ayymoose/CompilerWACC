@@ -433,7 +433,7 @@ func (cg CodeGenerator) cgVisitPrintStat(node Print) {
 		charValue := expr.(rune)
 
 		// MOV r4, #'c' : load the value into r4
-		appendAssembly(cg.instrs, "MOV r4, #"+string(charValue), 1, 1)
+		appendAssembly(cg.instrs, "MOV r4, #"+fmt.Sprintf("%c", charValue), 1, 1)
 		// MOV r0, r4 : prepare parameter for function call
 		appendAssembly(cg.instrs, "MOV r0, r4", 1, 1)
 		// BL putchar
