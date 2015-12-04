@@ -203,7 +203,7 @@ func pairTypeSize(typeFst Type, typeSnd Type) (int,int)  {
 		default:
 			fmt.Println("Unknown type1")
 	}
-}
+} 
 
 	switch typeSnd.(type) {
 	case PairType:
