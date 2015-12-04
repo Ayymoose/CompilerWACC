@@ -400,9 +400,20 @@ func (cg CodeGenerator) cgVisitReturnStat(node Return) {
 }
 
 func (cg CodeGenerator) cgVisitExitStat(node Exit) {
-	returnValue := node.Expr.(int)
-	// LDR r0, =n : loads return type to r0 argument
-	appendAssembly(cg.instrs, "LDR r0, ="+strconv.Itoa(returnValue), 1, 1)
+	expr := node.Expr
+
+	switch expr.(type) {
+	case Ident:
+		// LDR r0, =n : loads return type to r0 argument
+		appendAssembly(cg.instrs, "NOT IMPLEMENTED", 1, 1)
+
+	case int:
+		intValue := expr.(int)
+		// LDR r0, =n : loads return type to r0 argument
+		appendAssembly(cg.instrs, "LDR r0, ="+strconv.Itoa(intValue), 1, 1)
+
+	}
+
 	// BL exit : call exit
 	appendAssembly(cg.instrs, "BL exit", 1, 1)
 

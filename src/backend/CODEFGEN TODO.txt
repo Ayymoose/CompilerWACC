@@ -12,7 +12,8 @@ FREE: NOT STARTED ---
 RETURN: NOT STARTED ---
 - ???
 
-EXIT: COMPLETE --------------------------------------------------
+EXIT: IN PROGRESS -----------------------------------------------
+- to do case variables
 
 PRINT: IN PROGRESS/ LITERALS COMPLETE* ---
 - *Oli needs to help print runes
