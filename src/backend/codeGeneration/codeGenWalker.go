@@ -201,7 +201,7 @@ func (cg CodeGenerator) pushPair(fst interface{}, snd interface{}, typeFst Type,
 	appendAssembly(cg.instrs, "MOV " + reg2 +", r0", 1, 1)
 
 	//Load the first element into a register to be stored
-  //Mmmmm 
+  //Mmmmm
 
 	//Allocate memory for the first element
 	var fstSize, sndSize = pairTypeSize(typeFst,typeSnd)
@@ -259,7 +259,7 @@ func (cg CodeGenerator) pushArrayElements(array []interface{}, srcReg string, ds
 				//appendAssembly(cg.instrs, "MOV "+srcReg+", #"+strconv.Itoa(arrayItem.(string)), 1, 1)
 				appendAssembly(cg.instrs, "STRB "+srcReg+", ["+dstReg+", #"+strconv.Itoa(ARRAY_SIZE+CHAR_SIZE*i)+"]", 1, 1)
 			default:
-				fmt.Println("Array/Pair type not done!")
+				fmt.Println("Array/Pair type not done!") 
 			}
 		}
 	}
