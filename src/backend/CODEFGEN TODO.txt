@@ -1,0 +1,29 @@
+DECLARE: IN PROGRESS ---
+
+ASSIGNMENT: IN PROGRESS ---
+- CALL is being implemneted by henryk
+
+READ: IN PROGRESS ---
+- ???
+
+FREE: NOT STARTED ---
+- ???
+
+RETURN: NOT STARTED ---
+- ???
+
+EXIT: NOT STARTED ---
+- ???
+
+PRINT: IN PROGRESS/ LITERALS COMPLETE* ---
+- *Oli needs to help print runes
+- Still need to print pairs and array addresses
+- Need to print variables
+
+PRINTLN: COMPLETE MUTHAF***ER -----------------------------------
+
+IF: NOT STARTED ---
+
+WHILE: NOT STARTED ---
+
+SCOPE: NOT STARTED ---

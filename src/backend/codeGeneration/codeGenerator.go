@@ -58,7 +58,8 @@ func (cg CodeGenerator) GenerateCode() {
 	cg.buildFullInstr()
 }
 
-// Using
+// Using all the code generators ARMList, instrs is modified to include
+// all ARMList instructions in the correct order
 func (cg CodeGenerator) buildFullInstr() {
 	*cg.instrs = append(*cg.funcInstrs, (*cg.instrs)...)
 	*cg.instrs = append(*cg.msgInstrs, (*cg.instrs)...)
