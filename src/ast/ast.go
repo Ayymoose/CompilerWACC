@@ -31,17 +31,6 @@ type Integer int
 type Character string
 type Str string
 type Boolean bool
-
-// ArrayType struct
-type ArrayType struct {
-	Type Type
-}
-
-// PairType struct
-type PairType struct {
-	FstType Type
-	SndType Type
-}
 type PairLiter struct {
 }
 
@@ -108,6 +97,17 @@ type Function struct {
 type Param struct {
 	Ident     Ident
 	ParamType Type
+}
+
+// ArrayType struct
+type ArrayType struct {
+	Type Type
+}
+
+// PairType struct
+type PairType struct {
+	FstType Type
+	SndType Type
 }
 
 // Program ..
