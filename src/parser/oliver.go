@@ -10,14 +10,15 @@ import (
 
 //line oliver.y:10
 type parserSymType struct {
-	yys            int
-	str            string
-	stringconst    Str
-	number         int
-	integer        Integer
-	ident          Ident
-	character      Character
-	boolean        Boolean
+	yys         int
+	str         string
+	stringconst Str
+	number      int
+	integer     Integer
+	ident       Ident
+	character   Character
+	boolean     Boolean
+
 	functions      []*Function
 	function       *Function
 	stmt           Statement
@@ -109,7 +110,7 @@ const parserEofCode = 1
 const parserErrCode = 2
 const parserMaxDepth = 200
 
-//line oliver.y:203
+//line oliver.y:212
 
 //line yacctab:1
 var parserExca = [...]int{
@@ -625,25 +626,25 @@ parserdefault:
 
 	case 1:
 		parserDollar = parserS[parserpt-4 : parserpt+1]
-		//line oliver.y:88
+		//line oliver.y:91
 		{
 			parserlex.(*Lexer).prog = &Program{FunctionList: parserDollar[2].functions, StatList: parserDollar[3].stmts, SymbolTable: &SymbolTable{Table: make(map[Ident]Type)}}
 		}
 	case 2:
 		parserDollar = parserS[parserpt-2 : parserpt+1]
-		//line oliver.y:92
+		//line oliver.y:95
 		{
 			parserVAL.functions = append(parserDollar[1].functions, parserDollar[2].function)
 		}
 	case 3:
 		parserDollar = parserS[parserpt-0 : parserpt+1]
-		//line oliver.y:93
+		//line oliver.y:96
 		{
 			parserVAL.functions = []*Function{}
 		}
 	case 4:
 		parserDollar = parserS[parserpt-7 : parserpt+1]
-		//line oliver.y:96
+		//line oliver.y:99
 		{
 			if !checkStats(parserDollar[6].stmts) {
 				parserlex.Error("Missing return statement")
@@ -652,7 +653,7 @@ parserdefault:
 		}
 	case 5:
 		parserDollar = parserS[parserpt-8 : parserpt+1]
-		//line oliver.y:102
+		//line oliver.y:105
 		{
 			if !checkStats(parserDollar[7].stmts) {
 				parserlex.Error("Missing return statement")
@@ -661,451 +662,451 @@ parserdefault:
 		}
 	case 6:
 		parserDollar = parserS[parserpt-3 : parserpt+1]
-		//line oliver.y:108
+		//line oliver.y:111
 		{
 			parserVAL.params = append(parserDollar[1].params, parserDollar[3].param)
 		}
 	case 7:
 		parserDollar = parserS[parserpt-1 : parserpt+1]
-		//line oliver.y:109
+		//line oliver.y:112
 		{
 			parserVAL.params = []Param{parserDollar[1].param}
 		}
 	case 8:
 		parserDollar = parserS[parserpt-2 : parserpt+1]
-		//line oliver.y:111
+		//line oliver.y:114
 		{
 			parserVAL.param = Param{ParamType: parserDollar[1].typedefinition, Ident: parserDollar[2].ident}
 		}
 	case 9:
 		parserDollar = parserS[parserpt-1 : parserpt+1]
-		//line oliver.y:113
+		//line oliver.y:116
 		{
 			parserVAL.assignlhs = parserDollar[1].ident
 		}
 	case 10:
 		parserDollar = parserS[parserpt-1 : parserpt+1]
-		//line oliver.y:114
+		//line oliver.y:117
 		{
 			parserVAL.assignlhs = parserDollar[1].arrayelem
 		}
 	case 11:
 		parserDollar = parserS[parserpt-1 : parserpt+1]
-		//line oliver.y:115
+		//line oliver.y:118
 		{
 			parserVAL.assignlhs = parserDollar[1].pairelem
 		}
 	case 12:
 		parserDollar = parserS[parserpt-1 : parserpt+1]
-		//line oliver.y:117
+		//line oliver.y:120
 		{
 			parserVAL.assignrhs = parserDollar[1].expr
 		}
 	case 13:
 		parserDollar = parserS[parserpt-1 : parserpt+1]
-		//line oliver.y:118
+		//line oliver.y:121
 		{
 			parserVAL.assignrhs = parserDollar[1].arrayliter
 		}
 	case 14:
 		parserDollar = parserS[parserpt-1 : parserpt+1]
-		//line oliver.y:119
+		//line oliver.y:122
 		{
 			parserVAL.assignrhs = parserDollar[1].pairelem
 		}
 	case 15:
 		parserDollar = parserS[parserpt-6 : parserpt+1]
-		//line oliver.y:120
+		//line oliver.y:123
 		{
 			parserVAL.assignrhs = NewPair{FstExpr: parserDollar[3].expr, SndExpr: parserDollar[5].expr}
 		}
 	case 16:
 		parserDollar = parserS[parserpt-5 : parserpt+1]
-		//line oliver.y:121
+		//line oliver.y:124
 		{
 			parserVAL.assignrhs = Call{Ident: parserDollar[2].ident, ParamList: parserDollar[4].exprs}
 		}
 	case 17:
 		parserDollar = parserS[parserpt-3 : parserpt+1]
-		//line oliver.y:123
+		//line oliver.y:126
 		{
 			parserVAL.stmts = append(parserDollar[1].stmts, parserDollar[3].stmt)
 		}
 	case 18:
 		parserDollar = parserS[parserpt-1 : parserpt+1]
-		//line oliver.y:124
+		//line oliver.y:127
 		{
 			parserVAL.stmts = []Statement{parserDollar[1].stmt}
 		}
 	case 19:
 		parserDollar = parserS[parserpt-1 : parserpt+1]
-		//line oliver.y:127
+		//line oliver.y:130
 		{
 			parserVAL.stmt = Skip{}
 		}
 	case 20:
 		parserDollar = parserS[parserpt-4 : parserpt+1]
-		//line oliver.y:128
+		//line oliver.y:131
 		{
 			parserVAL.stmt = Declare{DecType: parserDollar[1].typedefinition, Lhs: parserDollar[2].ident, Rhs: parserDollar[4].assignrhs}
 		}
 	case 21:
 		parserDollar = parserS[parserpt-3 : parserpt+1]
-		//line oliver.y:129
+		//line oliver.y:132
 		{
 			parserVAL.stmt = Assignment{Lhs: parserDollar[1].assignlhs, Rhs: parserDollar[3].assignrhs}
 		}
 	case 22:
 		parserDollar = parserS[parserpt-2 : parserpt+1]
-		//line oliver.y:130
+		//line oliver.y:133
 		{
 			parserVAL.stmt = Read{parserDollar[2].assignlhs}
 		}
 	case 23:
 		parserDollar = parserS[parserpt-2 : parserpt+1]
-		//line oliver.y:131
+		//line oliver.y:134
 		{
 			parserVAL.stmt = Free{parserDollar[2].expr}
 		}
 	case 24:
 		parserDollar = parserS[parserpt-2 : parserpt+1]
-		//line oliver.y:132
+		//line oliver.y:135
 		{
 			parserVAL.stmt = Return{parserDollar[2].expr}
 		}
 	case 25:
 		parserDollar = parserS[parserpt-2 : parserpt+1]
-		//line oliver.y:133
+		//line oliver.y:136
 		{
 			parserVAL.stmt = Exit{parserDollar[2].expr}
 		}
 	case 26:
 		parserDollar = parserS[parserpt-2 : parserpt+1]
-		//line oliver.y:134
+		//line oliver.y:137
 		{
 			parserVAL.stmt = Print{parserDollar[2].expr}
 		}
 	case 27:
 		parserDollar = parserS[parserpt-2 : parserpt+1]
-		//line oliver.y:135
+		//line oliver.y:138
 		{
 			parserVAL.stmt = Println{parserDollar[2].expr}
 		}
 	case 28:
 		parserDollar = parserS[parserpt-7 : parserpt+1]
-		//line oliver.y:136
+		//line oliver.y:139
 		{
 			parserVAL.stmt = If{Conditional: parserDollar[2].expr, ThenStat: parserDollar[4].stmts, ElseStat: parserDollar[6].stmts}
 		}
 	case 29:
 		parserDollar = parserS[parserpt-5 : parserpt+1]
-		//line oliver.y:137
+		//line oliver.y:140
 		{
 			parserVAL.stmt = While{Conditional: parserDollar[2].expr, DoStat: parserDollar[4].stmts}
 		}
 	case 30:
 		parserDollar = parserS[parserpt-3 : parserpt+1]
-		//line oliver.y:138
+		//line oliver.y:141
 		{
 			parserVAL.stmt = Scope{StatList: parserDollar[2].stmts, SymbolTable: &SymbolTable{Table: make(map[Ident]Type)}}
 		}
 	case 31:
 		parserDollar = parserS[parserpt-1 : parserpt+1]
-		//line oliver.y:140
+		//line oliver.y:143
 		{
 			parserVAL.expr = parserDollar[1].integer
 		}
 	case 32:
 		parserDollar = parserS[parserpt-1 : parserpt+1]
-		//line oliver.y:141
+		//line oliver.y:145
 		{
 			parserVAL.expr = parserDollar[1].boolean
 		}
 	case 33:
 		parserDollar = parserS[parserpt-1 : parserpt+1]
-		//line oliver.y:142
+		//line oliver.y:146
 		{
 			parserVAL.expr = parserDollar[1].boolean
 		}
 	case 34:
 		parserDollar = parserS[parserpt-1 : parserpt+1]
-		//line oliver.y:143
+		//line oliver.y:148
 		{
 			parserVAL.expr = parserDollar[1].character
 		}
 	case 35:
 		parserDollar = parserS[parserpt-1 : parserpt+1]
-		//line oliver.y:144
+		//line oliver.y:149
 		{
 			parserVAL.expr = parserDollar[1].stringconst
 		}
 	case 36:
 		parserDollar = parserS[parserpt-1 : parserpt+1]
-		//line oliver.y:145
+		//line oliver.y:150
 		{
 			parserVAL.expr = PairLiter{}
 		}
 	case 37:
 		parserDollar = parserS[parserpt-1 : parserpt+1]
-		//line oliver.y:146
+		//line oliver.y:151
 		{
 			parserVAL.expr = parserDollar[1].ident
 		}
 	case 38:
 		parserDollar = parserS[parserpt-1 : parserpt+1]
-		//line oliver.y:147
+		//line oliver.y:152
 		{
 			parserVAL.expr = parserDollar[1].arrayelem
 		}
 	case 39:
 		parserDollar = parserS[parserpt-2 : parserpt+1]
-		//line oliver.y:148
+		//line oliver.y:154
 		{
 			parserVAL.expr = Unop{Unary: NOT, Expr: parserDollar[2].expr}
 		}
 	case 40:
 		parserDollar = parserS[parserpt-2 : parserpt+1]
-		//line oliver.y:149
+		//line oliver.y:155
 		{
 			parserVAL.expr = Unop{Unary: LEN, Expr: parserDollar[2].expr}
 		}
 	case 41:
 		parserDollar = parserS[parserpt-2 : parserpt+1]
-		//line oliver.y:150
+		//line oliver.y:156
 		{
 			parserVAL.expr = Unop{Unary: ORD, Expr: parserDollar[2].expr}
 		}
 	case 42:
 		parserDollar = parserS[parserpt-2 : parserpt+1]
-		//line oliver.y:151
+		//line oliver.y:157
 		{
 			parserVAL.expr = Unop{Unary: CHR, Expr: parserDollar[2].expr}
 		}
 	case 43:
 		parserDollar = parserS[parserpt-2 : parserpt+1]
-		//line oliver.y:152
+		//line oliver.y:158
 		{
 			parserVAL.expr = Unop{Unary: SUB, Expr: parserDollar[2].expr}
 		}
 	case 44:
 		parserDollar = parserS[parserpt-2 : parserpt+1]
-		//line oliver.y:153
+		//line oliver.y:159
 		{
 			parserVAL.expr = parserDollar[2].expr
 		}
 	case 45:
 		parserDollar = parserS[parserpt-3 : parserpt+1]
-		//line oliver.y:155
+		//line oliver.y:162
 		{
 			parserVAL.expr = Binop{Left: parserDollar[1].expr, Binary: PLUS, Right: parserDollar[3].expr}
 		}
 	case 46:
 		parserDollar = parserS[parserpt-3 : parserpt+1]
-		//line oliver.y:156
+		//line oliver.y:163
 		{
 			parserVAL.expr = Binop{Left: parserDollar[1].expr, Binary: SUB, Right: parserDollar[3].expr}
 		}
 	case 47:
 		parserDollar = parserS[parserpt-3 : parserpt+1]
-		//line oliver.y:157
+		//line oliver.y:164
 		{
 			parserVAL.expr = Binop{Left: parserDollar[1].expr, Binary: MUL, Right: parserDollar[3].expr}
 		}
 	case 48:
 		parserDollar = parserS[parserpt-3 : parserpt+1]
-		//line oliver.y:158
+		//line oliver.y:165
 		{
 			parserVAL.expr = Binop{Left: parserDollar[1].expr, Binary: MOD, Right: parserDollar[3].expr}
 		}
 	case 49:
 		parserDollar = parserS[parserpt-3 : parserpt+1]
-		//line oliver.y:159
+		//line oliver.y:166
 		{
 			parserVAL.expr = Binop{Left: parserDollar[1].expr, Binary: DIV, Right: parserDollar[3].expr}
 		}
 	case 50:
 		parserDollar = parserS[parserpt-3 : parserpt+1]
-		//line oliver.y:160
+		//line oliver.y:167
 		{
 			parserVAL.expr = Binop{Left: parserDollar[1].expr, Binary: LT, Right: parserDollar[3].expr}
 		}
 	case 51:
 		parserDollar = parserS[parserpt-3 : parserpt+1]
-		//line oliver.y:161
+		//line oliver.y:168
 		{
 			parserVAL.expr = Binop{Left: parserDollar[1].expr, Binary: GT, Right: parserDollar[3].expr}
 		}
 	case 52:
 		parserDollar = parserS[parserpt-3 : parserpt+1]
-		//line oliver.y:162
+		//line oliver.y:169
 		{
 			parserVAL.expr = Binop{Left: parserDollar[1].expr, Binary: LTE, Right: parserDollar[3].expr}
 		}
 	case 53:
 		parserDollar = parserS[parserpt-3 : parserpt+1]
-		//line oliver.y:163
+		//line oliver.y:170
 		{
 			parserVAL.expr = Binop{Left: parserDollar[1].expr, Binary: GTE, Right: parserDollar[3].expr}
 		}
 	case 54:
 		parserDollar = parserS[parserpt-3 : parserpt+1]
-		//line oliver.y:164
+		//line oliver.y:171
 		{
 			parserVAL.expr = Binop{Left: parserDollar[1].expr, Binary: EQ, Right: parserDollar[3].expr}
 		}
 	case 55:
 		parserDollar = parserS[parserpt-3 : parserpt+1]
-		//line oliver.y:165
+		//line oliver.y:172
 		{
 			parserVAL.expr = Binop{Left: parserDollar[1].expr, Binary: NEQ, Right: parserDollar[3].expr}
 		}
 	case 56:
 		parserDollar = parserS[parserpt-3 : parserpt+1]
-		//line oliver.y:166
+		//line oliver.y:173
 		{
 			parserVAL.expr = Binop{Left: parserDollar[1].expr, Binary: AND, Right: parserDollar[3].expr}
 		}
 	case 57:
 		parserDollar = parserS[parserpt-3 : parserpt+1]
-		//line oliver.y:167
+		//line oliver.y:174
 		{
 			parserVAL.expr = Binop{Left: parserDollar[1].expr, Binary: OR, Right: parserDollar[3].expr}
 		}
 	case 58:
 		parserDollar = parserS[parserpt-3 : parserpt+1]
-		//line oliver.y:168
+		//line oliver.y:175
 		{
 			parserVAL.expr = parserDollar[2].expr
 		}
 	case 59:
 		parserDollar = parserS[parserpt-3 : parserpt+1]
-		//line oliver.y:170
+		//line oliver.y:177
 		{
 			parserVAL.arrayliter = ArrayLiter{parserDollar[2].exprs}
 		}
 	case 60:
 		parserDollar = parserS[parserpt-3 : parserpt+1]
-		//line oliver.y:172
+		//line oliver.y:179
 		{
 			parserVAL.exprs = append(parserDollar[1].exprs, parserDollar[3].expr)
 		}
 	case 61:
 		parserDollar = parserS[parserpt-1 : parserpt+1]
-		//line oliver.y:173
+		//line oliver.y:180
 		{
 			parserVAL.exprs = []Evaluation{parserDollar[1].expr}
 		}
 	case 62:
 		parserDollar = parserS[parserpt-0 : parserpt+1]
-		//line oliver.y:174
+		//line oliver.y:181
 		{
 			parserVAL.exprs = []Evaluation{}
 		}
 	case 63:
 		parserDollar = parserS[parserpt-2 : parserpt+1]
-		//line oliver.y:176
+		//line oliver.y:183
 		{
 			parserVAL.arrayelem = ArrayElem{Ident: parserDollar[1].ident, Exprs: parserDollar[2].exprs}
 		}
 	case 64:
 		parserDollar = parserS[parserpt-4 : parserpt+1]
-		//line oliver.y:178
+		//line oliver.y:185
 		{
 			parserVAL.exprs = append(parserDollar[1].exprs, parserDollar[3].expr)
 		}
 	case 65:
 		parserDollar = parserS[parserpt-3 : parserpt+1]
-		//line oliver.y:179
+		//line oliver.y:186
 		{
 			parserVAL.exprs = []Evaluation{parserDollar[2].expr}
 		}
 	case 66:
 		parserDollar = parserS[parserpt-1 : parserpt+1]
-		//line oliver.y:181
+		//line oliver.y:189
 		{
 			parserVAL.pairliter = PairLiter{}
 		}
 	case 67:
 		parserDollar = parserS[parserpt-2 : parserpt+1]
-		//line oliver.y:183
+		//line oliver.y:192
 		{
 			parserVAL.pairelem = PairElem{Fsnd: FST, Expr: parserDollar[2].expr}
 		}
 	case 68:
 		parserDollar = parserS[parserpt-2 : parserpt+1]
-		//line oliver.y:184
+		//line oliver.y:193
 		{
 			parserVAL.pairelem = PairElem{Fsnd: SND, Expr: parserDollar[2].expr}
 		}
 	case 69:
 		parserDollar = parserS[parserpt-6 : parserpt+1]
-		//line oliver.y:186
+		//line oliver.y:195
 		{
 			parserVAL.typedefinition = PairType{FstType: parserDollar[3].pairelemtype, SndType: parserDollar[5].pairelemtype}
 		}
 	case 70:
 		parserDollar = parserS[parserpt-1 : parserpt+1]
-		//line oliver.y:188
+		//line oliver.y:197
 		{
 			parserVAL.pairelemtype = parserDollar[1].typedefinition
 		}
 	case 71:
 		parserDollar = parserS[parserpt-1 : parserpt+1]
-		//line oliver.y:189
+		//line oliver.y:198
 		{
 			parserVAL.pairelemtype = parserDollar[1].typedefinition
 		}
 	case 72:
 		parserDollar = parserS[parserpt-1 : parserpt+1]
-		//line oliver.y:190
+		//line oliver.y:199
 		{
 			parserVAL.pairelemtype = PairType{}
 		}
 	case 73:
 		parserDollar = parserS[parserpt-1 : parserpt+1]
-		//line oliver.y:192
+		//line oliver.y:201
 		{
 			parserVAL.typedefinition = parserDollar[1].typedefinition
 		}
 	case 74:
 		parserDollar = parserS[parserpt-1 : parserpt+1]
-		//line oliver.y:193
+		//line oliver.y:202
 		{
 			parserVAL.typedefinition = parserDollar[1].typedefinition
 		}
 	case 75:
 		parserDollar = parserS[parserpt-1 : parserpt+1]
-		//line oliver.y:194
+		//line oliver.y:203
 		{
 			parserVAL.typedefinition = parserDollar[1].typedefinition
 		}
 	case 76:
 		parserDollar = parserS[parserpt-1 : parserpt+1]
-		//line oliver.y:196
+		//line oliver.y:205
 		{
 			parserVAL.typedefinition = Int
 		}
 	case 77:
 		parserDollar = parserS[parserpt-1 : parserpt+1]
-		//line oliver.y:197
+		//line oliver.y:206
 		{
 			parserVAL.typedefinition = Bool
 		}
 	case 78:
 		parserDollar = parserS[parserpt-1 : parserpt+1]
-		//line oliver.y:198
+		//line oliver.y:207
 		{
 			parserVAL.typedefinition = Char
 		}
 	case 79:
 		parserDollar = parserS[parserpt-1 : parserpt+1]
-		//line oliver.y:199
+		//line oliver.y:208
 		{
 			parserVAL.typedefinition = String
 		}
 	case 80:
 		parserDollar = parserS[parserpt-3 : parserpt+1]
-		//line oliver.y:201
+		//line oliver.y:210
 		{
 			parserVAL.typedefinition = ArrayType{Type: parserDollar[1].typedefinition}
 		}
