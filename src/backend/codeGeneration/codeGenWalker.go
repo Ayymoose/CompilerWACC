@@ -270,17 +270,36 @@ func (cg CodeGenerator) pushPair(fst Evaluation, snd Evaluation, typeFst Type, t
 }
 
 // Global handle function
-func (cg CodeGenerator) handle(t Evaluation, srcReg string) {
+func (cg CodeGenerator) evalRHS(t Evaluation, srcReg string) {
 
 	switch t.(type) {
+	// Literals
 	case Boolean:
-		cg.handleBool(t, srcReg)
+		appendAssembly(cg.instrs, "MOV "+srcReg+", #"+boolInt(bool(t.(Boolean))), 1, 1)
 	case Integer:
-		cg.handleInt(t, srcReg)
+		appendAssembly(cg.instrs, "LDR "+srcReg+", ="+strconv.Itoa(int(t.(Integer))), 1, 1)
 	case Str:
-		cg.handleString(t, srcReg)
+		appendAssembly(cg.instrs, "LDR "+srcReg+", "+cg.getMsgLabel(string(t.(Str))), 1, 1)
 	case Character:
-		cg.handleChar(t, srcReg)
+		appendAssembly(cg.instrs, "MOV "+srcReg+", #"+string(t.(Character)), 1, 1)
+	case PairLiter:
+		appendAssembly(cg.instrs, "MOV "+srcReg+", #0", 1, 1)
+	case Ident:
+		var value, _ = cg.getIdentOffset(t.(Ident))
+		appendAssembly(cg.instrs, "LDR "+srcReg+", [sp, #"+strconv.Itoa(value)+"]", 1, 1)
+	case ArrayElem:
+		/*
+			30		PUSH {r4}
+			31		MOV r4, r0
+			32		LDR r0, =1
+			33		BL p_check_array_bounds
+			34		ADD r4, r4, #4
+			35		ADD r4, r4, r0, LSL #2
+			36		LDR r4, [r4]
+			37		MOV r0, r4
+			38		POP {r4}
+		*/
+		appendAssembly(cg.instrs, "Not implemented", 1, 1)
 	default:
 		fmt.Println("handle() doesn't support type")
 	}
@@ -305,7 +324,7 @@ func (cg CodeGenerator) handleInt(t Type, srcReg string) {
 		appendAssembly(cg.instrs, "LDR "+srcReg+", [sp, #"+strconv.Itoa(value)+"]", 1, 1)
 	case ArrayElem:
 		fmt.Println("ArrayElem not")
-	case Type:
+	case Integer:
 		// Load the value of the declaration to the register
 		appendAssembly(cg.instrs, "LDR "+srcReg+", ="+strconv.Itoa(int(t.(Integer))), 1, 1)
 	}
@@ -330,7 +349,7 @@ func (cg CodeGenerator) handleBool(t Type, srcReg string) {
 		appendAssembly(cg.instrs, "LDR "+srcReg+", [sp, #"+strconv.Itoa(value)+"]", 1, 1)
 	case ArrayElem:
 		fmt.Println("ArrayElem")
-	case Type:
+	case Boolean:
 		// Load the bool into a register
 		appendAssembly(cg.instrs, "MOV "+srcReg+", #"+boolInt(bool(t.(Boolean))), 1, 1)
 	}
@@ -354,7 +373,7 @@ func (cg CodeGenerator) handleChar(t Type, srcReg string) {
 		appendAssembly(cg.instrs, "LDR "+srcReg+", [sp, #"+strconv.Itoa(value)+"]", 1, 1)
 	case ArrayElem:
 		fmt.Println("ArrayElem not implemeted")
-	case Type:
+	case Character:
 		// Load the character into a register
 		appendAssembly(cg.instrs, "MOV "+srcReg+", #"+string(t.(Character)), 1, 1)
 	}
@@ -377,7 +396,7 @@ func (cg CodeGenerator) handleString(t Evaluation, srcReg string) {
 		appendAssembly(cg.instrs, "LDR "+srcReg+", [sp, #"+strconv.Itoa(value)+"]", 1, 1)
 	case ArrayElem:
 		fmt.Println("ArrayElem not implemeted")
-	case Type:
+	case String:
 		// Load the address of the string to the register
 		appendAssembly(cg.instrs, "LDR "+srcReg+", "+cg.getMsgLabel(string(t.(Str))), 1, 1)
 	}
