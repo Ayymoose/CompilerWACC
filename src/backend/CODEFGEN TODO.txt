@@ -12,7 +12,7 @@ FREE: NOT STARTED ---
 RETURN: NOT STARTED --- @Ayman
 
 EVAL RHS: IN PROGRESS ---
-- do array elem NANA
+- do array elem AYMAN
 - do array liter AYMAN
 - do newpair NANA
 - do pairelem NANA
