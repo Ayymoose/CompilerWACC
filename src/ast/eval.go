@@ -60,11 +60,21 @@ func (value NewPair) eval(functionTable []*Function, symbolTable *SymbolTable) (
 }
 
 func (value PairElem) eval(functionTable []*Function, symbolTable *SymbolTable) (Type, error) {
+	fstsnd := value.Fsnd
 	exprTyp, err := value.Expr.eval(functionTable, symbolTable)
 	if err != nil {
 		return nil, err
 	}
-	return exprTyp, nil
+	switch exprTyp.(type) {
+	case PairType:
+		switch fstsnd {
+		case Fst:
+			return exprTyp.(PairType).FstType, nil
+		case Snd:
+			return exprTyp.(PairType).SndType, nil
+		}
+	}
+	return nil, errors.New("Cannot get elem of non pair type")
 }
 
 func (value Integer) eval(functionTable []*Function, symbolTable *SymbolTable) (Type, error) {

@@ -14,6 +14,7 @@ type ConstType int
 type FSND int
 
 type Type interface {
+	typeString() string
 }
 
 type Evaluation interface {
@@ -33,6 +34,43 @@ type Boolean bool
 type PairLiter struct {
 }
 
+func (t ConstType) String() string {
+	return t.typeString()
+}
+
+func (t ArrayType) String() string {
+	return t.typeString()
+}
+
+func (t PairType) String() string {
+	return t.typeString()
+}
+
+func (x ConstType) typeString() string {
+	switch x {
+	case Int:
+		return "Int"
+	case Bool:
+		return "Bool"
+	case Char:
+		return "Char"
+	case String:
+		return "String"
+	case Pair:
+		return "Pair"
+	default:
+		return "Non-type"
+	}
+}
+
+func (x ArrayType) typeString() string {
+	return "Array:" + x.Type.typeString()
+}
+
+func (x PairType) typeString() string {
+	return "Pair:" + x.FstType.typeString() + "/" + x.SndType.typeString()
+}
+
 type Skip struct {
 }
 
@@ -41,6 +79,7 @@ const (
 	Bool
 	Char
 	String
+	Pair
 )
 
 const (

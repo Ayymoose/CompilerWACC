@@ -4,12 +4,12 @@ package ast
 type SymbolTable struct {
 	Parent     *SymbolTable
 	Table      map[Ident]Type
-	OffsetVals map[Ident]int
+	OffsetVals map[string]int
 }
 
 // New Constructor creates new instance of a symbolTable with pointer to its parent
 func (symbolTable *SymbolTable) New() *SymbolTable {
-	return &SymbolTable{Parent: symbolTable, Table: make(map[Ident]Type), OffsetVals: make(map[Ident]int)}
+	return &SymbolTable{Parent: symbolTable, Table: make(map[Ident]Type), OffsetVals: make(map[string]int)}
 }
 
 // Inserts a given key and value into the symbol table
@@ -18,12 +18,12 @@ func (symbolTable *SymbolTable) insert(key Ident, value Type) {
 }
 
 // Inserts the offset of a given key into symbol table
-func (symbolTable *SymbolTable) insertOffset(key Ident, offset int) {
+func (symbolTable *SymbolTable) insertOffset(key string, offset int) {
 	symbolTable.OffsetVals[key] = offset
 }
 
 // Returns the offset of a given key
-func (symbolTable *SymbolTable) getOffset(key Ident) int {
+func (symbolTable *SymbolTable) getOffset(key string) int {
 	return symbolTable.OffsetVals[key]
 }
 
@@ -56,5 +56,5 @@ func (symbolTable *SymbolTable) getTypeOfIdent(key Ident) Type {
 		}
 		curr = symbolTable.Parent
 	}
-	return -1
+	return nil
 }
