@@ -45,9 +45,19 @@ func pairTypeSize(typeFst Type, typeSnd Type) (int, int) {
 func sizeOf(t Type) int {
 	var size = 0
 	switch t.(type) {
+  case ConstType:
+		switch t.(ConstType) {
+		case Int:
+			size = INT_SIZE
+		case Bool:
+			size = BOOL_SIZE
+		case Char:
+			size = CHAR_SIZE
+		case String:
+			size = STRING_SIZE
+		}
 	case PairType:
-		size = PAIR_SIZE
-
+		size = PAIR_SIZE //Recurse on pair Type too?
 	case Integer:
 		size = INT_SIZE
 	case Str:
@@ -56,33 +66,25 @@ func sizeOf(t Type) int {
 		size = BOOL_SIZE
 	case Character:
 		size = CHAR_SIZE
-		//default:
-
 	case ArrayType:
-		switch t.(ArrayType).Type.(type) {
-		case Integer:
-			size = INT_SIZE
-		case Str:
-			size = STRING_SIZE
-		case Boolean:
-			size = BOOL_SIZE
-		case Character:
-			size = CHAR_SIZE
-		default:
-			//Recurse on type as it could be an array of an array
-			size = sizeOf(t.(ArrayType).Type)
-		}
-
+    size = sizeOf(t.(ArrayType).Type)
 	default:
 		fmt.Println("sizeOf(t) t is an unknown type")
-
+		typeOf(t)
 	}
+
 	return size
 }
 
 // Small function to print the type (remove later)
 func typeOf(t Type) {
 	switch t.(type) {
+	case ConstType:
+		fmt.Println("ConstType")
+	case FSND:
+		fmt.Println("FSND")
+	case nil:
+		fmt.Println("nil")
 	case Function:
 		fmt.Println("Function")
 	case Param:
@@ -131,8 +133,30 @@ func typeOf(t Type) {
 		fmt.Println("ArrayLiter")
 	case ArrayElem:
 		fmt.Println("ArrayElem")
+	case Evaluation:
+		fmt.Println("Evaluation")
+	case Statement:
+		fmt.Println("Statement")
+	case Integer:
+		fmt.Println("Integer")
+	case Str:
+		fmt.Println("Str")
+	case Boolean:
+		fmt.Println("Bool")
 	case Character:
 		fmt.Println("Character")
+	case PairLiter:
+		fmt.Println("PairLiter")
+	case Skip:
+		fmt.Println("Skip")
+	case int:
+		fmt.Println("int")
+	case bool:
+	  fmt.Println("bool")
+	case string:
+	  fmt.Println("string")
+	case rune:
+	  fmt.Println("rune")
 	default:
 		fmt.Println("Unknown")
 	}

@@ -223,9 +223,10 @@ func (cg CodeGenerator) pushPair(fst Evaluation, snd Evaluation, typeFst Type, t
 	case Str:
 		appendAssembly(cg.instrs, "LDR "+reg1+", "+cg.getMsgLabel(string(fst.(Str))), 1, 1)
 	case Character:
+
 	default:
 		fmt.Println("Unknown type for pair fst")
-
+		typeOf(typeFst)
 	}
 
 	//Allocate memory for the first element
@@ -242,7 +243,6 @@ func (cg CodeGenerator) pushPair(fst Evaluation, snd Evaluation, typeFst Type, t
 
 	case PairType:
 		fmt.Println("Pair type for snd not implemented")
-
 	case Integer:
 		appendAssembly(cg.instrs, "LDR "+reg1+", ="+strconv.Itoa(int(snd.(Integer))), 1, 1)
 	case Boolean:
@@ -253,7 +253,7 @@ func (cg CodeGenerator) pushPair(fst Evaluation, snd Evaluation, typeFst Type, t
 
 	default:
 		fmt.Println("Unknown type for pair snd")
-
+    typeOf(typeFst)
 	}
 
 	//Allocate memory for the second element
@@ -304,18 +304,6 @@ func (cg CodeGenerator) evalRHS(t Evaluation, srcReg string) {
 		cg.cgVisitUnopExpr(t.(Unop))
 	case Binop:
 		cg.cgVisitBinopExpr(t.(Binop))
-	case ArrayLiter:
-		/*	6		MOV r0, #12
-			7		BL malloc
-			8		MOV r3, r0
-			9		LDR r0, =2
-			10		STR r0, [r3, #4]
-			11		LDR r0, =3
-			12		STR r0, [r3, #8]
-			13		MOV r0, #2
-			14		STR r0, [r3]
-			15		MOV r0, r3*/
-		appendAssembly(cg.instrs, "arrayLiter not implemented", 1, 1)
 	case NewPair:
 		appendAssembly(cg.instrs, "newpair not implemented", 1, 1)
 	case PairElem:
@@ -325,6 +313,30 @@ func (cg CodeGenerator) evalRHS(t Evaluation, srcReg string) {
 	default:
 		fmt.Println("ERROR: Expression can not be evaluated")
 	}
+}
+
+//Evaluates array literals
+func (cg CodeGenerator) evalArrayLiter(typeNode Type, rhs Evaluation, srcReg string, dstReg string) {
+
+	 switch rhs.(type) {
+	 case ArrayLiter:
+		 //Calculate the amount of storage space required for the array
+		 // = ((arrayLength(array) * sizeOf(arrayType)) + 4 (4-bytes for an address)
+		 var arraySize = arraySize(rhs.(ArrayLiter).Exprs)
+		 var arrayStorage = (arraySize * sizeOf(typeNode)) + ARRAY_SIZE
+
+		 appendAssembly(cg.instrs, "LDR r0, ="+strconv.Itoa(arrayStorage), 1, 1)
+		 //Allocate memory for the array
+		 appendAssembly(cg.instrs, "BL malloc", 1, 1)
+		 appendAssembly(cg.instrs, "MOV "+dstReg+", r0", 1, 1)
+
+		 //Start loading each element in the array onto the stack
+		 cg.pushArrayElements(rhs.(ArrayLiter).Exprs, srcReg, dstReg, typeNode)
+	 default:
+		 fmt.Println("RHS Type not implemented")
+	 }
+
+
 }
 
 // Puts the array elements onto the stack
@@ -343,18 +355,15 @@ func (cg CodeGenerator) pushArrayElements(array []Evaluation, srcReg string, dst
 				appendAssembly(cg.instrs, "STR "+srcReg+", ["+dstReg+", #"+strconv.Itoa(ARRAY_SIZE+INT_SIZE*i)+"]", 1, 1)
 			case String:
 				cg.evalRHS(arrayItem, srcReg)
-				//appendAssembly(cg.instrs, "LDR "+srcReg+", "+ cg.getMsgLabel(array[i].(string)), 1, 1)
 				appendAssembly(cg.instrs, "STR "+srcReg+", ["+dstReg+", #"+strconv.Itoa(ARRAY_SIZE+STRING_SIZE*i)+"]", 1, 1)
 			case Bool:
 				cg.evalRHS(arrayItem, srcReg)
-				//appendAssembly(cg.instrs, "MOV "+srcReg+", #"+boolInt(arrayItem.(bool)), 1, 1)
 				appendAssembly(cg.instrs, "STRB "+srcReg+", ["+dstReg+", #"+strconv.Itoa(ARRAY_SIZE+BOOL_SIZE*i)+"]", 1, 1)
 			case Char:
 				cg.evalRHS(arrayItem, srcReg)
-				//appendAssembly(cg.instrs, "MOV "+srcReg+", #"+arrayItem.(Character).Value, 1, 1)
 				appendAssembly(cg.instrs, "STRB "+srcReg+", ["+dstReg+", #"+strconv.Itoa(ARRAY_SIZE+CHAR_SIZE*i)+"]", 1, 1)
 			default:
-				fmt.Println("Array/Pair type not done!")
+				fmt.Println("Type not implemented")
 			}
 		}
 	}
@@ -369,40 +378,15 @@ func (cg CodeGenerator) cgVisitDeclareStat(node Declare) {
 	var rhs = node.Rhs
 
 	switch node.DecType.(type) {
-
 	case ArrayType:
-
-		switch rhs.(type) {
-
-		case Call:
-			//	cgVisitCallStat(node.Rhs.(Call).Ident, node.Rhs.(Call).ParamList)
-		case ArrayLiter:
-			//Calculate the amount of storage space required for the array
-			// = ((arrayLength(array) * sizeOf(arrayType)) + 4 (4-bytes for an address)
-			var arraySize = arraySize(rhs.(ArrayLiter).Exprs)
-			var arrayStorage = (arraySize * sizeOf(node.DecType)) + ARRAY_SIZE
-
-			appendAssembly(cg.instrs, "LDR r0, ="+strconv.Itoa(arrayStorage), 1, 1)
-			//Allocate memory for the array
-			appendAssembly(cg.instrs, "BL malloc", 1, 1)
-			appendAssembly(cg.instrs, "MOV r4, r0", 1, 1)
-
-			//Start loading each element in the array onto the stack
-			cg.pushArrayElements(rhs.(ArrayLiter).Exprs, "r5", "r4", node.DecType)
-		default:
-			fmt.Println("RHS Type not implemented")
-		}
+		// Evalute an array
+		cg.evalArrayLiter(node.DecType,node.Rhs,"r5","r4")
 	case PairType:
-
 		// First allocate memory to store two addresses (8-bytes)
 		appendAssembly(cg.instrs, "LDR r0, ="+strconv.Itoa(ADDR_SIZE*2), 1, 1)
 		appendAssembly(cg.instrs, "BL malloc", 1, 1)
-
 		// Push a pair of elements onto the stack
 		cg.pushPair(rhs.(NewPair).FstExpr, rhs.(NewPair).SndExpr, node.DecType.(PairType).FstType, node.DecType.(PairType).SndType, "r5", "r4")
-
-	//cg.handle(node.DecType.(ConstType),"r4")
-
 	case Boolean:
 		cg.evalRHS(rhs, "r4")
 		// Using STRB, store it on the stack
@@ -419,7 +403,6 @@ func (cg CodeGenerator) cgVisitDeclareStat(node Declare) {
 		cg.evalRHS(rhs, "r4")
 		// Store the address onto the stack
 		appendAssembly(cg.instrs, "STR r4, [sp, #"+cg.subCurrP(STRING_SIZE)+"]", 1, 1)
-
 	default:
 		//	typeOf(node.DecType)
 	}
