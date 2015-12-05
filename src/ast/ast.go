@@ -1,9 +1,39 @@
 package ast
 
+type errorSlice []error
+
+func (e errorSlice) Error() string {
+	var result string
+	for _, errs := range e {
+		result += errs.Error() + "\n"
+	}
+	return result
+}
+
 type ConstType int
 type FSND int
 
 type Type interface {
+}
+
+type Evaluation interface {
+	eval(functionTable []*Function, symbolTable *SymbolTable) (Type, error)
+}
+
+type Statement interface {
+	visitStatement(functionTable []*Function, symbolTable *SymbolTable) errorSlice
+}
+
+type Ident string
+
+type Integer int
+type Character string
+type Str string
+type Boolean bool
+type PairLiter struct {
+}
+
+type Skip struct {
 }
 
 const (
@@ -11,7 +41,6 @@ const (
 	Bool
 	Char
 	String
-	Null
 )
 
 const (
@@ -20,14 +49,14 @@ const (
 )
 
 type Function struct {
-	Ident          string
+	Ident          Ident
 	ReturnType     Type
 	ParameterTypes []Param
-	StatList       []interface{}
+	StatList       []Statement
 }
 
 type Param struct {
-	Ident     string
+	Ident     Ident
 	ParamType Type
 }
 
@@ -45,112 +74,109 @@ type PairType struct {
 // Program ..
 type Program struct {
 	FunctionList []*Function
-	StatList     []interface{}
+	StatList     []Statement
 	SymbolTable  *SymbolTable
 }
 
 // Binop struct
 type Binop struct {
 	Binary int
-	Left   interface{}
-	Right  interface{}
+	Left   Evaluation
+	Right  Evaluation
 }
 
 // Unop struct
 type Unop struct {
 	Unary int
-	Expr  interface{}
+	Expr  Evaluation
 }
 
 type NewPair struct {
-	FstExpr interface{}
-	SndExpr interface{}
+	FstExpr Evaluation
+	SndExpr Evaluation
 }
 
 // Declare struct
 type Declare struct {
 	DecType Type
-	Lhs     interface{}
-	Rhs     interface{}
+	Lhs     Ident
+	Rhs     Evaluation
 }
 
 // Assignment struct
 type Assignment struct {
-	Lhs interface{}
-	Rhs interface{}
+	Lhs Evaluation
+	Rhs Evaluation
 }
 
 // If struct
 type If struct {
-	Conditional interface{}
-	ThenStat    []interface{}
-	ElseStat    []interface{}
+	Conditional Evaluation
+	ThenStat    []Statement
+	ElseStat    []Statement
 }
 
 // While struct
 type While struct {
-	Conditional interface{}
-	DoStat      []interface{}
+	Conditional Evaluation
+	DoStat      []Statement
 }
 
 type Scope struct {
 	SymbolTable *SymbolTable
-	StatList    []interface{}
+	StatList    []Statement
 }
 
 // Read struct
 type Read struct {
-	AssignLHS interface{} // should be an assignLHS
+	AssignLHS Evaluation // should be an assignLHS
 }
 
 // Free struct
 type Free struct {
-	Expr interface{}
+	Expr Evaluation
 }
 
 // Return struct
 type Return struct {
-	Expr interface{}
+	Expr Evaluation
 }
 
 // Exit struct
 type Exit struct {
-	Expr interface{}
+	Expr Evaluation
 }
 
 // Print struct
 type Print struct {
-	Expr interface{}
+	Expr Evaluation
 }
 
 // Println struct
 type Println struct {
-	Expr interface{}
+	Expr Evaluation
 }
 
 type Call struct {
-	Ident     string
-	ParamList []interface{}
+	Ident     Ident
+	ParamList []Evaluation
 }
 
+/*
 type Ident struct {
 	Name string
 }
-
+*/
 type PairElem struct {
 	Fsnd FSND
-	Expr interface{}
+	Expr Evaluation
 }
 
 type ArrayLiter struct {
-	Exprs []interface{}
+	Exprs []Evaluation
 }
 
 type ArrayElem struct {
-	Ident string
-	Exprs []interface{}
-}
-
-type Character struct {
-	Value string
+	Ident Ident
+	Exprs []Evaluation
 }

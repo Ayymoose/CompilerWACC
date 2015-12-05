@@ -1,25 +1,32 @@
 %{
 package parser
 
-import . "ast"
+import (
+. "ast"
+)
+
 %}
 
 %union{
 str string
+stringconst Str
 number int
+integer Integer
+ident Ident
+character Character
+boolean Boolean
 functions []*Function
 function *Function
-stmt  interface{}
-stmts []interface{}
-assignrhs interface{}
-assignlhs interface{}
-expr  interface{}
-exprs []interface{}
+stmt  Statement
+stmts []Statement
+assignrhs Evaluation
+assignlhs Evaluation
+expr  Evaluation
+exprs []Evaluation
 params  []Param
 param Param
-arglist []interface{}
-bracketed []interface{}
-pairliter interface{}
+bracketed []Evaluation
+pairliter Evaluation
 arrayliter ArrayLiter
 pairelem  PairElem
 arrayelem ArrayElem
@@ -38,21 +45,21 @@ pairelemtype Type
 %token NEWPAIR
 %token CALL
 %token FST SND
-%token <number> INT BOOL CHAR STRING PAIR
-%token <number> NOT NEG LEN ORD CHR                                              // Unary ops   DO WE NEED THESEEEE
-%token <number> MUL DIV MOD PLUS SUB AND OR GT GTE LT LTE EQ NEQ                 // Binary ops
+%token  INT BOOL CHAR STRING PAIR
+%token  NOT NEG LEN ORD CHR                                              // Unary ops   DO WE NEED THESEEEE
+%token  MUL DIV MOD PLUS SUB AND OR GT GTE LT LTE EQ NEQ                 // Binary ops
 %token POSITIVE NEGATIVE
-%token TRUE FALSE                                    // Booleans
+%token <boolean> TRUE FALSE                                    // Booleans
 %token NULL
 %token OPENSQUARE OPENROUND CLOSESQUARE CLOSEROUND
 %token ASSIGNMENT
 %token COMMA SEMICOLON
 %token ERROR
 
-%token <str> STRINGCONST
-%token <str> IDENTIFIER
-%token <number> INTEGER
-%token <str> CHARACTER
+%token <stringconst> STRINGCONST
+%token <ident> IDENTIFIER
+%token <integer> INTEGER
+%token <character> CHARACTER
 
 %type <prog> program
 %type <functions> functions
@@ -68,7 +75,7 @@ pairelemtype Type
 %type <pairelem> pairelem
 %type <arrayliter> arrayliter
 %type <arrayelem>  arrayelem
-%type <bracketed> bracketed
+%type <exprs> bracketed
 %type <pairliter> pairliter
 %type <typedefinition>  basetype typeDef arraytype pairtype
 %type <pairelemtype> pairelemtype
@@ -79,7 +86,7 @@ pairelemtype Type
 %%
 
 program : BEGIN functions statements END {
-                                          parserlex.(*Lexer).prog = &Program{FunctionList : $2 , StatList : $3 , SymbolTable : &SymbolTable{Table: make(map[string]Type)}}
+                                          parserlex.(*Lexer).prog = &Program{FunctionList : $2 , StatList : $3 , SymbolTable : &SymbolTable{Table: make(map[Ident]Type)}}
                                          }
 
 functions : functions function  { $$ = append($1, $2)}
@@ -114,10 +121,10 @@ assignrhs : expr                                           {$$ = $1}
           | CALL IDENTIFIER OPENROUND exprlist CLOSEROUND  { $$ = Call{Ident : $2, ParamList : $4} }
 
 statements : statements SEMICOLON statement           { $$ = append($1,$3) }
-           | statement                                { $$ = []interface{}{$1} }
+           | statement                                { $$ = []Statement{$1} }
 
 
-statement : SKIP                                        { $$ = $1 }
+statement : SKIP                                        { $$ = Skip{} }
           | typeDef IDENTIFIER ASSIGNMENT assignrhs     { $$ = Declare{DecType : $1, Lhs : $2, Rhs : $4} }
           | assignlhs ASSIGNMENT assignrhs              { $$ = Assignment{Lhs : $1, Rhs : $3} }
           | READ assignlhs                              { $$ = Read{$2} }
@@ -128,50 +135,50 @@ statement : SKIP                                        { $$ = $1 }
           | PRINTLN expr                                { $$ = Println{$2} }
           | IF expr THEN statements ELSE statements FI  { $$ = If{Conditional : $2, ThenStat : $4, ElseStat : $6} }
           | WHILE expr DO statements DONE               { $$ = While{Conditional : $2, DoStat : $4} }
-          | BEGIN statements END                        { $$ = Scope{StatList : $2, SymbolTable : &SymbolTable{Table: make(map[string]Type)} } }
+          | BEGIN statements END                        { $$ = Scope{StatList : $2, SymbolTable : &SymbolTable{Table: make(map[Ident]Type)} } }
 
 expr : INTEGER       { $$ =  $1 }
-     | TRUE          { $$ =  true }
-     | FALSE         { $$ =  false }
-     | CHARACTER     { $$ =  Character{Value : $1} }
+     | TRUE          { $$ =  $1 }
+     | FALSE         { $$ =  $1 }
+     | CHARACTER     { $$ =  $1 }
      | STRINGCONST   { $$ =  $1 }
-     | pairliter     { $$ =  $1 }
-     | IDENTIFIER    { $$ =  Ident{Name : $1} }
+     | pairliter     { $$ =  PairLiter{} }
+     | IDENTIFIER    { $$ =  $1 }
      | arrayelem     { $$ =  $1 }
-     | NOT expr     { $$ = Unop{Unary : $1, Expr : $2} }
-     | LEN expr     { $$ = Unop{Unary : $1, Expr : $2} }
-     | ORD expr     { $$ = Unop{Unary : $1, Expr : $2} }
-     | CHR expr     { $$ = Unop{Unary : $1, Expr : $2} }
-     | SUB expr     { $$ = Unop{Unary : $1, Expr : $2} }
+     | NOT expr     { $$ = Unop{Unary : NOT, Expr : $2} }
+     | LEN expr     { $$ = Unop{Unary : LEN, Expr : $2} }
+     | ORD expr     { $$ = Unop{Unary : ORD, Expr : $2} }
+     | CHR expr     { $$ = Unop{Unary : CHR, Expr : $2} }
+     | SUB expr     { $$ = Unop{Unary : SUB, Expr : $2} }
      | PLUS expr    { $$ = $2 }
 
-     | expr PLUS expr { $$ = Binop{Left : $1, Binary : $2, Right : $3} }
-     | expr SUB expr  { $$ = Binop{Left : $1, Binary : $2, Right : $3} }
-     | expr MUL expr  { $$ = Binop{Left : $1, Binary : $2, Right : $3} }
-     | expr MOD expr  { $$ = Binop{Left : $1, Binary : $2, Right : $3} }
-     | expr DIV expr  { $$ = Binop{Left : $1, Binary : $2, Right : $3} }
-     | expr LT expr   { $$ = Binop{Left : $1, Binary : $2, Right : $3} }
-     | expr GT expr   { $$ = Binop{Left : $1, Binary : $2, Right : $3} }
-     | expr LTE expr  { $$ = Binop{Left : $1, Binary : $2, Right : $3} }
-     | expr GTE expr  { $$ = Binop{Left : $1, Binary : $2, Right : $3} }
-     | expr EQ expr   { $$ = Binop{Left : $1, Binary : $2, Right : $3} }
-     | expr NEQ expr  { $$ = Binop{Left : $1, Binary : $2, Right : $3} }
-     | expr AND expr  { $$ = Binop{Left : $1, Binary : $2, Right : $3} }
-     | expr OR expr   { $$ = Binop{Left : $1, Binary : $2, Right : $3} }
+     | expr PLUS expr { $$ = Binop{Left : $1, Binary : PLUS, Right : $3} }
+     | expr SUB expr  { $$ = Binop{Left : $1, Binary : SUB, Right : $3} }
+     | expr MUL expr  { $$ = Binop{Left : $1, Binary : MUL, Right : $3} }
+     | expr MOD expr  { $$ = Binop{Left : $1, Binary : MOD, Right : $3} }
+     | expr DIV expr  { $$ = Binop{Left : $1, Binary : DIV, Right : $3} }
+     | expr LT expr   { $$ = Binop{Left : $1, Binary : LT, Right : $3} }
+     | expr GT expr   { $$ = Binop{Left : $1, Binary : GT, Right : $3} }
+     | expr LTE expr  { $$ = Binop{Left : $1, Binary : LTE, Right : $3} }
+     | expr GTE expr  { $$ = Binop{Left : $1, Binary : GTE, Right : $3} }
+     | expr EQ expr   { $$ = Binop{Left : $1, Binary : EQ, Right : $3} }
+     | expr NEQ expr  { $$ = Binop{Left : $1, Binary : NEQ, Right : $3} }
+     | expr AND expr  { $$ = Binop{Left : $1, Binary : AND, Right : $3} }
+     | expr OR expr   { $$ = Binop{Left : $1, Binary : OR, Right : $3} }
      | OPENROUND expr CLOSEROUND  { $$ = $2 }
 
 arrayliter : OPENSQUARE exprlist CLOSESQUARE { $$ = ArrayLiter{$2}}
 
 exprlist : exprlist COMMA expr {$$ = append($1, $3)}
-         | expr                {$$ = []interface{}{$1}}
-         |                     {$$ = []interface{}{}}
+         | expr                {$$ = []Evaluation{$1}}
+         |                     {$$ = []Evaluation{}}
 
 arrayelem : IDENTIFIER bracketed {$$ = ArrayElem{Ident: $1, Exprs : $2}}
 
 bracketed : bracketed OPENSQUARE expr CLOSESQUARE {$$ = append($1, $3)}
-          | OPENSQUARE expr CLOSESQUARE {$$ = []interface{}{$2}}
+          | OPENSQUARE expr CLOSESQUARE {$$ = []Evaluation{$2}}
 
-pairliter : NULL    { $$ =  Null }
+pairliter : NULL    { $$ =  PairLiter{} }
 
 pairelem : FST expr { $$ = PairElem{Fsnd: FST, Expr : $2} }
          | SND expr { $$ = PairElem{Fsnd: SND, Expr : $2} }

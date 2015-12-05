@@ -1,7 +1,7 @@
 package parser
 
 import (
-	"ast"
+	. "ast"
 	"fmt"
 	"math"
 	"os"
@@ -50,8 +50,8 @@ type Lexer struct {
 	width      int
 	lastPos    int // position of most recent item returned by nextItem
 	Items      chan Token
-	prog       *ast.Program // The parsed program
-	lastItem   Token        // The last item emitted
+	prog       *Program // The parsed program
+	lastItem   Token    // The last item emitted
 	parseError bool
 }
 
@@ -404,8 +404,16 @@ func (l *Lexer) Lex(lval *parserSymType) int {
 	token := l.NextItem()
 	//	fmt.Println(token, token.Typ)
 	switch token.Typ {
-	case STRINGCONST, IDENTIFIER, CHARACTER:
-		*lval = parserSymType{str: token.Lexeme}
+	case STRINGCONST:
+		*lval = parserSymType{stringconst: Str(token.Lexeme)}
+	case CHARACTER:
+		*lval = parserSymType{character: Character(token.Lexeme)}
+	case IDENTIFIER:
+		*lval = parserSymType{ident: Ident(token.Lexeme)}
+	case TRUE:
+		*lval = parserSymType{boolean: Boolean(true)}
+	case FALSE:
+		*lval = parserSymType{boolean: Boolean(false)}
 	case INTEGER:
 		num, err := strconv.Atoi(token.Lexeme)
 		if err != nil {
@@ -416,7 +424,7 @@ func (l *Lexer) Lex(lval *parserSymType) int {
 			fmt.Println("Int too big or small")
 			os.Exit(100)
 		}
-		*lval = parserSymType{number: num}
+		*lval = parserSymType{integer: Integer(num)}
 	}
 	return token.Typ
 }
@@ -446,12 +454,12 @@ func runeIsEscape(a rune) bool {
 	return false
 }
 
-func checkStats(stats []interface{}) bool {
+func checkStats(stats []Statement) bool {
 	switch stats[len(stats)-1].(type) {
-	case ast.Return, ast.Exit:
+	case Return, Exit:
 		return true
-	case ast.If:
-		ifstat := stats[len(stats)-1].(ast.If)
+	case If:
+		ifstat := stats[len(stats)-1].(If)
 		return checkStats(ifstat.ThenStat) && checkStats(ifstat.ElseStat)
 	default:
 		return false

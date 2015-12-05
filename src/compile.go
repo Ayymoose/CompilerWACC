@@ -1,16 +1,10 @@
 package main
 
 import (
-	//	"ast"
 	"fmt"
 	"io/ioutil"
 	"os"
 	"parser"
-
-	"ast"
-
-	codeG "backend/codeGeneration"
-	"backend/filewriter"
 )
 
 const SYNTAX_ERROR = 100
@@ -32,7 +26,7 @@ const BACKENDFILE = "ARMCode.s"
 
 func main() {
 
-	armList := &filewriter.ARMList{}
+	//armList := &filewriter.ARMList{}
 	file := os.Args[1] // index 1 is file path
 	b, err := ioutil.ReadFile(file)
 	if err != nil {
@@ -45,13 +39,20 @@ func main() {
 		os.Exit(SYNTAX_ERROR)
 	}
 	fmt.Println(root)
-
-	cg := codeG.ConstructCodeGenerator(root, armList, ast.SymbolTable{})
-	cg.GenerateCode()
-
-	for _, instr := range *armList {
-		fmt.Print(instr)
+	errs := root.SemanticCheck()
+	if errs != nil {
+		for _, str := range errs {
+			fmt.Println(str)
+		}
+		os.Exit(SEMANTIC_ERROR)
 	}
+	/*
+			cg := codeG.ConstructCodeGenerator(root, armList, ast.SymbolTable{})
+			cg.GenerateCode()
+
+		for _, instr := range *armList {
+			fmt.Print(instr)
+		} */
 
 	//armList.WriteToFile(BACKENDFILE)
 }
