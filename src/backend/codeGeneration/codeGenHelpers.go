@@ -23,85 +23,36 @@ func GetScopeVarSize(statList []interface{}) int {
 	for _, stat := range statList {
 		switch stat.(type) {
 		case Declare:
-			var t = stat.(Declare).DecType
-			switch t.(type) {
-			case PairType:
-				scopeSize += PAIR_SIZE
-			case ArrayType:
-				scopeSize += ARRAY_SIZE
-			case ConstType:
-				switch t.(ConstType) {
-				case Int:
-					scopeSize += INT_SIZE
-				case String:
-					scopeSize += STRING_SIZE
-				case Bool:
-					scopeSize += BOOL_SIZE
-				case Char:
-					scopeSize += CHAR_SIZE
-				default:
-					fmt.Println("No type found for ConstType")
-				}
-			}
-			//Anything else is just ignored
+			scopeSize += sizeOf(stat.(Declare).DecType)
 		}
 	}
 
 	return scopeSize
 }
 
-//Calculates the size of a pair type and returns (sizeOf(fst),sizeOf(snd))
+// Calculates the size of a pair type
 func pairTypeSize(typeFst Type, typeSnd Type) (int,int)  {
-	var fstSize = 0
-	var sndSize = 0
-
-	switch typeFst.(type) {
-	case PairType:
-		fstSize = PAIR_SIZE
-	case ConstType:
-		switch (typeFst.(ConstType)) {
-		case Int:
-			fstSize = INT_SIZE
-		case Bool:
-			fstSize = BOOL_SIZE
-		case Char:
-			fstSize = CHAR_SIZE
-		case String:
-			fstSize = STRING_SIZE
-		default:
-			fmt.Println("Unknown type1")
-	}
+	return sizeOf(typeFst),sizeOf(typeSnd)
 }
 
-	switch typeSnd.(type) {
-	case PairType:
-		sndSize = PAIR_SIZE
-	case ConstType:
-		switch (typeSnd.(ConstType)) {
-		case Int:
-			sndSize = INT_SIZE
-		case Bool:
-			sndSize = BOOL_SIZE
-		case Char:
-			sndSize = CHAR_SIZE
-		case String:
-			sndSize = STRING_SIZE
-		default:
-			fmt.Println("Unknown type2")
-	}
-  }
-
-	return fstSize,sndSize
-}
-
-
-//Calcuates the size of a type
+// Calcuates the size of a type
 func sizeOf(t Type) int {
 	var size = 0
 	switch t.(type) {
-
-	//Add more types here
-
+	case PairType:
+		size = PAIR_SIZE
+  case ConstType:
+	 switch t.(ConstType) {
+		 case Int:
+ 			size = INT_SIZE
+ 		case String:
+ 			size = STRING_SIZE
+ 		case Bool:
+ 			size = BOOL_SIZE
+ 		case Char:
+ 			size = CHAR_SIZE
+ 		//default:
+	 }
 	case ArrayType:
 		switch t.(ArrayType).Type {
 		case Int:
@@ -119,13 +70,13 @@ func sizeOf(t Type) int {
 
 
 	default:
-		fmt.Println("No type found!")
+		fmt.Println("sizeOf(t) t is an unknown type")
 
 	}
 	return size
 }
 
-//Calcuates the size of an array
+// Calcuates the size of an array
 func arraySize(array []interface{}) int {
 	return len(array)
 }

@@ -209,11 +209,31 @@ func (cg CodeGenerator) cgVisitParameter(node Param, offset int) {
 
 //Pushes a pair of elements onto the stack
 func (cg CodeGenerator) pushPair(fst interface{}, snd interface{}, typeFst Type, typeSnd Type, reg1 string, reg2 string) {
-	//Store the address in the free register
+	// Store the address in the free register
 	appendAssembly(cg.instrs, "MOV "+reg2+", r0", 1, 1)
 
-	//Load the first element into a register to be stored
-	//Mmmmm
+	// Load the first element into a register to be stored
+	switch typeFst.(type) {
+	case PairType:
+		fmt.Println("Pair type for fst not implemented")
+	case ConstType:
+
+		switch (typeFst.(ConstType)) {
+		case Int:
+			appendAssembly(cg.instrs, "LDR "+reg1+", ="+strconv.Itoa(fst.(int)), 1, 1)
+		case Bool:
+			appendAssembly(cg.instrs, "LDR "+reg1+", ="+boolInt(fst.(bool)), 1, 1)
+		case String:
+			appendAssembly(cg.instrs, "LDR "+reg1+", "+cg.getMsgLabel(fst.(string)), 1, 1)
+		case Char:
+
+		default:
+
+		}
+	default:
+			fmt.Println("Unknown type for pair fst")
+
+	}
 
 	//Allocate memory for the first element
 	var fstSize, sndSize = pairTypeSize(typeFst, typeSnd)
@@ -225,6 +245,26 @@ func (cg CodeGenerator) pushPair(fst interface{}, snd interface{}, typeFst Type,
 	appendAssembly(cg.instrs, "STR r0, ["+reg2+"]", 1, 1)
 
 	//Load the second element into a register to be stored
+	switch typeSnd.(type) {
+
+	case PairType:
+		fmt.Println("Pair type for snd not implemented")
+	case ConstType:
+		switch (typeSnd.(ConstType)) {
+		case Int:
+			appendAssembly(cg.instrs, "LDR "+reg1+", ="+strconv.Itoa(snd.(int)), 1, 1)
+		case Bool:
+      appendAssembly(cg.instrs, "LDR "+reg1+", ="+boolInt(snd.(bool)), 1, 1)
+		case String:
+      appendAssembly(cg.instrs, "LDR "+reg1+", "+cg.getMsgLabel(snd.(string)), 1, 1)
+		case Char:
+
+		default:
+		}
+	default:
+		fmt.Println("Unknown type for pair snd")
+
+	}
 
 	//Allocate memory for the second element
 	appendAssembly(cg.instrs, "LDR r0, ="+strconv.Itoa(sndSize), 1, 1)
@@ -239,13 +279,13 @@ func (cg CodeGenerator) pushPair(fst interface{}, snd interface{}, typeFst Type,
 
 }
 
-//Puts the array elements onto the stack
+// Puts the array elements onto the stack
 func (cg CodeGenerator) pushArrayElements(array []interface{}, srcReg string, dstReg string, t Type) {
 
 	var arraySize = arraySize(array)
-	//Loop through the array pushing it onto the stack
+	// Loop through the array pushing it onto the stack
 	for i := 0; i < arraySize; i++ {
-		//Array of pairs,ints,bools,chars,strings
+		// Array of pairs,ints,bools,chars,strings
 		var arrayItem = array[i]
 		switch t.(type) {
 		case ArrayType:
@@ -254,17 +294,13 @@ func (cg CodeGenerator) pushArrayElements(array []interface{}, srcReg string, ds
 				appendAssembly(cg.instrs, "LDR "+srcReg+", ="+strconv.Itoa(arrayItem.(int)), 1, 1)
 				appendAssembly(cg.instrs, "STR "+srcReg+", ["+dstReg+", #"+strconv.Itoa(ARRAY_SIZE+INT_SIZE*i)+"]", 1, 1)
 			case String:
-				//NEED TO GET CORRECT LABEL
-				var label = "msg_"
-				appendAssembly(cg.instrs, "LDR "+srcReg+", ="+label, 1, 1)
+				appendAssembly(cg.instrs, "LDR "+srcReg+", "+ cg.getMsgLabel(array[i].(string)), 1, 1)
 				appendAssembly(cg.instrs, "STR "+srcReg+", ["+dstReg+", #"+strconv.Itoa(ARRAY_SIZE+STRING_SIZE*i)+"]", 1, 1)
-				//fmt.Println(array[i])
 			case Bool:
 				appendAssembly(cg.instrs, "MOV "+srcReg+", #"+boolInt(arrayItem.(bool)), 1, 1)
 				appendAssembly(cg.instrs, "STRB "+srcReg+", ["+dstReg+", #"+strconv.Itoa(ARRAY_SIZE+BOOL_SIZE*i)+"]", 1, 1)
 			case Char:
-				//WHY DOES THIS PRINT 0 ????
-				fmt.Println(array[i])
+				// Problem with AST that gives 0s instead of the actual characters
 				//appendAssembly(cg.instrs, "MOV "+srcReg+", #"+strconv.Itoa(arrayItem.(string)), 1, 1)
 				appendAssembly(cg.instrs, "STRB "+srcReg+", ["+dstReg+", #"+strconv.Itoa(ARRAY_SIZE+CHAR_SIZE*i)+"]", 1, 1)
 			default:
@@ -272,9 +308,9 @@ func (cg CodeGenerator) pushArrayElements(array []interface{}, srcReg string, ds
 			}
 		}
 	}
-	//Put the size of the array onto the stack
+	// Put the size of the array onto the stack
 	appendAssembly(cg.instrs, "LDR "+srcReg+", ="+strconv.Itoa(arraySize), 1, 1)
-	//Now store the address of the array onto the stack
+	// Now store the address of the array onto the stack
 	appendAssembly(cg.instrs, "STR "+srcReg+", ["+dstReg+"]", 1, 1)
 	appendAssembly(cg.instrs, "STR "+dstReg+", [sp, #"+cg.subCurrP(INT_SIZE)+"]", 1, 1)
 }
@@ -304,33 +340,36 @@ func (cg CodeGenerator) cgVisitDeclareStat(node Declare) {
 		}
 	case PairType:
 
-		//First allocate memory to store two addresses (8-bytes)
-		appendAssembly(cg.instrs, "LDR r0, ="+strconv.Itoa(INT_SIZE*2), 1, 1)
+		// First allocate memory to store two addresses (8-bytes)
+		appendAssembly(cg.instrs, "LDR r0, ="+strconv.Itoa(INT_SIZE * 2), 1, 1)
 		appendAssembly(cg.instrs, "BL malloc", 1, 1)
 
-		//Push a pair of elements onto the stack
-		cg.pushPair(rhs.(NewPair).FstExpr, rhs.(NewPair).SndExpr, node.DecType.(PairType).FstType, node.DecType.(PairType).SndType, "r5", "r4")
+		// Push a pair of elements onto the stack
+		cg.pushPair(rhs.(NewPair).FstExpr, rhs.(NewPair).SndExpr, node.DecType.(PairType).FstType, node.DecType.(PairType).SndType,"r5","r4")
 
 	case ConstType:
 		switch node.DecType.(ConstType) {
 		case Bool:
-			//Load the bool into a register
+			// Load the bool into a register
 			appendAssembly(cg.instrs, "MOV r4, #"+strconv.Itoa(node.Rhs.(int)), 1, 1)
-			//Using STRB, store it on the stack
+			// Using STRB, store it on the stack
 			appendAssembly(cg.instrs,
 				"STRB r4, [sp, #"+cg.subCurrP(BOOL_SIZE)+"])", 1, 1)
 		case Char:
-			//Load the character into a register
+			// Load the character into a register
 			appendAssembly(cg.instrs, "MOV r4, #"+node.Rhs.(string), 1, 1)
-			//Using STRB, store it on the stack
-			appendAssembly(cg.instrs, "STRB r4, [sp, #"+cg.subCurrP(CHAR_SIZE)+"])", 1, 1)
+			// Using STRB, store it on the stack
+			appendAssembly(cg.instrs,"STRB r4, [sp, #"+cg.subCurrP(CHAR_SIZE)+"]", 1, 1)
 		case Int:
 			// Load the value of the declaration to the register
 			appendAssembly(cg.instrs, "LDR r4, "+strconv.Itoa(node.Rhs.(int)), 1, 1)
 			// Store the value of declaration to stack
-			appendAssembly(cg.instrs, "STR r4, [sp, #"+cg.subCurrP(INT_SIZE)+"])", 1, 1)
+			appendAssembly(cg.instrs, "STR r4, [sp, #"+cg.subCurrP(INT_SIZE)+"]", 1, 1)
 		case String:
-			fmt.Println("String not implemented")
+			// Load the address of the string to the register
+			appendAssembly(cg.instrs, "LDR r4, " + cg.getMsgLabel(node.Rhs.(string)), 1, 1)
+			// Store the address onto the stack
+			appendAssembly(cg.instrs, "STR r4, [sp, #"+cg.subCurrP(STRING_SIZE)+"]", 1, 1)
 		default:
 			fmt.Println("Type not implemented")
 		}
