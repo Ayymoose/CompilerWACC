@@ -43,6 +43,10 @@ func (node Declare) visitStatement(functionTable []*Function, symbolTable *Symbo
 				switch exprType.(type) {
 				case PairType:
 					// Do nothing
+				case ConstType:
+					if exprType.(ConstType) != Pair {
+						semanticErrors = append(semanticErrors, errors.New("Types in declaration do not match:"+node.DecType.typeString()+","+exprType.typeString()))
+					}
 				default:
 					semanticErrors = append(semanticErrors, errors.New("Types in declaration do not match:"+node.DecType.typeString()+","+exprType.typeString()))
 				}
@@ -51,6 +55,10 @@ func (node Declare) visitStatement(functionTable []*Function, symbolTable *Symbo
 				switch exprType.(type) {
 				case PairType:
 					// Do nothing
+				case ConstType:
+					if exprType.(ConstType) != Pair {
+						semanticErrors = append(semanticErrors, errors.New("Types in declaration do not match:"+node.DecType.typeString()+","+exprType.typeString()))
+					}
 				default:
 					semanticErrors = append(semanticErrors, errors.New("Types in declaration do not match:"+node.DecType.typeString()+","+exprType.typeString()))
 				}
