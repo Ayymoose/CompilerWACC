@@ -279,6 +279,23 @@ func (cg CodeGenerator) pushPair(fst interface{}, snd interface{}, typeFst Type,
 
 }
 
+// Global handle function
+func (cg CodeGenerator) handle(t Type, srcReg string) {
+
+	switch t.(type) {
+	case bool:
+		cg.handleBool(t,srcReg)
+	case int:
+	  cg.handleInt(t,srcReg)
+	case string:
+		cg.handleString(t,srcReg)
+	case rune:
+		cg.handleChar(t,srcReg)
+	default:
+		fmt.Println("handle() doesn't support type")
+	}
+}
+
 // Handles the delegation of integer calls (Better name?)
 func (cg CodeGenerator) handleInt(t Type, srcReg string) {
 
@@ -419,9 +436,11 @@ func (cg CodeGenerator) cgVisitDeclareStat(node Declare) {
 	var rhs = node.Rhs
 
 	switch node.DecType.(type) {
+
 	case ArrayType:
 
 		switch rhs.(type) {
+
 		case Call:
 			//	cgVisitCallStat(node.Rhs.(Call).Ident, node.Rhs.(Call).ParamList)
 		case ArrayLiter:
@@ -450,9 +469,12 @@ func (cg CodeGenerator) cgVisitDeclareStat(node Declare) {
 		cg.pushPair(rhs.(NewPair).FstExpr, rhs.(NewPair).SndExpr, node.DecType.(PairType).FstType, node.DecType.(PairType).SndType,"r5","r4")
 
 	case ConstType:
+
+		//cg.handle(node.DecType.(ConstType),"r4")
+
 		switch node.DecType.(ConstType) {
 
-    //CAN I CHANGE THIS USING A FUNCTION POINTER?
+    //CAN I CHANGE THIS USING A FUNCTION POINTER
 
 		case Bool:
       cg.handleBool(rhs, "r4")
@@ -473,6 +495,11 @@ func (cg CodeGenerator) cgVisitDeclareStat(node Declare) {
 		default:
 			fmt.Println("Type not implemented")
 		}
+
+
+
+	default:
+	//	typeOf(node.DecType)
 	}
 
 }
@@ -551,7 +578,8 @@ func (cg CodeGenerator) cgVisitPrintStat(node Print) {
 	expr := node.Expr
 
 	switch expr.(type) {
-	case string:
+
+   case string:
 		strValue := expr.(string)
 
 		// LDR r4, =msg_n : load the string message label
@@ -597,6 +625,9 @@ func (cg CodeGenerator) cgVisitPrintStat(node Print) {
 		appendAssembly(cg.instrs, "BL p_print_bool", 1, 1)
 		// Define relevant print function definition (iff it hasnt been defined)
 		cg.cgVisitPrintStatFunc_H("p_print_bool")
+	default:
+	  typeOf(expr)
+
 	}
 }
 
