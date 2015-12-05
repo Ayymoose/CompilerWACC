@@ -51,7 +51,7 @@ func main() {
 		os.Exit(SEMANTIC_ERROR)
 	}
 
-	var armList *ARMList
+	var armList *ARMList = new(ARMList)
 
 	cg := codeG.ConstructCodeGenerator(root, armList, ast.SymbolTable{})
 	cg.GenerateCode()
