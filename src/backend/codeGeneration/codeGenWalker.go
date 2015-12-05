@@ -294,7 +294,8 @@ func (cg CodeGenerator) handleInt(t Type, srcReg string) {
 	 cg.cgVisitUnopExpr(t.(Unop))
 	case Ident:
 	 // Load the address from the stack to register
-	 appendAssembly(cg.instrs, "LDR " +srcReg + ", [sp, #"+strconv.Itoa(cg.getIdentOffset(t.(Ident).Name)) + "]", 1, 1)
+	 var value, _ = cg.getIdentOffset(t.(Ident).Name)
+	 appendAssembly(cg.instrs, "LDR " +srcReg + ", [sp, #"+strconv.Itoa(value) + "]", 1, 1)
 	case ArrayElem:
 		 fmt.Println("ArrayElem not")
 	case Type:
@@ -318,7 +319,8 @@ func (cg CodeGenerator) handleBool(t Type, srcReg string) {
 		cg.cgVisitUnopExpr(t.(Unop))
 	case Ident:
 		// Load the address from the stack to register
-		appendAssembly(cg.instrs, "LDR " + srcReg +", [sp, #"+strconv.Itoa(cg.getIdentOffset(t.(Ident).Name)) + "]", 1, 1)
+		var value, _ = cg.getIdentOffset(t.(Ident).Name)
+		appendAssembly(cg.instrs, "LDR " + srcReg +", [sp, #"+strconv.Itoa(value) + "]", 1, 1)
 	case ArrayElem:
 		fmt.Println("ArrayElem")
 	case Type:
@@ -341,7 +343,8 @@ func (cg CodeGenerator) handleChar(t Type, srcReg string) {
 		cg.cgVisitUnopExpr(t.(Unop))
 	case Ident:
 		// Load the address from the stack to register
-		appendAssembly(cg.instrs, "LDR " + srcReg +", [sp, #"+strconv.Itoa(cg.getIdentOffset(t.(Ident).Name)) + "]", 1, 1)
+		var value, _ = cg.getIdentOffset(t.(Ident).Name)
+		appendAssembly(cg.instrs, "LDR " + srcReg +", [sp, #"+strconv.Itoa(value) + "]", 1, 1)
 	case ArrayElem:
 		fmt.Println("ArrayElem not implemeted")
 	case Type:
@@ -364,7 +367,8 @@ func (cg CodeGenerator) handleString(t Type, srcReg string) {
 		cg.cgVisitUnopExpr(t.(Unop))
 	case Ident:
 		// Load the address from the stack to register
-		appendAssembly(cg.instrs, "LDR " + srcReg +", [sp, #"+strconv.Itoa(cg.getIdentOffset(t.(Ident).Name)) + "]", 1, 1)
+		var value, _ = cg.getIdentOffset(t.(Ident).Name)
+		appendAssembly(cg.instrs, "LDR " + srcReg +", [sp, #"+strconv.Itoa(value) + "]", 1, 1)
 	case ArrayElem:
 			fmt.Println("ArrayElem not implemeted")
 	case Type:
