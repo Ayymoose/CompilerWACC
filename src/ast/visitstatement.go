@@ -35,7 +35,29 @@ func (node Declare) visitStatement(functionTable []*Function, symbolTable *Symbo
 		fmt.Println("EXPR TYPE IS NIL")
 	}
 	if exprType != node.DecType {
-		semanticErrors = append(semanticErrors, errors.New("Types in declaration do not match:"))
+		fmt.Println("Got in HEEEREEEEE")
+		switch node.DecType.(type) {
+		case PairType:
+			pairTypeStruct := node.DecType.(PairType)
+			if pairTypeStruct.FstType == Pair {
+				switch exprType.(type) {
+				case PairType:
+					// Do nothing
+				default:
+					semanticErrors = append(semanticErrors, errors.New("Types in declaration do not match:"+node.DecType.typeString()+","+exprType.typeString()))
+				}
+			}
+			if pairTypeStruct.SndType == Pair {
+				switch exprType.(type) {
+				case PairType:
+					// Do nothing
+				default:
+					semanticErrors = append(semanticErrors, errors.New("Types in declaration do not match:"+node.DecType.typeString()+","+exprType.typeString()))
+				}
+			}
+		default:
+			semanticErrors = append(semanticErrors, errors.New("Types in declaration do not match:"+node.DecType.typeString()+","+exprType.typeString()))
+		}
 	}
 	symbolTable.insert(node.Lhs, node.DecType)
 	if len(semanticErrors) > 0 {

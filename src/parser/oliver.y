@@ -189,8 +189,8 @@ bracketed : bracketed OPENSQUARE expr CLOSESQUARE {$$ = append($1, $3)}
 pairliter : NULL    { $$ =  PairLiter{} }
 
 
-pairelem : FST expr { $$ = PairElem{Fsnd: FST, Expr : $2} }
-         | SND expr { $$ = PairElem{Fsnd: SND, Expr : $2} }
+pairelem : FST expr { $$ = PairElem{Fsnd: Fst, Expr : $2} }
+         | SND expr { $$ = PairElem{Fsnd: Snd, Expr : $2} }
 
 pairtype : PAIR OPENROUND pairelemtype COMMA pairelemtype CLOSEROUND  { $$ = PairType{FstType : $3, SndType : $5} }
 

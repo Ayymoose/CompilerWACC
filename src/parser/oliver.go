@@ -1030,13 +1030,13 @@ parserdefault:
 		parserDollar = parserS[parserpt-2 : parserpt+1]
 		//line oliver.y:192
 		{
-			parserVAL.pairelem = PairElem{Fsnd: FST, Expr: parserDollar[2].expr}
+			parserVAL.pairelem = PairElem{Fsnd: Fst, Expr: parserDollar[2].expr}
 		}
 	case 68:
 		parserDollar = parserS[parserpt-2 : parserpt+1]
 		//line oliver.y:193
 		{
-			parserVAL.pairelem = PairElem{Fsnd: SND, Expr: parserDollar[2].expr}
+			parserVAL.pairelem = PairElem{Fsnd: Snd, Expr: parserDollar[2].expr}
 		}
 	case 69:
 		parserDollar = parserS[parserpt-6 : parserpt+1]
