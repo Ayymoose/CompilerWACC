@@ -2,6 +2,7 @@ package ast
 
 import (
 	"errors"
+	"fmt"
 )
 
 func (value Call) eval(functionTable []*Function, symbolTable *SymbolTable) (Type, error) {
@@ -168,7 +169,7 @@ func (binop Binop) eval(functionTable []*Function, symbolTable *SymbolTable) (Ty
 			return nil, errors.New("Left expr of binary bool operation is not an Bool")
 		}
 		if typr != Bool {
-			return nil, errors.New("Right expr of binary bool operation is not an Bool")
+			return nil, errors.New("Right expr of binary bool operation is not an Bool: " + typr.typeString() + " " + fmt.Sprint(binop.Right))
 		}
 		return Bool, nil
 	case LT, LTE, GT, GTE:
