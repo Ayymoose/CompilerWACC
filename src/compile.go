@@ -41,9 +41,9 @@ func main() {
 	fmt.Println(root)
 	errs := root.SemanticCheck()
 	if errs != nil {
-		//for _, str := range errs {
-		//	fmt.Println(str)
-		//	}
+		for _, str := range errs {
+			fmt.Println(str)
+		}
 		os.Exit(SEMANTIC_ERROR)
 	}
 	/*

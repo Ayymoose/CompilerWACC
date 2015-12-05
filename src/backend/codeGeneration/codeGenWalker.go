@@ -207,31 +207,43 @@ func (cg CodeGenerator) cgVisitParameter(node Param, offset int) {
 	}*/
 }
 
+// Evaluates a pair
+func (cg CodeGenerator) evalPair(pairType Type, dstReg string) {
+
+
+
+
+	switch pairType.(type) {
+	case PairType:
+		fmt.Println("Pair type not implemented")
+	case Integer:
+		appendAssembly(cg.instrs, "LDR "+dstReg+", ="+strconv.Itoa(int(pairType.(Integer))), 1, 1)
+	case Boolean:
+		appendAssembly(cg.instrs, "LDR "+dstReg+", ="+boolInt(bool(pairType.(Boolean))), 1, 1)
+	case Str:
+		appendAssembly(cg.instrs, "LDR "+dstReg+", "+cg.getMsgLabel(string(pairType.(Str))), 1, 1)
+	case Character:
+
+	default:
+		fmt.Println("Unknown type for pair")
+		typeOf(pairType)
+	}
+}
+
 //Pushes a pair of elements onto the stack
 func (cg CodeGenerator) pushPair(fst Evaluation, snd Evaluation, typeFst Type, typeSnd Type, reg1 string, reg2 string) {
 	// Store the address in the free register
 	appendAssembly(cg.instrs, "MOV "+reg2+", r0", 1, 1)
 
-	// Load the first element into a register to be stored
-	switch typeFst.(type) {
-	case PairType:
-		fmt.Println("Pair type for fst not implemented")
-	case Integer:
-		appendAssembly(cg.instrs, "LDR "+reg1+", ="+strconv.Itoa(int(fst.(Integer))), 1, 1)
-	case Boolean:
-		appendAssembly(cg.instrs, "LDR "+reg1+", ="+boolInt(bool(fst.(Boolean))), 1, 1)
-	case Str:
-		appendAssembly(cg.instrs, "LDR "+reg1+", "+cg.getMsgLabel(string(fst.(Str))), 1, 1)
-	case Character:
+	//Get pair sizes
+  var fstSize, sndSize = pairTypeSize(typeFst, typeSnd)
 
-	default:
-		fmt.Println("Unknown type for pair fst")
-		typeOf(typeFst)
-	}
+	// Load the first element into a register to be stored
+  cg.evalPair(typeFst,reg1)
 
 	//Allocate memory for the first element
-	var fstSize, sndSize = pairTypeSize(typeFst, typeSnd)
 	appendAssembly(cg.instrs, "LDR r0, ="+strconv.Itoa(fstSize), 1, 1)
+
 	appendAssembly(cg.instrs, "BL malloc", 1, 1)
 	//Store the first element to the newly allocated memory onto the stack
 	appendAssembly(cg.instrs, "STR "+reg1+", [r0]", 1, 1)
@@ -239,25 +251,11 @@ func (cg CodeGenerator) pushPair(fst Evaluation, snd Evaluation, typeFst Type, t
 	appendAssembly(cg.instrs, "STR r0, ["+reg2+"]", 1, 1)
 
 	//Load the second element into a register to be stored
-	switch typeSnd.(type) {
-
-	case PairType:
-		fmt.Println("Pair type for snd not implemented")
-	case Integer:
-		appendAssembly(cg.instrs, "LDR "+reg1+", ="+strconv.Itoa(int(snd.(Integer))), 1, 1)
-	case Boolean:
-		appendAssembly(cg.instrs, "LDR "+reg1+", ="+boolInt(bool(snd.(Boolean))), 1, 1)
-	case Str:
-		appendAssembly(cg.instrs, "LDR "+reg1+", "+cg.getMsgLabel(string(snd.(Str))), 1, 1)
-	case Character:
-
-	default:
-		fmt.Println("Unknown type for pair snd")
-    typeOf(typeFst)
-	}
+	cg.evalPair(typeSnd,reg1)
 
 	//Allocate memory for the second element
 	appendAssembly(cg.instrs, "LDR r0, ="+strconv.Itoa(sndSize), 1, 1)
+
 	appendAssembly(cg.instrs, "BL malloc", 1, 1)
 	//Store the second element to the newly allocated memory onto the stack
 	appendAssembly(cg.instrs, "STR "+reg1+", [r0]", 1, 1)
@@ -349,11 +347,7 @@ func (cg CodeGenerator) pushArrayElements(array []Evaluation, srcReg string, dst
 		var arrayItem = array[i]
 		switch t.(type) {
 		case ArrayType:
-
-
 			cg.evalRHS(arrayItem, srcReg)
-
-			///
 			switch t.(ArrayType).Type {
 			case Int:
 				appendAssembly(cg.instrs, "STR "+srcReg+", ["+dstReg+", #"+strconv.Itoa(ARRAY_SIZE+INT_SIZE*i)+"]", 1, 1)
@@ -366,8 +360,6 @@ func (cg CodeGenerator) pushArrayElements(array []Evaluation, srcReg string, dst
 			default:
 				fmt.Println("Type not implemented")
 			}
-			///
-
 		}
 	}
 	// Put the size of the array onto the stack
