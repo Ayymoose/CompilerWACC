@@ -45,6 +45,7 @@ func main() {
 		for _, str := range errs {
 			fmt.Println(str)
 		}
+		fmt.Println("Semantic Error : 200")
 		os.Exit(SEMANTIC_ERROR)
 	}
 	/*
