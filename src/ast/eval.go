@@ -15,7 +15,7 @@ func (value Call) eval(functionTable []*Function, symbolTable *SymbolTable) (Typ
 				if err != nil {
 					return nil, err
 				}
-				if exprType != function.ParameterTypes[ind] {
+				if exprType != function.ParameterTypes[ind].ParamType {
 					return nil, errors.New("Parameters of call and defintion do not match")
 				}
 			}
