@@ -1,5 +1,9 @@
 DECLARE: Almost done except pairs and arrays need to be fully implemented @Ayman
 
+GETIDENTOFFSET IMPORTANT ----------- NANA, HENRYK, OLI
+SCOPE MAP AND SHIT -----------------
+MAKE EVALRHS WORK FOR FUNCTIONS-----
+
 ASSIGNMENT: IN PROGRESS ---
 - CALL is being implemneted by henryk
 
@@ -16,7 +20,8 @@ EVAL RHS: IN PROGRESS ---
 - do array liter AYMAN
 - do newpair NANA
 - do pairelem NANA
- 
+- do call HENRYK
+
 EXIT: COMPLETE ----------------------------------------
 
 PRINT: IN PROGRESS/ LITERALS COMPLETE* ---
@@ -32,6 +37,6 @@ WHILE: NOT STARTED ---
 
 SCOPE: NOT STARTED ---
 
-UNOP: NOT STARTED ---
+UNOP: NOT STARTED --- HENRYK
 
-BINOP: NOT STARTED ---
+BINOP: NOT STARTED --- HENRYK

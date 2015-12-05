@@ -5,10 +5,6 @@ import (
 	"io/ioutil"
 	"os"
 	"parser"
-
-	"ast"
-	codeG "backend/codeGeneration"
-	. "backend/filewriter"
 )
 
 const SYNTAX_ERROR = 100
@@ -45,20 +41,18 @@ func main() {
 	fmt.Println(root)
 	errs := root.SemanticCheck()
 	if errs != nil {
-		for _, str := range errs {
-			fmt.Println(str)
-		}
+		//for _, str := range errs {
+		//	fmt.Println(str)
+	//	}
 		os.Exit(SEMANTIC_ERROR)
 	}
+	/*
+			cg := codeG.ConstructCodeGenerator(root, armList, ast.SymbolTable{})
+			cg.GenerateCode()
 
-	var armList *ARMList = new(ARMList)
-
-	cg := codeG.ConstructCodeGenerator(root, armList, ast.SymbolTable{})
-	cg.GenerateCode()
-
-	for _, instr := range *armList {
-		fmt.Print(instr)
-	}
+		for _, instr := range *armList {
+			fmt.Print(instr)
+		} */
 
 	//armList.WriteToFile(BACKENDFILE)
 }

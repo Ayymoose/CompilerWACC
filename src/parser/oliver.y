@@ -147,7 +147,7 @@ expr : INTEGER       { $$ =  $1 }
 
      | CHARACTER     { $$ =  $1 }
      | STRINGCONST   { $$ =  $1 }
-     | pairliter     { $$ =  PairLiter{} }
+     | pairliter     { $$ =  $1 }
      | IDENTIFIER    { $$ =  $1 }
      | arrayelem     { $$ =  $1 }
 
@@ -189,14 +189,14 @@ bracketed : bracketed OPENSQUARE expr CLOSESQUARE {$$ = append($1, $3)}
 pairliter : NULL    { $$ =  PairLiter{} }
 
 
-pairelem : FST expr { $$ = PairElem{Fsnd: FST, Expr : $2} }
-         | SND expr { $$ = PairElem{Fsnd: SND, Expr : $2} }
+pairelem : FST expr { $$ = PairElem{Fsnd: Fst, Expr : $2} }
+         | SND expr { $$ = PairElem{Fsnd: Snd, Expr : $2} }
 
 pairtype : PAIR OPENROUND pairelemtype COMMA pairelemtype CLOSEROUND  { $$ = PairType{FstType : $3, SndType : $5} }
 
 pairelemtype : basetype  { $$ = $1 }
              | arraytype { $$ = $1 }
-             | PAIR      { $$ = PairType{} }
+             | PAIR      { $$ = Pair}
 
 typeDef : basetype  { $$ =  $1 }
         | arraytype { $$ =  $1 }

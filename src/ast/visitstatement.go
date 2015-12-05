@@ -1,6 +1,9 @@
 package ast
 
-import "errors"
+import (
+	"errors"
+	"fmt"
+)
 
 func (root *Program) SemanticCheck() errorSlice {
 	var semanticErrors []error
@@ -26,8 +29,43 @@ func (node Declare) visitStatement(functionTable []*Function, symbolTable *Symbo
 	if errs != nil {
 		semanticErrors = append(semanticErrors, errs)
 	}
+	if exprType != nil {
+		//	fmt.Println(node.DecType.typeString() + "," + exprType.typeString())
+	} else {
+		fmt.Println("EXPR TYPE IS NIL")
+	}
 	if exprType != node.DecType {
-		semanticErrors = append(semanticErrors, errors.New("Types in declaration do not match"))
+		fmt.Println("Got in HEEEREEEEE")
+		switch node.DecType.(type) {
+		case PairType:
+			pairTypeStruct := node.DecType.(PairType)
+			if pairTypeStruct.FstType == Pair {
+				switch exprType.(type) {
+				case PairType:
+					// Do nothing
+				case ConstType:
+					if exprType.(ConstType) != Pair {
+						semanticErrors = append(semanticErrors, errors.New("Types in declaration do not match:"+node.DecType.typeString()+","+exprType.typeString()))
+					}
+				default:
+					semanticErrors = append(semanticErrors, errors.New("Types in declaration do not match:"+node.DecType.typeString()+","+exprType.typeString()))
+				}
+			}
+			if pairTypeStruct.SndType == Pair {
+				switch exprType.(type) {
+				case PairType:
+					// Do nothing
+				case ConstType:
+					if exprType.(ConstType) != Pair {
+						semanticErrors = append(semanticErrors, errors.New("Types in declaration do not match:"+node.DecType.typeString()+","+exprType.typeString()))
+					}
+				default:
+					semanticErrors = append(semanticErrors, errors.New("Types in declaration do not match:"+node.DecType.typeString()+","+exprType.typeString()))
+				}
+			}
+		default:
+			semanticErrors = append(semanticErrors, errors.New("Types in declaration do not match:"+node.DecType.typeString()+","+exprType.typeString()))
+		}
 	}
 	symbolTable.insert(node.Lhs, node.DecType)
 	if len(semanticErrors) > 0 {
