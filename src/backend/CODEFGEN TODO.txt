@@ -1,4 +1,4 @@
-DECLARE: IN PROGRESS ---
+DECLARE: Almost done except pairs and arrays need to be fully implemented @Ayman
 
 ASSIGNMENT: IN PROGRESS ---
 - CALL is being implemneted by henryk
@@ -9,8 +9,7 @@ READ: IN PROGRESS ---
 FREE: NOT STARTED ---
 - ???
 
-RETURN: NOT STARTED ---
-- ???
+RETURN: NOT STARTED --- @Ayman
 
 EXIT: COMPLETE ----------------------------------------
 
@@ -26,3 +25,7 @@ IF: NOT STARTED ---
 WHILE: NOT STARTED ---
 
 SCOPE: NOT STARTED ---
+
+UNOP: NOT STARTED ---
+
+BINOP: NOT STARTED ---
