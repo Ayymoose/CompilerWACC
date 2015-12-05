@@ -9,11 +9,12 @@ import (
 
 // Contains the size in bytes of all print format strings
 var mapPrintFormatToSize = map[string]int{
-	INT_FORMAT:    3,
-	STRING_FORMAT: 5,
-	NEWLINE_MSG:   1,
-	TRUE_MSG:      5,
-	FALSE_MSG:     6,
+	INT_FORMAT:     3,
+	STRING_FORMAT:  5,
+	NEWLINE_MSG:    1,
+	TRUE_MSG:       5,
+	FALSE_MSG:      6,
+	POINTER_FORMAT: 3,
 }
 
 //Size in bytes for all the variables in the current scope
@@ -31,8 +32,8 @@ func GetScopeVarSize(statList []interface{}) int {
 }
 
 // Calculates the size of a pair type
-func pairTypeSize(typeFst Type, typeSnd Type) (int,int)  {
-	return sizeOf(typeFst),sizeOf(typeSnd)
+func pairTypeSize(typeFst Type, typeSnd Type) (int, int) {
+	return sizeOf(typeFst), sizeOf(typeSnd)
 }
 
 // Calcuates the size of a type
@@ -41,18 +42,18 @@ func sizeOf(t Type) int {
 	switch t.(type) {
 	case PairType:
 		size = PAIR_SIZE
-  case ConstType:
-	 switch t.(ConstType) {
-		 case Int:
- 			size = INT_SIZE
- 		case String:
- 			size = STRING_SIZE
- 		case Bool:
- 			size = BOOL_SIZE
- 		case Char:
- 			size = CHAR_SIZE
- 		//default:
-	 }
+	case ConstType:
+		switch t.(ConstType) {
+		case Int:
+			size = INT_SIZE
+		case String:
+			size = STRING_SIZE
+		case Bool:
+			size = BOOL_SIZE
+		case Char:
+			size = CHAR_SIZE
+			//default:
+		}
 	case ArrayType:
 		switch t.(ArrayType).Type {
 		case Int:
@@ -67,7 +68,6 @@ func sizeOf(t Type) int {
 			//Recurse on type as it could be an array of an array
 			size = sizeOf(t.(ArrayType).Type)
 		}
-
 
 	default:
 		fmt.Println("sizeOf(t) t is an unknown type")
