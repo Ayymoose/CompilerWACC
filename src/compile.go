@@ -39,6 +39,7 @@ func main() {
 		os.Exit(SYNTAX_ERROR)
 	}
 	fmt.Println(root)
+
 	errs := root.SemanticCheck()
 	if errs != nil {
 		for _, str := range errs {
