@@ -147,7 +147,7 @@ expr : INTEGER       { $$ =  $1 }
 
      | CHARACTER     { $$ =  $1 }
      | STRINGCONST   { $$ =  $1 }
-     | pairliter     { $$ =  PairLiter{} }
+     | pairliter     { $$ =  $1 }
      | IDENTIFIER    { $$ =  $1 }
      | arrayelem     { $$ =  $1 }
 
@@ -196,7 +196,7 @@ pairtype : PAIR OPENROUND pairelemtype COMMA pairelemtype CLOSEROUND  { $$ = Pai
 
 pairelemtype : basetype  { $$ = $1 }
              | arraytype { $$ = $1 }
-             | PAIR      { $$ = PairType{} }
+             | PAIR      { $$ = Pair}
 
 typeDef : basetype  { $$ =  $1 }
         | arraytype { $$ =  $1 }

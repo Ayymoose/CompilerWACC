@@ -56,5 +56,5 @@ func (symbolTable *SymbolTable) getTypeOfIdent(key Ident) Type {
 		}
 		curr = symbolTable.Parent
 	}
-	return -1
+	return nil
 }
