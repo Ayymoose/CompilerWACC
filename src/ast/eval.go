@@ -7,7 +7,7 @@ import (
 func (value Call) eval(functionTable []*Function, symbolTable *SymbolTable) (Type, error) {
 	for _, function := range functionTable {
 		if value.Ident == function.Ident {
-			if len(value.ParamList) != len(functionTable) {
+			if len(value.ParamList) != len(function.ParameterTypes) {
 				return nil, errors.New("Different number of parameters in Call and Function Definition")
 			}
 			for ind := range value.ParamList {
