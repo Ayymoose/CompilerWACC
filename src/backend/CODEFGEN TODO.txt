@@ -13,7 +13,10 @@ RETURN: NOT STARTED --- @Ayman
 
 EVAL RHS: IN PROGRESS ---
 - do array elem NANA
-
+- do array liter AYMAN
+- do newpair NANA
+- do pairelem NANA
+ 
 EXIT: COMPLETE ----------------------------------------
 
 PRINT: IN PROGRESS/ LITERALS COMPLETE* ---
