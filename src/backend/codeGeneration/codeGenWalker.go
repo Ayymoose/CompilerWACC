@@ -296,7 +296,7 @@ func (cg CodeGenerator) handleInt(t Type, srcReg string) {
 	 // Load the address from the stack to register
 	 appendAssembly(cg.instrs, "LDR " +srcReg + ", [sp, #"+strconv.Itoa(cg.getIdentOffset(t.(Ident).Name)) + "]", 1, 1)
 	case ArrayElem:
-		 fmt.Println("ArrayElem not implemeted")
+		 fmt.Println("ArrayElem not")
 	case Type:
 	 // Load the value of the declaration to the register
 	 appendAssembly(cg.instrs, "LDR " + srcReg +", ="+strconv.Itoa(t.(int)), 1, 1)
@@ -385,18 +385,18 @@ func (cg CodeGenerator) pushArrayElements(array []interface{}, srcReg string, ds
 		case ArrayType:
 			switch t.(ArrayType).Type {
 			case Int:
-				cg.handleInt(arrayItem,"r4")
+				cg.handleInt(arrayItem,srcReg)
 				appendAssembly(cg.instrs, "STR "+srcReg+", ["+dstReg+", #"+strconv.Itoa(ARRAY_SIZE+INT_SIZE*i)+"]", 1, 1)
 			case String:
-				cg.handleString(arrayItem,"r4")
+				cg.handleString(arrayItem,srcReg)
 				//appendAssembly(cg.instrs, "LDR "+srcReg+", "+ cg.getMsgLabel(array[i].(string)), 1, 1)
 				appendAssembly(cg.instrs, "STR "+srcReg+", ["+dstReg+", #"+strconv.Itoa(ARRAY_SIZE+STRING_SIZE*i)+"]", 1, 1)
 			case Bool:
-				cg.handleBool(arrayItem,"r4")
+				cg.handleBool(arrayItem,srcReg)
 				//appendAssembly(cg.instrs, "MOV "+srcReg+", #"+boolInt(arrayItem.(bool)), 1, 1)
 				appendAssembly(cg.instrs, "STRB "+srcReg+", ["+dstReg+", #"+strconv.Itoa(ARRAY_SIZE+BOOL_SIZE*i)+"]", 1, 1)
 			case Char:
-				cg.handleChar(arrayItem,"r4")
+				cg.handleChar(arrayItem,srcReg)
 				//appendAssembly(cg.instrs, "MOV "+srcReg+", #"+arrayItem.(Character).Value, 1, 1)
 				appendAssembly(cg.instrs, "STRB "+srcReg+", ["+dstReg+", #"+strconv.Itoa(ARRAY_SIZE+CHAR_SIZE*i)+"]", 1, 1)
 			default:
@@ -429,6 +429,8 @@ func (cg CodeGenerator) cgVisitDeclareStat(node Declare) {
 			appendAssembly(cg.instrs, "LDR r0, ="+strconv.Itoa(arrayStorage), 1, 1)
 			//Allocate memory for the array
 			appendAssembly(cg.instrs, "BL malloc", 1, 1)
+			appendAssembly(cg.instrs, "MOV r4, r0", 1, 1)
+
 			//Start loading each element in the array onto the stack
 			cg.pushArrayElements(rhs.(ArrayLiter).Exprs, "r5", "r4", node.DecType)
 		default:
@@ -533,9 +535,15 @@ func (cg CodeGenerator) cgVisitReturnStat(node Return) {
 }
 
 func (cg CodeGenerator) cgVisitExitStat(node Exit) {
-	returnValue := node.Expr.(int)
+	/*returnValue := node.Expr.(int)
 	// LDR r0, =n : loads return type to r0 argument
-	appendAssembly(cg.instrs, "LDR r0, ="+strconv.Itoa(returnValue), 1, 1)
+	appendAssembly(cg.instrs, "LDR r0, ="+strconv.Itoa(returnValue), 1, 1)*/
+
+	var reg = "r4"
+
+	cg.handleInt(node.Expr,reg)
+	appendAssembly(cg.instrs, "MOV r0, " + reg, 1, 1)
+
 	// BL exit : call exit
 	appendAssembly(cg.instrs, "BL exit", 1, 1)
 
