@@ -1,4 +1,4 @@
-package parser
+package ast
 
 type ConstType int
 type FSND int

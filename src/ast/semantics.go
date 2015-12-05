@@ -1,9 +1,6 @@
-package parser
+package ast
 
-import (
-	. "ast"
-)
-
+/*
 func (root *Program) semanticCheck() {
 
 }
@@ -20,7 +17,7 @@ func (value interface{}) evalRHS(symbolTable *SymbolTable, functionTable []*Func
 		return String, nil
 	case Ident:
 		if symbolTable.isDefined(value.Name) {
-			return getTypeOfIdent(value.Name), nil
+			return symbolTable.getTypeOfIdent(value.Name), nil
 		}
 		return nil, error.new("Identifier not declared")
 	case ArrayElem:
@@ -42,7 +39,7 @@ func (value interface{}) evalRHS(symbolTable *SymbolTable, functionTable []*Func
 
 }
 
-func (value interface{}) evalExpr(symbolTable *SymbolTable) (Type, error) {
+func (value Expression) evalExpr(symbolTable *SymbolTable) (Type, error) {
 	switch value.(type) {
 	case int:
 		return Int, nil
@@ -177,7 +174,7 @@ func (value ArrayElem) evalArrayElem(symbolTable *SymbolTable) (Type, error) {
 		return nil, error.new("Array not defined, identifier cannot be found")
 	}
 	arrayTyp := symbolTable.getTypeOfIdent(value.Ident)
-	for _ := range value.Exprs {
+	for range value.Exprs {
 		switch arrayTyp.(type) {
 		case ArrayType:
 			arrayTyp = (arrayTyp.(ArrayType)).Type
@@ -228,8 +225,9 @@ func (value PairElem) evalPairElem(symbolTable *SymbolTable) (Type, error) {
 		return nil, err
 	}
 	return exprTyp, nil
-}
+} */
 
+/*
 func (value Call) evalCall(symbolTable *SymbolTable, functionTable []*Function) (Type, error) {
 	for _, function := range functionTable {
 		if value.Ident = {
@@ -238,4 +236,4 @@ func (value Call) evalCall(symbolTable *SymbolTable, functionTable []*Function) 
 	}
 }
 
-func (functionTable *[]Function)
+func (functionTable *[]Function) */

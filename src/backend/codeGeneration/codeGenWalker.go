@@ -279,6 +279,100 @@ func (cg CodeGenerator) pushPair(fst interface{}, snd interface{}, typeFst Type,
 
 }
 
+// Handles the delegation of integer calls (Better name?)
+func (cg CodeGenerator) handleInt(t Type, srcReg string) {
+
+	switch t.(type) {
+	case PairElem:
+	 fmt.Println("PairElem not implemented")
+	case Call:
+	 // Henryk please fix this crash
+	 // cg.cgVisitCallStat(t.(Call).Ident,t.(Call).ParamList)
+	case Binop:
+	 cg.cgVisitBinopExpr(t.(Binop))
+	case Unop:
+	 cg.cgVisitUnopExpr(t.(Unop))
+	case Ident:
+	 // Load the address from the stack to register
+	 appendAssembly(cg.instrs, "LDR " +srcReg + ", [sp, #"+strconv.Itoa(cg.getIdentOffset(t.(Ident).Name)) + "]", 1, 1)
+	case ArrayElem:
+		 fmt.Println("ArrayElem not implemeted")
+	case Type:
+	 // Load the value of the declaration to the register
+	 appendAssembly(cg.instrs, "LDR " + srcReg +", ="+strconv.Itoa(t.(int)), 1, 1)
+	}
+
+}
+
+// Handles the delegation of boolean calls (Better name?)
+func (cg CodeGenerator) handleBool(t Type, srcReg string) {
+	switch t.(type) {
+	case PairElem:
+		fmt.Println("PairElem not implemented")
+	case Call:
+		// Henryk please fix this crash
+		// cg.cgVisitCallStat(t.(Call).Ident,t.(Call).ParamList)
+	case Binop:
+		cg.cgVisitBinopExpr(t.(Binop))
+	case Unop:
+		cg.cgVisitUnopExpr(t.(Unop))
+	case Ident:
+		// Load the address from the stack to register
+		appendAssembly(cg.instrs, "LDR " + srcReg +", [sp, #"+strconv.Itoa(cg.getIdentOffset(t.(Ident).Name)) + "]", 1, 1)
+	case ArrayElem:
+		fmt.Println("ArrayElem")
+	case Type:
+		// Load the bool into a register
+		appendAssembly(cg.instrs, "MOV " + srcReg +", #" + boolInt(t.(bool)), 1, 1)
+	}
+}
+
+// Handles the delegation of character calls (Better name?)
+func (cg CodeGenerator) handleChar(t Type, srcReg string) {
+	switch t.(type) {
+	case PairElem:
+		fmt.Println("PairElem not implemented")
+	case Call:
+		// Henryk please fix this crash
+		// cg.cgVisitCallStat(t.(Call).Ident,t.(Call).ParamList)
+	case Binop:
+		cg.cgVisitBinopExpr(t.(Binop))
+	case Unop:
+		cg.cgVisitUnopExpr(t.(Unop))
+	case Ident:
+		// Load the address from the stack to register
+		appendAssembly(cg.instrs, "LDR " + srcReg +", [sp, #"+strconv.Itoa(cg.getIdentOffset(t.(Ident).Name)) + "]", 1, 1)
+	case ArrayElem:
+		fmt.Println("ArrayElem not implemeted")
+	case Type:
+		// Load the character into a register
+		appendAssembly(cg.instrs, "MOV " + srcReg +", #"+t.(Character).Value, 1, 1)
+	}
+}
+
+// Handles the delegation of string calls (Better name?)
+func (cg CodeGenerator) handleString(t Type, srcReg string) {
+	switch t.(type) {
+	case PairElem:
+		fmt.Println("PairElem not implemented")
+	case Call:
+		// Henryk please fix this crash
+		// cg.cgVisitCallStat(t.(Call).Ident,t.(Call).ParamList)
+	case Binop:
+		cg.cgVisitBinopExpr(t.(Binop))
+	case Unop:
+		cg.cgVisitUnopExpr(t.(Unop))
+	case Ident:
+		// Load the address from the stack to register
+		appendAssembly(cg.instrs, "LDR " + srcReg +", [sp, #"+strconv.Itoa(cg.getIdentOffset(t.(Ident).Name)) + "]", 1, 1)
+	case ArrayElem:
+			fmt.Println("ArrayElem not implemeted")
+	case Type:
+		// Load the address of the string to the register
+		appendAssembly(cg.instrs, "LDR " + srcReg +", " + cg.getMsgLabel(t.(string)), 1, 1)
+	}
+}
+
 // Puts the array elements onto the stack
 func (cg CodeGenerator) pushArrayElements(array []interface{}, srcReg string, dstReg string, t Type) {
 
@@ -291,17 +385,19 @@ func (cg CodeGenerator) pushArrayElements(array []interface{}, srcReg string, ds
 		case ArrayType:
 			switch t.(ArrayType).Type {
 			case Int:
-				appendAssembly(cg.instrs, "LDR "+srcReg+", ="+strconv.Itoa(arrayItem.(int)), 1, 1)
+				cg.handleInt(arrayItem,"r4")
 				appendAssembly(cg.instrs, "STR "+srcReg+", ["+dstReg+", #"+strconv.Itoa(ARRAY_SIZE+INT_SIZE*i)+"]", 1, 1)
 			case String:
-				appendAssembly(cg.instrs, "LDR "+srcReg+", "+ cg.getMsgLabel(array[i].(string)), 1, 1)
+				cg.handleString(arrayItem,"r4")
+				//appendAssembly(cg.instrs, "LDR "+srcReg+", "+ cg.getMsgLabel(array[i].(string)), 1, 1)
 				appendAssembly(cg.instrs, "STR "+srcReg+", ["+dstReg+", #"+strconv.Itoa(ARRAY_SIZE+STRING_SIZE*i)+"]", 1, 1)
 			case Bool:
-				appendAssembly(cg.instrs, "MOV "+srcReg+", #"+boolInt(arrayItem.(bool)), 1, 1)
+				cg.handleBool(arrayItem,"r4")
+				//appendAssembly(cg.instrs, "MOV "+srcReg+", #"+boolInt(arrayItem.(bool)), 1, 1)
 				appendAssembly(cg.instrs, "STRB "+srcReg+", ["+dstReg+", #"+strconv.Itoa(ARRAY_SIZE+BOOL_SIZE*i)+"]", 1, 1)
 			case Char:
-				// Problem with AST that gives 0s instead of the actual characters
-				//appendAssembly(cg.instrs, "MOV "+srcReg+", #"+strconv.Itoa(arrayItem.(string)), 1, 1)
+				cg.handleChar(arrayItem,"r4")
+				//appendAssembly(cg.instrs, "MOV "+srcReg+", #"+arrayItem.(Character).Value, 1, 1)
 				appendAssembly(cg.instrs, "STRB "+srcReg+", ["+dstReg+", #"+strconv.Itoa(ARRAY_SIZE+CHAR_SIZE*i)+"]", 1, 1)
 			default:
 				fmt.Println("Array/Pair type not done!")
@@ -349,25 +445,23 @@ func (cg CodeGenerator) cgVisitDeclareStat(node Declare) {
 
 	case ConstType:
 		switch node.DecType.(ConstType) {
+
+    //CAN I CHANGE THIS USING A FUNCTION POINTER?
+
 		case Bool:
-			// Load the bool into a register
-			appendAssembly(cg.instrs, "MOV r4, #"+strconv.Itoa(node.Rhs.(int)), 1, 1)
+      cg.handleBool(rhs, "r4")
 			// Using STRB, store it on the stack
-			appendAssembly(cg.instrs,
-				"STRB r4, [sp, #"+cg.subCurrP(BOOL_SIZE)+"])", 1, 1)
+			appendAssembly(cg.instrs, "STRB r4, [sp, #"+cg.subCurrP(BOOL_SIZE)+"]", 1, 1)
 		case Char:
-			// Load the character into a register
-			appendAssembly(cg.instrs, "MOV r4, #"+node.Rhs.(string), 1, 1)
+			cg.handleChar(rhs, "r4")
 			// Using STRB, store it on the stack
 			appendAssembly(cg.instrs,"STRB r4, [sp, #"+cg.subCurrP(CHAR_SIZE)+"]", 1, 1)
 		case Int:
-			// Load the value of the declaration to the register
-			appendAssembly(cg.instrs, "LDR r4, "+strconv.Itoa(node.Rhs.(int)), 1, 1)
+      cg.handleInt(rhs,"r4")
 			// Store the value of declaration to stack
 			appendAssembly(cg.instrs, "STR r4, [sp, #"+cg.subCurrP(INT_SIZE)+"]", 1, 1)
 		case String:
-			// Load the address of the string to the register
-			appendAssembly(cg.instrs, "LDR r4, " + cg.getMsgLabel(node.Rhs.(string)), 1, 1)
+			cg.handleString(rhs, "r4")
 			// Store the address onto the stack
 			appendAssembly(cg.instrs, "STR r4, [sp, #"+cg.subCurrP(STRING_SIZE)+"]", 1, 1)
 		default:
