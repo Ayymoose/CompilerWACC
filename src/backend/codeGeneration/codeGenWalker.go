@@ -18,6 +18,7 @@ const (
 	CHAR_SIZE   = 1
 	STRING_SIZE = 4
 	PAIR_SIZE   = 4
+	ADDR_SIZE   = 4
 )
 
 // Print format strings
@@ -32,7 +33,7 @@ const (
 
 // FUnction global variable
 var functionList []*Function // IS IT A POINTER OR NOT??
-var paramMap map[interface{}]int
+var paramMap map[Param]int
 
 // VISIT FUNCTIONS -------------------------------------------------------------
 
@@ -119,18 +120,18 @@ func (cg CodeGenerator) cgEvalStat(stat interface{}) {
 // IE WE ONLY PUSH ONTO STACK FUNC VARIABLES WHEN A FUNCTION IS CALLED
 // but
 // WE EXECUTE WHAT IS INSIDE THE FUNCTION REGARDLESS OF WHETHER IT IS CALLED OR NOT
-func (cg CodeGenerator) cgVisitCallStat(ident string, paramList []interface{}) {
+func (cg CodeGenerator) cgVisitCallStat(ident Ident, paramList []Param) {
 	for _, function := range functionList {
 		if function.Ident == ident {
 			// sub sp, sp, #n to create variable space
 			appendAssembly(cg.instrs, "SUB sp, sp, #4", 1, 1)
 
 			for _, param := range paramList {
-				cg.cgVisitParameter(param.(Param), 0) // NED SOME KIND OF MAP HERE FROM IDENT STRING TO IDENT OFFSET INT
+				cg.cgVisitParameter(param, 0) // NED SOME KIND OF MAP HERE FROM IDENT STRING TO IDENT OFFSET INT
 				// NEED SOMEHOW TO ACCUMULATE GLOBABL OFFSET
 			}
 
-			appendAssembly(cg.instrs, "BL f_"+function.Ident, 1, 1)
+			appendAssembly(cg.instrs, "BL f_"+string(function.Ident), 1, 1)
 
 			if !(paramList == nil) {
 				appendAssembly(cg.instrs, "ADD sp, sp, #"+"offset", 1, 1) // ADD LOGIC WHICH GETS GLOBAL OFFSET
@@ -153,7 +154,7 @@ func (cg CodeGenerator) cgVisitCallStat(ident string, paramList []interface{}) {
 
 func (cg CodeGenerator) cgVisitFunction(node Function) {
 	// f_funcName:
-	appendAssembly(cg.funcInstrs, "f_"+node.Ident+":", 0, 1)
+	appendAssembly(cg.funcInstrs, "f_"+string(node.Ident)+":", 0, 1)
 
 	// push {lr} to save the caller address
 	appendAssembly(cg.funcInstrs, "PUSH {lr}", 1, 1)
@@ -172,44 +173,42 @@ func (cg CodeGenerator) cgVisitFunction(node Function) {
 // VISIT STATEMENT -------------------------------------------------------------
 func (cg CodeGenerator) cgVisitParameter(node Param, offset int) {
 	// node.Ident
-	switch node.ParamType.(type) {
-	case ConstType:
-		switch node.ParamType.(ConstType) {
-		case Bool:
-			boolean := node.ParamType.(bool)
-			if boolean == true { // IS THIS CORRECT ????
-				appendAssembly(cg.instrs, "MOV r4, #1", 1, 1)
-			} else {
-				appendAssembly(cg.instrs, "MOV r4, #0", 1, 1)
-			}
-			appendAssembly(cg.instrs, "STRB r4, [sp, #"+cg.subCurrP(BOOL_SIZE)+"]!", 1, 1)
-			paramMap[boolean] = BOOL_SIZE
-		case Char:
-			char := node.ParamType.(rune)
-			appendAssembly(cg.instrs, "MOV r4, #"+(fmt.Sprintf("%c", char)), 1, 1)
-			appendAssembly(cg.instrs, "STRB r4, [sp, #"+cg.subCurrP(CHAR_SIZE)+"]!", 1, 1)
-			paramMap[char] = CHAR_SIZE
-		case Int:
-			integer := node.ParamType.(int)
-			appendAssembly(cg.instrs, "LDR r4, ="+strconv.Itoa(integer), 1, 1)
-			appendAssembly(cg.instrs, "STR r4, [sp, #"+cg.subCurrP(INT_SIZE)+"]!", 1, 1)
-			paramMap[integer] = INT_SIZE
-		case String: // OR char[] need to implement
-			appendAssembly(cg.instrs, "LDR r4, =msg_"+"0", 1, 1) // NEED TO ADD FUNCTIONALITY WHICH UPDATES THE MESSAGE NUMBERS
-			appendAssembly(cg.instrs, "STR r4, [sp, #"+cg.subCurrP(STRING_SIZE)+"]!", 1, 1)
-			paramMap["msg_0"] = STRING_SIZE // NEED TO MODIFIY THIS SHIITT
+	/*switch node.ParamType.(type) {
+	case Boolean:
+		boolean := node.ParamType.(Boolean)
+		if bool(boolean) == true { // IS THIS CORRECT ????
+			appendAssembly(cg.instrs, "MOV r4, #1", 1, 1)
+		} else {
+			appendAssembly(cg.instrs, "MOV r4, #0", 1, 1)
 		}
+		appendAssembly(cg.instrs, "STRB r4, [sp, #"+cg.subCurrP(BOOL_SIZE)+"]!", 1, 1)
+		paramMap[boolean] = BOOL_SIZE
+	case Character:
+		char := node.ParamType.(Character)
+		appendAssembly(cg.instrs, "MOV r4, #"+string(char), 1, 1)
+		appendAssembly(cg.instrs, "STRB r4, [sp, #"+cg.subCurrP(CHAR_SIZE)+"]!", 1, 1)
+		paramMap[char] = CHAR_SIZE
+	case Integer:
+		integer := node.ParamType.(Integer)
+		appendAssembly(cg.instrs, "LDR r4, ="+strconv.Itoa(int(integer)), 1, 1)
+		appendAssembly(cg.instrs, "STR r4, [sp, #"+cg.subCurrP(INT_SIZE)+"]!", 1, 1)
+		paramMap[integer] = INT_SIZE
+	case Str: // OR char[] need to implement
+		appendAssembly(cg.instrs, "LDR r4, =msg_"+"0", 1, 1) // NEED TO ADD FUNCTIONALITY WHICH UPDATES THE MESSAGE NUMBERS
+		appendAssembly(cg.instrs, "STR r4, [sp, #"+cg.subCurrP(STRING_SIZE)+"]!", 1, 1)
+		paramMap["msg_0"] = STRING_SIZE // NEED TO MODIFIY THIS SHIITT
+
 	case ArrayType:
 
 	case PairType: // there is only a pariliteral 'null for this case'
 		appendAssembly(cg.instrs, "LDR r4, =0", 1, 1)
 		appendAssembly(cg.instrs, "STR r4, [sp, #-4]!", 1, 1)
 
-	}
+	}*/
 }
 
 //Pushes a pair of elements onto the stack
-func (cg CodeGenerator) pushPair(fst interface{}, snd interface{}, typeFst Type, typeSnd Type, reg1 string, reg2 string) {
+func (cg CodeGenerator) pushPair(fst Evaluation, snd Evaluation, typeFst Type, typeSnd Type, reg1 string, reg2 string) {
 	// Store the address in the free register
 	appendAssembly(cg.instrs, "MOV "+reg2+", r0", 1, 1)
 
@@ -217,20 +216,13 @@ func (cg CodeGenerator) pushPair(fst interface{}, snd interface{}, typeFst Type,
 	switch typeFst.(type) {
 	case PairType:
 		fmt.Println("Pair type for fst not implemented")
-	case ConstType:
-
-		switch typeFst.(ConstType) {
-		case Int:
-			appendAssembly(cg.instrs, "LDR "+reg1+", ="+strconv.Itoa(fst.(int)), 1, 1)
-		case Bool:
-			appendAssembly(cg.instrs, "LDR "+reg1+", ="+boolInt(fst.(bool)), 1, 1)
-		case String:
-			appendAssembly(cg.instrs, "LDR "+reg1+", "+cg.getMsgLabel(fst.(string)), 1, 1)
-		case Char:
-
-		default:
-
-		}
+	case Integer:
+		appendAssembly(cg.instrs, "LDR "+reg1+", ="+strconv.Itoa(int(fst.(Integer))), 1, 1)
+	case Boolean:
+		appendAssembly(cg.instrs, "LDR "+reg1+", ="+boolInt(bool(fst.(Boolean))), 1, 1)
+	case Str:
+		appendAssembly(cg.instrs, "LDR "+reg1+", "+cg.getMsgLabel(string(fst.(Str))), 1, 1)
+	case Character:
 	default:
 		fmt.Println("Unknown type for pair fst")
 
@@ -250,18 +242,15 @@ func (cg CodeGenerator) pushPair(fst interface{}, snd interface{}, typeFst Type,
 
 	case PairType:
 		fmt.Println("Pair type for snd not implemented")
-	case ConstType:
-		switch typeSnd.(ConstType) {
-		case Int:
-			appendAssembly(cg.instrs, "LDR "+reg1+", ="+strconv.Itoa(snd.(int)), 1, 1)
-		case Bool:
-			appendAssembly(cg.instrs, "LDR "+reg1+", ="+boolInt(snd.(bool)), 1, 1)
-		case String:
-			appendAssembly(cg.instrs, "LDR "+reg1+", "+cg.getMsgLabel(snd.(string)), 1, 1)
-		case Char:
 
-		default:
-		}
+	case Integer:
+		appendAssembly(cg.instrs, "LDR "+reg1+", ="+strconv.Itoa(int(snd.(Integer))), 1, 1)
+	case Boolean:
+		appendAssembly(cg.instrs, "LDR "+reg1+", ="+boolInt(bool(snd.(Boolean))), 1, 1)
+	case Str:
+		appendAssembly(cg.instrs, "LDR "+reg1+", "+cg.getMsgLabel(string(snd.(Str))), 1, 1)
+	case Character:
+
 	default:
 		fmt.Println("Unknown type for pair snd")
 
@@ -281,16 +270,16 @@ func (cg CodeGenerator) pushPair(fst interface{}, snd interface{}, typeFst Type,
 }
 
 // Global handle function
-func (cg CodeGenerator) handle(t Type, srcReg string) {
+func (cg CodeGenerator) handle(t Evaluation, srcReg string) {
 
 	switch t.(type) {
-	case bool:
+	case Boolean:
 		cg.handleBool(t, srcReg)
-	case int:
+	case Integer:
 		cg.handleInt(t, srcReg)
-	case string:
+	case Str:
 		cg.handleString(t, srcReg)
-	case rune:
+	case Character:
 		cg.handleChar(t, srcReg)
 	default:
 		fmt.Println("handle() doesn't support type")
@@ -312,13 +301,13 @@ func (cg CodeGenerator) handleInt(t Type, srcReg string) {
 		cg.cgVisitUnopExpr(t.(Unop))
 	case Ident:
 		// Load the address from the stack to register
-		var value, _ = cg.getIdentOffset(t.(Ident).Name)
+		var value, _ = cg.getIdentOffset(t.(Ident))
 		appendAssembly(cg.instrs, "LDR "+srcReg+", [sp, #"+strconv.Itoa(value)+"]", 1, 1)
 	case ArrayElem:
 		fmt.Println("ArrayElem not")
 	case Type:
 		// Load the value of the declaration to the register
-		appendAssembly(cg.instrs, "LDR "+srcReg+", ="+strconv.Itoa(t.(int)), 1, 1)
+		appendAssembly(cg.instrs, "LDR "+srcReg+", ="+strconv.Itoa(int(t.(Integer))), 1, 1)
 	}
 
 }
@@ -337,13 +326,13 @@ func (cg CodeGenerator) handleBool(t Type, srcReg string) {
 		cg.cgVisitUnopExpr(t.(Unop))
 	case Ident:
 		// Load the address from the stack to register
-		var value, _ = cg.getIdentOffset(t.(Ident).Name)
+		var value, _ = cg.getIdentOffset(t.(Ident))
 		appendAssembly(cg.instrs, "LDR "+srcReg+", [sp, #"+strconv.Itoa(value)+"]", 1, 1)
 	case ArrayElem:
 		fmt.Println("ArrayElem")
 	case Type:
 		// Load the bool into a register
-		appendAssembly(cg.instrs, "MOV "+srcReg+", #"+boolInt(t.(bool)), 1, 1)
+		appendAssembly(cg.instrs, "MOV "+srcReg+", #"+boolInt(bool(t.(Boolean))), 1, 1)
 	}
 }
 
@@ -361,23 +350,22 @@ func (cg CodeGenerator) handleChar(t Type, srcReg string) {
 		cg.cgVisitUnopExpr(t.(Unop))
 	case Ident:
 		// Load the address from the stack to register
-		var value, _ = cg.getIdentOffset(t.(Ident).Name)
+		var value, _ = cg.getIdentOffset(t.(Ident))
 		appendAssembly(cg.instrs, "LDR "+srcReg+", [sp, #"+strconv.Itoa(value)+"]", 1, 1)
 	case ArrayElem:
 		fmt.Println("ArrayElem not implemeted")
 	case Type:
 		// Load the character into a register
-		appendAssembly(cg.instrs, "MOV "+srcReg+", #"+t.(Character).Value, 1, 1)
+		appendAssembly(cg.instrs, "MOV "+srcReg+", #"+string(t.(Character)), 1, 1)
 	}
 }
 
 // Handles the delegation of string calls (Better name?)
-func (cg CodeGenerator) handleString(t Type, srcReg string) {
+func (cg CodeGenerator) handleString(t Evaluation, srcReg string) {
 	switch t.(type) {
 	case PairElem:
 		fmt.Println("PairElem not implemented")
 	case Call:
-		// Henryk please fix this crash
 		// cg.cgVisitCallStat(t.(Call).Ident,t.(Call).ParamList)
 	case Binop:
 		cg.cgVisitBinopExpr(t.(Binop))
@@ -385,18 +373,18 @@ func (cg CodeGenerator) handleString(t Type, srcReg string) {
 		cg.cgVisitUnopExpr(t.(Unop))
 	case Ident:
 		// Load the address from the stack to register
-		var value, _ = cg.getIdentOffset(t.(Ident).Name)
+		var value, _ = cg.getIdentOffset(t.(Ident))
 		appendAssembly(cg.instrs, "LDR "+srcReg+", [sp, #"+strconv.Itoa(value)+"]", 1, 1)
 	case ArrayElem:
 		fmt.Println("ArrayElem not implemeted")
 	case Type:
 		// Load the address of the string to the register
-		appendAssembly(cg.instrs, "LDR "+srcReg+", "+cg.getMsgLabel(t.(string)), 1, 1)
+		appendAssembly(cg.instrs, "LDR "+srcReg+", "+cg.getMsgLabel(string(t.(Str))), 1, 1)
 	}
 }
 
 // Puts the array elements onto the stack
-func (cg CodeGenerator) pushArrayElements(array []interface{}, srcReg string, dstReg string, t Type) {
+func (cg CodeGenerator) pushArrayElements(array []Evaluation, srcReg string, dstReg string, t Type) {
 
 	var arraySize = arraySize(array)
 	// Loop through the array pushing it onto the stack
@@ -463,37 +451,30 @@ func (cg CodeGenerator) cgVisitDeclareStat(node Declare) {
 	case PairType:
 
 		// First allocate memory to store two addresses (8-bytes)
-		appendAssembly(cg.instrs, "LDR r0, ="+strconv.Itoa(INT_SIZE*2), 1, 1)
+		appendAssembly(cg.instrs, "LDR r0, ="+strconv.Itoa(ADDR_SIZE*2), 1, 1)
 		appendAssembly(cg.instrs, "BL malloc", 1, 1)
 
 		// Push a pair of elements onto the stack
 		cg.pushPair(rhs.(NewPair).FstExpr, rhs.(NewPair).SndExpr, node.DecType.(PairType).FstType, node.DecType.(PairType).SndType, "r5", "r4")
 
-	case ConstType:
+	//cg.handle(node.DecType.(ConstType),"r4")
 
-		//cg.handle(node.DecType.(ConstType),"r4")
-
-		switch node.DecType.(ConstType) {
-
-		case Boolean:
-			cg.handleBool(rhs, "r4")
-			// Using STRB, store it on the stack
-			appendAssembly(cg.instrs, "STRB r4, [sp, #"+cg.subCurrP(BOOL_SIZE)+"]", 1, 1)
-		case Char:
-			cg.handleChar(rhs, "r4")
-			// Using STRB, store it on the stack
-			appendAssembly(cg.instrs, "STRB r4, [sp, #"+cg.subCurrP(CHAR_SIZE)+"]", 1, 1)
-		case Int:
-			cg.handleInt(rhs, "r4")
-			// Store the value of declaration to stack
-			appendAssembly(cg.instrs, "STR r4, [sp, #"+cg.subCurrP(INT_SIZE)+"]", 1, 1)
-		case String:
-			cg.handleString(rhs, "r4")
-			// Store the address onto the stack
-			appendAssembly(cg.instrs, "STR r4, [sp, #"+cg.subCurrP(STRING_SIZE)+"]", 1, 1)
-		default:
-			fmt.Println("Type not implemented")
-		}
+	case Boolean:
+		cg.handleBool(rhs, "r4")
+		// Using STRB, store it on the stack
+		appendAssembly(cg.instrs, "STRB r4, [sp, #"+cg.subCurrP(BOOL_SIZE)+"]", 1, 1)
+	case Character:
+		cg.handleChar(rhs, "r4")
+		// Using STRB, store it on the stack
+		appendAssembly(cg.instrs, "STRB r4, [sp, #"+cg.subCurrP(CHAR_SIZE)+"]", 1, 1)
+	case Integer:
+		cg.handleInt(rhs, "r4")
+		// Store the value of declaration to stack
+		appendAssembly(cg.instrs, "STR r4, [sp, #"+cg.subCurrP(INT_SIZE)+"]", 1, 1)
+	case Str:
+		cg.handleString(rhs, "r4")
+		// Store the address onto the stack
+		appendAssembly(cg.instrs, "STR r4, [sp, #"+cg.subCurrP(STRING_SIZE)+"]", 1, 1)
 
 	default:
 		//	typeOf(node.DecType)
@@ -509,19 +490,7 @@ func (cg CodeGenerator) cgVisitAssignmentStat(node Assignment) {
 
 	// eval RHS ????
 	switch node.Rhs.(type) {
-	// expr
-	case ConstType:
-		switch node.Rhs.(ConstType) {
-		case Bool:
 
-		case Char:
-
-		case Int:
-
-		case String:
-
-			//	case Pair:
-		}
 	case ArrayElem:
 	case Unop:
 	case Binop:
@@ -580,7 +549,7 @@ func (cg CodeGenerator) cgVisitPrintStat(node Print) {
 		strValue := expr.(Str)
 
 		// LDR r4, =msg_n : load the string message label
-		msgLabel := cg.getMsgLabel(strValue)
+		msgLabel := cg.getMsgLabel(string(strValue))
 		appendAssembly(cg.instrs, "LDR r4, "+msgLabel, 1, 1)
 		// MOV r0, r4 : prepare parameter for function call
 		appendAssembly(cg.instrs, "MOV r0, r4", 1, 1)
@@ -593,7 +562,7 @@ func (cg CodeGenerator) cgVisitPrintStat(node Print) {
 		intValue := expr.(Integer)
 
 		// LDR r4, =i : load the value into r4
-		appendAssembly(cg.instrs, "LDR r4, ="+strconv.Itoa(intValue), 1, 1)
+		appendAssembly(cg.instrs, "LDR r4, ="+strconv.Itoa(int(intValue)), 1, 1)
 		// MOV r0, r4 : prepare parameter for function call
 		appendAssembly(cg.instrs, "MOV r0, r4", 1, 1)
 		// BL p_print_int
@@ -602,10 +571,10 @@ func (cg CodeGenerator) cgVisitPrintStat(node Print) {
 		cg.cgVisitPrintStatFunc_H("p_print_int")
 
 	case Character:
-		charValue := expr.(Charater)
+		charValue := expr.(Character)
 
 		// MOV r4, #'c' : load the value into r4
-		appendAssembly(cg.instrs, "MOV r4, #"+charValue, 1, 1)
+		appendAssembly(cg.instrs, "MOV r4, #"+string(charValue), 1, 1)
 		// MOV r0, r4 : prepare parameter for function call
 		appendAssembly(cg.instrs, "MOV r0, r4", 1, 1)
 		// BL putchar
@@ -615,7 +584,7 @@ func (cg CodeGenerator) cgVisitPrintStat(node Print) {
 		boolValue := expr.(Boolean)
 
 		// MOV r4, #e.g.1 : load the value into r4
-		appendAssembly(cg.instrs, "MOV r4, #"+boolInt(boolValue), 1, 1)
+		appendAssembly(cg.instrs, "MOV r4, #"+boolInt(bool(boolValue)), 1, 1)
 		// MOV r0, r4 : prepare parameter for function call
 		appendAssembly(cg.instrs, "MOV r0, r4", 1, 1)
 		// BL p_print_bool

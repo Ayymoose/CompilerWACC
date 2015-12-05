@@ -18,7 +18,7 @@ var mapPrintFormatToSize = map[string]int{
 }
 
 //Size in bytes for all the variables in the current scope
-func GetScopeVarSize(statList []interface{}) int {
+func GetScopeVarSize(statList []Statement) int {
 	var scopeSize = 0
 
 	for _, stat := range statList {
@@ -42,27 +42,26 @@ func sizeOf(t Type) int {
 	switch t.(type) {
 	case PairType:
 		size = PAIR_SIZE
-	case ConstType:
-		switch t.(ConstType) {
-		case Int:
-			size = INT_SIZE
-		case String:
-			size = STRING_SIZE
-		case Bool:
-			size = BOOL_SIZE
-		case Char:
-			size = CHAR_SIZE
-			//default:
-		}
+
+	case Integer:
+		size = INT_SIZE
+	case Str:
+		size = STRING_SIZE
+	case Boolean:
+		size = BOOL_SIZE
+	case Character:
+		size = CHAR_SIZE
+		//default:
+
 	case ArrayType:
-		switch t.(ArrayType).Type {
-		case Int:
+		switch t.(ArrayType).Type.(type) {
+		case Integer:
 			size = INT_SIZE
-		case String:
+		case Str:
 			size = STRING_SIZE
-		case Bool:
+		case Boolean:
 			size = BOOL_SIZE
-		case Char:
+		case Character:
 			size = CHAR_SIZE
 		default:
 			//Recurse on type as it could be an array of an array
@@ -135,7 +134,7 @@ func typeOf(t Type) {
 }
 
 // Calcuates the size of an array
-func arraySize(array []interface{}) int {
+func arraySize(array []Evaluation) int {
 	return len(array)
 }
 

@@ -101,7 +101,7 @@ func (cg CodeGenerator) AddCheckProgName(progName string) bool {
 
 // Using symbol tables, a offset to the sp is returned so the ident value can
 // be executed
-func (cg CodeGenerator) getIdentOffset(ident string) (int, Type) {
+func (cg CodeGenerator) getIdentOffset(ident Ident) (int, Type) {
 	// TO BE COMPLETED
-	return 100, Int
+	return 100, Integer(0)
 }

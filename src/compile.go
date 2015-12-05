@@ -8,6 +8,7 @@ import (
 
 	"ast"
 	codeG "backend/codeGeneration"
+	. "backend/filewriter"
 )
 
 const SYNTAX_ERROR = 100
@@ -49,6 +50,8 @@ func main() {
 		}
 		os.Exit(SEMANTIC_ERROR)
 	}
+
+	var armList *ARMList
 
 	cg := codeG.ConstructCodeGenerator(root, armList, ast.SymbolTable{})
 	cg.GenerateCode()
