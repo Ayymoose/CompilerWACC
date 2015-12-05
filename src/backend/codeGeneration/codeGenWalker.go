@@ -274,14 +274,14 @@ func (cg CodeGenerator) evalRHS(t Evaluation, srcReg string) {
 
 	switch t.(type) {
 	// Literals
-	case Boolean:
-		appendAssembly(cg.instrs, "MOV "+srcReg+", #"+boolInt(bool(t.(Boolean))), 1, 1)
 	case Integer:
 		appendAssembly(cg.instrs, "LDR "+srcReg+", ="+strconv.Itoa(int(t.(Integer))), 1, 1)
-	case Str:
-		appendAssembly(cg.instrs, "LDR "+srcReg+", "+cg.getMsgLabel(string(t.(Str))), 1, 1)
+	case Boolean:
+		appendAssembly(cg.instrs, "MOV "+srcReg+", #"+boolInt(bool(t.(Boolean))), 1, 1)
 	case Character:
 		appendAssembly(cg.instrs, "MOV "+srcReg+", #"+string(t.(Character)), 1, 1)
+	case Str:
+		appendAssembly(cg.instrs, "LDR "+srcReg+", "+cg.getMsgLabel(string(t.(Str))), 1, 1)
 	case PairLiter:
 		appendAssembly(cg.instrs, "MOV "+srcReg+", #0", 1, 1)
 	case Ident:
@@ -349,22 +349,25 @@ func (cg CodeGenerator) pushArrayElements(array []Evaluation, srcReg string, dst
 		var arrayItem = array[i]
 		switch t.(type) {
 		case ArrayType:
+
+
+			cg.evalRHS(arrayItem, srcReg)
+
+			///
 			switch t.(ArrayType).Type {
 			case Int:
-				cg.evalRHS(arrayItem, srcReg)
 				appendAssembly(cg.instrs, "STR "+srcReg+", ["+dstReg+", #"+strconv.Itoa(ARRAY_SIZE+INT_SIZE*i)+"]", 1, 1)
 			case String:
-				cg.evalRHS(arrayItem, srcReg)
 				appendAssembly(cg.instrs, "STR "+srcReg+", ["+dstReg+", #"+strconv.Itoa(ARRAY_SIZE+STRING_SIZE*i)+"]", 1, 1)
 			case Bool:
-				cg.evalRHS(arrayItem, srcReg)
 				appendAssembly(cg.instrs, "STRB "+srcReg+", ["+dstReg+", #"+strconv.Itoa(ARRAY_SIZE+BOOL_SIZE*i)+"]", 1, 1)
 			case Char:
-				cg.evalRHS(arrayItem, srcReg)
 				appendAssembly(cg.instrs, "STRB "+srcReg+", ["+dstReg+", #"+strconv.Itoa(ARRAY_SIZE+CHAR_SIZE*i)+"]", 1, 1)
 			default:
 				fmt.Println("Type not implemented")
 			}
+			///
+
 		}
 	}
 	// Put the size of the array onto the stack
