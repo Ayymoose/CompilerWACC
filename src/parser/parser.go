@@ -13,15 +13,8 @@ func ParseFile(filename, text string) (*ast.Program, error) {
 		fmt.Println(item)
 	}*/
 	e := parserParse(l)
-	if e != 0 {
-		return nil, errors.New("Compilation halted due to lex and parse errors")
+	if e == 0 && !l.parseError {
+		return l.prog, nil
 	}
-	/*errors := l.prog.semanticCheck()
-	if errors != nil {
-		for _, str := range error {
-			fmt.Println(str)
-		}
-		return nil, errors.New("Semantic error")
-	} */
-	return l.prog, nil
+	return nil, errors.New("Compilation halted due to lex and parse errors")
 }
