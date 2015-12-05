@@ -6,42 +6,42 @@ type Flag int
 
 // Flags emun
 const (
-	AND Flag = iota
-	ARRAYBOUNDS
-	DIVIDEDBYZERO
-	FREE
-	OR
-	OVERFLOW
-	READINT
-	READCHAR
-	RUNTIME
-	PRINT
-	PRINTLN
-	PRINTNULLPOINTER
-	PRINTSTRING
-	PRINTINT
-	PRINTBOOL
-	PRINTREFERENCE
+	flag_AND Flag = iota
+	flag_ARRAYBOUNDS
+	flag_DIVIDEDBYZERO
+	flag_FREE
+	flag_OR
+	flag_OVERFLOW
+	flag_READINT
+	flag_READCHAR
+	flag_RUNTIME
+	flag_PRINT
+	flag_PRINTLN
+	flag_PRINTNULLPOINTER
+	flag_PRINTSTRING
+	flag_PRINTINT
+	flag_PRINTBOOL
+	flag_PRINTREFERENCE
 )
 
 // FlagMap Flags are initially set to false
 var FlagMap = map[Flag]bool{
-	AND:              false,
-	ARRAYBOUNDS:      false,
-	DIVIDEDBYZERO:    false,
-	FREE:             false,
-	OR:               false,
-	OVERFLOW:         false,
-	READINT:          false,
-	READCHAR:         false,
-	RUNTIME:          false,
-	PRINT:            false,
-	PRINTLN:          false,
-	PRINTNULLPOINTER: false,
-	PRINTSTRING:      false,
-	PRINTINT:         false,
-	PRINTBOOL:        false,
-	PRINTREFERENCE:   false,
+	flag_AND:              false,
+	flag_ARRAYBOUNDS:      false,
+	flag_DIVIDEDBYZERO:    false,
+	flag_FREE:             false,
+	flag_OR:               false,
+	flag_OVERFLOW:         false,
+	flag_READINT:          false,
+	flag_READCHAR:         false,
+	flag_RUNTIME:          false,
+	flag_PRINT:            false,
+	flag_PRINTLN:          false,
+	flag_PRINTNULLPOINTER: false,
+	flag_PRINTSTRING:      false,
+	flag_PRINTINT:         false,
+	flag_PRINTBOOL:        false,
+	flag_PRINTREFERENCE:   false,
 }
 
 // setFlag sets the passed flag to true in FlagMap

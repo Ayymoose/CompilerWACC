@@ -285,13 +285,13 @@ func (cg CodeGenerator) handle(t Type, srcReg string) {
 
 	switch t.(type) {
 	case bool:
-		cg.handleBool(t,srcReg)
+		cg.handleBool(t, srcReg)
 	case int:
-	  cg.handleInt(t,srcReg)
+		cg.handleInt(t, srcReg)
 	case string:
-		cg.handleString(t,srcReg)
+		cg.handleString(t, srcReg)
 	case rune:
-		cg.handleChar(t,srcReg)
+		cg.handleChar(t, srcReg)
 	default:
 		fmt.Println("handle() doesn't support type")
 	}
@@ -475,7 +475,6 @@ func (cg CodeGenerator) cgVisitDeclareStat(node Declare) {
 
 		switch node.DecType.(ConstType) {
 
-
 		case Bool:
 			cg.handleBool(rhs, "r4")
 			// Using STRB, store it on the stack
@@ -496,10 +495,8 @@ func (cg CodeGenerator) cgVisitDeclareStat(node Declare) {
 			fmt.Println("Type not implemented")
 		}
 
-
-
 	default:
-	//	typeOf(node.DecType)
+		//	typeOf(node.DecType)
 	}
 
 }
@@ -579,8 +576,8 @@ func (cg CodeGenerator) cgVisitPrintStat(node Print) {
 
 	switch expr.(type) {
 
-   case string:
-		strValue := expr.(string)
+	case Str:
+		strValue := expr.(Str)
 
 		// LDR r4, =msg_n : load the string message label
 		msgLabel := cg.getMsgLabel(strValue)
@@ -592,8 +589,8 @@ func (cg CodeGenerator) cgVisitPrintStat(node Print) {
 		// Define relevant print function definition (iff it hasnt been defined)
 		cg.cgVisitPrintStatFunc_H("p_print_string")
 
-	case int:
-		intValue := expr.(int)
+	case Integer:
+		intValue := expr.(Integer)
 
 		// LDR r4, =i : load the value into r4
 		appendAssembly(cg.instrs, "LDR r4, ="+strconv.Itoa(intValue), 1, 1)
@@ -604,8 +601,8 @@ func (cg CodeGenerator) cgVisitPrintStat(node Print) {
 		// Define relevant print function definition (iff it hasnt been defined)
 		cg.cgVisitPrintStatFunc_H("p_print_int")
 
-	case rune:
-		charValue := expr.(rune)
+	case Character:
+		charValue := expr.(Charater)
 
 		// MOV r4, #'c' : load the value into r4
 		appendAssembly(cg.instrs, "MOV r4, #"+fmt.Sprintf("%c", charValue), 1, 1)
@@ -614,8 +611,8 @@ func (cg CodeGenerator) cgVisitPrintStat(node Print) {
 		// BL putchar
 		appendAssembly(cg.instrs, "BL putchar", 1, 1)
 
-	case bool:
-		boolValue := expr.(bool)
+	case Boolean:
+		boolValue := expr.(Boolean)
 
 		// MOV r4, #e.g.1 : load the value into r4
 		appendAssembly(cg.instrs, "MOV r4, #"+boolInt(boolValue), 1, 1)
@@ -626,7 +623,7 @@ func (cg CodeGenerator) cgVisitPrintStat(node Print) {
 		// Define relevant print function definition (iff it hasnt been defined)
 		cg.cgVisitPrintStatFunc_H("p_print_bool")
 	default:
-	  typeOf(expr)
+		typeOf(expr)
 
 	}
 }

@@ -5,6 +5,9 @@ import (
 	"io/ioutil"
 	"os"
 	"parser"
+
+	"ast"
+	codeG "backend/codeGeneration"
 )
 
 const SYNTAX_ERROR = 100
@@ -46,13 +49,13 @@ func main() {
 		}
 		os.Exit(SEMANTIC_ERROR)
 	}
-	/*
-			cg := codeG.ConstructCodeGenerator(root, armList, ast.SymbolTable{})
-			cg.GenerateCode()
 
-		for _, instr := range *armList {
-			fmt.Print(instr)
-		} */
+	cg := codeG.ConstructCodeGenerator(root, armList, ast.SymbolTable{})
+	cg.GenerateCode()
+
+	for _, instr := range *armList {
+		fmt.Print(instr)
+	}
 
 	//armList.WriteToFile(BACKENDFILE)
 }
