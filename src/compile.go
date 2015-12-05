@@ -39,13 +39,13 @@ func main() {
 		os.Exit(SYNTAX_ERROR)
 	}
 	fmt.Println(root)
-	/*errs := root.SemanticCheck()
+	errs := root.SemanticCheck()
 	if errs != nil {
 		for _, str := range errs {
 			fmt.Println(str)
 		}
 		os.Exit(SEMANTIC_ERROR)
-	} */
+	}
 	/*
 			cg := codeG.ConstructCodeGenerator(root, armList, ast.SymbolTable{})
 			cg.GenerateCode()
