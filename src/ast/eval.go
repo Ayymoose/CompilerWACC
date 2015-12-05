@@ -126,6 +126,10 @@ func (value ArrayElem) eval(functionTable []*Function, symbolTable *SymbolTable)
 		switch arrayTyp.(type) {
 		case ArrayType:
 			arrayTyp = (arrayTyp.(ArrayType)).Type
+		case ConstType:
+			if arrayTyp.(ConstType) == String && len(value.Exprs) == 1 {
+				return Char, nil
+			}
 		default:
 			return nil, errors.New("Too many nested indexes in array")
 		}
