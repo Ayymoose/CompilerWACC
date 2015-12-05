@@ -112,7 +112,7 @@ func (value ArrayElem) eval(functionTable []*Function, symbolTable *SymbolTable)
 		return nil, errors.New("Array not defined, identifier cannot be found")
 	}
 	arrayTyp := symbolTable.getTypeOfIdent(value.Ident)
-	for range value.Exprs {
+	for _ = range value.Exprs {
 		switch arrayTyp.(type) {
 		case ArrayType:
 			arrayTyp = (arrayTyp.(ArrayType)).Type
