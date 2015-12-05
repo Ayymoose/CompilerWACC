@@ -15,6 +15,7 @@ integer Integer
 ident Ident
 character Character
 boolean Boolean
+
 functions []*Function
 function *Function
 stmt  Statement
@@ -56,10 +57,12 @@ pairelemtype Type
 %token COMMA SEMICOLON
 %token ERROR
 
+
 %token <stringconst> STRINGCONST
 %token <ident> IDENTIFIER
 %token <integer> INTEGER
 %token <character> CHARACTER
+
 
 %type <prog> program
 %type <functions> functions
@@ -138,19 +141,23 @@ statement : SKIP                                        { $$ = Skip{} }
           | BEGIN statements END                        { $$ = Scope{StatList : $2, SymbolTable : &SymbolTable{Table: make(map[Ident]Type)} } }
 
 expr : INTEGER       { $$ =  $1 }
+
      | TRUE          { $$ =  $1 }
      | FALSE         { $$ =  $1 }
+
      | CHARACTER     { $$ =  $1 }
      | STRINGCONST   { $$ =  $1 }
      | pairliter     { $$ =  PairLiter{} }
      | IDENTIFIER    { $$ =  $1 }
      | arrayelem     { $$ =  $1 }
+
      | NOT expr     { $$ = Unop{Unary : NOT, Expr : $2} }
      | LEN expr     { $$ = Unop{Unary : LEN, Expr : $2} }
      | ORD expr     { $$ = Unop{Unary : ORD, Expr : $2} }
      | CHR expr     { $$ = Unop{Unary : CHR, Expr : $2} }
      | SUB expr     { $$ = Unop{Unary : SUB, Expr : $2} }
      | PLUS expr    { $$ = $2 }
+
 
      | expr PLUS expr { $$ = Binop{Left : $1, Binary : PLUS, Right : $3} }
      | expr SUB expr  { $$ = Binop{Left : $1, Binary : SUB, Right : $3} }
@@ -178,7 +185,9 @@ arrayelem : IDENTIFIER bracketed {$$ = ArrayElem{Ident: $1, Exprs : $2}}
 bracketed : bracketed OPENSQUARE expr CLOSESQUARE {$$ = append($1, $3)}
           | OPENSQUARE expr CLOSESQUARE {$$ = []Evaluation{$2}}
 
+
 pairliter : NULL    { $$ =  PairLiter{} }
+
 
 pairelem : FST expr { $$ = PairElem{Fsnd: FST, Expr : $2} }
          | SND expr { $$ = PairElem{Fsnd: SND, Expr : $2} }

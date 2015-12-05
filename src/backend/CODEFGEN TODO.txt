@@ -12,14 +12,14 @@ FREE: NOT STARTED ---
 RETURN: NOT STARTED ---
 - ???
 
-EXIT: COMPLETE --------------------------------------------------
+EXIT: COMPLETE ----------------------------------------
 
 PRINT: IN PROGRESS/ LITERALS COMPLETE* ---
-- *Oli needs to help print runes
-- Still need to print pairs and array addresses
+- *Oli needs to help print characters
+- Still need to print pairs (and null) and array addresses
 - Need to print variables
 
-PRINTLN: COMPLETE MUTHAF***ER -----------------------------------
+PRINTLN: COMPLETE ----------------------------------------
 
 IF: NOT STARTED ---
 

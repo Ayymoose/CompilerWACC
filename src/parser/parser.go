@@ -12,9 +12,8 @@ func ParseFile(filename, text string) (*Program, error) {
 		fmt.Println(item)
 	}*/
 	e := parserParse(l)
-	if e != 0 {
-		return nil, errors.New("Compilation halted due to lex and parse errors")
+	if e == 0 && !l.parseError {
+		return l.prog, nil
 	}
-
-	return l.prog, nil
+	return nil, errors.New("Compilation halted due to lex and parse errors")
 }

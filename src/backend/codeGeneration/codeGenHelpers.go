@@ -9,11 +9,12 @@ import (
 
 // Contains the size in bytes of all print format strings
 var mapPrintFormatToSize = map[string]int{
-	INT_FORMAT:    3,
-	STRING_FORMAT: 5,
-	NEWLINE_MSG:   1,
-	TRUE_MSG:      5,
-	FALSE_MSG:     6,
+	INT_FORMAT:     3,
+	STRING_FORMAT:  5,
+	NEWLINE_MSG:    1,
+	TRUE_MSG:       5,
+	FALSE_MSG:      6,
+	POINTER_FORMAT: 3,
 }
 
 //Size in bytes for all the variables in the current scope
@@ -31,8 +32,8 @@ func GetScopeVarSize(statList []interface{}) int {
 }
 
 // Calculates the size of a pair type
-func pairTypeSize(typeFst Type, typeSnd Type) (int,int)  {
-	return sizeOf(typeFst),sizeOf(typeSnd)
+func pairTypeSize(typeFst Type, typeSnd Type) (int, int) {
+	return sizeOf(typeFst), sizeOf(typeSnd)
 }
 
 // Calcuates the size of a type
@@ -41,18 +42,18 @@ func sizeOf(t Type) int {
 	switch t.(type) {
 	case PairType:
 		size = PAIR_SIZE
-  case ConstType:
-	 switch t.(ConstType) {
-		 case Int:
- 			size = INT_SIZE
- 		case String:
- 			size = STRING_SIZE
- 		case Bool:
- 			size = BOOL_SIZE
- 		case Char:
- 			size = CHAR_SIZE
- 		//default:
-	 }
+	case ConstType:
+		switch t.(ConstType) {
+		case Int:
+			size = INT_SIZE
+		case String:
+			size = STRING_SIZE
+		case Bool:
+			size = BOOL_SIZE
+		case Char:
+			size = CHAR_SIZE
+			//default:
+		}
 	case ArrayType:
 		switch t.(ArrayType).Type {
 		case Int:
@@ -68,12 +69,69 @@ func sizeOf(t Type) int {
 			size = sizeOf(t.(ArrayType).Type)
 		}
 
-
 	default:
 		fmt.Println("sizeOf(t) t is an unknown type")
 
 	}
 	return size
+}
+
+// Small function to print the type (remove later)
+func typeOf(t Type) {
+	switch t.(type) {
+	case Function:
+		fmt.Println("Function")
+	case Param:
+		fmt.Println("Param")
+	case ArrayType:
+		fmt.Println("ArrayType")
+	case PairType:
+		fmt.Println("PairType")
+	case Program:
+		fmt.Println("Program")
+	case Binop:
+		fmt.Println("Binop")
+	case Unop:
+		fmt.Println("Unop")
+	case NewPair:
+		fmt.Println("Newpair")
+	case Declare:
+		fmt.Println("Declare")
+	case Assignment:
+		fmt.Println("Assignment")
+	case If:
+		fmt.Println("If")
+	case While:
+		fmt.Println("While")
+	case Scope:
+		fmt.Println("Scope")
+	case Read:
+		fmt.Println("Read")
+	case Free:
+		fmt.Println("Free")
+	case Return:
+		fmt.Println("Return")
+	case Exit:
+		fmt.Println("Exit")
+	case Print:
+		fmt.Println("Print")
+	case Println:
+		fmt.Println("Println")
+	case Call:
+		fmt.Println("Call")
+	case Ident:
+		fmt.Println("Ident")
+	case PairElem:
+		fmt.Println("PairElem")
+	case ArrayLiter:
+		fmt.Println("ArrayLiter")
+	case ArrayElem:
+		fmt.Println("ArrayElem")
+	case Character:
+		fmt.Println("Character")
+	default:
+		fmt.Println("Unknown")
+	}
 }
 
 // Calcuates the size of an array
