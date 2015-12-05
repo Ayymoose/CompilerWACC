@@ -7,6 +7,11 @@ import (
 	"strconv"
 )
 
+var zeroInt Integer = 0
+var zeroCharater Character = "0"
+var zeroString Str = "0"
+var zeroBool Boolean = false
+
 // Contains the size in bytes of all print format strings
 var mapPrintFormatToSize = map[string]int{
 	INT_FORMAT:     3,
