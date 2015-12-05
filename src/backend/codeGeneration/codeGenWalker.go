@@ -207,11 +207,17 @@ func (cg CodeGenerator) cgVisitParameter(node Param, offset int) {
 	}*/
 }
 
+// Small helper function to do C function calls
+// Saves us having to write LDR and BL instructions each time
+// Puts argument into r0 and calls functionName via BL
+// For C functiond only!
+func (cg.CodeGenerator) CfunctionCall(functionName string, argument string) {
+	appendAssembly(cg.instrs, "LDR r0, ="+argument, 1, 1)
+	appendAssembly(cg.instrs, "BL " + functionName, 1, 1)
+}
+
 // Evaluates a pair
 func (cg CodeGenerator) evalPair(pairType Type, dstReg string) {
-
-
-
 
 	switch pairType.(type) {
 	case PairType:
@@ -242,9 +248,12 @@ func (cg CodeGenerator) pushPair(fst Evaluation, snd Evaluation, typeFst Type, t
   cg.evalPair(typeFst,reg1)
 
 	//Allocate memory for the first element
-	appendAssembly(cg.instrs, "LDR r0, ="+strconv.Itoa(fstSize), 1, 1)
+	cg.CfunctionCall("malloc",strconv.Itoa(fstSize))
 
-	appendAssembly(cg.instrs, "BL malloc", 1, 1)
+	/*
+	appendAssembly(cg.instrs, "LDR r0, ="+strconv.Itoa(fstSize), 1, 1)
+	appendAssembly(cg.instrs, "BL malloc", 1, 1) */
+
 	//Store the first element to the newly allocated memory onto the stack
 	appendAssembly(cg.instrs, "STR "+reg1+", [r0]", 1, 1)
 	//Store the address of allocated memory block of the pair on the stack
@@ -254,9 +263,13 @@ func (cg CodeGenerator) pushPair(fst Evaluation, snd Evaluation, typeFst Type, t
 	cg.evalPair(typeSnd,reg1)
 
 	//Allocate memory for the second element
-	appendAssembly(cg.instrs, "LDR r0, ="+strconv.Itoa(sndSize), 1, 1)
+	cg.CfunctionCall("malloc",strconv.Itoa(sndSize))
 
+	/*
+	appendAssembly(cg.instrs, "LDR r0, ="+strconv.Itoa(sndSize), 1, 1)
 	appendAssembly(cg.instrs, "BL malloc", 1, 1)
+	*/
+
 	//Store the second element to the newly allocated memory onto the stack
 	appendAssembly(cg.instrs, "STR "+reg1+", [r0]", 1, 1)
 	//Store the address of allocated memory block of the pair on the stack
@@ -323,9 +336,12 @@ func (cg CodeGenerator) evalArrayLiter(typeNode Type, rhs Evaluation, srcReg str
 		 var arraySize = arraySize(rhs.(ArrayLiter).Exprs)
 		 var arrayStorage = (arraySize * sizeOf(typeNode)) + ARRAY_SIZE
 
+     //Allocate memory for the array
+		 cg.CfunctionCall("malloc",strconv.Itoa(arrayStorage))
+		 /*
 		 appendAssembly(cg.instrs, "LDR r0, ="+strconv.Itoa(arrayStorage), 1, 1)
-		 //Allocate memory for the array
-		 appendAssembly(cg.instrs, "BL malloc", 1, 1)
+		 appendAssembly(cg.instrs, "BL malloc", 1, 1)*/
+
 		 appendAssembly(cg.instrs, "MOV "+dstReg+", r0", 1, 1)
 
 		 //Start loading each element in the array onto the stack
@@ -378,8 +394,11 @@ func (cg CodeGenerator) cgVisitDeclareStat(node Declare) {
 		cg.evalArrayLiter(node.DecType,node.Rhs,"r5","r4")
 	case PairType:
 		// First allocate memory to store two addresses (8-bytes)
+		cg.CfunctionCall("malloc",strconv.Itoa(ADDR_SIZE*2))
+		/*
 		appendAssembly(cg.instrs, "LDR r0, ="+strconv.Itoa(ADDR_SIZE*2), 1, 1)
-		appendAssembly(cg.instrs, "BL malloc", 1, 1)
+		appendAssembly(cg.instrs, "BL malloc", 1, 1)*/
+
 		// Push a pair of elements onto the stack
 		cg.pushPair(rhs.(NewPair).FstExpr, rhs.(NewPair).SndExpr, node.DecType.(PairType).FstType, node.DecType.(PairType).SndType, "r5", "r4")
 	case Boolean:
