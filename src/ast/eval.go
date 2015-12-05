@@ -82,7 +82,7 @@ func (value Integer) eval(functionTable []*Function, symbolTable *SymbolTable) (
 }
 
 func (value PairLiter) eval(functionTable []*Function, symbolTable *SymbolTable) (Type, error) {
-	return PairType{}, nil
+	return Pair, nil
 }
 
 func (value Str) eval(functionTable []*Function, symbolTable *SymbolTable) (Type, error) {
@@ -174,12 +174,12 @@ func (binop Binop) eval(functionTable []*Function, symbolTable *SymbolTable) (Ty
 		if typr != Int && typr != Char {
 			return nil, errors.New("Right expr of binary conditional operation is not an Int or Char")
 		}
-		if typl != typr {
+		if !typesMatch(typl, typr) {
 			return nil, errors.New("Left and right expr of binary conditional operation do not match")
 		}
 		return Bool, nil
 	case EQ, NEQ:
-		if typl != typr {
+		if !typesMatch(typl, typr) {
 			return nil, errors.New("Left and right expr of binary conditional operation do not match")
 		}
 		return Bool, nil
@@ -223,4 +223,20 @@ func (value Unop) eval(functionTable []*Function, symbolTable *SymbolTable) (Typ
 	default:
 		return nil, errors.New("Unary operation not recognised")
 	}
+}
+
+func typesMatch(type1 Type, type2 Type) bool {
+	switch type1.(type) {
+	case PairType:
+		if type2 == Pair {
+			return true
+		}
+	}
+	switch type2.(type) {
+	case PairType:
+		if type1 == Pair {
+			return true
+		}
+	}
+	return type1 == type2
 }

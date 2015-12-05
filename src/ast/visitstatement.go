@@ -84,8 +84,8 @@ func (node Assignment) visitStatement(functionTable []*Function, symbolTable *Sy
 	if errr != nil {
 		semanticErrors = append(semanticErrors, errr)
 	}
-	if lhsType != rhsType {
-		semanticErrors = append(semanticErrors, errors.New("Assignment types do not match"))
+	if !typesMatch(lhsType, rhsType) {
+		semanticErrors = append(semanticErrors, errors.New("Assignment types do not match"+lhsType.typeString()+","+rhsType.typeString()))
 	}
 	if len(semanticErrors) > 0 {
 		return semanticErrors
