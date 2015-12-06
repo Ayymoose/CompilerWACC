@@ -44,6 +44,7 @@ func (value ArrayLiter) Eval(functionTable []*Function, symbolTable *SymbolTable
 				return nil, errors.New("Array has mixed types")
 			}
 		}
+		fmt.Println("DID WE GET HERE?", currType.typeString())
 		return ArrayType{Type: currType}, nil
 	}
 	return nil, nil
@@ -101,6 +102,7 @@ func (value Boolean) Eval(functionTable []*Function, symbolTable *SymbolTable) (
 
 func (value ArrayElem) Eval(functionTable []*Function, symbolTable *SymbolTable) (Type, error) {
 	var currType Type
+
 	if len(value.Exprs) > 0 {
 		fstType, err := value.Exprs[0].Eval(functionTable, symbolTable)
 		currType = fstType

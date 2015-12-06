@@ -28,7 +28,10 @@ const (
 	NEWLINE_MSG    = "\\0"
 	TRUE_MSG       = "true\\0"
 	FALSE_MSG      = "false\\0"
+	READ_INT       = "%d\\0"
+	READ_CHAR      = "%c\\0"
 	POINTER_FORMAT = "%p\\0"
+	NULL_REFERENCE = "NullReferenceError: dereference a null reference\n\\0"
 )
 
 // Function global variable
@@ -186,6 +189,8 @@ func (cg CodeGenerator) cgVisitAssignmentStat(node Assignment) {
 func (cg CodeGenerator) cgVisitReadStat(node Read) {
 	// Technically only read int / char
 	constType := cg.eval(node.AssignLHS.(Ident)) // Type
+	appendAssembly(cg.instrs, "ADD r4, sp, #0", 1, 1)
+	appendAssembly(cg.instrs, "MOV r0, r4", 1, 1)
 	switch node.AssignLHS.(type) {
 	case ArrayElem:
 	case PairElem:
@@ -193,21 +198,85 @@ func (cg CodeGenerator) cgVisitReadStat(node Read) {
 	switch constType {
 	case Bool:
 	case Char:
-		appendAssembly(cg.instrs, "ADD r4, sp, #0", 1, 1)
-		appendAssembly(cg.instrs, "MOV r0, r4", 1, 1)
 		appendAssembly(cg.instrs, "BL p_read_char", 1, 1)
+		cg.cgVisitReadStatFunc_H("p_read_char")
 	case Int:
-		appendAssembly(cg.instrs, "ADD r4, sp, #0", 1, 1)
-		appendAssembly(cg.instrs, "MOV r0, r4", 1, 1)
 		appendAssembly(cg.instrs, "BL p_read_int", 1, 1)
+		cg.cgVisitReadStatFunc_H("p_read_int")
 	case String:
 	case Pair:
 		// TODO
 	}
 }
 
+// cgVisitReadStat helper function
+// Adds a function definition to the progFuncInstrs ARMList depending on the
+// function name provided
+func (cg CodeGenerator) cgVisitReadStatFunc_H(funcName string) {
+	if cg.AddCheckProgName(funcName) {
+		// if the program function has been defined previously
+		// a redefinition is unnecessary
+		return
+	}
+	// else define the read function
+	appendAssembly(cg.progFuncInstrs, funcName+":", 0, 1)
+	appendAssembly(cg.progFuncInstrs, "PUSH {lr}", 1, 1)
+	appendAssembly(cg.progFuncInstrs, "MOV r1, r0", 1, 1)
+	switch funcName {
+	case "p_read_char":
+		appendAssembly(cg.progFuncInstrs, "LDR r0, "+cg.getMsgLabel(READ_CHAR), 1, 1)
+	case "p_read_int":
+		appendAssembly(cg.progFuncInstrs, "LDR r0, "+cg.getMsgLabel(READ_INT), 1, 1)
+	}
+	appendAssembly(cg.progFuncInstrs, "ADD r0, r0, #4", 1, 1)
+	appendAssembly(cg.progFuncInstrs, "BL scanf", 1, 1)
+	appendAssembly(cg.progFuncInstrs, "POP {pc}", 1, 1)
+}
+
 func (cg CodeGenerator) cgVisitFreeStat(node Free) {
-	//	label := "p_free_pair"
+	// node.Expr.
+	appendAssembly(cg.instrs, "LDR r4, [sp]", 1, 1)
+	appendAssembly(cg.instrs, "MOV r0, r4", 1, 1)
+	appendAssembly(cg.instrs, "BL p_free_pair", 1, 1)
+	cg.cgVisitFreeStatFunc_H("p_free_pair")
+}
+
+// cgVisitFreeStat helper function
+// Adds a function definition to the progFuncInstrs ARMList depending on the
+// function name provided
+func (cg CodeGenerator) cgVisitFreeStatFunc_H(funcName string) {
+	if cg.AddCheckProgName(funcName) {
+		// if the program function has been defined previously
+		// a redefinition is unnecessary
+		return
+	}
+	// else define the read function
+	appendAssembly(cg.progFuncInstrs, funcName+":", 0, 1)
+	switch funcName {
+	case "p_free_pair":
+		appendAssembly(cg.progFuncInstrs, "PUSH {lr}", 1, 1)
+		appendAssembly(cg.progFuncInstrs, "CMP r0, #0", 1, 1)
+		appendAssembly(cg.progFuncInstrs, "LDREQ r0, "+cg.getMsgLabel(NULL_REFERENCE), 1, 1)
+		appendAssembly(cg.progFuncInstrs, "BEQ p_throw_runtime_error", 1, 1)
+		appendAssembly(cg.progFuncInstrs, "PUSH {r0}", 1, 1)
+		appendAssembly(cg.progFuncInstrs, "LDR r0, [r0]", 1, 1)
+		appendAssembly(cg.progFuncInstrs, "BL free", 1, 1)
+		appendAssembly(cg.progFuncInstrs, "LDR r0, [sp]", 1, 1)
+		appendAssembly(cg.progFuncInstrs, "LDR r0, [r0, #4]", 1, 1)
+		appendAssembly(cg.progFuncInstrs, "BL free", 1, 1)
+		appendAssembly(cg.progFuncInstrs, "POP {r0}", 1, 1)
+		appendAssembly(cg.progFuncInstrs, "BL free", 1, 1)
+		appendAssembly(cg.progFuncInstrs, "POP {pc}", 1, 1)
+	}
+
+	// if the program function has not been defined previously
+	if !cg.AddCheckProgName("p_throw_runtime_error") {
+		appendAssembly(cg.progFuncInstrs, "p_throw_runtime_error"+":", 0, 1)
+		appendAssembly(cg.progFuncInstrs, "BL p_print_string", 1, 1)
+		appendAssembly(cg.progFuncInstrs, "MOV r0, #-1", 1, 1)
+		appendAssembly(cg.progFuncInstrs, "BL exit", 1, 1)
+	}
+	cg.cgVisitPrintStatFunc_H("p_print_string")
 }
 
 func (cg CodeGenerator) cgVisitReturnStat(node Return) {

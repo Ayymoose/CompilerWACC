@@ -90,6 +90,10 @@ func (root *Program) SemanticCheck() errorSlice {
 		if errs != nil {
 			semanticErrors = append(semanticErrors, errs)
 		}
+		switch stat.(type) {
+		case Return:
+			semanticErrors = append(semanticErrors, errors.New("Cannot have return statement in main"))
+		}
 	}
 	if len(semanticErrors) > 0 {
 		return semanticErrors
