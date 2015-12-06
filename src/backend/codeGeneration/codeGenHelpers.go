@@ -45,7 +45,7 @@ func pairTypeSize(typeFst Type, typeSnd Type) (int, int) {
 func sizeOf(t Type) int {
 	var size = 0
 	switch t.(type) {
-  case ConstType:
+	case ConstType:
 		switch t.(ConstType) {
 		case Int:
 			size = INT_SIZE
@@ -54,20 +54,12 @@ func sizeOf(t Type) int {
 		case Char:
 			size = CHAR_SIZE
 		case String:
-			size = STRING_SIZE
+			size = ADDR_SIZE
 		}
 	case PairType:
-		size = PAIR_SIZE //Recurse on pair Type too?
-	case Integer:
-		size = INT_SIZE
-	case Str:
-		size = STRING_SIZE
-	case Boolean:
-		size = BOOL_SIZE
-	case Character:
-		size = CHAR_SIZE
+		size = ADDR_SIZE
 	case ArrayType:
-    size = sizeOf(t.(ArrayType).Type)
+		size = sizeOf(t.(ArrayType).Type)
 	default:
 		fmt.Println("sizeOf(t) t is an unknown type")
 		typeOf(t)
@@ -76,8 +68,10 @@ func sizeOf(t Type) int {
 	return size
 }
 
+type Generic interface{}
+
 // Small function to print the type (remove later)
-func typeOf(t Type) {
+func typeOf(t Generic) {
 	switch t.(type) {
 	case ConstType:
 		fmt.Println("ConstType")
@@ -152,11 +146,11 @@ func typeOf(t Type) {
 	case int:
 		fmt.Println("int")
 	case bool:
-	  fmt.Println("bool")
+		fmt.Println("bool")
 	case string:
-	  fmt.Println("string")
+		fmt.Println("string")
 	case rune:
-	  fmt.Println("rune")
+		fmt.Println("rune")
 	default:
 		fmt.Println("Unknown")
 	}
