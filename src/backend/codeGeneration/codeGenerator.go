@@ -36,6 +36,12 @@ func ConstructCodeGenerator(cRoot *Program, cInstrs *ARMList, cSymTable SymbolTa
 	return cg
 }
 
+// Evaluates the evaluation using the code generator
+func (cg CodeGenerator) eval(e Evaluation) Type {
+	eType, _ := e.Eval(cg.root.FunctionList, &(cg.symTable))
+	return eType
+}
+
 // Provides information about the stack in relation to a specific scope
 type scopeData struct {
 	currP       int        // the current position of the pointer to the stack
@@ -103,5 +109,5 @@ func (cg CodeGenerator) AddCheckProgName(progName string) bool {
 // be executed
 func (cg CodeGenerator) getIdentOffset(ident Ident) (int, Type) {
 	// TO BE COMPLETED
-	return 100, Integer(0)
+	return 100, Int
 }

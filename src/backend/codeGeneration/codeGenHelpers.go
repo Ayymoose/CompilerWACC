@@ -47,10 +47,10 @@ func sizeOf(t Type) int {
 		case Char:
 			size = CHAR_SIZE
 		case String:
-			size = STRING_SIZE
+			size = ADDR_SIZE
 		}
 	case PairType:
-		size = PAIR_SIZE //Recurse on pair Type too?
+		size = ADDR_SIZE
 	case ArrayType:
 		size = sizeOf(t.(ArrayType).Type)
 	default:
@@ -61,8 +61,10 @@ func sizeOf(t Type) int {
 	return size
 }
 
+type Generic interface{}
+
 // Small function to print the type (remove later)
-func typeOf(t Type) {
+func typeOf(t Generic) {
 	switch t.(type) {
 	case ConstType:
 		fmt.Println("ConstType")
