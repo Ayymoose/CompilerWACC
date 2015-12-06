@@ -41,14 +41,14 @@ func (root *Program) SemanticCheck() errorSlice {
 	if containsDuplicateFunc(root.FunctionList) {
 		semanticErrors = append(semanticErrors, errors.New("Program has function redefinitions"))
 	}
-	for _, functionProg := range root.FunctionList {
+	/*	for _, functionProg := range root.FunctionList {
 		for _, stat := range functionProg.StatList {
 			errs := stat.visitStatement(root.FunctionList, root.SymbolTable)
 			if errs != nil {
 				semanticErrors = append(semanticErrors, errs)
 			}
 		}
-	}
+	} */
 	for _, functionProg := range root.FunctionList {
 		functionProg.checkFuncStats(root.FunctionList, root.SymbolTable, functionProg.StatList)
 	}
