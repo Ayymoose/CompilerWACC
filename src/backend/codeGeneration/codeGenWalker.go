@@ -243,6 +243,16 @@ func (cg CodeGenerator) cgVisitFreeStat(node Free) {
 	cg.cgVisitFreeStatFunc_H("p_free_pair")
 }
 
+
+func (cg CodeGenerator) throwRunTimeError() {
+	if !cg.AddCheckProgName("p_throw_runtime_error") {
+		appendAssembly(cg.progFuncInstrs, "p_throw_runtime_error"+":", 0, 1)
+		appendAssembly(cg.progFuncInstrs, "BL p_print_string", 1, 1)
+		appendAssembly(cg.progFuncInstrs, "MOV r0, #-1", 1, 1)
+		appendAssembly(cg.progFuncInstrs, "BL exit", 1, 1)
+	}
+}
+
 // cgVisitFreeStat helper function
 // Adds a function definition to the progFuncInstrs ARMList depending on the
 // function name provided
@@ -272,12 +282,8 @@ func (cg CodeGenerator) cgVisitFreeStatFunc_H(funcName string) {
 	}
 
 	// if the program function has not been defined previously
-	if !cg.AddCheckProgName("p_throw_runtime_error") {
-		appendAssembly(cg.progFuncInstrs, "p_throw_runtime_error"+":", 0, 1)
-		appendAssembly(cg.progFuncInstrs, "BL p_print_string", 1, 1)
-		appendAssembly(cg.progFuncInstrs, "MOV r0, #-1", 1, 1)
-		appendAssembly(cg.progFuncInstrs, "BL exit", 1, 1)
-	}
+	cg.throwRunTimeError()
+
 	cg.cgVisitPrintStatFunc_H("p_print_string")
 }
 
@@ -355,13 +361,9 @@ func (cg CodeGenerator) cgVisitPrintStat(node Print) {
 // Adds a function definition to the progFuncInstrs ARMList depending on the
 // function name provided
 func (cg CodeGenerator) cgVisitPrintStatFunc_H(funcName string) {
-	if cg.AddCheckProgName(funcName) {
+	if !cg.AddCheckProgName(funcName) {
 		// if the program function has been defined previously
 		// a redefinition is unnecessary
-		return
-	}
-	// else define the print function
-
 	// funcLabel:
 	appendAssembly(cg.progFuncInstrs, funcName+":", 0, 1)
 	// push {lr} to save the caller address
@@ -419,6 +421,8 @@ func (cg CodeGenerator) cgVisitPrintStatFunc_H(funcName string) {
 
 }
 
+}
+
 func (cg CodeGenerator) cgVisitPrintlnStat(node Println) {
 	cg.cgVisitPrintStat(Print{Expr: node.Expr})
 	// BL p_print_ln
@@ -437,6 +441,49 @@ func (cg CodeGenerator) cgVisitWhileStat(node While) {
 
 func (cg CodeGenerator) cgVisitScopeStat(node Scope) {
 
+}
+
+//TODO: Group these functions in one big function that takes a string and defines it for us
+
+func (cg CodeGenerator) checkArrayBounds() {
+	if !cg.AddCheckProgName("p_check_array_bounds") {
+		appendAssembly(cg.progFuncInstrs, "p_check_array_bounds"+":", 0, 1)
+		appendAssembly(cg.progFuncInstrs, "PUSH {lr}", 1, 1)
+		appendAssembly(cg.progFuncInstrs, "CMP r0, #0", 1, 1)
+		appendAssembly(cg.progFuncInstrs, "LDRLT r0, =msg_0", 1, 1)
+		appendAssembly(cg.progFuncInstrs, "BLLT p_throw_runtime_error", 1, 1)
+		appendAssembly(cg.progFuncInstrs, "LDR r1, [r1]", 1, 1)
+		appendAssembly(cg.progFuncInstrs, "CMP r0, r1", 1, 1)
+		appendAssembly(cg.progFuncInstrs, "LDRCS r0, =msg_1", 1, 1)
+		appendAssembly(cg.progFuncInstrs, "BLCS p_throw_runtime_error", 1, 1)
+		appendAssembly(cg.progFuncInstrs, "POP {pc}", 1, 1)
+	}
+}
+
+//For evaluating array elements
+func (cg CodeGenerator) evalArrayElem(t Evaluation, reg1 string, reg2 string) {
+	//Create info
+	cg.getMsgLabel(ARRAY_INDEX_NEGATIVE)
+	cg.getMsgLabel(ARRAY_INDEX_LARGE)
+	cg.getMsgLabel(STRING_FORMAT)
+
+	//Store the address at the next space in the stack (i.e SP - ADDRESS_SIZE)
+	//SHOULD HAVE A OFFSET FUNCTION FOR THIS
+	appendAssembly(cg.instrs, "ADD "+reg1+", sp, #" + strconv.Itoa(cg.currStack.currP - ADDR_SIZE) , 1, 1)
+  //Load the index
+	cg.evalRHS(t.(ArrayElem).Exprs[0],reg2)
+	//Set a register to point to the array
+	appendAssembly(cg.instrs, "LDR " + reg1 + ", [" + reg1 + "]", 1, 1)
+
+	// reg1 = Address of the array
+	// reg2 = Index
+	appendAssembly(cg.instrs, "MOV r0, " + reg2, 1, 1)
+	appendAssembly(cg.instrs, "MOV r1, " + reg1, 1, 1)
+	//Jump
+	appendAssembly(cg.instrs, "BL p_check_array_bounds", 1, 1)
+  cg.checkArrayBounds()
+	cg.throwRunTimeError()
+  cg.cgVisitPrintStatFunc_H("p_print_string")
 }
 
 // Global handle function
@@ -458,22 +505,7 @@ func (cg CodeGenerator) evalRHS(t Evaluation, srcReg string) {
 		var value, _ = cg.getIdentOffset(t.(Ident))
 		appendAssembly(cg.instrs, "LDR "+srcReg+", [sp, #"+strconv.Itoa(value)+"]", 1, 1)
 	case ArrayElem:
-
-		appendAssembly(cg.progFuncInstrs, cg.getMsgLabel(ARRAY_INDEX_NEGATIVE), 1, 1)
-    appendAssembly(cg.progFuncInstrs, cg.getMsgLabel(ARRAY_INDEX_LARGE), 1, 1)
-		/*
-
-			30		PUSH {r4}
-			31		MOV r4, r0
-			32		LDR r0, =1
-			33		BL p_check_array_bounds
-			34		ADD r4, r4, #4
-			35		ADD r4, r4, r0, LSL #2
-			36		LDR r4, [r4]
-			37		MOV r0, r4
-			38		POP {r4}
-		*/
-		appendAssembly(cg.instrs, "arrayElem not implemented", 1, 1)
+		cg.evalArrayElem(t,srcReg,"r5")
 	case Unop:
 		cg.cgVisitUnopExpr(t.(Unop))
 	case Binop:
@@ -584,6 +616,7 @@ func (cg CodeGenerator) cgVisitParameter(node Param, offset int) {
 // Saves us having to write LDR and BL instructions each time
 // Puts argument into r0 and calls functionName via BL
 // For C functiond only!
+//NEED TO EDIT THIS FUNCTION TO SUPPORT MULTIPLE ARUGMENTS AND NOT USE JUST LDR BUT MOV TOO
 func (cg CodeGenerator) CfunctionCall(functionName string, argument string) {
 	appendAssembly(cg.instrs, "LDR r0, ="+argument, 1, 1)
 	appendAssembly(cg.instrs, "BL "+functionName, 1, 1)
