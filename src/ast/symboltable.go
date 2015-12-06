@@ -39,6 +39,14 @@ func (symbolTable *SymbolTable) isDefined(key Ident) bool {
 	return false
 }
 
+// Checks if the key is already declared in the symbol table
+func (symbolTable *SymbolTable) isDefinedInScope(key Ident) bool {
+	if symbolTable.contains(key) {
+		return true
+	}
+	return false
+}
+
 // Helper function which return a boolean depending on
 // whether or not the given key is in the symbol table
 func (symbolTable *SymbolTable) contains(key Ident) bool {
