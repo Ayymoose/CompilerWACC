@@ -83,9 +83,11 @@ pairelemtype Type
 %type <typedefinition>  basetype typeDef arraytype pairtype
 %type <pairelemtype> pairelemtype
 
-%left AND EQ NEQ OR
+%left OR
+%left AND
+%left EQ NEQ 
 %left PLUS SUB
-%left MUL DIV MOD 
+%left MUL DIV MOD
 %left LT GT LTE GTE
 %right NOT NEG LEN ORD CHR
 
