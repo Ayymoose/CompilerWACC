@@ -5,8 +5,6 @@ import (
 	cg "backend/codeGeneration"
 	fw "backend/filewriter"
 	"fmt"
-	fw "backend/filewriter"
-	cg "backend/codeGeneration"
 	"io/ioutil"
 	"os"
 	"parser"
@@ -52,17 +50,6 @@ func main() {
 		fmt.Println("Semantic Error : 200")
 		os.Exit(SEMANTIC_ERROR)
 	}
-	/*
-<<<<<<< HEAD
-	fmt.Println("SUCCESS : ")
-			codeGen := cg.ConstructCodeGenerator(root, armList, *root.SymbolTable)
-			codeGen.GenerateCode()
-			for _, instr := range *armList {
-				fmt.Print(instr)
-			}
-
-	//	armList.WriteToFile(BACKENDFILE)
-=======*/
 
 	fmt.Println("SUCCESSFUL FRONTEND: ")
 
@@ -73,5 +60,4 @@ func main() {
 	} */
 
 	armList.WriteToFile(BACKENDFILE)
->>>>>>> 1f93f05cfd6e1484fa84a19ad3e9ae09d2e209aa
 }
