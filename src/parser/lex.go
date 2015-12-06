@@ -153,7 +153,7 @@ func (l *Lexer) run() {
 func (l *Lexer) NextItem() Token {
 	item := <-l.Items
 	l.lastPos = item.Pos
-	l.lastItem = item
+	//l.lastItem = item
 	return item
 }
 
@@ -221,10 +221,8 @@ func lexInsideProgram(l *Lexer) stateFn {
 		if strings.HasPrefix(l.input[l.pos:], str) {
 			//		s := grammar.Token_strings[str]
 			if (l.input[l.pos] == '+' || l.input[l.pos] == '-') && '0' <= l.input[l.pos+1] && l.input[l.pos+1] <= '9' {
-				fmt.Println("Worng AGAIN BOB", l.lastItem.Typ)
 				switch l.lastItem.Typ {
 				case ASSIGNMENT, OPENROUND, OPENSQUARE, COMMA, SEMICOLON:
-					fmt.Println("Worng", l.lastItem)
 					return lexNumber
 				}
 			}
@@ -311,6 +309,7 @@ func (l *Lexer) acceptRun(valid string) {
 func (l *Lexer) emit(t int) {
 	item := Token{Typ: t, Lexeme: l.input[l.start:l.pos], Pos: l.start}
 	l.Items <- item
+	l.lastItem = item
 	l.start = l.pos
 }
 
