@@ -9,6 +9,5 @@ wacc_19:
 #	go build src/semantics.go
 	go build src/compile.go
 
-
 clean:
-	-rm *.output 
+	-rm *.output
