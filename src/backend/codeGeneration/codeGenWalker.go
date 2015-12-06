@@ -247,7 +247,6 @@ func (cg CodeGenerator) cgVisitFreeStat(node Free) {
 	cg.cgVisitFreeStatFunc_H("p_free_pair")
 }
 
-
 func (cg CodeGenerator) throwRunTimeError() {
 	if !cg.AddCheckProgName("p_throw_runtime_error") {
 		appendAssembly(cg.progFuncInstrs, "p_throw_runtime_error"+":", 0, 1)
@@ -286,8 +285,12 @@ func (cg CodeGenerator) cgVisitFreeStatFunc_H(funcName string) {
 	}
 
 	// if the program function has not been defined previously
-	cg.throwRunTimeError()
-
+	if !cg.AddCheckProgName("p_throw_runtime_error") {
+		appendAssembly(cg.progFuncInstrs, "p_throw_runtime_error"+":", 0, 1)
+		appendAssembly(cg.progFuncInstrs, "BL p_print_string", 1, 1)
+		appendAssembly(cg.progFuncInstrs, "MOV r0, #-1", 1, 1)
+		appendAssembly(cg.progFuncInstrs, "BL exit", 1, 1)
+	}
 	cg.cgVisitPrintStatFunc_H("p_print_string")
 }
 
@@ -368,62 +371,62 @@ func (cg CodeGenerator) cgVisitPrintStatFunc_H(funcName string) {
 	if !cg.AddCheckProgName(funcName) {
 		// if the program function has been defined previously
 		// a redefinition is unnecessary
-	// funcLabel:
-	appendAssembly(cg.progFuncInstrs, funcName+":", 0, 1)
-	// push {lr} to save the caller address
-	appendAssembly(cg.progFuncInstrs, "PUSH {lr}", 1, 1)
+		// funcLabel:
+		appendAssembly(cg.progFuncInstrs, funcName+":", 0, 1)
+		// push {lr} to save the caller address
+		appendAssembly(cg.progFuncInstrs, "PUSH {lr}", 1, 1)
 
-	switch funcName {
-	case "p_print_int":
-		// r1 = int value
-		appendAssembly(cg.progFuncInstrs, "MOV r1, r0", 1, 1)
-		// r0 = int format string
-		appendAssembly(cg.progFuncInstrs, "LDR r0, "+cg.getMsgLabel(INT_FORMAT), 1, 1)
+		switch funcName {
+		case "p_print_int":
+			// r1 = int value
+			appendAssembly(cg.progFuncInstrs, "MOV r1, r0", 1, 1)
+			// r0 = int format string
+			appendAssembly(cg.progFuncInstrs, "LDR r0, "+cg.getMsgLabel(INT_FORMAT), 1, 1)
 
-	case "p_print_bool":
-		// Check bool value - 0
-		appendAssembly(cg.progFuncInstrs, "CMP r0, #0", 1, 1)
-		// If bool = true then r0 = "true"
-		appendAssembly(cg.progFuncInstrs, "LDRNE r0, "+cg.getMsgLabel(TRUE_MSG), 1, 1)
-		// If bool = false then r0 = "false"
-		appendAssembly(cg.progFuncInstrs, "LDREQ r0, "+cg.getMsgLabel(FALSE_MSG), 1, 1)
+		case "p_print_bool":
+			// Check bool value - 0
+			appendAssembly(cg.progFuncInstrs, "CMP r0, #0", 1, 1)
+			// If bool = true then r0 = "true"
+			appendAssembly(cg.progFuncInstrs, "LDRNE r0, "+cg.getMsgLabel(TRUE_MSG), 1, 1)
+			// If bool = false then r0 = "false"
+			appendAssembly(cg.progFuncInstrs, "LDREQ r0, "+cg.getMsgLabel(FALSE_MSG), 1, 1)
 
-	case "p_print_string":
-		// r1 = string value
-		appendAssembly(cg.progFuncInstrs, "LDR r1, [r0]", 1, 1)
-		// r2 = r0 + 4
-		appendAssembly(cg.progFuncInstrs, "ADD r2, r0, #4", 1, 1)
-		// r0 = string format string
-		appendAssembly(cg.progFuncInstrs, "LDR r0, "+cg.getMsgLabel(STRING_FORMAT), 1, 1)
+		case "p_print_string":
+			// r1 = string value
+			appendAssembly(cg.progFuncInstrs, "LDR r1, [r0]", 1, 1)
+			// r2 = r0 + 4
+			appendAssembly(cg.progFuncInstrs, "ADD r2, r0, #4", 1, 1)
+			// r0 = string format string
+			appendAssembly(cg.progFuncInstrs, "LDR r0, "+cg.getMsgLabel(STRING_FORMAT), 1, 1)
 
-	case "p_print_ln":
-		// r0 = new line string
-		appendAssembly(cg.progFuncInstrs, "LDR r0, "+cg.getMsgLabel(NEWLINE_MSG), 1, 1)
+		case "p_print_ln":
+			// r0 = new line string
+			appendAssembly(cg.progFuncInstrs, "LDR r0, "+cg.getMsgLabel(NEWLINE_MSG), 1, 1)
 
-	case "p_print_reference":
-		// r1 = int value
-		appendAssembly(cg.progFuncInstrs, "MOV r1, r0", 1, 1)
-		// r0 = pointer format string
-		appendAssembly(cg.progFuncInstrs, "LDR r0, "+cg.getMsgLabel(POINTER_FORMAT), 1, 1)
+		case "p_print_reference":
+			// r1 = int value
+			appendAssembly(cg.progFuncInstrs, "MOV r1, r0", 1, 1)
+			// r0 = pointer format string
+			appendAssembly(cg.progFuncInstrs, "LDR r0, "+cg.getMsgLabel(POINTER_FORMAT), 1, 1)
+		}
+
+		//
+		appendAssembly(cg.progFuncInstrs, "ADD r0, r0, #4", 1, 1)
+		// calls printf or puts
+		if funcName == "p_print_ln" {
+			appendAssembly(cg.progFuncInstrs, "BL puts", 1, 1)
+		} else {
+			appendAssembly(cg.progFuncInstrs, "BL printf", 1, 1)
+		}
+		// Sets fflush argument
+		appendAssembly(cg.progFuncInstrs, "MOV r0, #0", 1, 1)
+		// calls fflush
+		appendAssembly(cg.progFuncInstrs, "BL fflush", 1, 1)
+
+		// pop {pc} to restore the caller address as the next instruction
+		appendAssembly(cg.progFuncInstrs, "POP {pc}", 1, 1)
+
 	}
-
-	//
-	appendAssembly(cg.progFuncInstrs, "ADD r0, r0, #4", 1, 1)
-	// calls printf or puts
-	if funcName == "p_print_ln" {
-		appendAssembly(cg.progFuncInstrs, "BL puts", 1, 1)
-	} else {
-		appendAssembly(cg.progFuncInstrs, "BL printf", 1, 1)
-	}
-	// Sets fflush argument
-	appendAssembly(cg.progFuncInstrs, "MOV r0, #0", 1, 1)
-	// calls fflush
-	appendAssembly(cg.progFuncInstrs, "BL fflush", 1, 1)
-
-	// pop {pc} to restore the caller address as the next instruction
-	appendAssembly(cg.progFuncInstrs, "POP {pc}", 1, 1)
-
-}
 
 }
 
@@ -444,7 +447,16 @@ func (cg CodeGenerator) cgVisitWhileStat(node While) {
 }
 
 func (cg CodeGenerator) cgVisitScopeStat(node Scope) {
+	// sub sp, sp, #n to create variable space
+	appendAssembly(cg.instrs, "SUB sp, sp, #"+strconv.Itoa(cg.globalStack.size), 1, 1)
 
+	// traverse all statements by switching on statement type
+	for _, stat := range node.StatList {
+		cg.cgEvalStat(stat)
+	}
+
+	// add sp, sp, #n to remove variable space
+	appendAssembly(cg.instrs, "ADD sp, sp, #"+strconv.Itoa(cg.globalStack.size), 1, 1)
 }
 
 //TODO: Group these functions in one big function that takes a string and defines it for us
@@ -473,21 +485,21 @@ func (cg CodeGenerator) evalArrayElem(t Evaluation, reg1 string, reg2 string) {
 
 	//Store the address at the next space in the stack (i.e SP - ADDRESS_SIZE)
 	//SHOULD HAVE A OFFSET FUNCTION FOR THIS
-	appendAssembly(cg.instrs, "ADD "+reg1+", sp, #" + strconv.Itoa(cg.currStack.currP - ADDR_SIZE) , 1, 1)
-  //Load the index
-	cg.evalRHS(t.(ArrayElem).Exprs[0],reg2)
+	appendAssembly(cg.instrs, "ADD "+reg1+", sp, #"+strconv.Itoa(cg.currStack.currP-ADDR_SIZE), 1, 1)
+	//Load the index
+	cg.evalRHS(t.(ArrayElem).Exprs[0], reg2)
 	//Set a register to point to the array
-	appendAssembly(cg.instrs, "LDR " + reg1 + ", [" + reg1 + "]", 1, 1)
+	appendAssembly(cg.instrs, "LDR "+reg1+", ["+reg1+"]", 1, 1)
 
 	// reg1 = Address of the array
 	// reg2 = Index
-	appendAssembly(cg.instrs, "MOV r0, " + reg2, 1, 1)
-	appendAssembly(cg.instrs, "MOV r1, " + reg1, 1, 1)
+	appendAssembly(cg.instrs, "MOV r0, "+reg2, 1, 1)
+	appendAssembly(cg.instrs, "MOV r1, "+reg1, 1, 1)
 	//Jump
 	appendAssembly(cg.instrs, "BL p_check_array_bounds", 1, 1)
-  cg.checkArrayBounds()
+	cg.checkArrayBounds()
 	cg.throwRunTimeError()
-  cg.cgVisitPrintStatFunc_H("p_print_string")
+	cg.cgVisitPrintStatFunc_H("p_print_string")
 }
 
 // Global handle function
@@ -509,7 +521,7 @@ func (cg CodeGenerator) evalRHS(t Evaluation, srcReg string) {
 		var value, _ = cg.getIdentOffset(t.(Ident))
 		appendAssembly(cg.instrs, "LDR "+srcReg+", [sp, #"+strconv.Itoa(value)+"]", 1, 1)
 	case ArrayElem:
-		cg.evalArrayElem(t,srcReg,"r5")
+		cg.evalArrayElem(t, srcReg, "r5")
 	case Unop:
 		cg.cgVisitUnopExpr(t.(Unop))
 	case Binop:
