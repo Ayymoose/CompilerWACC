@@ -181,6 +181,191 @@ func (cg CodeGenerator) cgVisitAssignmentStat(node Assignment) {
 	}
 }
 
+func (cg CodeGenerator) cgVisitReadStat(node Read) {
+	label := "p_read_"
+	offset := 0
+	switch node.AssignLHS.(type) {
+	case Ident:
+	case ArrayElem:
+	case PairElem:
+	default:
+
+	}
+
+	if offset == 4 {
+		label += "int"
+	} else if offset == 1 {
+		label += "char"
+	}
+	// p_read_int:  /char
+	//PUSH {lr}
+
+	// BL scanf
+	//POP {pc}
+}
+
+func (cg CodeGenerator) cgVisitFreeStat(node Free) {
+	//	label := "p_free_pair"
+}
+
+func (cg CodeGenerator) cgVisitReturnStat(node Return) {
+
+}
+
+func (cg CodeGenerator) cgVisitExitStat(node Exit) {
+	// LDR r0, =n : loads return type to r0 argument
+	var reg = "r4"
+	cg.evalRHS(node.Expr, reg)
+	appendAssembly(cg.instrs, "MOV r0, "+reg, 1, 1)
+	// BL exit : call exit
+	appendAssembly(cg.instrs, "BL exit", 1, 1)
+}
+
+func (cg CodeGenerator) cgVisitPrintStat(node Print) {
+	expr := node.Expr
+
+	switch expr.(type) {
+
+	case Str:
+		strValue := expr.(Str)
+
+		// LDR r4, =msg_n : load the string message label
+		msgLabel := cg.getMsgLabel(string(strValue))
+		appendAssembly(cg.instrs, "LDR r4, "+msgLabel, 1, 1)
+		// MOV r0, r4 : prepare parameter for function call
+		appendAssembly(cg.instrs, "MOV r0, r4", 1, 1)
+		// BL p_print_string
+		appendAssembly(cg.instrs, "BL p_print_string", 1, 1)
+		// Define relevant print function definition (iff it hasnt been defined)
+		cg.cgVisitPrintStatFunc_H("p_print_string")
+
+	case Integer:
+		intValue := expr.(Integer)
+
+		// LDR r4, =i : load the value into r4
+		appendAssembly(cg.instrs, "LDR r4, ="+strconv.Itoa(int(intValue)), 1, 1)
+		// MOV r0, r4 : prepare parameter for function call
+		appendAssembly(cg.instrs, "MOV r0, r4", 1, 1)
+		// BL p_print_int
+		appendAssembly(cg.instrs, "BL p_print_int", 1, 1)
+		// Define relevant print function definition (iff it hasnt been defined)
+		cg.cgVisitPrintStatFunc_H("p_print_int")
+
+	case Character:
+		charValue := expr.(Character)
+
+		// MOV r4, #'c' : load the value into r4
+		appendAssembly(cg.instrs, "MOV r4, #"+string(charValue), 1, 1)
+		// MOV r0, r4 : prepare parameter for function call
+		appendAssembly(cg.instrs, "MOV r0, r4", 1, 1)
+		// BL putchar
+		appendAssembly(cg.instrs, "BL putchar", 1, 1)
+
+	case Boolean:
+		boolValue := expr.(Boolean)
+
+		// MOV r4, #e.g.1 : load the value into r4
+		appendAssembly(cg.instrs, "MOV r4, #"+boolInt(bool(boolValue)), 1, 1)
+		// MOV r0, r4 : prepare parameter for function call
+		appendAssembly(cg.instrs, "MOV r0, r4", 1, 1)
+		// BL p_print_bool
+		appendAssembly(cg.instrs, "BL p_print_bool", 1, 1)
+		// Define relevant print function definition (iff it hasnt been defined)
+		cg.cgVisitPrintStatFunc_H("p_print_bool")
+	default:
+		typeOf(expr)
+
+	}
+}
+
+// cgVisitPrintStat helper function
+// Adds a function definition to the progFuncInstrs ARMList depending on the
+// function name provided
+func (cg CodeGenerator) cgVisitPrintStatFunc_H(funcName string) {
+	if cg.AddCheckProgName(funcName) {
+		// if the program function has been defined previously
+		// a redefinition is unnecessary
+		return
+	}
+	// else define the print function
+
+	// funcLabel:
+	appendAssembly(cg.progFuncInstrs, funcName+":", 0, 1)
+	// push {lr} to save the caller address
+	appendAssembly(cg.progFuncInstrs, "PUSH {lr}", 1, 1)
+
+	switch funcName {
+	case "p_print_int":
+		// r1 = int value
+		appendAssembly(cg.progFuncInstrs, "MOV r1, r0", 1, 1)
+		// r0 = int format string
+		appendAssembly(cg.progFuncInstrs, "LDR r0, "+cg.getMsgLabel(INT_FORMAT), 1, 1)
+
+	case "p_print_bool":
+		// Check bool value - 0
+		appendAssembly(cg.progFuncInstrs, "CMP r0, #0", 1, 1)
+		// If bool = true then r0 = "true"
+		appendAssembly(cg.progFuncInstrs, "LDRNE r0, "+cg.getMsgLabel(TRUE_MSG), 1, 1)
+		// If bool = false then r0 = "false"
+		appendAssembly(cg.progFuncInstrs, "LDREQ r0, "+cg.getMsgLabel(FALSE_MSG), 1, 1)
+
+	case "p_print_string":
+		// r1 = string value
+		appendAssembly(cg.progFuncInstrs, "LDR r1, [r0]", 1, 1)
+		// r2 = r0 + 4
+		appendAssembly(cg.progFuncInstrs, "ADD r2, r0, #4", 1, 1)
+		// r0 = string format string
+		appendAssembly(cg.progFuncInstrs, "LDR r0, "+cg.getMsgLabel(STRING_FORMAT), 1, 1)
+
+	case "p_print_ln":
+		// r0 = new line string
+		appendAssembly(cg.progFuncInstrs, "LDR r0, "+cg.getMsgLabel(NEWLINE_MSG), 1, 1)
+
+	case "p_print_reference":
+		// r1 = int value
+		appendAssembly(cg.progFuncInstrs, "MOV r1, r0", 1, 1)
+		// r0 = pointer format string
+		appendAssembly(cg.progFuncInstrs, "LDR r0, "+cg.getMsgLabel(POINTER_FORMAT), 1, 1)
+	}
+
+	//
+	appendAssembly(cg.progFuncInstrs, "ADD r0, r0, #4", 1, 1)
+	// calls printf or puts
+	if funcName == "p_print_ln" {
+		appendAssembly(cg.progFuncInstrs, "BL puts", 1, 1)
+	} else {
+		appendAssembly(cg.progFuncInstrs, "BL printf", 1, 1)
+	}
+	// Sets fflush argument
+	appendAssembly(cg.progFuncInstrs, "MOV r0, #0", 1, 1)
+	// calls fflush
+	appendAssembly(cg.progFuncInstrs, "BL fflush", 1, 1)
+
+	// pop {pc} to restore the caller address as the next instruction
+	appendAssembly(cg.progFuncInstrs, "POP {pc}", 1, 1)
+
+}
+
+func (cg CodeGenerator) cgVisitPrintlnStat(node Println) {
+	cg.cgVisitPrintStat(Print{Expr: node.Expr})
+	// BL p_print_ln
+	appendAssembly(cg.instrs, "BL p_print_ln", 1, 1)
+	// Define relevant print function definition (iff it hasnt been defined)
+	cg.cgVisitPrintStatFunc_H("p_print_ln")
+}
+
+func (cg CodeGenerator) cgVisitIfStat(node If) {
+
+}
+
+func (cg CodeGenerator) cgVisitWhileStat(node While) {
+
+}
+
+func (cg CodeGenerator) cgVisitScopeStat(node Scope) {
+
+}
+
 // Global handle function
 func (cg CodeGenerator) evalRHS(t Evaluation, srcReg string) {
 
@@ -443,191 +628,6 @@ func (cg CodeGenerator) pushArrayElements(array []Evaluation, srcReg string, dst
 	// Now store the address of the array onto the stack
 	appendAssembly(cg.instrs, "STR "+srcReg+", ["+dstReg+"]", 1, 1)
 	appendAssembly(cg.instrs, "STR "+dstReg+", [sp, #"+cg.subCurrP(INT_SIZE)+"]", 1, 1)
-}
-
-func (cg CodeGenerator) cgVisitReadStat(node Read) {
-	label := "p_read_"
-	offset := 0
-	switch node.AssignLHS.(type) {
-	case Ident:
-	case ArrayElem:
-	case PairElem:
-	default:
-
-	}
-
-	if offset == 4 {
-		label += "int"
-	} else if offset == 1 {
-		label += "char"
-	}
-	// p_read_int:  /char
-	//PUSH {lr}
-
-	// BL scanf
-	//POP {pc}
-}
-
-func (cg CodeGenerator) cgVisitFreeStat(node Free) {
-	//	label := "p_free_pair"
-}
-
-func (cg CodeGenerator) cgVisitReturnStat(node Return) {
-
-}
-
-func (cg CodeGenerator) cgVisitExitStat(node Exit) {
-	// LDR r0, =n : loads return type to r0 argument
-	var reg = "r4"
-	cg.evalRHS(node.Expr, reg)
-	appendAssembly(cg.instrs, "MOV r0, "+reg, 1, 1)
-	// BL exit : call exit
-	appendAssembly(cg.instrs, "BL exit", 1, 1)
-}
-
-func (cg CodeGenerator) cgVisitPrintStat(node Print) {
-	expr := node.Expr
-
-	switch expr.(type) {
-
-	case Str:
-		strValue := expr.(Str)
-
-		// LDR r4, =msg_n : load the string message label
-		msgLabel := cg.getMsgLabel(string(strValue))
-		appendAssembly(cg.instrs, "LDR r4, "+msgLabel, 1, 1)
-		// MOV r0, r4 : prepare parameter for function call
-		appendAssembly(cg.instrs, "MOV r0, r4", 1, 1)
-		// BL p_print_string
-		appendAssembly(cg.instrs, "BL p_print_string", 1, 1)
-		// Define relevant print function definition (iff it hasnt been defined)
-		cg.cgVisitPrintStatFunc_H("p_print_string")
-
-	case Integer:
-		intValue := expr.(Integer)
-
-		// LDR r4, =i : load the value into r4
-		appendAssembly(cg.instrs, "LDR r4, ="+strconv.Itoa(int(intValue)), 1, 1)
-		// MOV r0, r4 : prepare parameter for function call
-		appendAssembly(cg.instrs, "MOV r0, r4", 1, 1)
-		// BL p_print_int
-		appendAssembly(cg.instrs, "BL p_print_int", 1, 1)
-		// Define relevant print function definition (iff it hasnt been defined)
-		cg.cgVisitPrintStatFunc_H("p_print_int")
-
-	case Character:
-		charValue := expr.(Character)
-
-		// MOV r4, #'c' : load the value into r4
-		appendAssembly(cg.instrs, "MOV r4, #"+string(charValue), 1, 1)
-		// MOV r0, r4 : prepare parameter for function call
-		appendAssembly(cg.instrs, "MOV r0, r4", 1, 1)
-		// BL putchar
-		appendAssembly(cg.instrs, "BL putchar", 1, 1)
-
-	case Boolean:
-		boolValue := expr.(Boolean)
-
-		// MOV r4, #e.g.1 : load the value into r4
-		appendAssembly(cg.instrs, "MOV r4, #"+boolInt(bool(boolValue)), 1, 1)
-		// MOV r0, r4 : prepare parameter for function call
-		appendAssembly(cg.instrs, "MOV r0, r4", 1, 1)
-		// BL p_print_bool
-		appendAssembly(cg.instrs, "BL p_print_bool", 1, 1)
-		// Define relevant print function definition (iff it hasnt been defined)
-		cg.cgVisitPrintStatFunc_H("p_print_bool")
-	default:
-		typeOf(expr)
-
-	}
-}
-
-// cgVisitPrintStat helper function
-// Adds a function definition to the progFuncInstrs ARMList depending on the
-// function name provided
-func (cg CodeGenerator) cgVisitPrintStatFunc_H(funcName string) {
-	if cg.AddCheckProgName(funcName) {
-		// if the program function has been defined previously
-		// a redefinition is unnecessary
-		return
-	}
-	// else define the print function
-
-	// funcLabel:
-	appendAssembly(cg.progFuncInstrs, funcName+":", 0, 1)
-	// push {lr} to save the caller address
-	appendAssembly(cg.progFuncInstrs, "PUSH {lr}", 1, 1)
-
-	switch funcName {
-	case "p_print_int":
-		// r1 = int value
-		appendAssembly(cg.progFuncInstrs, "MOV r1, r0", 1, 1)
-		// r0 = int format string
-		appendAssembly(cg.progFuncInstrs, "LDR r0, "+cg.getMsgLabel(INT_FORMAT), 1, 1)
-
-	case "p_print_bool":
-		// Check bool value - 0
-		appendAssembly(cg.progFuncInstrs, "CMP r0, #0", 1, 1)
-		// If bool = true then r0 = "true"
-		appendAssembly(cg.progFuncInstrs, "LDRNE r0, "+cg.getMsgLabel(TRUE_MSG), 1, 1)
-		// If bool = false then r0 = "false"
-		appendAssembly(cg.progFuncInstrs, "LDREQ r0, "+cg.getMsgLabel(FALSE_MSG), 1, 1)
-
-	case "p_print_string":
-		// r1 = string value
-		appendAssembly(cg.progFuncInstrs, "LDR r1, [r0]", 1, 1)
-		// r2 = r0 + 4
-		appendAssembly(cg.progFuncInstrs, "ADD r2, r0, #4", 1, 1)
-		// r0 = string format string
-		appendAssembly(cg.progFuncInstrs, "LDR r0, "+cg.getMsgLabel(STRING_FORMAT), 1, 1)
-
-	case "p_print_ln":
-		// r0 = new line string
-		appendAssembly(cg.progFuncInstrs, "LDR r0, "+cg.getMsgLabel(NEWLINE_MSG), 1, 1)
-
-	case "p_print_reference":
-		// r1 = int value
-		appendAssembly(cg.progFuncInstrs, "MOV r1, r0", 1, 1)
-		// r0 = pointer format string
-		appendAssembly(cg.progFuncInstrs, "LDR r0, "+cg.getMsgLabel(POINTER_FORMAT), 1, 1)
-	}
-
-	//
-	appendAssembly(cg.progFuncInstrs, "ADD r0, r0, #4", 1, 1)
-	// calls printf or puts
-	if funcName == "p_print_ln" {
-		appendAssembly(cg.progFuncInstrs, "BL puts", 1, 1)
-	} else {
-		appendAssembly(cg.progFuncInstrs, "BL printf", 1, 1)
-	}
-	// Sets fflush argument
-	appendAssembly(cg.progFuncInstrs, "MOV r0, #0", 1, 1)
-	// calls fflush
-	appendAssembly(cg.progFuncInstrs, "BL fflush", 1, 1)
-
-	// pop {pc} to restore the caller address as the next instruction
-	appendAssembly(cg.progFuncInstrs, "POP {pc}", 1, 1)
-
-}
-
-func (cg CodeGenerator) cgVisitPrintlnStat(node Println) {
-	cg.cgVisitPrintStat(Print{Expr: node.Expr})
-	// BL p_print_ln
-	appendAssembly(cg.instrs, "BL p_print_ln", 1, 1)
-	// Define relevant print function definition (iff it hasnt been defined)
-	cg.cgVisitPrintStatFunc_H("p_print_ln")
-}
-
-func (cg CodeGenerator) cgVisitIfStat(node If) {
-
-}
-
-func (cg CodeGenerator) cgVisitWhileStat(node While) {
-
-}
-
-func (cg CodeGenerator) cgVisitScopeStat(node Scope) {
-
 }
 
 // VISIT EXPRESSIONS -----------------------------------------------------------
