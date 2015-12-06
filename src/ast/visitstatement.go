@@ -87,7 +87,15 @@ func (node Assignment) visitStatement(functionTable []*Function, symbolTable *Sy
 	if errr != nil {
 		semanticErrors = append(semanticErrors, errr)
 	}
-	if !typesMatch(lhsType, rhsType) {
+	if rhsType == nil {
+		switch lhsType.(type) {
+		case ArrayType:
+			// Do nothing
+		default:
+			semanticErrors = append(semanticErrors, errors.New("LHS is not of type Array"+lhsType.typeString()+","+rhsType.typeString()))
+		}
+	}
+	if !typesMatch(lhsType, rhsType) && rhsType != nil {
 		semanticErrors = append(semanticErrors, errors.New("Assignment types do not match"+lhsType.typeString()+","+rhsType.typeString()))
 	}
 	if len(semanticErrors) > 0 {
