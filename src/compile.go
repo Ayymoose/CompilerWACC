@@ -2,8 +2,8 @@ package main
 
 import (
 	. "ast"
-//	cg "backend/codeGeneration"
-//	fw "backend/filewriter"
+	cg "backend/codeGeneration"
+	fw "backend/filewriter"
 	"fmt"
 	"io/ioutil"
 	"os"
@@ -28,7 +28,7 @@ const BACKENDFILE = "ARMCode.s"
 // wacc_examples/valid/pairs/createPair03.wacc
 
 func main() {
-//		armList := &fw.ARMList{}
+		armList := &fw.ARMList{}
 	file := os.Args[1] // index 1 is file path
 	b, err := ioutil.ReadFile(file)
 	if err != nil {
@@ -53,11 +53,11 @@ func main() {
 
 	fmt.Println("SUCCESSFUL FRONTEND: ")
 
-//	codeGen := cg.ConstructCodeGenerator(root, armList, *root.SymbolTable)
-//	codeGen.GenerateCode()
-	/*	for _, instr := range *armList {
+	codeGen := cg.ConstructCodeGenerator(root, armList, *root.SymbolTable)
+	codeGen.GenerateCode()
+		for _, instr := range *armList {
 		fmt.Print(instr)
-	} */
+	}
 
-//	armList.WriteToFile(BACKENDFILE)
+	armList.WriteToFile(BACKENDFILE)
 }
