@@ -25,6 +25,9 @@ func (node Skip) visitStatement(functionTable []*Function, symbolTable *SymbolTa
 
 func (node Declare) visitStatement(functionTable []*Function, symbolTable *SymbolTable) errorSlice {
 	var semanticErrors errorSlice
+	if symbolTable.isDefinedInScope(node.Lhs) {
+		semanticErrors = append(semanticErrors, errors.New("Variable already declared"))
+	}
 	exprType, errs := node.Rhs.eval(functionTable, symbolTable)
 	if errs != nil {
 		semanticErrors = append(semanticErrors, errs)
@@ -34,7 +37,7 @@ func (node Declare) visitStatement(functionTable []*Function, symbolTable *Symbo
 	} else {
 		fmt.Println("EXPR TYPE IS NIL")
 	}
-	if exprType != node.DecType {
+	if exprType != node.DecType && exprType != nil {
 		fmt.Println("Got in HEEEREEEEE")
 		switch node.DecType.(type) {
 		case PairType:

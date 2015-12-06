@@ -82,6 +82,17 @@ const (
 	Pair
 )
 
+// ArrayType struct
+type ArrayType struct {
+	Type Type
+}
+
+// PairType struct
+type PairType struct {
+	FstType Type
+	SndType Type
+}
+
 const (
 	Fst FSND = iota
 	Snd
@@ -97,17 +108,6 @@ type Function struct {
 type Param struct {
 	Ident     Ident
 	ParamType Type
-}
-
-// ArrayType struct
-type ArrayType struct {
-	Type Type
-}
-
-// PairType struct
-type PairType struct {
-	FstType Type
-	SndType Type
 }
 
 // Program ..

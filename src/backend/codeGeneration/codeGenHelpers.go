@@ -25,20 +25,13 @@ var mapPrintFormatToSize = map[string]int{
 //Size in bytes for all the variables in the current scope
 func GetScopeVarSize(statList []Statement) int {
 	var scopeSize = 0
-
 	for _, stat := range statList {
 		switch stat.(type) {
 		case Declare:
 			scopeSize += sizeOf(stat.(Declare).DecType)
 		}
 	}
-
 	return scopeSize
-}
-
-// Calculates the size of a pair type
-func pairTypeSize(typeFst Type, typeSnd Type) (int, int) {
-	return sizeOf(typeFst), sizeOf(typeSnd)
 }
 
 // Calcuates the size of a type
@@ -154,11 +147,6 @@ func typeOf(t Generic) {
 	default:
 		fmt.Println("Unknown")
 	}
-}
-
-// Calcuates the size of an array
-func arraySize(array []Evaluation) int {
-	return len(array)
 }
 
 // Adds the string code to the list of instructions instrs.

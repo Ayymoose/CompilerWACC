@@ -222,7 +222,6 @@ func (cg CodeGenerator) evalPair(pairType Type, dstReg string) {
 	switch pairType.(type) {
 	case PairType:
 		fmt.Println("Pair type not implemented")
-
 	case ConstType:
 		switch pairType.(ConstType) {
 		case Int:
@@ -246,7 +245,7 @@ func (cg CodeGenerator) pushPair(fst Evaluation, snd Evaluation, typeFst Type, t
 	appendAssembly(cg.instrs, "MOV "+reg2+", r0", 1, 1)
 
 	//Get pair sizes
-	var fstSize, sndSize = pairTypeSize(typeFst, typeSnd)
+	var fstSize, sndSize = sizeOf(typeFst), sizeOf(typeSnd)
 
 	// Load the first element into a register to be stored
 	cg.evalPair(typeFst, reg1)
@@ -281,7 +280,6 @@ func (cg CodeGenerator) pushPair(fst Evaluation, snd Evaluation, typeFst Type, t
 
 	//Store the address of the address that contains pointers to the first and second elements
 	appendAssembly(cg.instrs, "STR "+reg2+", [sp]", 1, 1)
-
 }
 
 // Global handle function
@@ -336,16 +334,11 @@ func (cg CodeGenerator) evalArrayLiter(typeNode Type, rhs Evaluation, srcReg str
 	switch rhs.(type) {
 	case ArrayLiter:
 		//Calculate the amount of storage space required for the array
-		// = ((arrayLength(array) * sizeOf(arrayType)) + 4 (4-bytes for an address)
-		var arraySize = arraySize(rhs.(ArrayLiter).Exprs)
-		var arrayStorage = (arraySize * sizeOf(typeNode)) + ARRAY_SIZE
+		// = ((arrayLength(array) * sizeOf(arrayType)) + ADDRESS_SIZE
+		var arrayStorage = (len(rhs.(ArrayLiter).Exprs) * sizeOf(typeNode)) + ADDR_SIZE
 
 		//Allocate memory for the array
 		cg.CfunctionCall("malloc", strconv.Itoa(arrayStorage))
-		/*
-		 appendAssembly(cg.instrs, "LDR r0, ="+strconv.Itoa(arrayStorage), 1, 1)
-		 appendAssembly(cg.instrs, "BL malloc", 1, 1)*/
-
 		appendAssembly(cg.instrs, "MOV "+dstReg+", r0", 1, 1)
 
 		//Start loading each element in the array onto the stack
@@ -359,14 +352,13 @@ func (cg CodeGenerator) evalArrayLiter(typeNode Type, rhs Evaluation, srcReg str
 // Puts the array elements onto the stack
 func (cg CodeGenerator) pushArrayElements(array []Evaluation, srcReg string, dstReg string, t Type) {
 
-	var arraySize = arraySize(array)
+	var arraySize = len(array)
 	// Loop through the array pushing it onto the stack
 	for i := 0; i < arraySize; i++ {
 		// Array of pairs,ints,bools,chars,strings
-		var arrayItem = array[i]
 		switch t.(type) {
 		case ArrayType:
-			cg.evalRHS(arrayItem, srcReg)
+			cg.evalRHS(array[i], srcReg)
 			switch t.(ArrayType).Type {
 			case Int:
 				appendAssembly(cg.instrs, "STR "+srcReg+", ["+dstReg+", #"+strconv.Itoa(ARRAY_SIZE+INT_SIZE*i)+"]", 1, 1)
@@ -389,44 +381,41 @@ func (cg CodeGenerator) pushArrayElements(array []Evaluation, srcReg string, dst
 }
 
 func (cg CodeGenerator) cgVisitDeclareStat(node Declare) {
-	var rhs = node.Rhs
+	/*var rhs = node.Rhs
 
 	switch node.DecType.(type) {
 	case ArrayType:
 		// Evalute an array
-		cg.evalArrayLiter(node.DecType, node.Rhs, "r5", "r4")
+		cg.evalArrayLiter(node.DecType, rhs, "r5", "r4")
 	case PairType:
 		// First allocate memory to store two addresses (8-bytes)
 		cg.CfunctionCall("malloc", strconv.Itoa(ADDR_SIZE*2))
-		/*
-			appendAssembly(cg.instrs, "LDR r0, ="+strconv.Itoa(ADDR_SIZE*2), 1, 1)
-			appendAssembly(cg.instrs, "BL malloc", 1, 1)*/
-
 		// Push a pair of elements onto the stack
 		cg.pushPair(rhs.(NewPair).FstExpr, rhs.(NewPair).SndExpr, node.DecType.(PairType).FstType, node.DecType.(PairType).SndType, "r5", "r4")
-	case ConstType:
-		switch node.DecType.(ConstType) {
-		case Bool:
-			cg.evalRHS(rhs, "r4")
-			// Using STRB, store it on the stack
-			appendAssembly(cg.instrs, "STRB r4, [sp, #"+cg.subCurrP(BOOL_SIZE)+"]", 1, 1)
-		case Char:
-			cg.evalRHS(rhs, "r4")
-			// Using STRB, store it on the stack
-			appendAssembly(cg.instrs, "STRB r4, [sp, #"+cg.subCurrP(CHAR_SIZE)+"]", 1, 1)
-		case Int:
-			cg.evalRHS(rhs, "r4")
-			// Store the value of declaration to stack
-			appendAssembly(cg.instrs, "STR r4, [sp, #"+cg.subCurrP(INT_SIZE)+"]", 1, 1)
-		case String:
-			cg.evalRHS(rhs, "r4")
-			// Store the address onto the stack
-			appendAssembly(cg.instrs, "STR r4, [sp, #"+cg.subCurrP(STRING_SIZE)+"]", 1, 1)
-		}
+
+		// Probabliy can reduce this code using a sizeOf() and group
+	case Boolean:
+		cg.evalRHS(rhs, "r4")
+		// Using STRB, store it on the stack
+		appendAssembly(cg.instrs, "STRB r4, [sp, #"+cg.subCurrP(BOOL_SIZE)+"]", 1, 1)
+	case Character:
+		cg.evalRHS(rhs, "r4")
+		// Using STRB, store it on the stack
+		appendAssembly(cg.instrs, "STRB r4, [sp, #"+cg.subCurrP(CHAR_SIZE)+"]", 1, 1)
+	case Integer:
+		cg.evalRHS(rhs, "r4")
+		// Store the value of declaration to stack
+		appendAssembly(cg.instrs, "STR r4, [sp, #"+cg.subCurrP(INT_SIZE)+"]", 1, 1)
+	case Str:
+		cg.evalRHS(rhs, "r4")
+		// Store the address onto the stack
+		appendAssembly(cg.instrs, "STR r4, [sp, #"+cg.subCurrP(STRING_SIZE)+"]", 1, 1)
+		//
+
 	default:
 		//	typeOf(node.DecType)
 	}
-
+	*/
 }
 func (cg CodeGenerator) cgVisitAssignmentStat(node Assignment) {
 	switch node.Lhs.(type) {

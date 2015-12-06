@@ -1,7 +1,7 @@
 package main
 
 import (
-	"ast"
+"ast"
 	codeG "backend/codeGeneration"
 	"fmt"
 	"io/ioutil"
@@ -42,10 +42,13 @@ func main() {
 	}
 	fmt.Println(root)
 
-	errs := root.SemanticCheck()
-	if errs != nil {
-		for _, str := range errs {
-			fmt.Println(str)
+		errs := root.SemanticCheck()
+		if errs != nil {
+			for _, str := range errs {
+				fmt.Println(str)
+			}
+			fmt.Println("Semantic Error : 200")
+			os.Exit(SEMANTIC_ERROR)
 		}
 		fmt.Println("Semantic Error : 200")
 		os.Exit(SEMANTIC_ERROR)
@@ -59,6 +62,7 @@ func main() {
 	for _, instr := range *armList {
 		fmt.Print(instr)
 	}
+
 
 	//armList.WriteToFile(BACKENDFILE)
 }

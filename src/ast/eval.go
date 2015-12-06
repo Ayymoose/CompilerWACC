@@ -27,6 +27,7 @@ func (value Call) eval(functionTable []*Function, symbolTable *SymbolTable) (Typ
 }
 
 func (value ArrayLiter) eval(functionTable []*Function, symbolTable *SymbolTable) (Type, error) {
+	fmt.Println("ARRRAU LITER", value.Exprs)
 	var currType Type
 	if len(value.Exprs) > 0 {
 		fstType, err := value.Exprs[0].eval(functionTable, symbolTable)
@@ -45,7 +46,7 @@ func (value ArrayLiter) eval(functionTable []*Function, symbolTable *SymbolTable
 		}
 		return ArrayType{Type: currType}, nil
 	}
-	return nil, errors.New("Array has no elements")
+	return nil, nil
 }
 
 func (value NewPair) eval(functionTable []*Function, symbolTable *SymbolTable) (Type, error) {
