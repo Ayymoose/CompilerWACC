@@ -27,7 +27,7 @@ func (value Call) Eval(functionTable []*Function, symbolTable *SymbolTable) (Typ
 }
 
 func (value ArrayLiter) Eval(functionTable []*Function, symbolTable *SymbolTable) (Type, error) {
-	fmt.Println("ARRRAU LITER", value.Exprs)
+	//	fmt.Println("ARRRAU LITER", value.Exprs)
 	var currType Type
 	if len(value.Exprs) > 0 {
 		fstType, err := value.Exprs[0].Eval(functionTable, symbolTable)
@@ -143,6 +143,7 @@ func (value Ident) Eval(functionTable []*Function, symbolTable *SymbolTable) (Ty
 	if symbolTable.isDefined(value) {
 		return symbolTable.getTypeOfIdent(value), nil
 	}
+	fmt.Println("Supposed to GET HERE IDENT EVAL")
 	return nil, errors.New("Identifier not declared")
 }
 
