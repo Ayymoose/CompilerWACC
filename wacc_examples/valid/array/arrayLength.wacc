@@ -6,8 +6,6 @@
 # Program:
 
 begin
-  int[] i = [43, 2, 18, 1];
-  char[] c = ['H','e','l','l','o'];
-  bool[] b = [true,false,false,true];
-  string[] s = ["I","Like","Cake","."]
+  int[] a = [43, 2, 18, 1] ;
+  println len a
 end

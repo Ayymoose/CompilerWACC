@@ -217,9 +217,9 @@ func (value Unop) Eval(functionTable []*Function, symbolTable *SymbolTable) (Typ
 	case LEN:
 		switch typExpr.(type) {
 		case ArrayType:
-			return nil, errors.New("Cannot perform len on non Array expression")
+			return Int, nil
 		}
-		return Int, nil
+		return nil, errors.New("Cannot perform len on non Array expression")
 	case ORD:
 		if typExpr != Char {
 			return nil, errors.New("Cannot perform ord on non Char expression")
