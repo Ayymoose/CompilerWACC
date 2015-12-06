@@ -23,6 +23,7 @@ func (function *Function) checkFuncRetStats(functionTable []*Function, symbolTab
 	switch stat.(type) {
 	case Return:
 		ExprTyp, _ := stat.(Return).Expr.Eval(functionTable, symbolTable)
+		fmt.Println(ExprTyp.typeString())
 		if ExprTyp != function.ReturnType {
 			semanticErrors = append(semanticErrors, errors.New("Return type does not match"))
 		}
@@ -42,6 +43,9 @@ func (function *Function) checkFuncRetStats(functionTable []*Function, symbolTab
 			semanticErrors = append(semanticErrors, elseerr)
 		}
 	}
+	if len(semanticErrors) > 0 {
+		return semanticErrors
+	}
 	return nil
 }
 
@@ -54,6 +58,7 @@ func (function *Function) checkFunc(root *Program) errorSlice {
 	for _, stat := range root.StatList {
 		errs := stat.visitStatement(root.FunctionList, funcSymbolTable)
 		if errs != nil {
+
 			semanticErrors = append(semanticErrors, errs)
 		}
 	}
@@ -73,10 +78,10 @@ func (root *Program) SemanticCheck() errorSlice {
 		semanticErrors = append(semanticErrors, errors.New("Program has function redefinitions"))
 	}
 	for _, functionProg := range root.FunctionList {
-		semanticErrors = append(semanticErrors, functionProg.checkFunc(root))
-	}
-	for _, functionProg := range root.FunctionList {
-		functionProg.checkFunc(root)
+		funcErrs := functionProg.checkFunc(root)
+		if funcErrs != nil {
+			semanticErrors = append(semanticErrors, funcErrs)
+		}
 	}
 	for _, stat := range root.StatList {
 		errs := stat.visitStatement(root.FunctionList, root.SymbolTable)

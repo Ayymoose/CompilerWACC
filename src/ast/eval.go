@@ -27,7 +27,7 @@ func (value Call) Eval(functionTable []*Function, symbolTable *SymbolTable) (Typ
 }
 
 func (value ArrayLiter) Eval(functionTable []*Function, symbolTable *SymbolTable) (Type, error) {
-	fmt.Println("ARRRAU LITER", value.Exprs)
+	//	fmt.Println("ARRRAU LITER", value.Exprs)
 	var currType Type
 	if len(value.Exprs) > 0 {
 		fstType, err := value.Exprs[0].Eval(functionTable, symbolTable)
