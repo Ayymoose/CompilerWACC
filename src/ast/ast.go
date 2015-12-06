@@ -18,7 +18,7 @@ type Type interface {
 }
 
 type Evaluation interface {
-	eval(functionTable []*Function, symbolTable *SymbolTable) (Type, error)
+	Eval(functionTable []*Function, symbolTable *SymbolTable) (Type, error)
 }
 
 type Statement interface {
