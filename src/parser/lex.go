@@ -421,7 +421,7 @@ func (l *Lexer) Lex(lval *parserSymType) int {
 			os.Exit(100)
 		}
 		if !checkInt(num) {
-			fmt.Println("Int too big or small")
+			fmt.Println("Int too big or small: ", num)
 			os.Exit(100)
 		}
 		*lval = parserSymType{integer: Integer(num)}
