@@ -41,15 +41,15 @@ func main() {
 	}
 	fmt.Println(root)
 
-	errs := root.SemanticCheck()
-	if errs != nil {
-		for _, str := range errs {
-			fmt.Println(str)
+	/*	errs := root.SemanticCheck()
+		if errs != nil {
+			for _, str := range errs {
+				fmt.Println(str)
+			}
+			fmt.Println("Semantic Error : 200")
+			os.Exit(SEMANTIC_ERROR)
 		}
-		fmt.Println("Semantic Error : 200")
-		os.Exit(SEMANTIC_ERROR)
-	}
-
+	*/
 	//	cg := codeG.ConstructCodeGenerator(root, armList, SymbolTable{})
 	//	cg.GenerateCode()
 	/*
