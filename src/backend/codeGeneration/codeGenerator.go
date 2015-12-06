@@ -11,16 +11,17 @@ import (
 // the code generator can use the "GenerateCode" function to fill the assembly list
 // instrs with the assembly produced by traversing the tree
 type CodeGenerator struct {
-	root           *Program          // Root of the AST
-	instrs         *ARMList          // List of assembly instructions for the program
-	msgInstrs      *ARMList          // List of assembly instructions to create msg labels
-	symTable       SymbolTable       // Used to map variable identifiers to their values
-	funcInstrs     *ARMList          // List of assembly instructions that define functions and their labels
-	progFuncInstrs *ARMList          // List of assembly instructions that define program generated functions e.g. p_print_string
-	progFuncNames  *[]string         // List of program defined function names. Used to avoid program redefinitions
-	globalStack    *scopeData        // Stack data for the global scope
-	currStack      *scopeData        // Stack data for the current scope
-	msgMap         map[string]string // Maps string values to their msg labels
+	root              *Program          // Root of the AST
+	instrs            *ARMList          // List of assembly instructions for the program
+	msgInstrs         *ARMList          // List of assembly instructions to create msg labels
+	symTable          SymbolTable       // Used to map variable identifiers to their values
+	funcInstrs        *ARMList          // List of assembly instructions that define functions and their labels
+	progFuncInstrs    *ARMList          // List of assembly instructions that define program generated functions e.g. p_print_string
+	progFuncNames     *[]string         // List of program defined function names. Used to avoid program redefinitions
+	globalStack       *scopeData        // Stack data for the global scope
+	currStack         *scopeData        // Stack data for the current scope
+	msgMap            map[string]string // Maps string values to their msg labels
+	currentLabelIndex int               // The index of the current generic label (used in control flow functions)
 }
 
 // Constructor for the code generator.
@@ -110,4 +111,10 @@ func (cg CodeGenerator) AddCheckProgName(progName string) bool {
 func (cg CodeGenerator) getIdentOffset(ident Ident) (int, Type) {
 	// TO BE COMPLETED
 	return 100, Int
+}
+
+func (cg CodeGenerator) getNewLabel() string {
+	newLabel := "L" + strconv.Itoa(cg.currentLabelIndex)
+	cg.currentLabelIndex++
+	return newLabel
 }

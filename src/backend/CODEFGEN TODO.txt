@@ -27,8 +27,7 @@ EVAL RHS: IN PROGRESS ---
 EXIT: COMPLETE ----------------------------------------
 
 PRINT: IN PROGRESS/ LITERALS COMPLETE* ---
-- Still need to print pairs (and null) and array addresses
-- Need to print variables
+- Still need to print array addresses
 
 PRINTLN: COMPLETE ----------------------------------------
 
