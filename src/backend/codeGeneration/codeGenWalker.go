@@ -23,14 +23,14 @@ const (
 
 // Print format strings
 const (
-	INT_FORMAT     = "%d\\0"
-	STRING_FORMAT  = "%.*s\\0"
-	NEWLINE_MSG    = "\\0"
-	TRUE_MSG       = "true\\0"
-	FALSE_MSG      = "false\\0"
-	READ_INT       = "%d\\0"
-	READ_CHAR      = "%c\\0"
-	POINTER_FORMAT = "%p\\0"
+	INT_FORMAT     = "\"%d\\0\""
+	STRING_FORMAT  = "\"%.*s\\0\""
+	NEWLINE_MSG    = "\"\\0\""
+	TRUE_MSG       = "\"true\\0\""
+	FALSE_MSG      = "\"false\\0\""
+	READ_INT       = "\"%d\\0\""
+	READ_CHAR      = "\"%c\\0\""
+	POINTER_FORMAT = "\"%p\\0\""
 )
 
 // error messages
