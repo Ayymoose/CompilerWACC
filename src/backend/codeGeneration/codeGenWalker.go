@@ -23,17 +23,21 @@ const (
 
 // Print format strings
 const (
-	INT_FORMAT           = "%d\\0"
-	STRING_FORMAT        = "%.*s\\0"
-	NEWLINE_MSG          = "\\0"
-	TRUE_MSG             = "true\\0"
-	FALSE_MSG            = "false\\0"
-	READ_INT             = "%d\\0"
-	READ_CHAR            = "%c\\0"
-	POINTER_FORMAT       = "%p\\0"
-	NULL_REFERENCE       = "NullReferenceError: dereference a null reference\\n\\0"
-	ARRAY_INDEX_NEGATIVE = "ArrayIndexOutOfBoundsError: negative index\\n\\0"
-	ARRAY_INDEX_LARGE    = "ArrayIndexOutOfBoundsError: index too large\\n\\0"
+	INT_FORMAT     = "%d\\0"
+	STRING_FORMAT  = "%.*s\\0"
+	NEWLINE_MSG    = "\\0"
+	TRUE_MSG       = "true\\0"
+	FALSE_MSG      = "false\\0"
+	READ_INT       = "%d\\0"
+	READ_CHAR      = "%c\\0"
+	POINTER_FORMAT = "%p\\0"
+)
+
+// error messages
+const (
+	NULL_REFERENCE       = "\"NullReferenceError: dereference a null reference\\n\\0\""
+	ARRAY_INDEX_NEGATIVE = "\"ArrayIndexOutOfBoundsError: negative index\\n\\0\""
+	ARRAY_INDEX_LARGE    = "\"ArrayIndexOutOfBoundsError: index too large\\n\\0\""
 )
 
 // Function global variable
@@ -460,7 +464,7 @@ func (cg CodeGenerator) evalRHS(t Evaluation, srcReg string) {
 	case ArrayElem:
 
 		appendAssembly(cg.progFuncInstrs, cg.getMsgLabel(ARRAY_INDEX_NEGATIVE), 1, 1)
-    appendAssembly(cg.progFuncInstrs, cg.getMsgLabel(ARRAY_INDEX_LARGE), 1, 1)
+		appendAssembly(cg.progFuncInstrs, cg.getMsgLabel(ARRAY_INDEX_LARGE), 1, 1)
 		/*
 
 			30		PUSH {r4}
@@ -598,7 +602,7 @@ func (cg CodeGenerator) pushPair(fst Evaluation, snd Evaluation, reg1 string, re
 	var fstSize, sndSize = sizeOf(cg.eval(fst)), sizeOf(cg.eval(snd))
 
 	// Load the first element into a register to be stored
-  cg.evalRHS(fst, reg1)
+	cg.evalRHS(fst, reg1)
 
 	//Allocate memory for the first element
 	cg.CfunctionCall("malloc", strconv.Itoa(fstSize))
@@ -621,10 +625,10 @@ func (cg CodeGenerator) pushPair(fst Evaluation, snd Evaluation, reg1 string, re
 
 	//Store the address of the address that contains pointers to the first and second elements
 	//THIS DOESN'T WORK
-  //THE PROBLEM IS FINDING THE OFFSET OF WHERE THE REGISTER IS STORED ON THE STACK BUT
+	//THE PROBLEM IS FINDING THE OFFSET OF WHERE THE REGISTER IS STORED ON THE STACK BUT
 	//WE SHOULD HAVE A FUNCTION THAT TELLS US THE OFFSET OF THE NEXT AVAILABLE SPACE ON THE STACK
-	var offset = 0//, _ = cg.getIdentOffset(reg2)
-	appendAssembly(cg.instrs, "STR "+reg2+", [sp, #" + strconv.Itoa(offset) + "]", 1, 1)
+	var offset = 0 //, _ = cg.getIdentOffset(reg2)
+	appendAssembly(cg.instrs, "STR "+reg2+", [sp, #"+strconv.Itoa(offset)+"]", 1, 1)
 	//
 
 }
