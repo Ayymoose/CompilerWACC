@@ -1,0 +1,11 @@
+# a simple function definition and call
+
+# Output:
+# 0
+
+# Program:
+
+begin
+bool a = true ;
+a = false
+end

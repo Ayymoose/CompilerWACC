@@ -31,8 +31,8 @@ const (
 	POINTER_FORMAT = "%p\\0"
 )
 
-// FUnction global variable
-var functionList []*Function // IS IT A POINTER OR NOT??
+// Function global variable
+var functionList []*Function
 var paramMap map[Param]int
 
 // VISIT FUNCTIONS -------------------------------------------------------------
@@ -113,6 +113,117 @@ func (cg CodeGenerator) cgEvalStat(stat interface{}) {
 		cg.cgVisitScopeStat(stat.(Scope))
 	default:
 		//	""
+	}
+}
+
+func (cg CodeGenerator) cgVisitDeclareStat(node Declare) {
+	rhs := node.Rhs
+
+	switch node.DecType.(type) {
+	case ConstType:
+		switch node.DecType.(ConstType) {
+		case Bool:
+			cg.evalRHS(rhs, "r4")
+			// Using STRB, store it on the stack
+			appendAssembly(cg.instrs, "STRB r4, [sp, #"+cg.subCurrP(BOOL_SIZE)+"]", 1, 1)
+		case Char:
+			cg.evalRHS(rhs, "r4")
+			// Using STRB, store it on the stack
+			appendAssembly(cg.instrs, "STRB r4, [sp, #"+cg.subCurrP(CHAR_SIZE)+"]", 1, 1)
+		case Int:
+			cg.evalRHS(rhs, "r4")
+			// Store the value of declaration to stack
+			appendAssembly(cg.instrs, "STR r4, [sp, #"+cg.subCurrP(INT_SIZE)+"]", 1, 1)
+		case String:
+			cg.evalRHS(rhs, "r4")
+			// Store the address onto the stack
+			appendAssembly(cg.instrs, "STR r4, [sp, #"+cg.subCurrP(STRING_SIZE)+"]", 1, 1)
+		case Pair:
+			// TODO
+		}
+	case PairType:
+		// First allocate memory to store two addresses (8-bytes)
+		cg.CfunctionCall("malloc", strconv.Itoa(ADDR_SIZE*2))
+		// Push a pair of elements onto the stack
+		cg.pushPair(rhs.(NewPair).FstExpr, rhs.(NewPair).SndExpr, node.DecType.(PairType).FstType, node.DecType.(PairType).SndType, "r5", "r4")
+	case ArrayType:
+		// Evalute an array
+		cg.evalArrayLiter(node.DecType, rhs, "r5", "r4")
+	}
+}
+
+func (cg CodeGenerator) cgVisitAssignmentStat(node Assignment) {
+	constType := cg.eval(node.Lhs.(Ident)) // Type
+	rhs := node.Rhs
+	switch node.Lhs.(type) {
+	case ArrayElem:
+	case PairElem:
+	}
+	switch constType {
+	case Bool:
+		cg.evalRHS(rhs, "r4")
+		// Using STRB, store it on the stack
+		appendAssembly(cg.instrs, "STRB r4, [sp, #"+cg.subCurrP(BOOL_SIZE)+"]", 1, 1)
+	case Char:
+		cg.evalRHS(rhs, "r4")
+		// Using STRB, store it on the stack
+		appendAssembly(cg.instrs, "STRB r4, [sp, #"+cg.subCurrP(CHAR_SIZE)+"]", 1, 1)
+	case Int:
+		cg.evalRHS(rhs, "r4")
+		// Store the value of declaration to stack
+		appendAssembly(cg.instrs, "STR r4, [sp, #"+cg.subCurrP(INT_SIZE)+"]", 1, 1)
+	case String:
+		cg.evalRHS(rhs, "r4")
+		// Store the address onto the stack
+		appendAssembly(cg.instrs, "STR r4, [sp, #"+cg.subCurrP(STRING_SIZE)+"]", 1, 1)
+	case Pair:
+		// TODO
+	}
+}
+
+// Global handle function
+func (cg CodeGenerator) evalRHS(t Evaluation, srcReg string) {
+
+	switch t.(type) {
+	// Literals
+	case Integer:
+		appendAssembly(cg.instrs, "LDR "+srcReg+", ="+strconv.Itoa(int(t.(Integer))), 1, 1)
+	case Boolean:
+		appendAssembly(cg.instrs, "MOV "+srcReg+", #"+boolInt(bool(t.(Boolean))), 1, 1)
+	case Character:
+		appendAssembly(cg.instrs, "MOV "+srcReg+", #"+string(t.(Character)), 1, 1)
+	case Str:
+		appendAssembly(cg.instrs, "LDR "+srcReg+", "+cg.getMsgLabel(string(t.(Str))), 1, 1)
+	case PairLiter:
+		appendAssembly(cg.instrs, "MOV "+srcReg+", #0", 1, 1)
+	case Ident:
+		var value, _ = cg.getIdentOffset(t.(Ident))
+		appendAssembly(cg.instrs, "LDR "+srcReg+", [sp, #"+strconv.Itoa(value)+"]", 1, 1)
+	case ArrayElem:
+		/*
+			30		PUSH {r4}
+			31		MOV r4, r0
+			32		LDR r0, =1
+			33		BL p_check_array_bounds
+			34		ADD r4, r4, #4
+			35		ADD r4, r4, r0, LSL #2
+			36		LDR r4, [r4]
+			37		MOV r0, r4
+			38		POP {r4}
+		*/
+		appendAssembly(cg.instrs, "arrayElem not implemented", 1, 1)
+	case Unop:
+		cg.cgVisitUnopExpr(t.(Unop))
+	case Binop:
+		cg.cgVisitBinopExpr(t.(Binop))
+	case NewPair:
+		appendAssembly(cg.instrs, "newpair not implemented", 1, 1)
+	case PairElem:
+		appendAssembly(cg.instrs, "pair elem not implemented", 1, 1)
+	case Call:
+		appendAssembly(cg.instrs, "call not implemented", 1, 1)
+	default:
+		fmt.Println("ERROR: Expression can not be evaluated")
 	}
 }
 
@@ -282,52 +393,6 @@ func (cg CodeGenerator) pushPair(fst Evaluation, snd Evaluation, typeFst Type, t
 	appendAssembly(cg.instrs, "STR "+reg2+", [sp]", 1, 1)
 }
 
-// Global handle function
-func (cg CodeGenerator) evalRHS(t Evaluation, srcReg string) {
-
-	switch t.(type) {
-	// Literals
-	case Integer:
-		appendAssembly(cg.instrs, "LDR "+srcReg+", ="+strconv.Itoa(int(t.(Integer))), 1, 1)
-	case Boolean:
-		appendAssembly(cg.instrs, "MOV "+srcReg+", #"+boolInt(bool(t.(Boolean))), 1, 1)
-	case Character:
-		appendAssembly(cg.instrs, "MOV "+srcReg+", #"+string(t.(Character)), 1, 1)
-	case Str:
-		appendAssembly(cg.instrs, "LDR "+srcReg+", "+cg.getMsgLabel(string(t.(Str))), 1, 1)
-	case PairLiter:
-		appendAssembly(cg.instrs, "MOV "+srcReg+", #0", 1, 1)
-	case Ident:
-		var value, _ = cg.getIdentOffset(t.(Ident))
-		appendAssembly(cg.instrs, "LDR "+srcReg+", [sp, #"+strconv.Itoa(value)+"]", 1, 1)
-	case ArrayElem:
-		/*
-			30		PUSH {r4}
-			31		MOV r4, r0
-			32		LDR r0, =1
-			33		BL p_check_array_bounds
-			34		ADD r4, r4, #4
-			35		ADD r4, r4, r0, LSL #2
-			36		LDR r4, [r4]
-			37		MOV r0, r4
-			38		POP {r4}
-		*/
-		appendAssembly(cg.instrs, "arrayElem not implemented", 1, 1)
-	case Unop:
-		cg.cgVisitUnopExpr(t.(Unop))
-	case Binop:
-		cg.cgVisitBinopExpr(t.(Binop))
-	case NewPair:
-		appendAssembly(cg.instrs, "newpair not implemented", 1, 1)
-	case PairElem:
-		appendAssembly(cg.instrs, "pair elem not implemented", 1, 1)
-	case Call:
-		appendAssembly(cg.instrs, "call not implemented", 1, 1)
-	default:
-		fmt.Println("ERROR: Expression can not be evaluated")
-	}
-}
-
 //Evaluates array literals
 func (cg CodeGenerator) evalArrayLiter(typeNode Type, rhs Evaluation, srcReg string, dstReg string) {
 
@@ -378,62 +443,6 @@ func (cg CodeGenerator) pushArrayElements(array []Evaluation, srcReg string, dst
 	// Now store the address of the array onto the stack
 	appendAssembly(cg.instrs, "STR "+srcReg+", ["+dstReg+"]", 1, 1)
 	appendAssembly(cg.instrs, "STR "+dstReg+", [sp, #"+cg.subCurrP(INT_SIZE)+"]", 1, 1)
-}
-
-func (cg CodeGenerator) cgVisitDeclareStat(node Declare) {
-	/*var rhs = node.Rhs
-
-	switch node.DecType.(type) {
-	case ArrayType:
-		// Evalute an array
-		cg.evalArrayLiter(node.DecType, rhs, "r5", "r4")
-	case PairType:
-		// First allocate memory to store two addresses (8-bytes)
-		cg.CfunctionCall("malloc", strconv.Itoa(ADDR_SIZE*2))
-		// Push a pair of elements onto the stack
-		cg.pushPair(rhs.(NewPair).FstExpr, rhs.(NewPair).SndExpr, node.DecType.(PairType).FstType, node.DecType.(PairType).SndType, "r5", "r4")
-
-		// Probabliy can reduce this code using a sizeOf() and group
-	case Boolean:
-		cg.evalRHS(rhs, "r4")
-		// Using STRB, store it on the stack
-		appendAssembly(cg.instrs, "STRB r4, [sp, #"+cg.subCurrP(BOOL_SIZE)+"]", 1, 1)
-	case Character:
-		cg.evalRHS(rhs, "r4")
-		// Using STRB, store it on the stack
-		appendAssembly(cg.instrs, "STRB r4, [sp, #"+cg.subCurrP(CHAR_SIZE)+"]", 1, 1)
-	case Integer:
-		cg.evalRHS(rhs, "r4")
-		// Store the value of declaration to stack
-		appendAssembly(cg.instrs, "STR r4, [sp, #"+cg.subCurrP(INT_SIZE)+"]", 1, 1)
-	case Str:
-		cg.evalRHS(rhs, "r4")
-		// Store the address onto the stack
-		appendAssembly(cg.instrs, "STR r4, [sp, #"+cg.subCurrP(STRING_SIZE)+"]", 1, 1)
-		//
-
-	default:
-		//	typeOf(node.DecType)
-	}
-	*/
-}
-func (cg CodeGenerator) cgVisitAssignmentStat(node Assignment) {
-	switch node.Lhs.(type) {
-	case ArrayElem:
-	case PairElem:
-	default: // Ident
-	}
-
-	// eval RHS ????
-	switch node.Rhs.(type) {
-
-	case ArrayElem:
-	case Unop:
-	case Binop:
-	case Call:
-	//	cgVisitCallStat(node.Rhs.(Call).Ident, node.Rhs.(Call).ParamList)
-	default: // Ident   // NEED TO DEAL WITH '(' EXPR ')' CASE AS WELL?
-	}
 }
 
 func (cg CodeGenerator) cgVisitReadStat(node Read) {

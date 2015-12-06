@@ -28,7 +28,6 @@ const BACKENDFILE = "ARMCode.s"
 func main() {
 
 	//	armList := &fw.ARMList{}
-
 	file := os.Args[1] // index 1 is file path
 	b, err := ioutil.ReadFile(file)
 	if err != nil {
@@ -48,7 +47,6 @@ func main() {
 			fmt.Println(str)
 		}
 		fmt.Println("Semantic Error : 200")
-		fmt.Println("Semantic Error : 200")
 		os.Exit(SEMANTIC_ERROR)
 	}
 	/*	codeGen := cg.ConstructCodeGenerator(root, armList, *root.SymbolTable)
@@ -56,6 +54,6 @@ func main() {
 		for _, instr := range *armList {
 			fmt.Print(instr)
 		}
-
-		armList.WriteToFile(BACKENDFILE) */
+	*/
+	//	armList.WriteToFile(BACKENDFILE)
 }
