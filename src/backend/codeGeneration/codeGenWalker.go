@@ -443,7 +443,21 @@ func (cg CodeGenerator) cgVisitIfStat(node If) {
 }
 
 func (cg CodeGenerator) cgVisitWhileStat(node While) {
+	appendAssembly(cg.instrs, "B L0", 1, 1)
+	appendAssembly(cg.instrs, "L1", 0, 1)
 
+	// traverse all statements by switching on statement type
+	for _, stat := range node.DoStat {
+		cg.cgEvalStat(stat)
+	}
+
+	appendAssembly(cg.instrs, "L0", 0, 1)
+	cg.evalRHS(node.Conditional, "r4") // NEED TWO REGISTERS R4 and R5 to compare
+	appendAssembly(cg.instrs, "CMP r4, r5", 1, 1)
+	appendAssembly(cg.instrs, "MOVGT r4, #1", 1, 1)
+	appendAssembly(cg.instrs, "MOVLE r4, #0", 1, 1)
+	appendAssembly(cg.instrs, "CMP r4, #1", 1, 1)
+	appendAssembly(cg.instrs, "BEG L1", 1, 1)
 }
 
 func (cg CodeGenerator) cgVisitScopeStat(node Scope) {
