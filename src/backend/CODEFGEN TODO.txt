@@ -20,14 +20,13 @@ RETURN: NOT STARTED --- @Ayman
 EVAL RHS: IN PROGRESS ---
 - do array elem AYMAN
 - do array liter AYMAN
-- do newpair NANA
-- do pairelem NANA
+- do newpair AYMAN
+- do pairelem AYMAN
 - do call HENRYK
 
 EXIT: COMPLETE ----------------------------------------
 
 PRINT: IN PROGRESS/ LITERALS COMPLETE* ---
-- *Oli needs to help print characters
 - Still need to print pairs (and null) and array addresses
 - Need to print variables
 
