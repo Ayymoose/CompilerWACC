@@ -29,12 +29,13 @@ func (symbolTable *SymbolTable) getOffset(key string) int {
 
 // Checks if the key is already declared in the symbol table
 func (symbolTable *SymbolTable) isDefined(key Ident) bool {
+
 	curr := symbolTable
 	for curr != nil {
 		if curr.contains(key) {
 			return true
 		}
-		curr = symbolTable.Parent
+		curr = curr.Parent
 	}
 	return false
 }
