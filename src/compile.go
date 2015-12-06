@@ -1,6 +1,7 @@
 package main
 
 import (
+	. "ast"
 	"fmt"
 	"io/ioutil"
 	"os"
@@ -48,10 +49,10 @@ func main() {
 		fmt.Println("Semantic Error : 200")
 		os.Exit(SEMANTIC_ERROR)
 	}
-	/*
-			cg := codeG.ConstructCodeGenerator(root, armList, ast.SymbolTable{})
-			cg.GenerateCode()
 
+	//	cg := codeG.ConstructCodeGenerator(root, armList, SymbolTable{})
+	//	cg.GenerateCode()
+	/*
 		for _, instr := range *armList {
 			fmt.Print(instr)
 		} */
