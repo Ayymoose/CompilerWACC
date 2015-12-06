@@ -5,8 +5,53 @@ import (
 	"fmt"
 )
 
+func containsDuplicateFunc(functionTable []*Function) bool {
+	freqMap := make(map[Ident]int)
+	for _, funcDec := range functionTable {
+		freqMap[funcDec.Ident]++
+	}
+	for _, val := range freqMap {
+		if val > 1 {
+			return true
+		}
+	}
+	return false
+}
+
+func (function *Function) checkFuncStats(functionTable []*Function, symbolTable *SymbolTable, stats []Statement) bool {
+	switch stats[len(stats)-1].(type) {
+	case Return:
+		ExprTyp, _ := (stats[len(stats)-1].(Return)).Expr.Eval(functionTable, symbolTable)
+		if ExprTyp != function.ReturnType {
+			return false
+		}
+	case Exit:
+		return true
+	case If:
+		ifstat := stats[len(stats)-1].(If)
+		return function.checkFuncStats(functionTable, symbolTable, ifstat.ThenStat) && function.checkFuncStats(functionTable, symbolTable, ifstat.ElseStat)
+	default:
+		return false
+	}
+	return false
+}
+
 func (root *Program) SemanticCheck() errorSlice {
 	var semanticErrors []error
+	if containsDuplicateFunc(root.FunctionList) {
+		semanticErrors = append(semanticErrors, errors.New("Program has function redefinitions"))
+	}
+	for _, functionProg := range root.FunctionList {
+		for _, stat := range functionProg.StatList {
+			errs := stat.visitStatement(root.FunctionList, root.SymbolTable)
+			if errs != nil {
+				semanticErrors = append(semanticErrors, errs)
+			}
+		}
+	}
+	for _, functionProg := range root.FunctionList {
+		functionProg.checkFuncStats(root.FunctionList, root.SymbolTable, functionProg.StatList)
+	}
 	for _, stat := range root.StatList {
 		errs := stat.visitStatement(root.FunctionList, root.SymbolTable)
 		if errs != nil {
@@ -106,9 +151,11 @@ func (node Assignment) visitStatement(functionTable []*Function, symbolTable *Sy
 
 func (node Read) visitStatement(functionTable []*Function, symbolTable *SymbolTable) errorSlice {
 	var semanticErrors errorSlice
-	_, err := node.AssignLHS.Eval(functionTable, symbolTable)
+	exprTyp, err := node.AssignLHS.Eval(functionTable, symbolTable)
 	if err != nil {
 		semanticErrors = append(semanticErrors, err)
+	} else if exprTyp != Char || exprTyp != Int {
+		semanticErrors = append(semanticErrors, errors.New("Cannot read non Char or Int type"))
 	}
 	if len(semanticErrors) > 0 {
 		return semanticErrors
@@ -118,9 +165,17 @@ func (node Read) visitStatement(functionTable []*Function, symbolTable *SymbolTa
 
 func (node Free) visitStatement(functionTable []*Function, symbolTable *SymbolTable) errorSlice {
 	var semanticErrors errorSlice
-	_, err := node.Expr.Eval(functionTable, symbolTable)
+	exprTyp, err := node.Expr.Eval(functionTable, symbolTable)
 	if err != nil {
 		semanticErrors = append(semanticErrors, err)
+	}
+	switch exprTyp.(type) {
+	case PairType:
+		// Do nothing
+	default:
+		if exprTyp != Pair {
+			semanticErrors = append(semanticErrors, errors.New("Cannot free non pair type"))
+		}
 	}
 	if len(semanticErrors) > 0 {
 		return semanticErrors
@@ -134,6 +189,7 @@ func (node Return) visitStatement(functionTable []*Function, symbolTable *Symbol
 	if err != nil {
 		semanticErrors = append(semanticErrors, err)
 	}
+
 	if len(semanticErrors) > 0 {
 		return semanticErrors
 	}
@@ -142,9 +198,12 @@ func (node Return) visitStatement(functionTable []*Function, symbolTable *Symbol
 
 func (node Exit) visitStatement(functionTable []*Function, symbolTable *SymbolTable) errorSlice {
 	var semanticErrors errorSlice
-	_, err := node.Expr.Eval(functionTable, symbolTable)
+	exprTyp, err := node.Expr.Eval(functionTable, symbolTable)
 	if err != nil {
 		semanticErrors = append(semanticErrors, err)
+	}
+	if exprTyp != Int {
+		semanticErrors = append(semanticErrors, errors.New("Bad exit expression, must be int"))
 	}
 	if len(semanticErrors) > 0 {
 		return semanticErrors
