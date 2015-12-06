@@ -28,6 +28,8 @@ const (
 	NEWLINE_MSG    = "\\0"
 	TRUE_MSG       = "true\\0"
 	FALSE_MSG      = "false\\0"
+	READ_INT       = "%d\\0"
+	READ_CHAR      = "%c\\0"
 	POINTER_FORMAT = "%p\\0"
 )
 
@@ -194,14 +196,47 @@ func (cg CodeGenerator) cgVisitReadStat(node Read) {
 		appendAssembly(cg.instrs, "ADD r4, sp, #0", 1, 1)
 		appendAssembly(cg.instrs, "MOV r0, r4", 1, 1)
 		appendAssembly(cg.instrs, "BL p_read_char", 1, 1)
+		cg.cgVisitReadStatFunc_H("p_read_char")
+
 	case Int:
 		appendAssembly(cg.instrs, "ADD r4, sp, #0", 1, 1)
 		appendAssembly(cg.instrs, "MOV r0, r4", 1, 1)
 		appendAssembly(cg.instrs, "BL p_read_int", 1, 1)
+		cg.cgVisitReadStatFunc_H("p_read_int")
 	case String:
 	case Pair:
 		// TODO
 	}
+}
+
+// cgVisitReadStat helper function
+// Adds a function definition to the progFuncInstrs ARMList depending on the
+// function name provided
+func (cg CodeGenerator) cgVisitReadStatFunc_H(funcName string) {
+	if cg.AddCheckProgName(funcName) {
+		// if the program function has been defined previously
+		// a redefinition is unnecessary
+		return
+	}
+	// else define the read function
+	appendAssembly(cg.progFuncInstrs, funcName+":", 0, 1)
+	switch funcName {
+	case "p_read_char":
+		appendAssembly(cg.progFuncInstrs, "PUSH {lr}", 1, 1)
+		appendAssembly(cg.progFuncInstrs, "MOV r1, r0", 1, 1)
+		appendAssembly(cg.progFuncInstrs, "LDR r0, "+cg.getMsgLabel(READ_CHAR), 1, 1)
+		appendAssembly(cg.progFuncInstrs, "ADD r0, r0, #4", 1, 1)
+		appendAssembly(cg.progFuncInstrs, "BL scanf", 1, 1)
+		appendAssembly(cg.progFuncInstrs, "POP {pc}", 1, 1)
+	case "p_read_int":
+		appendAssembly(cg.progFuncInstrs, "PUSH {lr}", 1, 1)
+		appendAssembly(cg.progFuncInstrs, "MOV r1, r0", 1, 1)
+		appendAssembly(cg.progFuncInstrs, "LDR r0, "+cg.getMsgLabel(READ_INT), 1, 1)
+		appendAssembly(cg.progFuncInstrs, "ADD r0, r0, #4", 1, 1)
+		appendAssembly(cg.progFuncInstrs, "BL scanf", 1, 1)
+		appendAssembly(cg.progFuncInstrs, "POP {pc}", 1, 1)
+	}
+
 }
 
 func (cg CodeGenerator) cgVisitFreeStat(node Free) {
