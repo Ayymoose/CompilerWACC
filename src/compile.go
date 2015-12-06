@@ -48,6 +48,8 @@ func main() {
 		fmt.Println("Semantic Error : 200")
 		os.Exit(SEMANTIC_ERROR)
 	}
+
+
 	/*
 			cg := codeG.ConstructCodeGenerator(root, armList, ast.SymbolTable{})
 			cg.GenerateCode()
