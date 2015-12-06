@@ -28,6 +28,8 @@
 
 #ignore the WACC tempory test_files copy
 testing/test_files/
+#Ignore compile.exe that keeps getting added @AYMAN
+/compile.exe
 
 #ignore other junk files
 *.backup
