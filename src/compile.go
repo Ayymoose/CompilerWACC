@@ -3,6 +3,8 @@ package main
 import (
 	. "ast"
 	"fmt"
+	fw "backend/filewriter"
+	cg "backend/codeGeneration"
 	"io/ioutil"
 	"os"
 	"parser"
@@ -27,7 +29,7 @@ const BACKENDFILE = "ARMCode.s"
 
 func main() {
 
-	//	armList := &fw.ARMList{}
+		armList := &fw.ARMList{}
 	file := os.Args[1] // index 1 is file path
 	b, err := ioutil.ReadFile(file)
 	if err != nil {
@@ -50,11 +52,11 @@ func main() {
 		os.Exit(SEMANTIC_ERROR)
 	}
 	fmt.Println("SUCCESS : ")
-	/*		codeGen := cg.ConstructCodeGenerator(root, armList, *root.SymbolTable)
+			codeGen := cg.ConstructCodeGenerator(root, armList, *root.SymbolTable)
 			codeGen.GenerateCode()
 			for _, instr := range *armList {
 				fmt.Print(instr)
-			}  */
+			}
 
 	//	armList.WriteToFile(BACKENDFILE)
 }
