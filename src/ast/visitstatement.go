@@ -18,20 +18,53 @@ func containsDuplicateFunc(functionTable []*Function) bool {
 	return false
 }
 
-func (function *Function) checkFuncStats(functionTable []*Function, symbolTable *SymbolTable, stats []Statement) bool {
-	switch stats[len(stats)-1].(type) {
+func (function *Function) checkFuncRetStats(functionTable []*Function, symbolTable *SymbolTable, stat Statement) errorSlice {
+	var semanticErrors []error
+	switch stat.(type) {
 	case Return:
-		ExprTyp, _ := (stats[len(stats)-1].(Return)).Expr.Eval(functionTable, symbolTable)
+		ExprTyp, _ := stat.(Return).Expr.Eval(functionTable, symbolTable)
 		if ExprTyp != function.ReturnType {
-			return false
+			semanticErrors = append(semanticErrors, errors.New("Return type does not match"))
 		}
 	case Exit:
-		return true
+		ExprTyp, _ := stat.(Exit).Expr.Eval(functionTable, symbolTable)
+		if ExprTyp != Int {
+			semanticErrors = append(semanticErrors, errors.New("Invalid Exit statement"))
+		}
 	case If:
-		ifstat := stats[len(stats)-1].(If)
-		return function.checkFuncStats(functionTable, symbolTable, ifstat.ThenStat) && function.checkFuncStats(functionTable, symbolTable, ifstat.ElseStat)
+		ifstat := stat.(If)
+		thenerr := function.checkFuncRetStats(functionTable, symbolTable, ifstat.ThenStat[len(ifstat.ThenStat)-1])
+		elseerr := function.checkFuncRetStats(functionTable, symbolTable, ifstat.ElseStat[len(ifstat.ElseStat)-1])
+		if thenerr != nil {
+			semanticErrors = append(semanticErrors, thenerr)
+		}
+		if elseerr != nil {
+			semanticErrors = append(semanticErrors, elseerr)
+		}
 	}
-	return false
+	return nil
+}
+
+func (function *Function) checkFunc(root *Program) errorSlice {
+	var semanticErrors []error
+	funcSymbolTable := root.SymbolTable.New()
+	for _, param := range function.ParameterTypes {
+		funcSymbolTable.insert(param.Ident, param.ParamType)
+	}
+	for _, stat := range root.StatList {
+		errs := stat.visitStatement(root.FunctionList, funcSymbolTable)
+		if errs != nil {
+			semanticErrors = append(semanticErrors, errs)
+		}
+	}
+	funretstaterrs := function.checkFuncRetStats(root.FunctionList, funcSymbolTable, function.StatList[len(function.StatList)-1])
+	if funretstaterrs != nil {
+		semanticErrors = append(semanticErrors, funretstaterrs)
+	}
+	if len(semanticErrors) > 0 {
+		return semanticErrors
+	}
+	return nil
 }
 
 func (root *Program) SemanticCheck() errorSlice {
@@ -39,16 +72,11 @@ func (root *Program) SemanticCheck() errorSlice {
 	if containsDuplicateFunc(root.FunctionList) {
 		semanticErrors = append(semanticErrors, errors.New("Program has function redefinitions"))
 	}
-	/*	for _, functionProg := range root.FunctionList {
-		for _, stat := range functionProg.StatList {
-			errs := stat.visitStatement(root.FunctionList, root.SymbolTable)
-			if errs != nil {
-				semanticErrors = append(semanticErrors, errs)
-			}
-		}
-	} */
 	for _, functionProg := range root.FunctionList {
-		functionProg.checkFuncStats(root.FunctionList, root.SymbolTable, functionProg.StatList)
+		semanticErrors = append(semanticErrors, functionProg.checkFunc(root))
+	}
+	for _, functionProg := range root.FunctionList {
+		functionProg.checkFunc(root)
 	}
 	for _, stat := range root.StatList {
 		errs := stat.visitStatement(root.FunctionList, root.SymbolTable)
