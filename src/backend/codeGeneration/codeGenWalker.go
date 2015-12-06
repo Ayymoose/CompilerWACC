@@ -28,7 +28,10 @@ const (
 	NEWLINE_MSG    = "\\0"
 	TRUE_MSG       = "true\\0"
 	FALSE_MSG      = "false\\0"
+	READ_INT       = "%d\\0"
+	READ_CHAR      = "%c\\0"
 	POINTER_FORMAT = "%p\\0"
+	NULL_REFERENCE = "NullReferenceError: dereference a null reference\n\\0"
 )
 
 // Function global variable
@@ -121,6 +124,7 @@ func (cg CodeGenerator) cgVisitDeclareStat(node Declare) {
 
 	switch node.DecType.(type) {
 	case ConstType:
+
 		switch node.DecType.(ConstType) {
 		case Bool:
 			cg.evalRHS(rhs, "r4")
@@ -141,14 +145,13 @@ func (cg CodeGenerator) cgVisitDeclareStat(node Declare) {
 		case Pair:
 			// TODO
 		}
+
 	case PairType:
 		// First allocate memory to store two addresses (8-bytes)
 		cg.CfunctionCall("malloc", strconv.Itoa(ADDR_SIZE*2))
 		// Push a pair of elements onto the stack
 		cg.pushPair(rhs.(NewPair).FstExpr, rhs.(NewPair).SndExpr, "r5", "r4")
 	case ArrayType:
-
-
 		// Evalute an array
 		cg.evalArrayLiter(node.DecType, rhs, "r5", "r4")
 	}
@@ -186,6 +189,8 @@ func (cg CodeGenerator) cgVisitAssignmentStat(node Assignment) {
 func (cg CodeGenerator) cgVisitReadStat(node Read) {
 	// Technically only read int / char
 	constType := cg.eval(node.AssignLHS.(Ident)) // Type
+	appendAssembly(cg.instrs, "ADD r4, sp, #0", 1, 1)
+	appendAssembly(cg.instrs, "MOV r0, r4", 1, 1)
 	switch node.AssignLHS.(type) {
 	case ArrayElem:
 	case PairElem:
@@ -193,21 +198,85 @@ func (cg CodeGenerator) cgVisitReadStat(node Read) {
 	switch constType {
 	case Bool:
 	case Char:
-		appendAssembly(cg.instrs, "ADD r4, sp, #0", 1, 1)
-		appendAssembly(cg.instrs, "MOV r0, r4", 1, 1)
 		appendAssembly(cg.instrs, "BL p_read_char", 1, 1)
+		cg.cgVisitReadStatFunc_H("p_read_char")
 	case Int:
-		appendAssembly(cg.instrs, "ADD r4, sp, #0", 1, 1)
-		appendAssembly(cg.instrs, "MOV r0, r4", 1, 1)
 		appendAssembly(cg.instrs, "BL p_read_int", 1, 1)
+		cg.cgVisitReadStatFunc_H("p_read_int")
 	case String:
 	case Pair:
 		// TODO
 	}
 }
 
+// cgVisitReadStat helper function
+// Adds a function definition to the progFuncInstrs ARMList depending on the
+// function name provided
+func (cg CodeGenerator) cgVisitReadStatFunc_H(funcName string) {
+	if cg.AddCheckProgName(funcName) {
+		// if the program function has been defined previously
+		// a redefinition is unnecessary
+		return
+	}
+	// else define the read function
+	appendAssembly(cg.progFuncInstrs, funcName+":", 0, 1)
+	appendAssembly(cg.progFuncInstrs, "PUSH {lr}", 1, 1)
+	appendAssembly(cg.progFuncInstrs, "MOV r1, r0", 1, 1)
+	switch funcName {
+	case "p_read_char":
+		appendAssembly(cg.progFuncInstrs, "LDR r0, "+cg.getMsgLabel(READ_CHAR), 1, 1)
+	case "p_read_int":
+		appendAssembly(cg.progFuncInstrs, "LDR r0, "+cg.getMsgLabel(READ_INT), 1, 1)
+	}
+	appendAssembly(cg.progFuncInstrs, "ADD r0, r0, #4", 1, 1)
+	appendAssembly(cg.progFuncInstrs, "BL scanf", 1, 1)
+	appendAssembly(cg.progFuncInstrs, "POP {pc}", 1, 1)
+}
+
 func (cg CodeGenerator) cgVisitFreeStat(node Free) {
-	//	label := "p_free_pair"
+	// node.Expr.
+	appendAssembly(cg.instrs, "LDR r4, [sp]", 1, 1)
+	appendAssembly(cg.instrs, "MOV r0, r4", 1, 1)
+	appendAssembly(cg.instrs, "BL p_free_pair", 1, 1)
+	cg.cgVisitFreeStatFunc_H("p_free_pair")
+}
+
+// cgVisitFreeStat helper function
+// Adds a function definition to the progFuncInstrs ARMList depending on the
+// function name provided
+func (cg CodeGenerator) cgVisitFreeStatFunc_H(funcName string) {
+	if cg.AddCheckProgName(funcName) {
+		// if the program function has been defined previously
+		// a redefinition is unnecessary
+		return
+	}
+	// else define the read function
+	appendAssembly(cg.progFuncInstrs, funcName+":", 0, 1)
+	switch funcName {
+	case "p_free_pair":
+		appendAssembly(cg.progFuncInstrs, "PUSH {lr}", 1, 1)
+		appendAssembly(cg.progFuncInstrs, "CMP r0, #0", 1, 1)
+		appendAssembly(cg.progFuncInstrs, "LDREQ r0, "+cg.getMsgLabel(NULL_REFERENCE), 1, 1)
+		appendAssembly(cg.progFuncInstrs, "BEQ p_throw_runtime_error", 1, 1)
+		appendAssembly(cg.progFuncInstrs, "PUSH {r0}", 1, 1)
+		appendAssembly(cg.progFuncInstrs, "LDR r0, [r0]", 1, 1)
+		appendAssembly(cg.progFuncInstrs, "BL free", 1, 1)
+		appendAssembly(cg.progFuncInstrs, "LDR r0, [sp]", 1, 1)
+		appendAssembly(cg.progFuncInstrs, "LDR r0, [r0, #4]", 1, 1)
+		appendAssembly(cg.progFuncInstrs, "BL free", 1, 1)
+		appendAssembly(cg.progFuncInstrs, "POP {r0}", 1, 1)
+		appendAssembly(cg.progFuncInstrs, "BL free", 1, 1)
+		appendAssembly(cg.progFuncInstrs, "POP {pc}", 1, 1)
+	}
+
+	// if the program function has not been defined previously
+	if !cg.AddCheckProgName("p_throw_runtime_error") {
+		appendAssembly(cg.progFuncInstrs, "p_throw_runtime_error"+":", 0, 1)
+		appendAssembly(cg.progFuncInstrs, "BL p_print_string", 1, 1)
+		appendAssembly(cg.progFuncInstrs, "MOV r0, #-1", 1, 1)
+		appendAssembly(cg.progFuncInstrs, "BL exit", 1, 1)
+	}
+	cg.cgVisitPrintStatFunc_H("p_print_string")
 }
 
 func (cg CodeGenerator) cgVisitReturnStat(node Return) {
@@ -514,30 +583,6 @@ func (cg CodeGenerator) CfunctionCall(functionName string, argument string) {
 	appendAssembly(cg.instrs, "BL "+functionName, 1, 1)
 }
 
-// Evaluates a pair
-func (cg CodeGenerator) evalPair(fst Evaluation, dstReg string) {
-	var t = cg.eval(fst)
-	switch t.(type) {
-	case PairType:
-		fmt.Println("Pair type not implemented")
-	case ConstType:
-		switch t.(ConstType) {
-		case Int:
-			appendAssembly(cg.instrs, "LDR "+dstReg+", ="+strconv.Itoa(int(fst.(Integer))), 1, 1)
-		case Bool:
-      appendAssembly(cg.instrs, "LDR "+dstReg+", ="+boolInt(bool(fst.(Boolean))), 1, 1)
-		case String:
-      appendAssembly(cg.instrs, "LDR "+dstReg+", "+cg.getMsgLabel(string(fst.(Str))), 1, 1)
-		case Char:
-      appendAssembly(cg.instrs, "MOV "+dstReg+", #"+string(fst.(Character)), 1, 1)
-		}
-	default:
-		fmt.Println("Unknown type for pair")
-		typeOf(t)
-	}
-
-}
-
 //Pushes a pair of elements onto the stack
 func (cg CodeGenerator) pushPair(fst Evaluation, snd Evaluation, reg1 string, reg2 string) {
 	// Store the address in the free register
@@ -547,7 +592,7 @@ func (cg CodeGenerator) pushPair(fst Evaluation, snd Evaluation, reg1 string, re
 	var fstSize, sndSize = sizeOf(cg.eval(fst)), sizeOf(cg.eval(snd))
 
 	// Load the first element into a register to be stored
-  cg.evalPair(fst, reg1)
+  cg.evalRHS(fst, reg1)
 
 	//Allocate memory for the first element
 	cg.CfunctionCall("malloc", strconv.Itoa(fstSize))
@@ -558,7 +603,7 @@ func (cg CodeGenerator) pushPair(fst Evaluation, snd Evaluation, reg1 string, re
 	appendAssembly(cg.instrs, "STR r0, ["+reg2+"]", 1, 1)
 
 	//Load the second element into a register to be stored
-	cg.evalPair(snd, reg1)
+	cg.evalRHS(snd, reg1)
 
 	//Allocate memory for the second element
 	cg.CfunctionCall("malloc", strconv.Itoa(sndSize))
@@ -569,7 +614,12 @@ func (cg CodeGenerator) pushPair(fst Evaluation, snd Evaluation, reg1 string, re
 	appendAssembly(cg.instrs, "STR r0, ["+reg2+", #4]", 1, 1)
 
 	//Store the address of the address that contains pointers to the first and second elements
-	appendAssembly(cg.instrs, "STR "+reg2+", [sp]", 1, 1)
+	//THIS DOESN'T WORK
+  //THE PROBLEM IS FINDING THE OFFSET OF WHERE THE REGISTER IS STORED ON THE STACK BUT
+	//WE SHOULD HAVE A FUNCTION THAT TELLS US THE OFFSET OF THE NEXT AVAILABLE SPACE ON THE STACK
+	var offset = 0//, _ = cg.getIdentOffset(reg2)
+	appendAssembly(cg.instrs, "STR "+reg2+", [sp, #" + strconv.Itoa(offset) + "]", 1, 1)
+	//
 
 }
 
@@ -595,6 +645,7 @@ func (cg CodeGenerator) evalArrayLiter(typeNode Type, rhs Evaluation, srcReg str
 }
 
 // Puts the array elements onto the stack
+// Where t is the type of the array
 func (cg CodeGenerator) pushArrayElements(array []Evaluation, srcReg string, dstReg string, t Type) {
 
 	var arraySize = len(array)
