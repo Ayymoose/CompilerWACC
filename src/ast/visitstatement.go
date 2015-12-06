@@ -55,20 +55,23 @@ func (function *Function) checkFunc(root *Program) errorSlice {
 	for _, param := range function.ParameterTypes {
 		funcSymbolTable.insert(param.Ident, param.ParamType)
 	}
-	for _, stat := range root.StatList {
+	for _, stat := range function.StatList {
 		errs := stat.visitStatement(root.FunctionList, funcSymbolTable)
 		if errs != nil {
-
+			//		fmt.Println("GOT HERE errs!:   ", stat)
 			semanticErrors = append(semanticErrors, errs)
 		}
 	}
 	funretstaterrs := function.checkFuncRetStats(root.FunctionList, funcSymbolTable, function.StatList[len(function.StatList)-1])
 	if funretstaterrs != nil {
+		//		fmt.Println("GOT HERE funretstaterrs!")
 		semanticErrors = append(semanticErrors, funretstaterrs)
 	}
 	if len(semanticErrors) > 0 {
+		//	fmt.Println("GOT HERE WHATTTTT!")
 		return semanticErrors
 	}
+	//	fmt.Println("GOT HERE CLEAN")
 	return nil
 }
 
