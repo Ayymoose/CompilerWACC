@@ -18,29 +18,69 @@ func containsDuplicateFunc(functionTable []*Function) bool {
 	return false
 }
 
-func (function *Function) checkFuncRetStats(functionTable []*Function, symbolTable *SymbolTable, stat Statement) errorSlice {
+func (node If) checkIfReturn(functionTable []*Function, symbolTable *SymbolTable, returnType Type) errorSlice {
+	var semanticErrors errorSlice
+	cond, err := node.Conditional.Eval(functionTable, symbolTable)
+	if err != nil {
+		semanticErrors = append(semanticErrors, err)
+	}
+	if cond != Bool {
+		semanticErrors = append(semanticErrors, errors.New("Conditional is not boolean expression"))
+	}
+	thenSymTab := symbolTable.New()
+	for _, thenstat := range node.ThenStat {
+		switch thenstat.(type) {
+		case Return:
+			errs := thenstat.(Return).checkReturnReturn(functionTable, thenSymTab, returnType)
+			if errs != nil {
+				semanticErrors = append(semanticErrors, errs)
+			}
+		case If:
+			errs := thenstat.(If).checkIfReturn(functionTable, thenSymTab, returnType)
+			if errs != nil {
+				semanticErrors = append(semanticErrors, errs)
+			}
+		default:
+			errs := thenstat.visitStatement(functionTable, thenSymTab)
+			if errs != nil {
+				semanticErrors = append(semanticErrors, errs)
+			}
+		}
+	}
+	elseSymTab := symbolTable.New()
+	for _, elsestat := range node.ElseStat {
+		switch elsestat.(type) {
+		case Return:
+			errs := elsestat.(Return).checkReturnReturn(functionTable, elseSymTab, returnType)
+			if errs != nil {
+				semanticErrors = append(semanticErrors, errs)
+			}
+		case If:
+			errs := elsestat.(If).checkIfReturn(functionTable, elseSymTab, returnType)
+			if errs != nil {
+				semanticErrors = append(semanticErrors, errs)
+			}
+		default:
+			errs := elsestat.visitStatement(functionTable, elseSymTab)
+			if errs != nil {
+				semanticErrors = append(semanticErrors, errs)
+			}
+		}
+	}
+	if len(semanticErrors) > 0 {
+		return semanticErrors
+	}
+	return nil
+}
+
+func (node Return) checkReturnReturn(functionTable []*Function, symbolTable *SymbolTable, returnType Type) errorSlice {
 	var semanticErrors []error
-	switch stat.(type) {
-	case Return:
-		ExprTyp, _ := stat.(Return).Expr.Eval(functionTable, symbolTable)
-		fmt.Println(ExprTyp.typeString())
-		if ExprTyp != function.ReturnType {
-			semanticErrors = append(semanticErrors, errors.New("Return type does not match"))
-		}
-	case Exit:
-		ExprTyp, _ := stat.(Exit).Expr.Eval(functionTable, symbolTable)
-		if ExprTyp != Int {
-			semanticErrors = append(semanticErrors, errors.New("Invalid Exit statement"))
-		}
-	case If:
-		ifstat := stat.(If)
-		thenerr := function.checkFuncRetStats(functionTable, symbolTable, ifstat.ThenStat[len(ifstat.ThenStat)-1])
-		elseerr := function.checkFuncRetStats(functionTable, symbolTable, ifstat.ElseStat[len(ifstat.ElseStat)-1])
-		if thenerr != nil {
-			semanticErrors = append(semanticErrors, thenerr)
-		}
-		if elseerr != nil {
-			semanticErrors = append(semanticErrors, elseerr)
+	exprTyp, err := node.Expr.Eval(functionTable, symbolTable)
+	if err != nil {
+		semanticErrors = append(semanticErrors, err)
+	} else {
+		if !typesMatch(exprTyp, returnType) {
+			semanticErrors = append(semanticErrors, errors.New("Return Types do not match: "+exprTyp.typeString()+"::"+returnType.typeString()))
 		}
 	}
 	if len(semanticErrors) > 0 {
@@ -55,17 +95,31 @@ func (function *Function) checkFunc(root *Program) errorSlice {
 	for _, param := range function.ParameterTypes {
 		funcSymbolTable.insert(param.Ident, param.ParamType)
 	}
-	for _, stat := range function.StatList {
+	for ind, stat := range function.StatList {
+		if ind == len(function.StatList)-1 {
+			switch stat.(type) {
+			case If:
+				errIf := stat.(If).checkIfReturn(root.FunctionList, funcSymbolTable, function.ReturnType)
+				if errIf != nil {
+					semanticErrors = append(semanticErrors, errIf)
+				}
+			case Return:
+				errRet := stat.(Return).checkReturnReturn(root.FunctionList, funcSymbolTable, function.ReturnType)
+				if errRet != nil {
+					semanticErrors = append(semanticErrors, errRet)
+				}
+			}
+		}
 		errs := stat.visitStatement(root.FunctionList, funcSymbolTable)
 		if errs != nil {
 			semanticErrors = append(semanticErrors, errs)
 		}
 	}
-	funretstaterrs := function.checkFuncRetStats(root.FunctionList, funcSymbolTable, function.StatList[len(function.StatList)-1])
-	if funretstaterrs != nil {
-		//		fmt.Println("GOT HERE funretstaterrs!")
-		semanticErrors = append(semanticErrors, funretstaterrs)
-	}
+	/*	funretstaterrs := function.checkFuncRetStats(root.FunctionList, funcSymbolTable, function.StatList[len(function.StatList)-1])
+		if funretstaterrs != nil {
+			//		fmt.Println("GOT HERE funretstaterrs!")
+			semanticErrors = append(semanticErrors, funretstaterrs)
+		} */
 	if len(semanticErrors) > 0 {
 		//	fmt.Println("GOT HERE WHATTTTT!")
 		return semanticErrors
@@ -79,9 +133,12 @@ func (root *Program) SemanticCheck() errorSlice {
 	if containsDuplicateFunc(root.FunctionList) {
 		semanticErrors = append(semanticErrors, errors.New("Program has function redefinitions"))
 	}
-	for _, functionProg := range root.FunctionList {
+	for ind, functionProg := range root.FunctionList {
+		//	fmt.Println(" At functionProg: ", ind, "/", len(root.FunctionList)-1, "::", functionProg.Ident)
 		funcErrs := functionProg.checkFunc(root)
 		if funcErrs != nil {
+			fmt.Println("Error At Func: ", ind, "/", len(root.FunctionList)-1, "::", functionProg.Ident)
+			fmt.Println(funcErrs)
 			semanticErrors = append(semanticErrors, funcErrs)
 		}
 	}
@@ -108,7 +165,7 @@ func (node Skip) visitStatement(functionTable []*Function, symbolTable *SymbolTa
 func (node Declare) visitStatement(functionTable []*Function, symbolTable *SymbolTable) errorSlice {
 	var semanticErrors errorSlice
 	if symbolTable.isDefinedInScope(node.Lhs) {
-		semanticErrors = append(semanticErrors, errors.New("Variable already declared"))
+		semanticErrors = append(semanticErrors, errors.New("Variable already declared::"+string(node.Lhs)))
 	}
 	exprType, errs := node.Rhs.Eval(functionTable, symbolTable)
 	if errs != nil {
@@ -120,7 +177,6 @@ func (node Declare) visitStatement(functionTable []*Function, symbolTable *Symbo
 		fmt.Println("EXPR TYPE IS NIL")
 	}
 	if exprType != node.DecType && exprType != nil {
-		fmt.Println("Got in HEEEREEEEE")
 		switch node.DecType.(type) {
 		case PairType:
 			pairTypeStruct := node.DecType.(PairType)
@@ -281,14 +337,17 @@ func (node If) visitStatement(functionTable []*Function, symbolTable *SymbolTabl
 	if cond != Bool {
 		semanticErrors = append(semanticErrors, errors.New("Conditional is not boolean expression"))
 	}
+	thenSymTab := symbolTable.New()
 	for _, thenstat := range node.ThenStat {
-		errs := thenstat.visitStatement(functionTable, symbolTable)
+		errs := thenstat.visitStatement(functionTable, thenSymTab)
+		//	fmt.Println(thenSymTab)
 		if errs != nil {
 			semanticErrors = append(semanticErrors, errs)
 		}
 	}
+	elseSymTab := symbolTable.New()
 	for _, elsestat := range node.ElseStat {
-		errs := elsestat.visitStatement(functionTable, symbolTable)
+		errs := elsestat.visitStatement(functionTable, elseSymTab)
 		if errs != nil {
 			semanticErrors = append(semanticErrors, errs)
 		}
@@ -328,6 +387,49 @@ func (node Scope) visitStatement(functionTable []*Function, symbolTable *SymbolT
 		errs := stat.visitStatement(functionTable, newSymTab)
 		if errs != nil {
 			semanticErrors = append(semanticErrors, errs)
+		}
+	}
+	if len(semanticErrors) > 0 {
+		return semanticErrors
+	}
+	return nil
+}
+
+func (function *Function) checkFuncRetStats(functionTable []*Function, symbolTable *SymbolTable, stat Statement) errorSlice {
+	var semanticErrors []error
+	switch stat.(type) {
+	case Return:
+		ExprTyp, err := stat.(Return).Expr.Eval(functionTable, symbolTable)
+		if err != nil {
+			fmt.Println("WEIRD ERROR TING:", err)
+			semanticErrors = append(semanticErrors, err)
+		}
+		//else {
+		//	fmt.Println(stat.(Return).Expr)
+		//		fmt.Println(ExprTyp.typeString())
+		fmt.Println("GOT HERE, kl: ", stat.(Return).Expr)
+		if ExprTyp == nil {
+			fmt.Println("ALLOW NIL TING")
+		}
+		if !typesMatch(ExprTyp, function.ReturnType) {
+			semanticErrors = append(semanticErrors, errors.New("Return type does not match:"+ExprTyp.typeString()+"::"+function.ReturnType.typeString()))
+		}
+		//		}
+
+	case Exit:
+		ExprTyp, _ := stat.(Exit).Expr.Eval(functionTable, symbolTable)
+		if ExprTyp != Int {
+			semanticErrors = append(semanticErrors, errors.New("Invalid Exit statement"))
+		}
+	case If:
+		ifstat := stat.(If)
+		thenerr := function.checkFuncRetStats(functionTable, symbolTable, ifstat.ThenStat[len(ifstat.ThenStat)-1])
+		elseerr := function.checkFuncRetStats(functionTable, symbolTable, ifstat.ElseStat[len(ifstat.ElseStat)-1])
+		if thenerr != nil {
+			semanticErrors = append(semanticErrors, thenerr)
+		}
+		if elseerr != nil {
+			semanticErrors = append(semanticErrors, elseerr)
 		}
 	}
 	if len(semanticErrors) > 0 {

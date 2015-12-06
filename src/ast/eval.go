@@ -44,7 +44,7 @@ func (value ArrayLiter) Eval(functionTable []*Function, symbolTable *SymbolTable
 				return nil, errors.New("Array has mixed types")
 			}
 		}
-		fmt.Println("DID WE GET HERE?", currType.typeString())
+		//		fmt.Println("DID WE GET HERE?", currType.typeString())
 		return ArrayType{Type: currType}, nil
 	}
 	return nil, nil
@@ -142,10 +142,11 @@ func (value ArrayElem) Eval(functionTable []*Function, symbolTable *SymbolTable)
 }
 
 func (value Ident) Eval(functionTable []*Function, symbolTable *SymbolTable) (Type, error) {
+	//	fmt.Println(symbolTable, "::::", value)
 	if symbolTable.isDefined(value) {
 		return symbolTable.getTypeOfIdent(value), nil
 	}
-	fmt.Println("Supposed to GET HERE IDENT EVAL")
+	//fmt.Println("Supposed to GET HERE IDENT EVAL")
 	return nil, errors.New("Identifier not declared")
 }
 

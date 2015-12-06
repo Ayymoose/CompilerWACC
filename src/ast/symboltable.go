@@ -29,23 +29,19 @@ func (symbolTable *SymbolTable) getOffset(key string) int {
 
 // Checks if the key is already declared in the symbol table
 func (symbolTable *SymbolTable) isDefined(key Ident) bool {
-
-	curr := symbolTable
-	for curr != nil {
-		if curr.contains(key) {
-			return true
-		}
-		curr = curr.Parent
+	if symbolTable == nil {
+		return false
 	}
-	return false
+	if symbolTable.contains(key) {
+		return true
+	} else {
+		return symbolTable.Parent.isDefined(key)
+	}
 }
 
 // Checks if the key is already declared in the symbol table
 func (symbolTable *SymbolTable) isDefinedInScope(key Ident) bool {
-	if symbolTable.contains(key) {
-		return true
-	}
-	return false
+	return symbolTable.contains(key)
 }
 
 // Helper function which return a boolean depending on
@@ -57,13 +53,13 @@ func (symbolTable *SymbolTable) contains(key Ident) bool {
 
 // Given an Ident key, returns the slice of Type tokens
 func (symbolTable *SymbolTable) getTypeOfIdent(key Ident) Type {
-	curr := symbolTable
-	for curr != nil {
-		if curr.contains(key) {
-			k := curr.Table[key]
-			return k
-		}
-		curr = symbolTable.Parent
+	if symbolTable == nil {
+		return nil
 	}
-	return nil
+	if symbolTable.contains(key) {
+		k := symbolTable.Table[key]
+		return k
+	} else {
+		return symbolTable.Parent.getTypeOfIdent(key)
+	}
 }
