@@ -31,7 +31,13 @@ const (
 	READ_INT       = "%d\\0"
 	READ_CHAR      = "%c\\0"
 	POINTER_FORMAT = "%p\\0"
-	NULL_REFERENCE = "\"NullReferenceError: dereference a null reference\\n\\0\""
+)
+
+// error messages
+const (
+	NULL_REFERENCE       = "\"NullReferenceError: dereference a null reference\\n\\0\""
+	ARRAY_INDEX_NEGATIVE = "\"ArrayIndexOutOfBoundsError: negative index\\n\\0\""
+	ARRAY_INDEX_LARGE    = "\"ArrayIndexOutOfBoundsError: index too large\\n\\0\""
 )
 
 // Function global variable
@@ -143,7 +149,7 @@ func (cg CodeGenerator) cgVisitDeclareStat(node Declare) {
 			// Store the address onto the stack
 			appendAssembly(cg.instrs, "STR r4, [sp, #"+cg.subCurrP(STRING_SIZE)+"]", 1, 1)
 		case Pair:
-			// TODO
+			fmt.Println("Pair not implemented")
 		}
 
 	case PairType:
@@ -456,7 +462,11 @@ func (cg CodeGenerator) evalRHS(t Evaluation, srcReg string) {
 		var value, _ = cg.getIdentOffset(t.(Ident))
 		appendAssembly(cg.instrs, "LDR "+srcReg+", [sp, #"+strconv.Itoa(value)+"]", 1, 1)
 	case ArrayElem:
+
+		appendAssembly(cg.progFuncInstrs, cg.getMsgLabel(ARRAY_INDEX_NEGATIVE), 1, 1)
+		appendAssembly(cg.progFuncInstrs, cg.getMsgLabel(ARRAY_INDEX_LARGE), 1, 1)
 		/*
+
 			30		PUSH {r4}
 			31		MOV r4, r0
 			32		LDR r0, =1
@@ -651,7 +661,7 @@ func (cg CodeGenerator) pushArrayElements(array []Evaluation, srcReg string, dst
 	var arraySize = len(array)
 	// Loop through the array pushing it onto the stack
 	for i := 0; i < arraySize; i++ {
-		// Array of pairs,ints,bools,chars,strings
+		// Array of ,ints,bools,chars,strings
 		switch t.(type) {
 		case ArrayType:
 			cg.evalRHS(array[i], srcReg)

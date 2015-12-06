@@ -5,6 +5,8 @@ import (
 	cg "backend/codeGeneration"
 	fw "backend/filewriter"
 	"fmt"
+	fw "backend/filewriter"
+	cg "backend/codeGeneration"
 	"io/ioutil"
 	"os"
 	"parser"
@@ -28,8 +30,7 @@ const BACKENDFILE = "ARMCode.s"
 // wacc_examples/valid/pairs/createPair03.wacc
 
 func main() {
-
-	armList := &fw.ARMList{}
+		armList := &fw.ARMList{}
 	file := os.Args[1] // index 1 is file path
 	b, err := ioutil.ReadFile(file)
 	if err != nil {
@@ -51,6 +52,17 @@ func main() {
 		fmt.Println("Semantic Error : 200")
 		os.Exit(SEMANTIC_ERROR)
 	}
+	/*
+<<<<<<< HEAD
+	fmt.Println("SUCCESS : ")
+			codeGen := cg.ConstructCodeGenerator(root, armList, *root.SymbolTable)
+			codeGen.GenerateCode()
+			for _, instr := range *armList {
+				fmt.Print(instr)
+			}
+
+	//	armList.WriteToFile(BACKENDFILE)
+=======*/
 
 	fmt.Println("SUCCESSFUL FRONTEND: ")
 
@@ -61,4 +73,5 @@ func main() {
 	} */
 
 	armList.WriteToFile(BACKENDFILE)
+>>>>>>> 1f93f05cfd6e1484fa84a19ad3e9ae09d2e209aa
 }
