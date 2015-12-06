@@ -49,6 +49,7 @@ func main() {
 		fmt.Println("Semantic Error : 200")
 		os.Exit(SEMANTIC_ERROR)
 	}
+	fmt.Println("SUCCESS : ")
 	/*		codeGen := cg.ConstructCodeGenerator(root, armList, *root.SymbolTable)
 			codeGen.GenerateCode()
 			for _, instr := range *armList {
