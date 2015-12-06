@@ -182,26 +182,26 @@ func (cg CodeGenerator) cgVisitAssignmentStat(node Assignment) {
 }
 
 func (cg CodeGenerator) cgVisitReadStat(node Read) {
-	label := "p_read_"
-	offset := 0
+	// Technically only read int / char
+	constType := cg.eval(node.AssignLHS.(Ident)) // Type
 	switch node.AssignLHS.(type) {
-	case Ident:
 	case ArrayElem:
 	case PairElem:
-	default:
-
 	}
-
-	if offset == 4 {
-		label += "int"
-	} else if offset == 1 {
-		label += "char"
+	switch constType {
+	case Bool:
+	case Char:
+		appendAssembly(cg.instrs, "ADD r4, sp, #0", 1, 1)
+		appendAssembly(cg.instrs, "MOV r0, r4", 1, 1)
+		appendAssembly(cg.instrs, "BL p_read_char", 1, 1)
+	case Int:
+		appendAssembly(cg.instrs, "ADD r4, sp, #0", 1, 1)
+		appendAssembly(cg.instrs, "MOV r0, r4", 1, 1)
+		appendAssembly(cg.instrs, "BL p_read_int", 1, 1)
+	case String:
+	case Pair:
+		// TODO
 	}
-	// p_read_int:  /char
-	//PUSH {lr}
-
-	// BL scanf
-	//POP {pc}
 }
 
 func (cg CodeGenerator) cgVisitFreeStat(node Free) {
