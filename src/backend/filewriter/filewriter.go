@@ -21,7 +21,7 @@ func (f ARMList) AppendStringToFile(input string) {
 
 // writes all the strings contained in the File struct to the file
 func (f ARMList) WriteToFile(fileName string) {
-	file, err := os.Create("/fileWriter/" + fileName)
+	file, err := os.Create(fileName)
 	check(err)
 	defer file.Close()
 	for _, str := range f {
