@@ -58,7 +58,6 @@ func (function *Function) checkFunc(root *Program) errorSlice {
 	for _, stat := range function.StatList {
 		errs := stat.visitStatement(root.FunctionList, funcSymbolTable)
 		if errs != nil {
-			//		fmt.Println("GOT HERE errs!:   ", stat)
 			semanticErrors = append(semanticErrors, errs)
 		}
 	}
