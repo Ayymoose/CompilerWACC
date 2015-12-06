@@ -1,5 +1,7 @@
 DECLARE: Almost done except pairs and arrays need to be fully implemented @Ayman
 
+CHECK IF .ascii IN MSGS SHOULD HAVE MESSAGE PRINTED OUT WITH QUOTES
+
 GETIDENTOFFSET IMPORTANT ----------- NANA, HENRYK, OLI
 SCOPE MAP AND SHIT -----------------
 MAKE EVALRHS WORK FOR FUNCTIONS-----
@@ -7,8 +9,8 @@ MAKE EVALRHS WORK FOR FUNCTIONS-----
 ASSIGNMENT: IN PROGRESS ---
 - CALL is being implemneted by henryk
 
-READ: IN PROGRESS ---
-- ???
+READ: Done-ish ---
+- Is done for int and char. Possibly could be done better as it is mostly hand coded
 
 FREE: NOT STARTED ---
 - ???
