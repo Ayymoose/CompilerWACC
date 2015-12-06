@@ -154,7 +154,7 @@ func (node Read) visitStatement(functionTable []*Function, symbolTable *SymbolTa
 	exprTyp, err := node.AssignLHS.Eval(functionTable, symbolTable)
 	if err != nil {
 		semanticErrors = append(semanticErrors, err)
-	} else if exprTyp != Char || exprTyp != Int {
+	} else if exprTyp != Char && exprTyp != Int {
 		semanticErrors = append(semanticErrors, errors.New("Cannot read non Char or Int type"))
 	}
 	if len(semanticErrors) > 0 {
