@@ -49,9 +49,12 @@ func main() {
 			fmt.Println("Semantic Error : 200")
 			os.Exit(SEMANTIC_ERROR)
 		}
-	*/
-	//	cg := codeG.ConstructCodeGenerator(root, armList, SymbolTable{})
-	//	cg.GenerateCode()
+		fmt.Println("Semantic Error : 200")
+		os.Exit(SEMANTIC_ERROR)
+	}
+
+
+
 	/*
 		for _, instr := range *armList {
 			fmt.Print(instr)
