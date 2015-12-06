@@ -30,8 +30,6 @@ func (function *Function) checkFuncStats(functionTable []*Function, symbolTable 
 	case If:
 		ifstat := stats[len(stats)-1].(If)
 		return function.checkFuncStats(functionTable, symbolTable, ifstat.ThenStat) && function.checkFuncStats(functionTable, symbolTable, ifstat.ElseStat)
-	default:
-		return false
 	}
 	return false
 }
@@ -132,7 +130,7 @@ func (node Assignment) visitStatement(functionTable []*Function, symbolTable *Sy
 	if errr != nil {
 		semanticErrors = append(semanticErrors, errr)
 	}
-	if rhsType == nil {
+	if rhsType == nil && errl == nil && errr == nil {
 		switch lhsType.(type) {
 		case ArrayType:
 			// Do nothing
@@ -140,7 +138,7 @@ func (node Assignment) visitStatement(functionTable []*Function, symbolTable *Sy
 			semanticErrors = append(semanticErrors, errors.New("LHS is not of type Array"+lhsType.typeString()+","+rhsType.typeString()))
 		}
 	}
-	if !typesMatch(lhsType, rhsType) && rhsType != nil {
+	if !typesMatch(lhsType, rhsType) && rhsType != nil && lhsType != nil {
 		semanticErrors = append(semanticErrors, errors.New("Assignment types do not match"+lhsType.typeString()+","+rhsType.typeString()))
 	}
 	if len(semanticErrors) > 0 {

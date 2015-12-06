@@ -143,6 +143,7 @@ func (value Ident) Eval(functionTable []*Function, symbolTable *SymbolTable) (Ty
 	if symbolTable.isDefined(value) {
 		return symbolTable.getTypeOfIdent(value), nil
 	}
+	fmt.Println("Supposed to GET HERE IDENT EVAL")
 	return nil, errors.New("Identifier not declared")
 }
 
