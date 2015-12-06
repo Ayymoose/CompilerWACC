@@ -221,6 +221,7 @@ func lexInsideProgram(l *Lexer) stateFn {
 		if strings.HasPrefix(l.input[l.pos:], str) {
 			//		s := grammar.Token_strings[str]
 			if (l.input[l.pos] == '+' || l.input[l.pos] == '-') && '0' <= l.input[l.pos+1] && l.input[l.pos+1] <= '9' {
+				fmt.Println("Worng AGAIN BOB", l.lastItem.Typ)
 				switch l.lastItem.Typ {
 				case ASSIGNMENT, OPENROUND, OPENSQUARE, COMMA, SEMICOLON:
 					fmt.Println("Worng", l.lastItem)
@@ -421,7 +422,7 @@ func (l *Lexer) Lex(lval *parserSymType) int {
 			os.Exit(100)
 		}
 		if !checkInt(num) {
-			fmt.Println("Int too big or small: ", num)
+			fmt.Println("Int too big or small")
 			os.Exit(100)
 		}
 		*lval = parserSymType{integer: Integer(num)}

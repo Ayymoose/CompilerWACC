@@ -1,8 +1,9 @@
 package main
 
 import (
-"ast"
-	codeG "backend/codeGeneration"
+	. "ast"
+	cg "backend/codeGeneration"
+	fw "backend/filewriter"
 	"fmt"
 	"io/ioutil"
 	"os"
@@ -28,7 +29,7 @@ const BACKENDFILE = "ARMCode.s"
 
 func main() {
 
-	//armList := &filewriter.ARMList{}
+	armList := &fw.ARMList{}
 	file := os.Args[1] // index 1 is file path
 	b, err := ioutil.ReadFile(file)
 	if err != nil {
@@ -42,27 +43,19 @@ func main() {
 	}
 	fmt.Println(root)
 
-		errs := root.SemanticCheck()
-		if errs != nil {
-			for _, str := range errs {
-				fmt.Println(str)
-			}
-			fmt.Println("Semantic Error : 200")
-			os.Exit(SEMANTIC_ERROR)
+	errs := root.SemanticCheck()
+	if errs != nil {
+		for _, str := range errs {
+			fmt.Println(str)
 		}
 		fmt.Println("Semantic Error : 200")
 		os.Exit(SEMANTIC_ERROR)
 	}
-
-	armList := new(ARMList)
-
-	cg := codeG.ConstructCodeGenerator(root, armList, ast.SymbolTable{})
-	cg.GenerateCode()
-
+	codeGen := cg.ConstructCodeGenerator(root, armList, *root.SymbolTable)
+	codeGen.GenerateCode()
 	for _, instr := range *armList {
 		fmt.Print(instr)
 	}
 
-
-	//armList.WriteToFile(BACKENDFILE)
+	armList.WriteToFile(BACKENDFILE)
 }

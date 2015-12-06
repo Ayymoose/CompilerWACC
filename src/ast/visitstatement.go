@@ -28,7 +28,7 @@ func (node Declare) visitStatement(functionTable []*Function, symbolTable *Symbo
 	if symbolTable.isDefinedInScope(node.Lhs) {
 		semanticErrors = append(semanticErrors, errors.New("Variable already declared"))
 	}
-	exprType, errs := node.Rhs.eval(functionTable, symbolTable)
+	exprType, errs := node.Rhs.Eval(functionTable, symbolTable)
 	if errs != nil {
 		semanticErrors = append(semanticErrors, errs)
 	}
@@ -79,8 +79,8 @@ func (node Declare) visitStatement(functionTable []*Function, symbolTable *Symbo
 
 func (node Assignment) visitStatement(functionTable []*Function, symbolTable *SymbolTable) errorSlice {
 	var semanticErrors errorSlice
-	lhsType, errl := node.Lhs.eval(functionTable, symbolTable)
-	rhsType, errr := node.Rhs.eval(functionTable, symbolTable)
+	lhsType, errl := node.Lhs.Eval(functionTable, symbolTable)
+	rhsType, errr := node.Rhs.Eval(functionTable, symbolTable)
 	if errl != nil {
 		semanticErrors = append(semanticErrors, errl)
 	}
@@ -98,7 +98,7 @@ func (node Assignment) visitStatement(functionTable []*Function, symbolTable *Sy
 
 func (node Read) visitStatement(functionTable []*Function, symbolTable *SymbolTable) errorSlice {
 	var semanticErrors errorSlice
-	_, err := node.AssignLHS.eval(functionTable, symbolTable)
+	_, err := node.AssignLHS.Eval(functionTable, symbolTable)
 	if err != nil {
 		semanticErrors = append(semanticErrors, err)
 	}
@@ -110,7 +110,7 @@ func (node Read) visitStatement(functionTable []*Function, symbolTable *SymbolTa
 
 func (node Free) visitStatement(functionTable []*Function, symbolTable *SymbolTable) errorSlice {
 	var semanticErrors errorSlice
-	_, err := node.Expr.eval(functionTable, symbolTable)
+	_, err := node.Expr.Eval(functionTable, symbolTable)
 	if err != nil {
 		semanticErrors = append(semanticErrors, err)
 	}
@@ -122,7 +122,7 @@ func (node Free) visitStatement(functionTable []*Function, symbolTable *SymbolTa
 
 func (node Return) visitStatement(functionTable []*Function, symbolTable *SymbolTable) errorSlice {
 	var semanticErrors errorSlice
-	_, err := node.Expr.eval(functionTable, symbolTable)
+	_, err := node.Expr.Eval(functionTable, symbolTable)
 	if err != nil {
 		semanticErrors = append(semanticErrors, err)
 	}
@@ -134,7 +134,7 @@ func (node Return) visitStatement(functionTable []*Function, symbolTable *Symbol
 
 func (node Exit) visitStatement(functionTable []*Function, symbolTable *SymbolTable) errorSlice {
 	var semanticErrors errorSlice
-	_, err := node.Expr.eval(functionTable, symbolTable)
+	_, err := node.Expr.Eval(functionTable, symbolTable)
 	if err != nil {
 		semanticErrors = append(semanticErrors, err)
 	}
@@ -146,7 +146,7 @@ func (node Exit) visitStatement(functionTable []*Function, symbolTable *SymbolTa
 
 func (node Print) visitStatement(functionTable []*Function, symbolTable *SymbolTable) errorSlice {
 	var semanticErrors errorSlice
-	_, err := node.Expr.eval(functionTable, symbolTable)
+	_, err := node.Expr.Eval(functionTable, symbolTable)
 	if err != nil {
 		semanticErrors = append(semanticErrors, err)
 	}
@@ -158,7 +158,7 @@ func (node Print) visitStatement(functionTable []*Function, symbolTable *SymbolT
 
 func (node Println) visitStatement(functionTable []*Function, symbolTable *SymbolTable) errorSlice {
 	var semanticErrors errorSlice
-	_, err := node.Expr.eval(functionTable, symbolTable)
+	_, err := node.Expr.Eval(functionTable, symbolTable)
 	if err != nil {
 		semanticErrors = append(semanticErrors, err)
 	}
@@ -170,7 +170,7 @@ func (node Println) visitStatement(functionTable []*Function, symbolTable *Symbo
 
 func (node If) visitStatement(functionTable []*Function, symbolTable *SymbolTable) errorSlice {
 	var semanticErrors errorSlice
-	cond, err := node.Conditional.eval(functionTable, symbolTable)
+	cond, err := node.Conditional.Eval(functionTable, symbolTable)
 	if err != nil {
 		semanticErrors = append(semanticErrors, err)
 	}
@@ -197,7 +197,7 @@ func (node If) visitStatement(functionTable []*Function, symbolTable *SymbolTabl
 
 func (node While) visitStatement(functionTable []*Function, symbolTable *SymbolTable) errorSlice {
 	var semanticErrors errorSlice
-	cond, err := node.Conditional.eval(functionTable, symbolTable)
+	cond, err := node.Conditional.Eval(functionTable, symbolTable)
 	if err != nil {
 		semanticErrors = append(semanticErrors, err)
 	}

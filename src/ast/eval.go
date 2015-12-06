@@ -5,14 +5,14 @@ import (
 	"fmt"
 )
 
-func (value Call) eval(functionTable []*Function, symbolTable *SymbolTable) (Type, error) {
+func (value Call) Eval(functionTable []*Function, symbolTable *SymbolTable) (Type, error) {
 	for _, function := range functionTable {
 		if value.Ident == function.Ident {
 			if len(value.ParamList) != len(function.ParameterTypes) {
 				return nil, errors.New("Different number of parameters in Call and Function Definition")
 			}
 			for ind := range value.ParamList {
-				exprType, err := value.ParamList[ind].eval(functionTable, symbolTable)
+				exprType, err := value.ParamList[ind].Eval(functionTable, symbolTable)
 				if err != nil {
 					return nil, err
 				}
@@ -26,17 +26,17 @@ func (value Call) eval(functionTable []*Function, symbolTable *SymbolTable) (Typ
 	return nil, errors.New("No such function defined")
 }
 
-func (value ArrayLiter) eval(functionTable []*Function, symbolTable *SymbolTable) (Type, error) {
+func (value ArrayLiter) Eval(functionTable []*Function, symbolTable *SymbolTable) (Type, error) {
 	fmt.Println("ARRRAU LITER", value.Exprs)
 	var currType Type
 	if len(value.Exprs) > 0 {
-		fstType, err := value.Exprs[0].eval(functionTable, symbolTable)
+		fstType, err := value.Exprs[0].Eval(functionTable, symbolTable)
 		currType = fstType
 		if err != nil {
 			return nil, err
 		}
 		for _, exprs := range value.Exprs {
-			currType2, err2 := exprs.eval(functionTable, symbolTable)
+			currType2, err2 := exprs.Eval(functionTable, symbolTable)
 			if err2 != nil {
 				return nil, err2
 			}
@@ -49,9 +49,9 @@ func (value ArrayLiter) eval(functionTable []*Function, symbolTable *SymbolTable
 	return nil, nil
 }
 
-func (value NewPair) eval(functionTable []*Function, symbolTable *SymbolTable) (Type, error) {
-	fstTyp, err1 := value.FstExpr.eval(functionTable, symbolTable)
-	sndTyp, err2 := value.SndExpr.eval(functionTable, symbolTable)
+func (value NewPair) Eval(functionTable []*Function, symbolTable *SymbolTable) (Type, error) {
+	fstTyp, err1 := value.FstExpr.Eval(functionTable, symbolTable)
+	sndTyp, err2 := value.SndExpr.Eval(functionTable, symbolTable)
 	if err1 != nil {
 		return nil, err1
 	}
@@ -61,9 +61,9 @@ func (value NewPair) eval(functionTable []*Function, symbolTable *SymbolTable) (
 	return PairType{FstType: fstTyp, SndType: sndTyp}, nil
 }
 
-func (value PairElem) eval(functionTable []*Function, symbolTable *SymbolTable) (Type, error) {
+func (value PairElem) Eval(functionTable []*Function, symbolTable *SymbolTable) (Type, error) {
 	fstsnd := value.Fsnd
-	exprTyp, err := value.Expr.eval(functionTable, symbolTable)
+	exprTyp, err := value.Expr.Eval(functionTable, symbolTable)
 	if err != nil {
 		return nil, err
 	}
@@ -79,36 +79,36 @@ func (value PairElem) eval(functionTable []*Function, symbolTable *SymbolTable) 
 	return nil, errors.New("Cannot get elem of non pair type")
 }
 
-func (value Integer) eval(functionTable []*Function, symbolTable *SymbolTable) (Type, error) {
+func (value Integer) Eval(functionTable []*Function, symbolTable *SymbolTable) (Type, error) {
 	return Int, nil
 }
 
-func (value PairLiter) eval(functionTable []*Function, symbolTable *SymbolTable) (Type, error) {
+func (value PairLiter) Eval(functionTable []*Function, symbolTable *SymbolTable) (Type, error) {
 	return Pair, nil
 }
 
-func (value Str) eval(functionTable []*Function, symbolTable *SymbolTable) (Type, error) {
+func (value Str) Eval(functionTable []*Function, symbolTable *SymbolTable) (Type, error) {
 	return String, nil
 }
 
-func (value Character) eval(functionTable []*Function, symbolTable *SymbolTable) (Type, error) {
+func (value Character) Eval(functionTable []*Function, symbolTable *SymbolTable) (Type, error) {
 	return Char, nil
 }
 
-func (value Boolean) eval(functionTable []*Function, symbolTable *SymbolTable) (Type, error) {
+func (value Boolean) Eval(functionTable []*Function, symbolTable *SymbolTable) (Type, error) {
 	return Bool, nil
 }
 
-func (value ArrayElem) eval(functionTable []*Function, symbolTable *SymbolTable) (Type, error) {
+func (value ArrayElem) Eval(functionTable []*Function, symbolTable *SymbolTable) (Type, error) {
 	var currType Type
 	if len(value.Exprs) > 0 {
-		fstType, err := value.Exprs[0].eval(functionTable, symbolTable)
+		fstType, err := value.Exprs[0].Eval(functionTable, symbolTable)
 		currType = fstType
 		if err != nil {
 			return nil, err
 		}
 		for _, exprs := range value.Exprs {
-			currType2, err2 := exprs.eval(functionTable, symbolTable)
+			currType2, err2 := exprs.Eval(functionTable, symbolTable)
 			if err2 != nil {
 				return nil, err2
 			}
@@ -139,16 +139,16 @@ func (value ArrayElem) eval(functionTable []*Function, symbolTable *SymbolTable)
 	return arrayTyp, nil
 }
 
-func (value Ident) eval(functionTable []*Function, symbolTable *SymbolTable) (Type, error) {
+func (value Ident) Eval(functionTable []*Function, symbolTable *SymbolTable) (Type, error) {
 	if symbolTable.isDefined(value) {
 		return symbolTable.getTypeOfIdent(value), nil
 	}
 	return nil, errors.New("Identifier not declared")
 }
 
-func (binop Binop) eval(functionTable []*Function, symbolTable *SymbolTable) (Type, error) {
-	typl, err := binop.Left.eval(functionTable, symbolTable)
-	typr, err2 := binop.Right.eval(functionTable, symbolTable)
+func (binop Binop) Eval(functionTable []*Function, symbolTable *SymbolTable) (Type, error) {
+	typl, err := binop.Left.Eval(functionTable, symbolTable)
+	typr, err2 := binop.Right.Eval(functionTable, symbolTable)
 	if err != nil {
 		return nil, err
 	}
@@ -194,8 +194,8 @@ func (binop Binop) eval(functionTable []*Function, symbolTable *SymbolTable) (Ty
 	}
 }
 
-func (value Unop) eval(functionTable []*Function, symbolTable *SymbolTable) (Type, error) {
-	typExpr, err := value.Expr.eval(functionTable, symbolTable)
+func (value Unop) Eval(functionTable []*Function, symbolTable *SymbolTable) (Type, error) {
+	typExpr, err := value.Expr.Eval(functionTable, symbolTable)
 	if err != nil {
 		return nil, err
 	}
