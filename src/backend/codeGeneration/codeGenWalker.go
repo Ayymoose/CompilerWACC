@@ -287,6 +287,7 @@ func (cg CodeGenerator) evalRHS(t Evaluation, srcReg string) {
 		cg.cgVisitUnopExpr(t.(Unop))
 	case Binop:
 		cg.cgVisitBinopExpr(t.(Binop))
+		appendAssembly(cg.currInstrs(), "MOV "+srcReg+", r0", 1, 1)
 	case NewPair:
 		// First allocate memory to store two addresses (8-bytes)
 		cg.CfunctionCall("malloc", strconv.Itoa(ADDR_SIZE*2))
@@ -952,6 +953,7 @@ func (cg CodeGenerator) cgVisitBinopExpr(node Binop) {
 		appendAssembly(cg.currInstrs(), "MOVEQ r4, #1", 1, 1)
 		appendAssembly(cg.currInstrs(), "MOVNE r4, #0", 1, 1)
 	}
+	appendAssembly(cg.currInstrs(), "MOV r0, r4", 1, 1)
 }
 
 // cgVisitBinopExpr helper function
