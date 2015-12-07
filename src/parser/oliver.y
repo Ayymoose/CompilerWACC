@@ -85,7 +85,7 @@ pairelemtype Type
 
 %left OR
 %left AND
-%left EQ NEQ 
+%left EQ NEQ
 %left PLUS SUB
 %left MUL DIV MOD
 %left LT GT LTE GTE
@@ -104,13 +104,13 @@ function : typeDef IDENTIFIER OPENROUND CLOSEROUND IS statements END
            { if !checkStats($6) {
           	parserlex.Error("Missing return statement")
            }
-             $$ = &Function{Ident : $2, ReturnType : $1, StatList : $6}
+             $$ = &Function{Ident : $2, ReturnType : $1, StatList : $6, SymbolTable: &SymbolTable{Table: make(map[Ident]Type)}}
            }
          | typeDef IDENTIFIER OPENROUND paramlist CLOSEROUND IS statements END
            { if !checkStats($7) {
             	parserlex.Error("Missing return statement")
             }
-             $$ = &Function{Ident : $2, ReturnType : $1, StatList : $7, ParameterTypes : $4}
+             $$ = &Function{Ident : $2, ReturnType : $1, StatList : $7, ParameterTypes : $4, SymbolTable: &SymbolTable{Table: make(map[Ident]Type)}}
            }
 
 paramlist : paramlist COMMA param { $$ = append($1, $3)}

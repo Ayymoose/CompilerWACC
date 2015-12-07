@@ -103,6 +103,7 @@ type Function struct {
 	ReturnType     Type
 	ParameterTypes []Param
 	StatList       []Statement
+	SymbolTable    *SymbolTable
 }
 
 type Param struct {

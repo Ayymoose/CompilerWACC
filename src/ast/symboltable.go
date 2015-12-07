@@ -12,6 +12,11 @@ func (symbolTable *SymbolTable) New() *SymbolTable {
 	return &SymbolTable{Parent: symbolTable, Table: make(map[Ident]Type), OffsetVals: make(map[string]int)}
 }
 
+// New Constructor creates new instance of a symbolTable with pointer to its parent
+func New() *SymbolTable {
+	return &SymbolTable{Table: make(map[Ident]Type), OffsetVals: make(map[string]int)}
+}
+
 // Inserts a given key and value into the symbol table
 func (symbolTable *SymbolTable) insert(key Ident, value Type) {
 	symbolTable.Table[key] = value
