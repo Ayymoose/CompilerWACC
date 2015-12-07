@@ -270,14 +270,14 @@ func (cg CodeGenerator) evalRHS(t Evaluation, srcReg string) {
 		appendAssembly(cg.currInstrs(), "LDR "+srcReg+", "+cg.getMsgLabel(string(t.(Str))), 1, 1)
 	case PairLiter:
 		appendAssembly(cg.currInstrs(), "LDR "+srcReg+", =0", 1, 1)
-	/*case Ident:
+	case Ident:
 		//If the Ident is a BOOL we use LDRSB !
 		//Fix
 		var value, _ = cg.getIdentOffset(t.(Ident))
 		appendAssembly(cg.currInstrs(), "LDR "+srcReg+", [sp, #"+strconv.Itoa(value)+"]", 1, 1)
 	case ArrayElem:
 		cg.evalArrayElem(t, srcReg, "r5")
-	case Unop:
+	/*case Unop:
 		cg.cgVisitUnopExpr(t.(Unop))
 	case Binop:
 		cg.cgVisitBinopExpr(t.(Binop))
