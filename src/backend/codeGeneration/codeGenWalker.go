@@ -278,7 +278,7 @@ func (cg CodeGenerator) evalRHS(t Evaluation, srcReg string) {
 	case ArrayElem:
 		cg.evalArrayElem(t, srcReg, "r5")
 	case Unop:
-		cg.cgVisitUnopExpr(t.(Unop))
+		//cg.cgVisitUnopExpr(t.(Unop))
 	case Binop:
 		cg.cgVisitBinopExpr(t.(Binop))
 	case NewPair:
@@ -862,27 +862,26 @@ func (cg CodeGenerator) cgVisitParameter(node Evaluation, offset int) {
 // VISIT EXPRESSIONS -----------------------------------------------------------
 
 func (cg CodeGenerator) cgVisitUnopExpr(node Unop) {
-	/*
-		switch node.Unary {
-		case SUB:
-			cg.evalRHS(node.Expr, "r4")
-			//Negate the result in the register
-			appendAssembly(cg.currInstrs(), "RSBS r4, r4, #0", 1, 1)
-		case LEN:
-			cg.evalRHS(node.Expr, "r4")
-			//Assume the RHS is always an array
-			//So the RHS type is an Ident
-			//Load the length of the array into the register
-			appendAssembly(cg.currInstrs(), "LDR r4, [r4]", 1, 1)
-		case ORD:
-			cg.evalOrd(node)
-		case CHR:
-			cg.evalRHS(node.Expr, "r4")
-			fmt.Println("chr not done")
-		default:
-			fmt.Println("oh no")
-			fmt.Println(node.Unary)
-		}*/
+	switch node.Unary {
+	case SUB:
+		cg.evalRHS(node.Expr, "r4")
+		//Negate the result in the register
+		appendAssembly(cg.currInstrs(), "RSBS r4, r4, #0", 1, 1)
+	case LEN:
+		cg.evalRHS(node.Expr, "r4")
+		//Assume the RHS is always an array
+		//So the RHS type is an Ident
+		//Load the length of the array into the register
+		appendAssembly(cg.currInstrs(), "LDR r4, [r4]", 1, 1)
+	case ORD:
+		cg.evalOrd(node)
+	case CHR:
+		cg.evalRHS(node.Expr, "r4")
+		fmt.Println("chr not done")
+	default:
+		fmt.Println("oh no")
+		fmt.Println(node.Unary)
+	}
 
 }
 
