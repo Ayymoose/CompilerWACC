@@ -90,7 +90,9 @@ func (cg CodeGenerator) setNewFuncScope(varSpaceSize int, paramMap *map[Param]in
 func (cg CodeGenerator) removeCurrScope() {
 	cg.currStack = cg.currStack.parentScope
 	cg.symTable = cg.symTable.Parent
-	cg.symTable.RemoveChild()
+	if cg.symTable != nil {
+		cg.symTable.RemoveChild()
+	}
 }
 
 // Returns cg.funcInstrs iff the current scope is a function scope. cg.instrs otherwise

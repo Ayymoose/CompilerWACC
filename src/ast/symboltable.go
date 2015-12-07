@@ -93,6 +93,9 @@ func (symbolTable *SymbolTable) GetTypeOfIdent(key Ident) Type {
 
 // Removes the head of the children list
 func (symbolTable *SymbolTable) RemoveChild() {
+	if len(symbolTable.Children) == 0 {
+		return
+	}
 	symbolTable.Children = symbolTable.Children[1:]
 }
 
