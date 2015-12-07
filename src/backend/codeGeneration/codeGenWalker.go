@@ -457,11 +457,9 @@ func (cg CodeGenerator) evalOrd(node Unop) {
 		appendAssembly(cg.currInstrs(), "LDRSB r4, [sp, #"+strconv.Itoa(offset)+"]", 1, 1)
 	case ArrayElem:
 		cg.evalRHS(node.Expr, "r4")
-		fmt.Println("ArrayElem not done for ord")
 	case Character:
 		appendAssembly(cg.currInstrs(), "MOV r4, #"+string(node.Expr.(Character)), 1, 1)
 	default:
-		fmt.Println("Oh no")
 	}
 }
 
