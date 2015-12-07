@@ -275,8 +275,10 @@ func (cg CodeGenerator) evalRHS(t Evaluation, srcReg string) {
 			switch resType.(ConstType) {
 			case Bool, Char:
 				appendAssembly(cg.currInstrs(), "LDRSB "+srcReg+", [sp, #"+strconv.Itoa(offset)+"]", 1, 1)
+			case Int, String:
+				appendAssembly(cg.currInstrs(), "LDR "+srcReg+", [sp, #"+strconv.Itoa(offset)+"]", 1, 1)
 			}
-		default: // Int, String, ArrayType, PairType:
+		default:
 			appendAssembly(cg.currInstrs(), "LDR "+srcReg+", [sp, #"+strconv.Itoa(offset)+"]", 1, 1)
 		}
 	case ArrayElem:

@@ -177,7 +177,7 @@ func (cg CodeGenerator) getIdentOffset(ident Ident) (int, Type) {
 // The function assumes an offset will be found eventually (semantically correct)
 func (cg CodeGenerator) findIdentOffset(ident Ident, symTable *SymbolTable) (int, Type) {
 	if symTable == nil {
-		fmt.Print("ERROR: incorrect symbol table")
+		fmt.Println("ERROR: incorrect symbol table")
 		return 0, Int
 	}
 
