@@ -40,6 +40,9 @@ const (
 	ARRAY_INDEX_LARGE    = "\"ArrayIndexOutOfBoundsError: index too large\\n\\0\""
 )
 
+// Maximum offset of stack pointer
+const STACK_SIZE_MAX = 1024
+
 // Function global variable
 var functionList []*Function
 var paramMap map[Param]int
@@ -219,6 +222,29 @@ func (cg CodeGenerator) cgVisitPrintStatFunc_H(funcName string) {
 func (cg CodeGenerator) CfunctionCall(functionName string, argument string) {
 	appendAssembly(cg.instrs, "LDR r0, ="+argument, 1, 1)
 	appendAssembly(cg.instrs, "BL "+functionName, 1, 1)
+}
+
+
+// Because the maximum amount we can add or subtract the stack pointer by is 1024
+// These helper functions allocate and deallocate space on the stack for us
+
+func (cg CodeGenerator) createStackSpace(stackSize int) {
+	if STACK_SIZE_MAX - stackSize < 0 {
+		appendAssembly(cg.instrs, "SUB sp, sp, #"+strconv.Itoa(STACK_SIZE_MAX), 1, 1)
+		cg.createStackSpace(stackSize - STACK_SIZE_MAX)
+	} else {
+		appendAssembly(cg.instrs, "SUB sp, sp, #"+strconv.Itoa(stackSize), 1, 1)
+	}
+}
+
+// This cleans the stack
+func (cg CodeGenerator) removeStackSpace(stackSize int) {
+	if STACK_SIZE_MAX - stackSize < 0 {
+		appendAssembly(cg.instrs, "ADD sp, sp, #"+strconv.Itoa(STACK_SIZE_MAX), 1, 1)
+		cg.removeStackSpace(stackSize - STACK_SIZE_MAX)
+	} else {
+		appendAssembly(cg.instrs, "ADD sp, sp, #"+strconv.Itoa(stackSize), 1, 1)
+	}
 }
 
 // EVALUATION FUNCTIONS
@@ -435,7 +461,7 @@ func (cg CodeGenerator) cgVisitProgram(node *Program) {
 
 	// sub sp, sp, #n to create variable space
 	if cg.globalStack.size > 0 {
-		appendAssembly(cg.instrs, "SUB sp, sp, #"+strconv.Itoa(cg.globalStack.size), 1, 1)
+		cg.createStackSpace(cg.globalStack.size)
 	}
 
 	// traverse all statements by switching on statement type
@@ -445,7 +471,7 @@ func (cg CodeGenerator) cgVisitProgram(node *Program) {
 
 	// add sp, sp, #n to remove variable space
 	if cg.globalStack.size > 0 {
-		appendAssembly(cg.instrs, "ADD sp, sp, #"+strconv.Itoa(cg.globalStack.size), 1, 1)
+		cg.removeStackSpace(cg.globalStack.size)
 	}
 
 	// ldr r0, =0 to return 0 as the main return
@@ -526,6 +552,12 @@ func (cg CodeGenerator) cgVisitDeclareStat(node Declare) {
 		cg.evalArrayLiter(node.DecType, rhs, "r5", "r4")
 	}
 }
+
+//TODO: Fails on waiting on Nana's getIdentOffset() function
+//TODO: intAssignment.wacc FAILS
+//TODO: intLeadingZeros.wacc FAILS
+//TODO: _VarNames.wacc FAILS
+//TODO: longVarNames.wacc FAILS
 
 func (cg CodeGenerator) cgVisitAssignmentStat(node Assignment) {
 	constType := cg.eval(node.Lhs.(Ident)) // Type
