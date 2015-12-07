@@ -2,8 +2,7 @@ package main
 
 import (
 	. "ast"
-	//	cg "backend/codeGeneration"
-	//	fw "backend/filewriter"
+	cg "backend/codeGeneration"
 	"fmt"
 	"io/ioutil"
 	"os"
@@ -57,10 +56,10 @@ func main() {
 	fileARM := filename[0:len(filename)-len(ext)] + ".s"
 	fmt.Println(fileARM)
 
-	/*	codeGen := cg.ConstructCodeGenerator(root, armList, *root.SymbolTable)
-		codeGen.GenerateCode()
-			for _, instr := range *armList {
-			fmt.Print(instr)
-		}
-		armList.WriteToFile(fileARM) */
+	codeGen := cg.ConstructCodeGenerator(root, armList, *root.SymbolTable)
+	codeGen.GenerateCode()
+	for _, instr := range *armList {
+		fmt.Print(instr)
+	}
+	armList.WriteToFile(fileARM)
 }
