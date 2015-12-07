@@ -979,6 +979,7 @@ func (cg CodeGenerator) cgVisitBinopExpr_H(funcName string) {
 			appendAssembly(cg.progFuncInstrs, "LDREQ r0, "+cg.getMsgLabel(DIVIDE_BY_ZERO), 1, 1)
 			appendAssembly(cg.progFuncInstrs, "BLEQ p_throw_runtime_error", 1, 1)
 			appendAssembly(cg.progFuncInstrs, "POP {pc}", 1, 1)
+			cg.throwRunTimeError()
 		}
 	}
 }
