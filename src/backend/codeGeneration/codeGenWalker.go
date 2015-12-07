@@ -454,8 +454,11 @@ func (cg CodeGenerator) cgVisitWhileStat(node While) {
 }
 
 func (cg CodeGenerator) cgVisitScopeStat(node Scope) {
+	// Amount of bytes on the stack the scope takes up for variables
+	varSpaceSize := GetScopeVarSize(node.StatList)
+
 	// sub sp, sp, #n to create variable space
-	appendAssembly(cg.instrs, "SUB sp, sp, #"+strconv.Itoa(cg.globalStack.size), 1, 1)
+	appendAssembly(cg.instrs, "SUB sp, sp, #"+strconv.Itoa(varSpaceSize), 1, 1)
 
 	// traverse all statements by switching on statement type
 	for _, stat := range node.StatList {
@@ -463,7 +466,7 @@ func (cg CodeGenerator) cgVisitScopeStat(node Scope) {
 	}
 
 	// add sp, sp, #n to remove variable space
-	appendAssembly(cg.instrs, "ADD sp, sp, #"+strconv.Itoa(cg.globalStack.size), 1, 1)
+	appendAssembly(cg.instrs, "ADD sp, sp, #"+strconv.Itoa(varSpaceSize), 1, 1)
 }
 
 //TODO: Group these functions in one big function that takes a string and defines it for us
