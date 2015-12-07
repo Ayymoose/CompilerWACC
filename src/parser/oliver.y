@@ -94,7 +94,7 @@ pairelemtype Type
 %%
 
 program : BEGIN functions statements END {
-                                          parserlex.(*Lexer).prog = &Program{FunctionList : $2 , StatList : $3 , SymbolTable : &SymbolTable{Table: make(map[Ident]Type)}}
+                                          parserlex.(*Lexer).prog = &Program{FunctionList : $2 , StatList : $3 , SymbolTable : NewInstance()}
                                          }
 
 functions : functions function  { $$ = append($1, $2)}
@@ -104,13 +104,13 @@ function : typeDef IDENTIFIER OPENROUND CLOSEROUND IS statements END
            { if !checkStats($6) {
           	parserlex.Error("Missing return statement")
            }
-             $$ = &Function{Ident : $2, ReturnType : $1, StatList : $6, SymbolTable: &SymbolTable{Table: make(map[Ident]Type)}}
+             $$ = &Function{Ident : $2, ReturnType : $1, StatList : $6, SymbolTable: NewInstance()}
            }
          | typeDef IDENTIFIER OPENROUND paramlist CLOSEROUND IS statements END
            { if !checkStats($7) {
             	parserlex.Error("Missing return statement")
             }
-             $$ = &Function{Ident : $2, ReturnType : $1, StatList : $7, ParameterTypes : $4, SymbolTable: &SymbolTable{Table: make(map[Ident]Type)}}
+             $$ = &Function{Ident : $2, ReturnType : $1, StatList : $7, ParameterTypes : $4, SymbolTable: NewInstance()}
            }
 
 paramlist : paramlist COMMA param { $$ = append($1, $3)}
@@ -143,7 +143,7 @@ statement : SKIP                                        { $$ = Skip{} }
           | PRINTLN expr                                { $$ = Println{$2} }
           | IF expr THEN statements ELSE statements FI  { $$ = If{Conditional : $2, ThenStat : $4, ElseStat : $6} }
           | WHILE expr DO statements DONE               { $$ = While{Conditional : $2, DoStat : $4} }
-          | BEGIN statements END                        { $$ = Scope{StatList : $2, SymbolTable : &SymbolTable{Table: make(map[Ident]Type)} } }
+          | BEGIN statements END                        { $$ = Scope{StatList : $2 } }
 
 expr : INTEGER       { $$ =  $1 }
 

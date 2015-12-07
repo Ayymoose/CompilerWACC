@@ -25,6 +25,7 @@ func (node If) checkIfReturn(functionTable []*Function, symbolTable *SymbolTable
 		semanticErrors = append(semanticErrors, errors.New("Conditional is not boolean expression"))
 	}
 	thenSymTab := symbolTable.New()
+	symbolTable.Children = append(symbolTable.Children, thenSymTab)
 	for _, thenstat := range node.ThenStat {
 		switch thenstat.(type) {
 		case Return:
@@ -45,6 +46,7 @@ func (node If) checkIfReturn(functionTable []*Function, symbolTable *SymbolTable
 		}
 	}
 	elseSymTab := symbolTable.New()
+	symbolTable.Children = append(symbolTable.Children, elseSymTab)
 	for _, elsestat := range node.ElseStat {
 		switch elsestat.(type) {
 		case Return:
@@ -322,6 +324,7 @@ func (node If) visitStatement(functionTable []*Function, symbolTable *SymbolTabl
 		semanticErrors = append(semanticErrors, errors.New("Conditional is not boolean expression"))
 	}
 	thenSymTab := symbolTable.New()
+	symbolTable.Children = append(symbolTable.Children, thenSymTab)
 	for _, thenstat := range node.ThenStat {
 		errs := thenstat.visitStatement(functionTable, thenSymTab)
 		if errs != nil {
@@ -329,6 +332,7 @@ func (node If) visitStatement(functionTable []*Function, symbolTable *SymbolTabl
 		}
 	}
 	elseSymTab := symbolTable.New()
+	symbolTable.Children = append(symbolTable.Children, elseSymTab)
 	for _, elsestat := range node.ElseStat {
 		errs := elsestat.visitStatement(functionTable, elseSymTab)
 		if errs != nil {
@@ -350,8 +354,10 @@ func (node While) visitStatement(functionTable []*Function, symbolTable *SymbolT
 	if cond != Bool {
 		semanticErrors = append(semanticErrors, errors.New("Conditional is not boolean expression"))
 	}
+	whileSymTab := symbolTable.New()
+	symbolTable.Children = append(symbolTable.Children, whileSymTab)
 	for _, dostat := range node.DoStat {
-		errs := dostat.visitStatement(functionTable, symbolTable)
+		errs := dostat.visitStatement(functionTable, whileSymTab)
 		if errs != nil {
 			semanticErrors = append(semanticErrors, errs)
 		}
@@ -365,6 +371,7 @@ func (node While) visitStatement(functionTable []*Function, symbolTable *SymbolT
 func (node Scope) visitStatement(functionTable []*Function, symbolTable *SymbolTable) errorSlice {
 	var semanticErrors errorSlice
 	newSymTab := symbolTable.New()
+	symbolTable.Children = append(symbolTable.Children, newSymTab)
 	for _, stat := range node.StatList {
 		errs := stat.visitStatement(functionTable, newSymTab)
 		if errs != nil {

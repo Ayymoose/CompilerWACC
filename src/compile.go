@@ -52,6 +52,8 @@ func main() {
 	}
 
 	fmt.Println("SUCCESSFUL FRONTEND: ")
+	root.SymbolTable.PrintChildren()
+
 	filename := filepath.Base(file)
 	ext := filepath.Ext(filename)
 	fileARM := filename[0:len(filename)-len(ext)] + ".s"
@@ -63,4 +65,5 @@ func main() {
 		fmt.Print(instr)
 	}
 	armList.WriteToFile(fileARM)
+
 }

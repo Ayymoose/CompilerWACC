@@ -1,20 +1,33 @@
 package ast
 
+import "fmt"
+
 // SymbolTable constructor
 type SymbolTable struct {
 	Parent     *SymbolTable
 	Table      map[Ident]Type
 	OffsetVals map[string]int
+	Children   []*SymbolTable
+}
+
+func (symbolTable *SymbolTable) PrintChildren() {
+	if len(symbolTable.Children) == 0 {
+		return
+	}
+	fmt.Println(symbolTable.Children)
+	for _, sym := range symbolTable.Children {
+		sym.PrintChildren()
+	}
 }
 
 // New Constructor creates new instance of a symbolTable with pointer to its parent
 func (symbolTable *SymbolTable) New() *SymbolTable {
-	return &SymbolTable{Parent: symbolTable, Table: make(map[Ident]Type), OffsetVals: make(map[string]int)}
+	return &SymbolTable{Parent: symbolTable, Table: make(map[Ident]Type), OffsetVals: make(map[string]int), Children: []*SymbolTable{}}
 }
 
 // New Constructor creates new instance of a symbolTable with pointer to its parent
-func New() *SymbolTable {
-	return &SymbolTable{Table: make(map[Ident]Type), OffsetVals: make(map[string]int)}
+func NewInstance() *SymbolTable {
+	return &SymbolTable{Table: make(map[Ident]Type), OffsetVals: make(map[string]int), Children: []*SymbolTable{}}
 }
 
 // Inserts a given key and value into the symbol table
