@@ -272,8 +272,7 @@ func (cg CodeGenerator) evalRHS(t Evaluation, srcReg string) {
 				// If the type in the stack is a bool it should be LDRSB
 				// TODO:FIXs
 				appendAssembly(cg.currInstrs(), "LDR "+srcReg+", [sp, #"+strconv.Itoa(offset)+"]", 1, 1)
-			default:
-				fmt.Println("oh nos")
+
 			}
 		default: // Int, String, ArrayType, PairType:
 			appendAssembly(cg.currInstrs(), "LDR "+srcReg+", [sp, #"+strconv.Itoa(offset)+"]", 1, 1)
@@ -900,8 +899,6 @@ func (cg CodeGenerator) cgVisitUnopExpr(node Unop) {
 		//NOT FINISHED
 		cg.evalRHS(node.Expr, "r4")
 	default:
-		fmt.Println("Dont know this type in Unop")
-		fmt.Println(node.Unary)
 	}
 
 }
