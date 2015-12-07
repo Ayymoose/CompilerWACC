@@ -309,56 +309,49 @@ func (cg CodeGenerator) cgVisitExitStat(node Exit) {
 
 func (cg CodeGenerator) cgVisitPrintStat(node Print) {
 	expr := node.Expr
+	dstReg := "r0"
 
-	switch expr.(type) {
+	// Get value of expr into dstReg
+	cg.evalRHS(expr, dstReg)
 
-	case Str:
-		strValue := expr.(Str)
+	exprType := cg.eval(expr)
+	switch exprType.(type) {
+	case ConstType:
+		switch exprType.(ConstType) {
+		case String:
+			// BL p_print_string
+			appendAssembly(cg.instrs, "BL p_print_string", 1, 1)
+			// Define relevant print function definition (iff it hasnt been defined)
+			cg.cgVisitPrintStatFunc_H("p_print_string")
 
-		// LDR r4, =msg_n : load the string message label
-		msgLabel := cg.getMsgLabel(string(strValue))
-		appendAssembly(cg.instrs, "LDR r4, "+msgLabel, 1, 1)
-		// MOV r0, r4 : prepare parameter for function call
-		appendAssembly(cg.instrs, "MOV r0, r4", 1, 1)
-		// BL p_print_string
-		appendAssembly(cg.instrs, "BL p_print_string", 1, 1)
+		case Int:
+			// BL p_print_int
+			appendAssembly(cg.instrs, "BL p_print_int", 1, 1)
+			// Define relevant print function definition (iff it hasnt been defined)
+			cg.cgVisitPrintStatFunc_H("p_print_int")
+
+		case Char:
+			// BL putchar
+			appendAssembly(cg.instrs, "BL putchar", 1, 1)
+
+		case Bool:
+			// BL p_print_bool
+			appendAssembly(cg.instrs, "BL p_print_bool", 1, 1)
+			// Define relevant print function definition (iff it hasnt been defined)
+			cg.cgVisitPrintStatFunc_H("p_print_bool")
+		case Pair:
+			// BL p_print_reference
+			appendAssembly(cg.instrs, "BL p_print_reference", 1, 1)
+			// Define relevant print function definition (iff it hasnt been defined)
+			cg.cgVisitPrintStatFunc_H("p_print_reference")
+		}
+	case PairType:
+		// BL p_print_reference
+		appendAssembly(cg.instrs, "BL p_print_reference", 1, 1)
 		// Define relevant print function definition (iff it hasnt been defined)
-		cg.cgVisitPrintStatFunc_H("p_print_string")
-
-	case Integer:
-		intValue := expr.(Integer)
-
-		// LDR r4, =i : load the value into r4
-		appendAssembly(cg.instrs, "LDR r4, ="+strconv.Itoa(int(intValue)), 1, 1)
-		// MOV r0, r4 : prepare parameter for function call
-		appendAssembly(cg.instrs, "MOV r0, r4", 1, 1)
-		// BL p_print_int
-		appendAssembly(cg.instrs, "BL p_print_int", 1, 1)
-		// Define relevant print function definition (iff it hasnt been defined)
-		cg.cgVisitPrintStatFunc_H("p_print_int")
-
-	case Character:
-		charValue := expr.(Character)
-
-		// MOV r4, #'c' : load the value into r4
-		appendAssembly(cg.instrs, "MOV r4, #"+string(charValue), 1, 1)
-		// MOV r0, r4 : prepare parameter for function call
-		appendAssembly(cg.instrs, "MOV r0, r4", 1, 1)
-		// BL putchar
-		appendAssembly(cg.instrs, "BL putchar", 1, 1)
-
-	case Boolean:
-		boolValue := expr.(Boolean)
-
-		// MOV r4, #e.g.1 : load the value into r4
-		appendAssembly(cg.instrs, "MOV r4, #"+boolInt(bool(boolValue)), 1, 1)
-		// MOV r0, r4 : prepare parameter for function call
-		appendAssembly(cg.instrs, "MOV r0, r4", 1, 1)
-		// BL p_print_bool
-		appendAssembly(cg.instrs, "BL p_print_bool", 1, 1)
-		// Define relevant print function definition (iff it hasnt been defined)
-		cg.cgVisitPrintStatFunc_H("p_print_bool")
+		cg.cgVisitPrintStatFunc_H("p_print_reference")
 	default:
+		appendAssembly(cg.instrs, "Error: type not implemented", 1, 1)
 		typeOf(expr)
 
 	}
