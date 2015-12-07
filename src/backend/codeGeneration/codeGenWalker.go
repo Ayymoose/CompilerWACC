@@ -153,10 +153,8 @@ func (cg CodeGenerator) cgVisitDeclareStat(node Declare) {
 		}
 
 	case PairType:
-		// First allocate memory to store two addresses (8-bytes)
-		cg.CfunctionCall("malloc", strconv.Itoa(ADDR_SIZE*2))
-		// Push a pair of elements onto the stack
-		cg.pushPair(rhs.(NewPair).FstExpr, rhs.(NewPair).SndExpr, "r5", "r4")
+		// Evalutes a pair of elements onto the stack
+		cg.evalRHS(rhs,"r4")
 	case ArrayType:
 		// Evalute an array
 		cg.evalArrayLiter(node.DecType, rhs, "r5", "r4")
@@ -247,6 +245,16 @@ func (cg CodeGenerator) cgVisitFreeStat(node Free) {
 	cg.cgVisitFreeStatFunc_H("p_free_pair")
 }
 
+func (cg CodeGenerator) dereferenceNullPointer() {
+	if !cg.AddCheckProgName("p_check_null_pointer") {
+		appendAssembly(cg.progFuncInstrs, "p_check_null_pointer"+":", 0, 1)
+		appendAssembly(cg.progFuncInstrs, "PUSH {lr}", 1, 1)
+		appendAssembly(cg.progFuncInstrs, "CMP r0, #0", 1, 1)
+		appendAssembly(cg.progFuncInstrs, "LDREQ r0, "+cg.getMsgLabel(NULL_REFERENCE), 1, 1)
+		appendAssembly(cg.progFuncInstrs, "BLEQ p_throw_runtime_error", 1, 1)
+		appendAssembly(cg.progFuncInstrs, "POP {pc}", 1, 1)
+	}
+}
 
 func (cg CodeGenerator) throwRunTimeError() {
 	if !cg.AddCheckProgName("p_throw_runtime_error") {
@@ -299,6 +307,9 @@ func (cg CodeGenerator) cgVisitExitStat(node Exit) {
 	// LDR r0, =n : loads return type to r0 argument
 	var reg = "r4"
 	cg.evalRHS(node.Expr, reg)
+
+  typeOf(node.Expr)
+
 	appendAssembly(cg.instrs, "MOV r0, "+reg, 1, 1)
 	// BL exit : call exit
 	appendAssembly(cg.instrs, "BL exit", 1, 1)
@@ -447,18 +458,16 @@ func (cg CodeGenerator) cgVisitScopeStat(node Scope) {
 
 }
 
-//TODO: Group these functions in one big function that takes a string and defines it for us
-
 func (cg CodeGenerator) checkArrayBounds() {
 	if !cg.AddCheckProgName("p_check_array_bounds") {
 		appendAssembly(cg.progFuncInstrs, "p_check_array_bounds"+":", 0, 1)
 		appendAssembly(cg.progFuncInstrs, "PUSH {lr}", 1, 1)
 		appendAssembly(cg.progFuncInstrs, "CMP r0, #0", 1, 1)
-		appendAssembly(cg.progFuncInstrs, "LDRLT r0, =msg_0", 1, 1)
+		appendAssembly(cg.progFuncInstrs, "LDRLT r0, " +cg.getMsgLabel(ARRAY_INDEX_NEGATIVE), 1, 1)
 		appendAssembly(cg.progFuncInstrs, "BLLT p_throw_runtime_error", 1, 1)
 		appendAssembly(cg.progFuncInstrs, "LDR r1, [r1]", 1, 1)
 		appendAssembly(cg.progFuncInstrs, "CMP r0, r1", 1, 1)
-		appendAssembly(cg.progFuncInstrs, "LDRCS r0, =msg_1", 1, 1)
+		appendAssembly(cg.progFuncInstrs, "LDRCS r0, " +cg.getMsgLabel(ARRAY_INDEX_LARGE), 1, 1)
 		appendAssembly(cg.progFuncInstrs, "BLCS p_throw_runtime_error", 1, 1)
 		appendAssembly(cg.progFuncInstrs, "POP {pc}", 1, 1)
 	}
@@ -473,6 +482,7 @@ func (cg CodeGenerator) evalArrayElem(t Evaluation, reg1 string, reg2 string) {
 
 	//Store the address at the next space in the stack (i.e SP - ADDRESS_SIZE)
 	//SHOULD HAVE A OFFSET FUNCTION FOR THIS
+	//TODO: FIX THIS CODE
 	appendAssembly(cg.instrs, "ADD "+reg1+", sp, #" + strconv.Itoa(cg.currStack.currP - ADDR_SIZE) , 1, 1)
   //Load the index
 	cg.evalRHS(t.(ArrayElem).Exprs[0],reg2)
@@ -504,7 +514,7 @@ func (cg CodeGenerator) evalRHS(t Evaluation, srcReg string) {
 	case Str:
 		appendAssembly(cg.instrs, "LDR "+srcReg+", "+cg.getMsgLabel(string(t.(Str))), 1, 1)
 	case PairLiter:
-		appendAssembly(cg.instrs, "MOV "+srcReg+", #0", 1, 1)
+		appendAssembly(cg.instrs, "LDR "+srcReg+", =0", 1, 1)
 	case Ident:
 		var value, _ = cg.getIdentOffset(t.(Ident))
 		appendAssembly(cg.instrs, "LDR "+srcReg+", [sp, #"+strconv.Itoa(value)+"]", 1, 1)
@@ -515,14 +525,44 @@ func (cg CodeGenerator) evalRHS(t Evaluation, srcReg string) {
 	case Binop:
 		cg.cgVisitBinopExpr(t.(Binop))
 	case NewPair:
-		appendAssembly(cg.instrs, "newpair not implemented", 1, 1)
+		// First allocate memory to store two addresses (8-bytes)
+		cg.CfunctionCall("malloc", strconv.Itoa(ADDR_SIZE*2))
+		cg.evalPair(t.(NewPair).FstExpr, t.(NewPair).SndExpr, "r5", srcReg)
 	case PairElem:
-		appendAssembly(cg.instrs, "pair elem not implemented", 1, 1)
+    cg.evalPairElem(t.(PairElem) ,srcReg)
 	case Call:
 		appendAssembly(cg.instrs, "call not implemented", 1, 1)
 	default:
 		fmt.Println("ERROR: Expression can not be evaluated")
 	}
+}
+
+func (cg CodeGenerator) evalPairElem(t PairElem, srcReg string) {
+
+	//Load the address of the pair from the STACK
+	//TODO: FIX THIS
+	var offset = 0
+	appendAssembly(cg.instrs, "LDR "+srcReg+", [sp, #"+ strconv.Itoa(offset)+"]", 1, 1)
+	//Check for null pointer deference
+	appendAssembly(cg.instrs, "MOV r0, "+srcReg, 1, 1)
+	appendAssembly(cg.instrs, "BL p_check_null_pointer", 1, 1)
+	cg.dereferenceNullPointer()
+	cg.throwRunTimeError()
+	cg.cgVisitPrintStatFunc_H("p_print_string")
+
+	//Depending on fst or snd , load the address
+	switch (t.Fsnd) {
+	case Fst:
+		appendAssembly(cg.instrs, "LDR "+srcReg+", ["+srcReg+"]", 1, 1)
+	case Snd:
+		appendAssembly(cg.instrs, "LDR "+srcReg+", ["+srcReg+", #4]", 1, 1)
+	}
+	//Double deference
+	appendAssembly(cg.instrs, "LDR "+srcReg+", ["+srcReg+"]", 1, 1)
+	//Store on the next available space on the STACK
+	//TODO: FIX THIS
+	appendAssembly(cg.instrs, "STR "+srcReg+", [sp, #"+strconv.Itoa(offset)+"]", 1, 1)
+
 }
 
 // ONLY VISIT FUNCTION IF IT IS CALLED
@@ -626,8 +666,8 @@ func (cg CodeGenerator) CfunctionCall(functionName string, argument string) {
 	appendAssembly(cg.instrs, "BL "+functionName, 1, 1)
 }
 
-//Pushes a pair of elements onto the stack
-func (cg CodeGenerator) pushPair(fst Evaluation, snd Evaluation, reg1 string, reg2 string) {
+//Evalutes a pair of elements onto the stack
+func (cg CodeGenerator) evalPair(fst Evaluation, snd Evaluation, reg1 string, reg2 string) {
 	// Store the address in the free register
 	appendAssembly(cg.instrs, "MOV "+reg2+", r0", 1, 1)
 
@@ -664,6 +704,7 @@ func (cg CodeGenerator) pushPair(fst Evaluation, snd Evaluation, reg1 string, re
 	appendAssembly(cg.instrs, "STR "+reg2+", [sp, #"+strconv.Itoa(offset)+"]", 1, 1)
 	//
 
+
 }
 
 //Evaluates array literals
@@ -680,7 +721,7 @@ func (cg CodeGenerator) evalArrayLiter(typeNode Type, rhs Evaluation, srcReg str
 		appendAssembly(cg.instrs, "MOV "+dstReg+", r0", 1, 1)
 
 		//Start loading each element in the array onto the stack
-		cg.pushArrayElements(rhs.(ArrayLiter).Exprs, srcReg, dstReg, typeNode)
+		cg.evalArray(rhs.(ArrayLiter).Exprs, srcReg, dstReg, typeNode)
 	default:
 		fmt.Println("RHS Type not implemented")
 	}
@@ -689,7 +730,7 @@ func (cg CodeGenerator) evalArrayLiter(typeNode Type, rhs Evaluation, srcReg str
 
 // Puts the array elements onto the stack
 // Where t is the type of the array
-func (cg CodeGenerator) pushArrayElements(array []Evaluation, srcReg string, dstReg string, t Type) {
+func (cg CodeGenerator) evalArray(array []Evaluation, srcReg string, dstReg string, t Type) {
 
 	var arraySize = len(array)
 	// Loop through the array pushing it onto the stack
