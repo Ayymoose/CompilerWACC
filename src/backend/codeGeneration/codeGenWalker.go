@@ -48,14 +48,6 @@ const STACK_SIZE_MAX = 1024
 // Function global variable
 var functionList []*Function
 
-//TODO: Fails on waiting on Nana's getIdentOffset() function
-
-//TODO: intAssignment.wacc FAILS
-//TODO: intLeadingZeros.wacc FAILS
-//TODO: _VarNames.wacc FAILS
-//TODO: longVarNames.wacc FAILS
-//TODO: arrayLength.wacc FAILS
-
 // HELPER FUNCTIONS
 // cgVisitReadStat helper function
 // Adds a function definition to the progFuncInstrs ARMList depending on the
@@ -586,6 +578,9 @@ func (cg CodeGenerator) cgVisitDeclareStat(node Declare) {
 	default:
 		typeOf(node.DecType)
 	}
+
+	// Saves Idents offset in the symbol tables offset map
+	cg.currSymTable().InsertOffset(string(node.Lhs), cg.currStack.currP)
 }
 
 func (cg CodeGenerator) cgVisitAssignmentStat(node Assignment) {

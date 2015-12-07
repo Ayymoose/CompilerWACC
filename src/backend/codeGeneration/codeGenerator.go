@@ -169,10 +169,14 @@ func (cg CodeGenerator) AddCheckProgName(progName string) bool {
 // Using symbol tables, a offset to the sp is returned so the ident value can
 // be executed
 func (cg CodeGenerator) getIdentOffset(ident Ident) (int, Type) {
-	// TO BE COMPLETED
-	//I MODIFIED THIS SO SOME TEST CASES WILL PASS @AYMAN
-	//CHANGED FROM 100 to 4
+
 	return 1, Int
+}
+
+// Checks if the ident is in the given symbol table. If not the parents are searched
+// The function assumes an offset will be found eventually (semantically correct)
+func findIdentOffset(ident Ident, symtable *symbolTable) (int, Type) {
+
 }
 
 func (cg CodeGenerator) getNewLabel() string {
