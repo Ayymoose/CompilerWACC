@@ -645,7 +645,7 @@ func (cg CodeGenerator) cgVisitExitStat(node Exit) {
 
 func (cg CodeGenerator) cgVisitPrintStat(node Print) {
 	expr := node.Expr
-	dstReg := "r0"
+	dstReg := "r4"
 
 	// Get value of expr into dstReg
 	cg.evalRHS(expr, dstReg)
@@ -655,6 +655,7 @@ func (cg CodeGenerator) cgVisitPrintStat(node Print) {
 	case ConstType:
 		switch exprType.(ConstType) {
 		case String:
+			appendAssembly(cg.instrs, "MOV, r0, r4", 1, 1)
 			// BL p_print_string
 			appendAssembly(cg.instrs, "BL p_print_string", 1, 1)
 			// Define relevant print function definition (iff it hasnt been defined)
