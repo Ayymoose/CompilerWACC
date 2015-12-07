@@ -47,6 +47,16 @@ const STACK_SIZE_MAX = 1024
 var functionList []*Function
 var paramMap map[Param]int
 
+
+//TODO: Fails on waiting on Nana's getIdentOffset() function
+
+//TODO: intAssignment.wacc FAILS
+//TODO: intLeadingZeros.wacc FAILS
+//TODO: _VarNames.wacc FAILS
+//TODO: longVarNames.wacc FAILS
+//TODO: arrayLength.wacc FAILS
+
+
 // HELPER FUNCTIONS
 // cgVisitReadStat helper function
 // Adds a function definition to the progFuncInstrs ARMList depending on the
@@ -522,7 +532,6 @@ func (cg CodeGenerator) cgVisitDeclareStat(node Declare) {
 
 	switch node.DecType.(type) {
 	case ConstType:
-
 		switch node.DecType.(ConstType) {
 		case Bool:
 			cg.evalRHS(rhs, "r4")
@@ -550,22 +559,31 @@ func (cg CodeGenerator) cgVisitDeclareStat(node Declare) {
 	case ArrayType:
 		// Evalute an array
 		cg.evalArrayLiter(node.DecType, rhs, "r5", "r4")
+	default:
+		typeOf(node.DecType)
 	}
 }
 
-//TODO: Fails on waiting on Nana's getIdentOffset() function
-//TODO: intAssignment.wacc FAILS
-//TODO: intLeadingZeros.wacc FAILS
-//TODO: _VarNames.wacc FAILS
-//TODO: longVarNames.wacc FAILS
-
 func (cg CodeGenerator) cgVisitAssignmentStat(node Assignment) {
-	constType := cg.eval(node.Lhs.(Ident)) // Type
+
+	// Type
+	constType := cg.eval(node.Lhs.(Ident))
 	rhs := node.Rhs
+
+	// lhs can be
+	// IDENT , ARRAY-ELEM , PAIR-ELEM
 	switch node.Lhs.(type) {
+  case Ident:
+		//Put the LHS into a reg and evaluate the RHS
+		fmt.Println("Ident not done")
 	case ArrayElem:
+		fmt.Println("Array elem not done")
 	case PairElem:
+		fmt.Println("Pair elem not done")
+	default:
+		fmt.Println("Oh no something went really wrong!")
 	}
+
 	switch constType {
 	case Bool:
 		cg.evalRHS(rhs, "r4")
@@ -584,7 +602,7 @@ func (cg CodeGenerator) cgVisitAssignmentStat(node Assignment) {
 		// Store the address onto the stack
 		appendAssembly(cg.instrs, "STR r4, [sp, #"+cg.subCurrP(STRING_SIZE)+"]", 1, 1)
 	case Pair:
-		// TODO
+		fmt.Println("Pair not done")
 	}
 }
 
