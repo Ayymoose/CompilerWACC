@@ -272,6 +272,8 @@ func (cg CodeGenerator) evalRHS(t Evaluation, srcReg string) {
 	case PairLiter:
 		appendAssembly(cg.instrs, "LDR "+srcReg+", =0", 1, 1)
 	case Ident:
+		//If the Ident is a BOOL we use LDRSB !
+		//Fix
 		var value, _ = cg.getIdentOffset(t.(Ident))
 		appendAssembly(cg.instrs, "LDR "+srcReg+", [sp, #"+strconv.Itoa(value)+"]", 1, 1)
 	case ArrayElem:
@@ -440,6 +442,22 @@ func (cg CodeGenerator) evalArrayElem(t Evaluation, reg1 string, reg2 string) {
 	cg.checkArrayBounds()
 	cg.throwRunTimeError()
 	cg.cgVisitPrintStatFunc_H("p_print_string")
+}
+
+// Evalutes a ord
+func (cg CodeGenerator) evalOrd(node Unop) {
+	switch node.Expr.(type) {
+	case Ident:
+		//If it's an ident
+		var offset, _ = cg.getIdentOffset(node.Expr.(Ident))
+		appendAssembly(cg.instrs, "LDRSB r4, [sp, #"+strconv.Itoa(offset)+"]", 1, 1)
+	case ArrayElem:
+		fmt.Println("ArrayElem not done for ord")
+	case Character:
+		fmt.Println("Char not done for ord")
+	default:
+		fmt.Println("Oh no")
+	}
 }
 
 // VISIT FUNCTIONS -------------------------------------------------------------
@@ -645,7 +663,7 @@ func (cg CodeGenerator) cgVisitExitStat(node Exit) {
 
 func (cg CodeGenerator) cgVisitPrintStat(node Print) {
 	expr := node.Expr
-	dstReg := "r0" // TODO This register choice is very critical
+	dstReg := "r0"
 
 	// Get value of expr into dstReg
 	cg.evalRHS(expr, dstReg)
@@ -655,16 +673,12 @@ func (cg CodeGenerator) cgVisitPrintStat(node Print) {
 	case ConstType:
 		switch exprType.(ConstType) {
 		case String:
-			//TODO CHECK WHAT HAPPENS WITH MOV
-			//		appendAssembly(cg.instrs, "MOV, r0, r4", 1, 1)
 			// BL p_print_string
 			appendAssembly(cg.instrs, "BL p_print_string", 1, 1)
 			// Define relevant print function definition (iff it hasnt been defined)
 			cg.cgVisitPrintStatFunc_H("p_print_string")
 
 		case Int:
-			//TODO CHECK WHAT HAPPENS WITH MOV
-			appendAssembly(cg.instrs, "MOV r0, r4", 1, 1)
 			// BL p_print_int
 			appendAssembly(cg.instrs, "BL p_print_int", 1, 1)
 			// Define relevant print function definition (iff it hasnt been defined)
@@ -852,18 +866,25 @@ func (cg CodeGenerator) cgVisitParameter(node Evaluation, offset int) {
 // VISIT EXPRESSIONS -----------------------------------------------------------
 
 func (cg CodeGenerator) cgVisitUnopExpr(node Unop) {
-	cg.evalRHS(node.Expr, "r4")
+
 	switch node.Unary {
 	case SUB:
+		cg.evalRHS(node.Expr, "r4")
 		//Negate the result in the register
 		appendAssembly(cg.instrs, "RSBS r4, r4, #0", 1, 1)
 	case LEN:
-
+		cg.evalRHS(node.Expr, "r4")
+		//Assume the RHS is always an array
+		//So the RHS type is an Ident
+		//Load the length of the array into the register
+		appendAssembly(cg.instrs, "LDR r4, [r4]", 1, 1)
 	case ORD:
-
+		cg.evalOrd(node)
 	case CHR:
-
+		cg.evalRHS(node.Expr, "r4")
+		fmt.Println("chr not done")
 	default:
+		fmt.Println("oh no")
 		fmt.Println(node.Unary)
 	}
 
