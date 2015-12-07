@@ -14,7 +14,8 @@ type CodeGenerator struct {
 	root              *Program          // Root of the AST
 	instrs            *ARMList          // List of assembly instructions for the program
 	msgInstrs         *ARMList          // List of assembly instructions to create msg labels
-	symTable          *SymbolTable      // Used to map variable identifiers to their values
+	symTable          *SymbolTable      // Used to map variable identifiers to their types
+	funcSymTable      *SymbolTable      // Used to map function variable indentifier to ther types
 	funcInstrs        *ARMList          // List of assembly instructions that define functions and their labels
 	progFuncInstrs    *ARMList          // List of assembly instructions that define program generated functions e.g. p_print_string
 	progFuncNames     *[]string         // List of program defined function names. Used to avoid program redefinitions
@@ -66,8 +67,7 @@ func (cg CodeGenerator) setNewScope(varSpaceSize int) {
 	}
 
 	cg.currStack = newScope
-
-	//TODO: CODE TO SET CHILD SYMBOL TABLE
+	cg.symTable = cg.symTable.GetFrontChild()
 }
 
 // Creates new scope data for a new function scope. Sets isFunc to true which
@@ -88,8 +88,8 @@ func (cg CodeGenerator) setNewFuncScope(varSpaceSize int, paramMap *map[Param]in
 // Removes current scope and replaces it with the parent scope
 func (cg CodeGenerator) removeCurrScope() {
 	cg.currStack = cg.currStack.parentScope
-
-	//TODO: CODE TO SET CHILD SYMBOL TABLE
+	cg.symTable = cg.symTable.Parent
+	cg.symTable.RemoveChild()
 }
 
 // Returns cg.funcInstrs iff the current scope is a function scope. cg.instrs otherwise
@@ -98,6 +98,15 @@ func (cg CodeGenerator) currInstrs() *ARMList {
 		return cg.funcInstrs
 	} else {
 		return cg.instrs
+	}
+}
+
+// Returns cg.funcSymbolTable iff the current scope is a function scope. cg.symbolTable otherwise
+func (cg CodeGenerator) currSymTable() *SymbolTable {
+	if cg.currStack.isFunc {
+		return cg.funcSymTable
+	} else {
+		return cg.symTable
 	}
 }
 
@@ -160,10 +169,19 @@ func (cg CodeGenerator) AddCheckProgName(progName string) bool {
 // Using symbol tables, a offset to the sp is returned so the ident value can
 // be executed
 func (cg CodeGenerator) getIdentOffset(ident Ident) (int, Type) {
-	// TO BE COMPLETED
-	//I MODIFIED THIS SO SOME TEST CASES WILL PASS @AYMAN
-	//CHANGED FROM 100 to 4
-	return 1, Int
+
+	return cg.findIdentOffset(ident, cg.currSymTable())
+}
+
+// Checks if the ident is in the given symbol table. If not the parents are searched
+// The function assumes an offset will be found eventually (semantically correct)
+func (cg CodeGenerator) findIdentOffset(ident Ident, symTable *SymbolTable) (int, Type) {
+	if !symTable.IsOffsetDefined(ident) {
+		return cg.findIdentOffset(ident, symTable.Parent)
+	}
+
+	return symTable.GetOffset(string(ident)), symTable.GetTypeOfIdent(ident)
+
 }
 
 func (cg CodeGenerator) getNewLabel() string {
