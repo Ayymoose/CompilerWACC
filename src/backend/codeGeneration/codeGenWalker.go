@@ -653,7 +653,7 @@ func (cg CodeGenerator) cgVisitExitStat(node Exit) {
 }
 
 func (cg CodeGenerator) cgVisitPrintStat(node Print) {
-	expr := node.Expr
+	/*expr := node.Expr
 	dstReg := "r0"
 
 	// Get value of expr into dstReg
@@ -699,7 +699,7 @@ func (cg CodeGenerator) cgVisitPrintStat(node Print) {
 		appendAssembly(cg.currInstrs(), "Error: type not implemented", 1, 1)
 		typeOf(expr)
 
-	}
+	}*/
 }
 
 func (cg CodeGenerator) cgVisitPrintlnStat(node Println) {
