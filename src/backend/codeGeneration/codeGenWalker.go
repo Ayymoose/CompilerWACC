@@ -654,10 +654,10 @@ func (cg CodeGenerator) cgVisitExitStat(node Exit) {
 
 func (cg CodeGenerator) cgVisitPrintStat(node Print) {
 	expr := node.Expr
-	//dstReg := "r0"
+	dstReg := "r0"
 
 	// Get value of expr into dstReg
-	//cg.evalRHS(expr, dstReg)
+	cg.evalRHS(expr, dstReg)
 
 	exprType := cg.eval(expr)
 	switch exprType.(type) {
