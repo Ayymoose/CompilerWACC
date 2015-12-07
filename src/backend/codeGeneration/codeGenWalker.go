@@ -523,11 +523,11 @@ func (cg CodeGenerator) cgEvalStat(stat interface{}) {
 		cg.cgVisitReturnStat(stat.(Return))
 	case Exit:
 		cg.cgVisitExitStat(stat.(Exit))
-		/*	case Print:
-				cg.cgVisitPrintStat(stat.(Print))
-			case Println:
-				cg.cgVisitPrintlnStat(stat.(Println))
-		*/ /*		case If:
+	case Print:
+		cg.cgVisitPrintStat(stat.(Print))
+	case Println:
+		cg.cgVisitPrintlnStat(stat.(Println))
+		/*		case If:
 					cg.cgVisitIfStat(stat.(If))
 				case While:
 					cg.cgVisitWhileStat(stat.(While))
@@ -654,10 +654,10 @@ func (cg CodeGenerator) cgVisitExitStat(node Exit) {
 
 func (cg CodeGenerator) cgVisitPrintStat(node Print) {
 	expr := node.Expr
-	dstReg := "r0"
+	//dstReg := "r0"
 
 	// Get value of expr into dstReg
-	cg.evalRHS(expr, dstReg)
+	//cg.evalRHS(expr, dstReg)
 
 	exprType := cg.eval(expr)
 	switch exprType.(type) {
