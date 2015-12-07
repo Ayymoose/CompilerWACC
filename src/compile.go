@@ -4,16 +4,15 @@ import (
 	. "ast"
 	cg "backend/codeGeneration"
 	fw "backend/filewriter"
-	"path/filepath"
 	"fmt"
 	"io/ioutil"
 	"os"
 	"parser"
+	"path/filepath"
 )
 
 const SYNTAX_ERROR = 100
 const SEMANTIC_ERROR = 200
-
 
 // wacc_examples\valid\expressions\andExpr.wacc
 // wacc_examples\valid\basic\exit\exitBasic.wacc
@@ -28,7 +27,7 @@ const SEMANTIC_ERROR = 200
 // wacc_examples/valid/pairs/createPair03.wacc
 
 func main() {
-		armList := &fw.ARMList{}
+	armList := &fw.ARMList{}
 
 	file := os.Args[1] // index 1 is file path
 	b, err := ioutil.ReadFile(file)
@@ -53,13 +52,14 @@ func main() {
 	}
 
 	fmt.Println("SUCCESSFUL FRONTEND: ")
-		filename := filepath.Base(file)
-		ext := filepath.Ext(filename)
-		fileARM := filename[0:len(filename)-len(ext)]+".s"
-		fmt.Println(fileARM)
+	filename := filepath.Base(file)
+	ext := filepath.Ext(filename)
+	fileARM := filename[0:len(filename)-len(ext)] + ".s"
+	fmt.Println(fileARM)
+
 	codeGen := cg.ConstructCodeGenerator(root, armList, *root.SymbolTable)
 	codeGen.GenerateCode()
-		for _, instr := range *armList {
+	for _, instr := range *armList {
 		fmt.Print(instr)
 	}
 	armList.WriteToFile(fileARM)
