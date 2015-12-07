@@ -466,7 +466,7 @@ func (cg CodeGenerator) evalArrayElem(t Evaluation, reg1 string, reg2 string) {
 	appendAssembly(cg.currInstrs(), "ADD " + reg1 +", "+ reg1+", " +reg2+", LSL #2", 1, 1)
 	appendAssembly(cg.currInstrs(), "LDR "+reg1+", ["+reg1+"]", 1, 1)
 
-	/ /Hack
+	// Hack
 	if reg1 != "r0" {
 		appendAssembly(cg.currInstrs(), "MOV r0, "+reg1, 1, 1)
 	}
