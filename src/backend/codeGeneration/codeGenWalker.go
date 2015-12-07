@@ -258,7 +258,7 @@ func (cg CodeGenerator) removeStackSpace(stackSize int) {
 // Evalutes the RHS of an expression
 func (cg CodeGenerator) evalRHS(t Evaluation, srcReg string) {
 
-	/*switch t.(type) {
+	switch t.(type) {
 	// Literals
 	case Integer:
 		appendAssembly(cg.currInstrs(), "LDR "+srcReg+", ="+strconv.Itoa(int(t.(Integer))), 1, 1)
@@ -270,7 +270,7 @@ func (cg CodeGenerator) evalRHS(t Evaluation, srcReg string) {
 		appendAssembly(cg.currInstrs(), "LDR "+srcReg+", "+cg.getMsgLabel(string(t.(Str))), 1, 1)
 	case PairLiter:
 		appendAssembly(cg.currInstrs(), "LDR "+srcReg+", =0", 1, 1)
-	case Ident:
+	/*case Ident:
 		//If the Ident is a BOOL we use LDRSB !
 		//Fix
 		var value, _ = cg.getIdentOffset(t.(Ident))
@@ -289,10 +289,10 @@ func (cg CodeGenerator) evalRHS(t Evaluation, srcReg string) {
 		cg.evalPairElem(t.(PairElem), srcReg)
 	case Call:
 		// TODO UNCOMMENT This when you are sure that its not causing the infinite loop
-	//	cg.cgVisitCallStat(t.(Call).Ident, t.(Call).ParamList)
+	//	cg.cgVisitCallStat(t.(Call).Ident, t.(Call).ParamList)*/
 	default:
 		fmt.Println("ERROR: Expression can not be evaluated")
-	}*/
+	}
 }
 
 // Evalute a pair element
