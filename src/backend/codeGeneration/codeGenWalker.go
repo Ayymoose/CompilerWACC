@@ -345,7 +345,7 @@ func (cg CodeGenerator) cgVisitPrintStat(node Print) {
 			// Define relevant print function definition (iff it hasnt been defined)
 			cg.cgVisitPrintStatFunc_H("p_print_reference")
 		}
-	case PairType:
+	case PairType, ArrayType:
 		// BL p_print_reference
 		appendAssembly(cg.instrs, "BL p_print_reference", 1, 1)
 		// Define relevant print function definition (iff it hasnt been defined)
