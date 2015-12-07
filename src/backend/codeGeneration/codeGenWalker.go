@@ -903,21 +903,23 @@ func (cg CodeGenerator) cgVisitUnopExpr(node Unop) {
 func (cg CodeGenerator) cgVisitBinopExpr(node Binop) {
 	cg.evalRHS(node.Left, "r0")
 	appendAssembly(cg.currInstrs(), "PUSH {r0}", 1, 1)
+	// TODO WE INCREMENT THE STACK POINTER AS WE PUSH ONTO THE STACK
 	cg.evalRHS(node.Right, "r0")
 	appendAssembly(cg.currInstrs(), "MOV r1, r0", 1, 1)
 	appendAssembly(cg.currInstrs(), "POP {r0}", 1, 1)
+	// TODO WE DECREMENT THE STACK POINTER AS WE POP OFF THE STACK
 	switch node.Binary {
 	case PLUS:
 		appendAssembly(cg.currInstrs(), "ADDS r0, r0, r1", 1, 1)
 		appendAssembly(cg.currInstrs(), "BLVS p_throw_overflow_error", 1, 1)
 		cg.cgVisitBinopExpr_H("p_throw_overflow_error")
 	case SUB:
-		appendAssembly(cg.currInstrs(), "SUBS r4, r4, r5", 1, 1)
+		appendAssembly(cg.currInstrs(), "SUBS r0, r0, r1", 1, 1)
 		appendAssembly(cg.currInstrs(), "BLVS p_throw_overflow_error", 1, 1)
 		cg.cgVisitBinopExpr_H("p_throw_overflow_error")
 	case MUL:
-		appendAssembly(cg.currInstrs(), "SMULL r4, r5, r4, r5", 1, 1)
-		appendAssembly(cg.currInstrs(), "CMP r5, r4, ASR #31", 1, 1)
+		appendAssembly(cg.currInstrs(), "SMULL r0, r1, r0, r1", 1, 1)
+		appendAssembly(cg.currInstrs(), "CMP r1, r0, ASR #31", 1, 1)
 		appendAssembly(cg.currInstrs(), "BLNE p_throw_overflow_error", 1, 1)
 		cg.cgVisitBinopExpr_H("p_throw_overflow_error")
 	case DIV:
