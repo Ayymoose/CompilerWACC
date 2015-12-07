@@ -38,6 +38,8 @@ const (
 	NULL_REFERENCE       = "\"NullReferenceError: dereference a null reference\\n\\0\""
 	ARRAY_INDEX_NEGATIVE = "\"ArrayIndexOutOfBoundsError: negative index\\n\\0\""
 	ARRAY_INDEX_LARGE    = "\"ArrayIndexOutOfBoundsError: index too large\\n\\0\""
+	OVERFLOW             = "\"OverflowError: the result is too small/large to store in a 4-byte signed-integer.\\n\\0\""
+	DIVIDE_BY_ZERO       = "\"DivideByZeroError: divide or modulo by zero\\n\\0\""
 )
 
 // Function global variable
@@ -808,24 +810,78 @@ func (cg CodeGenerator) cgVisitBinopExpr(node Binop) {
 	//Left   Evaluation
 	//Right  Evaluation
 	//cg.eval(node) // Type
+
+	cg.evalRHS(node.Left, "r4")
+	cg.evalRHS(node.Right, "r5")
 	switch node.Binary {
 	case PLUS:
-		cg.evalRHS(node.Left, "r4")
-		cg.evalRHS(node.Right, "r5")
 		appendAssembly(cg.instrs, "ADDS r4, r4, r5", 1, 1)
 		appendAssembly(cg.instrs, "BLVS p_throw_overflow_error", 1, 1)
+		cg.cgVisitBinopExpr_H("p_throw_overflow_error")
 	case SUB:
-
+		appendAssembly(cg.instrs, "SUBS r4, r4, r5", 1, 1)
+		appendAssembly(cg.instrs, "BLVS p_throw_overflow_error", 1, 1)
+		cg.cgVisitBinopExpr_H("p_throw_overflow_error")
 	case MUL:
+		appendAssembly(cg.instrs, "SMULL r4, r5, r4, r5", 1, 1)
+		appendAssembly(cg.instrs, "CMP r5, r4, ASR #31", 1, 1)
+		appendAssembly(cg.instrs, "BLNE p_throw_overflow_error", 1, 1)
+		cg.cgVisitBinopExpr_H("p_throw_overflow_error")
 	case DIV:
+		appendAssembly(cg.instrs, "MOV r0, r4", 1, 1)
+		appendAssembly(cg.instrs, "MOV r1, r5", 1, 1)
+		appendAssembly(cg.instrs, "BL p_check_divide_by_zero", 1, 1)
+		appendAssembly(cg.instrs, "BL __aeabi_idiv", 1, 1)
+		appendAssembly(cg.instrs, "MOV r4, r0", 1, 1)
+		cg.cgVisitBinopExpr_H("p_check_divide_by_zero")
 	case MOD:
+		appendAssembly(cg.instrs, "MOV r0, r4", 1, 1)
+		appendAssembly(cg.instrs, "MOV r1, r5", 1, 1)
+		appendAssembly(cg.instrs, "BL p_check_divide_by_zero", 1, 1)
+		appendAssembly(cg.instrs, "BL __aeabi_idivmod", 1, 1)
+		appendAssembly(cg.instrs, "MOV r4, r1", 1, 1)
+		cg.cgVisitBinopExpr_H("p_check_divide_by_zero")
 	case AND:
+		appendAssembly(cg.instrs, "AND r4, r4, r5", 1, 1)
 	case OR:
-	case LT:
-	case LTE:
-	case GT:
-	case GTE:
-	case EQ:
-	case NEQ:
+		appendAssembly(cg.instrs, "ORR r4, r4, r5", 1, 1)
+	case LT, LTE, GT, GTE:
+		appendAssembly(cg.instrs, "CMP r4, r5", 1, 1)
+		appendAssembly(cg.instrs, "MOVLT r4, #1", 1, 1)
+		appendAssembly(cg.instrs, "MOVGE r4, #0", 1, 1)
+	case EQ, NEQ:
+		appendAssembly(cg.instrs, "CMP r4, r5", 1, 1)
+		appendAssembly(cg.instrs, "MOVEQ r4, #1", 1, 1)
+		appendAssembly(cg.instrs, "MOVNE r4, #0", 1, 1)
+	}
+}
+
+// cgVisitBinopExpr helper function
+// Adds a function definition to the progFuncInstrs ARMList depending on the
+// function name provided
+func (cg CodeGenerator) cgVisitBinopExpr_H(funcName string) {
+	if !cg.AddCheckProgName(funcName) {
+		// if the program function has been defined previously
+		// a redefinition is unnecessary
+		// funcLabel:
+		appendAssembly(cg.progFuncInstrs, funcName+":", 0, 1)
+
+		switch funcName {
+		case "p_throw_overflow_error":
+			appendAssembly(cg.progFuncInstrs, "LDR r0, "+cg.getMsgLabel(OVERFLOW), 1, 1)
+			appendAssembly(cg.progFuncInstrs, "BL p_throw_runtime_error", 1, 1)
+			cg.cgVisitBinopExpr_H("p_throw_runtime_error")
+		case "p_throw_runtime_error":
+			appendAssembly(cg.progFuncInstrs, "BL p_print_string", 1, 1)
+			appendAssembly(cg.progFuncInstrs, "MOV r0, #-1", 1, 1)
+			appendAssembly(cg.progFuncInstrs, "BL exit", 1, 1)
+			cg.cgVisitPrintStatFunc_H("p_print_string")
+		case "p_check_divide_by_zero":
+			appendAssembly(cg.progFuncInstrs, "PUSH {lr}", 1, 1)
+			appendAssembly(cg.progFuncInstrs, "CMP r1, #0", 1, 1)
+			appendAssembly(cg.progFuncInstrs, "LDREQ r0, "+cg.getMsgLabel(DIVIDE_BY_ZERO), 1, 1)
+			appendAssembly(cg.progFuncInstrs, "BLEQ p_throw_runtime_error", 1, 1)
+			appendAssembly(cg.progFuncInstrs, "POP {pc}", 1, 1)
+		}
 	}
 }
