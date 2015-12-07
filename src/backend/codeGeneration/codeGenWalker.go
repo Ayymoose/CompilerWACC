@@ -859,7 +859,6 @@ func (cg CodeGenerator) cgVisitUnopExpr(node Unop) {
 	default:
 		fmt.Println(node.Unary)
 	}
-
 }
 
 func (cg CodeGenerator) cgVisitBinopExpr(node Binop) {
