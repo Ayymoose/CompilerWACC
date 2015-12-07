@@ -53,6 +53,7 @@ type scopeData struct {
 	isFunc      bool           // true iff the scope date is used for a function scope
 	paramMap    *map[Param]int // Map of function parameters to their offset from the start of the function
 	// only used if isFunc is true
+	extraOffset int // Extra offset used when stack is used to store intermediate values
 }
 
 // Creates new scope data for a new scope.
@@ -68,6 +69,7 @@ func (cg CodeGenerator) setNewScope(varSpaceSize int) {
 	}
 
 	cg.currStack = newScope
+
 	cg.symTable = cg.symTable.GetFrontChild()
 }
 
@@ -93,6 +95,16 @@ func (cg CodeGenerator) removeCurrScope() {
 	if cg.symTable != nil {
 		cg.symTable.RemoveChild()
 	}
+}
+
+// Used to add extra offset to the current scope when intermediate values are stored on the stack
+func (cg CodeGenerator) addExtraOffset(n int) {
+	cg.currStack.extraOffset += n
+}
+
+// Used to sub extra offset to the current scope when intermediate values are stored on the stack
+func (cg CodeGenerator) subExtraOffset(n int) {
+	cg.currStack.extraOffset -= n
 }
 
 // Returns cg.funcInstrs iff the current scope is a function scope. cg.instrs otherwise
@@ -185,10 +197,10 @@ func (cg CodeGenerator) findIdentOffset(ident Ident, symTable *SymbolTable,
 	}
 
 	if !symTable.IsOffsetDefined(ident) {
-		return cg.findIdentOffset(ident, symTable.Parent, scope.parentScope, accOffset+scope.currP)
+		return cg.findIdentOffset(ident, symTable.Parent, scope.parentScope, accOffset+scope.currPcg.currStack.extraOffset)
 	}
 
-	return symTable.GetOffset(string(ident)) + accOffset, symTable.GetTypeOfIdent(ident)
+	return symTable.GetOffset(string(ident)) + accOffset + cg.currStack.extraOffset, symTable.GetTypeOfIdent(ident)
 
 }
 

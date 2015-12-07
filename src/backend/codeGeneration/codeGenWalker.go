@@ -233,7 +233,7 @@ func (cg CodeGenerator) CfunctionCall(functionName string, argument string) {
 // These helper functions allocate and deallocate space on the stack for us
 
 func (cg CodeGenerator) createStackSpace(stackSize int) {
-	if STACK_SIZE_MAX-stackSize < 0 {
+	if stackSize > STACK_SIZE_MAX {
 		appendAssembly(cg.currInstrs(), "SUB sp, sp, #"+strconv.Itoa(STACK_SIZE_MAX), 1, 1)
 		cg.createStackSpace(stackSize - STACK_SIZE_MAX)
 	} else {
@@ -243,7 +243,7 @@ func (cg CodeGenerator) createStackSpace(stackSize int) {
 
 // This cleans the stack
 func (cg CodeGenerator) removeStackSpace(stackSize int) {
-	if STACK_SIZE_MAX-stackSize < 0 {
+	if stackSize > STACK_SIZE_MAX {
 		appendAssembly(cg.currInstrs(), "ADD sp, sp, #"+strconv.Itoa(STACK_SIZE_MAX), 1, 1)
 		cg.removeStackSpace(stackSize - STACK_SIZE_MAX)
 	} else {
@@ -471,9 +471,9 @@ func (cg CodeGenerator) evalOrd(node Unop) {
 
 func (cg CodeGenerator) cgVisitProgram(node *Program) {
 	// Set properties of global scope
-	cg.globalStack.size = GetScopeVarSize(node.StatList)
-	cg.globalStack.currP = cg.globalStack.size
-	cg.globalStack.isFunc = false
+	cg.currStack.size = GetScopeVarSize(node.StatList)
+	cg.currStack.currP = cg.currStack.size
+	cg.currStack.isFunc = false
 
 	// ASSIGN functions to global variable
 	// WE WIll only traverse them if they are called
@@ -492,7 +492,7 @@ func (cg CodeGenerator) cgVisitProgram(node *Program) {
 	appendAssembly(cg.currInstrs(), "PUSH {lr}", 1, 1)
 
 	// sub sp, sp, #n to create variable space
-	if cg.globalStack.size > 0 {
+	if cg.currStack.size > 0 {
 		cg.createStackSpace(cg.globalStack.size)
 	}
 
@@ -502,7 +502,7 @@ func (cg CodeGenerator) cgVisitProgram(node *Program) {
 	}
 
 	// add sp, sp, #n to remove variable space
-	if cg.globalStack.size > 0 {
+	if cg.currStack.size > 0 {
 		cg.removeStackSpace(cg.globalStack.size)
 	}
 
@@ -769,15 +769,18 @@ func (cg CodeGenerator) cgVisitScopeStat(node Scope) {
 	cg.setNewScope(varSpaceSize)
 
 	// sub sp, sp, #n to create variable space
-	appendAssembly(cg.currInstrs(), "SUB sp, sp, #"+strconv.Itoa(varSpaceSize), 1, 1)
-
+	if varSpaceSize > 0 {
+		appendAssembly(cg.currInstrs(), "SUB sp, sp, #"+strconv.Itoa(varSpaceSize), 1, 1)
+	}
 	// traverse all statements by switching on statement type
 	for _, stat := range node.StatList {
 		cg.cgEvalStat(stat)
 	}
 
 	// add sp, sp, #n to remove variable space
-	appendAssembly(cg.currInstrs(), "ADD sp, sp, #"+strconv.Itoa(varSpaceSize), 1, 1)
+	if varSpaceSize > 0 {
+		appendAssembly(cg.currInstrs(), "ADD sp, sp, #"+strconv.Itoa(varSpaceSize), 1, 1)
+	}
 
 	cg.removeCurrScope()
 
