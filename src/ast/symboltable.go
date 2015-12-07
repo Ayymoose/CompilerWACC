@@ -47,7 +47,17 @@ func (symbolTable *SymbolTable) GetOffset(key string) int {
 
 // Checks if the key is already declared in the offset map
 func (symbolTable *SymbolTable) IsOffsetDefined(key Ident) bool {
-	return symbolTable.isDefined(key)
+	if symbolTable == nil {
+		return false
+	}
+
+	_, inMap := symbolTable.OffsetVals[string(key)]
+
+	if inMap {
+		return true
+	} else {
+		return symbolTable.Parent.IsOffsetDefined(key)
+	}
 }
 
 // Checks if the key is already declared in the symbol table

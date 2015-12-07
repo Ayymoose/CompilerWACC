@@ -233,7 +233,7 @@ func (cg CodeGenerator) CfunctionCall(functionName string, argument string) {
 // These helper functions allocate and deallocate space on the stack for us
 
 func (cg CodeGenerator) createStackSpace(stackSize int) {
-	if STACK_SIZE_MAX-stackSize < 0 {
+	if stackSize > STACK_SIZE_MAX {
 		appendAssembly(cg.currInstrs(), "SUB sp, sp, #"+strconv.Itoa(STACK_SIZE_MAX), 1, 1)
 		cg.createStackSpace(stackSize - STACK_SIZE_MAX)
 	} else {
@@ -243,7 +243,7 @@ func (cg CodeGenerator) createStackSpace(stackSize int) {
 
 // This cleans the stack
 func (cg CodeGenerator) removeStackSpace(stackSize int) {
-	if STACK_SIZE_MAX-stackSize < 0 {
+	if stackSize > STACK_SIZE_MAX {
 		appendAssembly(cg.currInstrs(), "ADD sp, sp, #"+strconv.Itoa(STACK_SIZE_MAX), 1, 1)
 		cg.removeStackSpace(stackSize - STACK_SIZE_MAX)
 	} else {
@@ -497,9 +497,9 @@ func (cg CodeGenerator) evalOrd(node Unop) {
 
 func (cg CodeGenerator) cgVisitProgram(node *Program) {
 	// Set properties of global scope
-	cg.globalStack.size = GetScopeVarSize(node.StatList)
-	cg.globalStack.currP = cg.globalStack.size
-	cg.globalStack.isFunc = false
+	cg.currStack.size = GetScopeVarSize(node.StatList)
+	cg.currStack.currP = cg.currStack.size
+	cg.currStack.isFunc = false
 
 	// ASSIGN functions to global variable
 	// WE WIll only traverse them if they are called
@@ -518,7 +518,7 @@ func (cg CodeGenerator) cgVisitProgram(node *Program) {
 	appendAssembly(cg.currInstrs(), "PUSH {lr}", 1, 1)
 
 	// sub sp, sp, #n to create variable space
-	if cg.globalStack.size > 0 {
+	if cg.currStack.size > 0 {
 		cg.createStackSpace(cg.globalStack.size)
 	}
 
@@ -528,7 +528,7 @@ func (cg CodeGenerator) cgVisitProgram(node *Program) {
 	}
 
 	// add sp, sp, #n to remove variable space
-	if cg.globalStack.size > 0 {
+	if cg.currStack.size > 0 {
 		cg.removeStackSpace(cg.globalStack.size)
 	}
 
@@ -795,15 +795,18 @@ func (cg CodeGenerator) cgVisitScopeStat(node Scope) {
 	cg.setNewScope(varSpaceSize)
 
 	// sub sp, sp, #n to create variable space
-	appendAssembly(cg.currInstrs(), "SUB sp, sp, #"+strconv.Itoa(varSpaceSize), 1, 1)
-
+	if varSpaceSize > 0 {
+		appendAssembly(cg.currInstrs(), "SUB sp, sp, #"+strconv.Itoa(varSpaceSize), 1, 1)
+	}
 	// traverse all statements by switching on statement type
 	for _, stat := range node.StatList {
 		cg.cgEvalStat(stat)
 	}
 
 	// add sp, sp, #n to remove variable space
-	appendAssembly(cg.currInstrs(), "ADD sp, sp, #"+strconv.Itoa(varSpaceSize), 1, 1)
+	if varSpaceSize > 0 {
+		appendAssembly(cg.currInstrs(), "ADD sp, sp, #"+strconv.Itoa(varSpaceSize), 1, 1)
+	}
 
 	cg.removeCurrScope()
 
@@ -927,25 +930,25 @@ func (cg CodeGenerator) cgVisitUnopExpr(node Unop) {
 }
 
 func (cg CodeGenerator) cgVisitBinopExpr(node Binop) {
-	//Binary int
-	//Left   Evaluation
-	//Right  Evaluation
-	//cg.eval(node) // Type
-
-	cg.evalRHS(node.Left, "r4")
-	cg.evalRHS(node.Right, "r5")
+	cg.evalRHS(node.Left, "r0")
+	appendAssembly(cg.currInstrs(), "PUSH {r0}", 1, 1)
+	// TODO WE INCREMENT THE STACK POINTER AS WE PUSH ONTO THE STACK
+	cg.evalRHS(node.Right, "r0")
+	appendAssembly(cg.currInstrs(), "MOV r1, r0", 1, 1)
+	appendAssembly(cg.currInstrs(), "POP {r0}", 1, 1)
+	// TODO WE DECREMENT THE STACK POINTER AS WE POP OFF THE STACK
 	switch node.Binary {
 	case PLUS:
-		appendAssembly(cg.currInstrs(), "ADDS r4, r4, r5", 1, 1)
+		appendAssembly(cg.currInstrs(), "ADDS r0, r0, r1", 1, 1)
 		appendAssembly(cg.currInstrs(), "BLVS p_throw_overflow_error", 1, 1)
 		cg.cgVisitBinopExpr_H("p_throw_overflow_error")
 	case SUB:
-		appendAssembly(cg.currInstrs(), "SUBS r4, r4, r5", 1, 1)
+		appendAssembly(cg.currInstrs(), "SUBS r0, r0, r1", 1, 1)
 		appendAssembly(cg.currInstrs(), "BLVS p_throw_overflow_error", 1, 1)
 		cg.cgVisitBinopExpr_H("p_throw_overflow_error")
 	case MUL:
-		appendAssembly(cg.currInstrs(), "SMULL r4, r5, r4, r5", 1, 1)
-		appendAssembly(cg.currInstrs(), "CMP r5, r4, ASR #31", 1, 1)
+		appendAssembly(cg.currInstrs(), "SMULL r0, r1, r0, r1", 1, 1)
+		appendAssembly(cg.currInstrs(), "CMP r1, r0, ASR #31", 1, 1)
 		appendAssembly(cg.currInstrs(), "BLNE p_throw_overflow_error", 1, 1)
 		cg.cgVisitBinopExpr_H("p_throw_overflow_error")
 	case DIV:
@@ -964,34 +967,41 @@ func (cg CodeGenerator) cgVisitBinopExpr(node Binop) {
 		cg.cgVisitBinopExpr_H("p_check_divide_by_zero")
 	case AND:
 		appendAssembly(cg.currInstrs(), "AND r4, r4, r5", 1, 1)
+		appendAssembly(cg.currInstrs(), "MOV r0, r4", 1, 1)
 	case OR:
 		appendAssembly(cg.currInstrs(), "ORR r4, r4, r5", 1, 1)
+		appendAssembly(cg.currInstrs(), "MOV r0, r4", 1, 1)
 	case LT:
 		appendAssembly(cg.currInstrs(), "CMP r4, r5", 1, 1)
 		appendAssembly(cg.currInstrs(), "MOVLT r4, #1", 1, 1)
 		appendAssembly(cg.currInstrs(), "MOVGE r4, #0", 1, 1)
+		appendAssembly(cg.currInstrs(), "MOV r0, r4", 1, 1)
 	case GT:
 		appendAssembly(cg.currInstrs(), "CMP r4, r5", 1, 1)
 		appendAssembly(cg.currInstrs(), "MOVGT r4, #1", 1, 1)
 		appendAssembly(cg.currInstrs(), "MOVLE r4, #0", 1, 1)
+		appendAssembly(cg.currInstrs(), "MOV r0, r4", 1, 1)
 	case LTE:
 		appendAssembly(cg.currInstrs(), "CMP r4, r5", 1, 1)
 		appendAssembly(cg.currInstrs(), "MOVLE r4, #1", 1, 1)
 		appendAssembly(cg.currInstrs(), "MOVGT r4, #0", 1, 1)
+		appendAssembly(cg.currInstrs(), "MOV r0, r4", 1, 1)
 	case GTE:
 		appendAssembly(cg.currInstrs(), "CMP r4, r5", 1, 1)
 		appendAssembly(cg.currInstrs(), "MOVGE r4, #1", 1, 1)
 		appendAssembly(cg.currInstrs(), "MOVLT r4, #0", 1, 1)
+		appendAssembly(cg.currInstrs(), "MOV r0, r4", 1, 1)
 	case EQ:
 		appendAssembly(cg.currInstrs(), "CMP r4, r5", 1, 1)
 		appendAssembly(cg.currInstrs(), "MOVEQ r4, #1", 1, 1)
 		appendAssembly(cg.currInstrs(), "MOVNE r4, #0", 1, 1)
+		appendAssembly(cg.currInstrs(), "MOV r0, r4", 1, 1)
 	case NEQ:
 		appendAssembly(cg.currInstrs(), "CMP r4, r5", 1, 1)
 		appendAssembly(cg.currInstrs(), "MOVNE r4, #1", 1, 1)
 		appendAssembly(cg.currInstrs(), "MOVEQ r4, #0", 1, 1)
+		appendAssembly(cg.currInstrs(), "MOV r0, r4", 1, 1)
 	}
-	appendAssembly(cg.currInstrs(), "MOV r0, r4", 1, 1)
 }
 
 // cgVisitBinopExpr helper function
