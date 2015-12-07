@@ -2,8 +2,8 @@ package main
 
 import (
 	. "ast"
-	cg "backend/codeGeneration"
-	fw "backend/filewriter"
+	//	cg "backend/codeGeneration"
+	//	fw "backend/filewriter"
 	"fmt"
 	"io/ioutil"
 	"os"
@@ -27,7 +27,7 @@ const SEMANTIC_ERROR = 200
 // wacc_examples/valid/pairs/createPair03.wacc
 
 func main() {
-	armList := &fw.ARMList{}
+	//		armList := &fw.ARMList{}
 
 	file := os.Args[1] // index 1 is file path
 	b, err := ioutil.ReadFile(file)
@@ -57,10 +57,10 @@ func main() {
 	fileARM := filename[0:len(filename)-len(ext)] + ".s"
 	fmt.Println(fileARM)
 
-	codeGen := cg.ConstructCodeGenerator(root, armList, *root.SymbolTable)
-	codeGen.GenerateCode()
-	for _, instr := range *armList {
-		fmt.Print(instr)
-	}
-	armList.WriteToFile(fileARM)
+	/*	codeGen := cg.ConstructCodeGenerator(root, armList, *root.SymbolTable)
+		codeGen.GenerateCode()
+			for _, instr := range *armList {
+			fmt.Print(instr)
+		}
+		armList.WriteToFile(fileARM) */
 }
