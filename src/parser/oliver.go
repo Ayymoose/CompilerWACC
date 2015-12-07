@@ -631,7 +631,7 @@ parserdefault:
 		parserDollar = parserS[parserpt-4 : parserpt+1]
 		//line oliver.y:96
 		{
-			parserlex.(*Lexer).prog = &Program{FunctionList: parserDollar[2].functions, StatList: parserDollar[3].stmts, SymbolTable: &SymbolTable{Table: make(map[Ident]Type)}}
+			parserlex.(*Lexer).prog = &Program{FunctionList: parserDollar[2].functions, StatList: parserDollar[3].stmts, SymbolTable: NewInstance()}
 		}
 	case 2:
 		parserDollar = parserS[parserpt-2 : parserpt+1]
@@ -652,7 +652,7 @@ parserdefault:
 			if !checkStats(parserDollar[6].stmts) {
 				parserlex.Error("Missing return statement")
 			}
-			parserVAL.function = &Function{Ident: parserDollar[2].ident, ReturnType: parserDollar[1].typedefinition, StatList: parserDollar[6].stmts, SymbolTable: &SymbolTable{Table: make(map[Ident]Type)}}
+			parserVAL.function = &Function{Ident: parserDollar[2].ident, ReturnType: parserDollar[1].typedefinition, StatList: parserDollar[6].stmts, SymbolTable: NewInstance()}
 		}
 	case 5:
 		parserDollar = parserS[parserpt-8 : parserpt+1]
@@ -661,7 +661,7 @@ parserdefault:
 			if !checkStats(parserDollar[7].stmts) {
 				parserlex.Error("Missing return statement")
 			}
-			parserVAL.function = &Function{Ident: parserDollar[2].ident, ReturnType: parserDollar[1].typedefinition, StatList: parserDollar[7].stmts, ParameterTypes: parserDollar[4].params, SymbolTable: &SymbolTable{Table: make(map[Ident]Type)}}
+			parserVAL.function = &Function{Ident: parserDollar[2].ident, ReturnType: parserDollar[1].typedefinition, StatList: parserDollar[7].stmts, ParameterTypes: parserDollar[4].params, SymbolTable: NewInstance()}
 		}
 	case 6:
 		parserDollar = parserS[parserpt-3 : parserpt+1]
@@ -811,7 +811,7 @@ parserdefault:
 		parserDollar = parserS[parserpt-3 : parserpt+1]
 		//line oliver.y:146
 		{
-			parserVAL.stmt = Scope{StatList: parserDollar[2].stmts, SymbolTable: &SymbolTable{Table: make(map[Ident]Type)}}
+			parserVAL.stmt = Scope{StatList: parserDollar[2].stmts}
 		}
 	case 31:
 		parserDollar = parserS[parserpt-1 : parserpt+1]

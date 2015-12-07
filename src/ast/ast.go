@@ -163,8 +163,8 @@ type While struct {
 }
 
 type Scope struct {
-	SymbolTable *SymbolTable
-	StatList    []Statement
+	//SymbolTable *SymbolTable
+	StatList []Statement
 }
 
 // Read struct
