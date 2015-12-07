@@ -170,22 +170,23 @@ func (cg CodeGenerator) AddCheckProgName(progName string) bool {
 // Using symbol tables, a offset to the sp is returned so the ident value can
 // be executed
 func (cg CodeGenerator) getIdentOffset(ident Ident) (int, Type) {
-	return cg.findIdentOffset(ident, cg.currSymTable())
+	return cg.findIdentOffset(ident, cg.currSymTable(), cg.currStack, 0)
 }
 
 // Checks if the ident is in the given symbol table. If not the parents are searched
 // The function assumes an offset will be found eventually (semantically correct)
-func (cg CodeGenerator) findIdentOffset(ident Ident, symTable *SymbolTable) (int, Type) {
+func (cg CodeGenerator) findIdentOffset(ident Ident, symTable *SymbolTable,
+	scope *scopeData, accOffset int) (int, Type) {
 	if symTable == nil {
 		fmt.Println("ERROR: incorrect symbol table")
 		return 0, Int
 	}
 
 	if !symTable.IsOffsetDefined(ident) {
-		return cg.findIdentOffset(ident, symTable.Parent)
+		return cg.findIdentOffset(ident, symTable.Parent, scope.parentScope, accOffset+scope.currP)
 	}
 
-	return symTable.GetOffset(string(ident)), symTable.GetTypeOfIdent(ident)
+	return symTable.GetOffset(string(ident)) + accOffset, symTable.GetTypeOfIdent(ident)
 
 }
 
