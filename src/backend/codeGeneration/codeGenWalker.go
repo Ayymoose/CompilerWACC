@@ -226,12 +226,11 @@ func (cg CodeGenerator) CfunctionCall(functionName string, argument string) {
 	appendAssembly(cg.instrs, "BL "+functionName, 1, 1)
 }
 
-
 // Because the maximum amount we can add or subtract the stack pointer by is 1024
 // These helper functions allocate and deallocate space on the stack for us
 
 func (cg CodeGenerator) createStackSpace(stackSize int) {
-	if STACK_SIZE_MAX - stackSize < 0 {
+	if STACK_SIZE_MAX-stackSize < 0 {
 		appendAssembly(cg.instrs, "SUB sp, sp, #"+strconv.Itoa(STACK_SIZE_MAX), 1, 1)
 		cg.createStackSpace(stackSize - STACK_SIZE_MAX)
 	} else {
@@ -241,7 +240,7 @@ func (cg CodeGenerator) createStackSpace(stackSize int) {
 
 // This cleans the stack
 func (cg CodeGenerator) removeStackSpace(stackSize int) {
-	if STACK_SIZE_MAX - stackSize < 0 {
+	if STACK_SIZE_MAX-stackSize < 0 {
 		appendAssembly(cg.instrs, "ADD sp, sp, #"+strconv.Itoa(STACK_SIZE_MAX), 1, 1)
 		cg.removeStackSpace(stackSize - STACK_SIZE_MAX)
 	} else {
@@ -282,7 +281,7 @@ func (cg CodeGenerator) evalRHS(t Evaluation, srcReg string) {
 	case PairElem:
 		cg.evalPairElem(t.(PairElem), srcReg)
 	case Call:
-		cg.cgVisitCallStat(t.(Call).Ident, t.(Call).ParamList)
+	//	cg.cgVisitCallStat(t.(Call).Ident, t.(Call).ParamList)
 	default:
 		fmt.Println("ERROR: Expression can not be evaluated")
 	}
@@ -436,7 +435,6 @@ func (cg CodeGenerator) evalArrayElem(t Evaluation, reg1 string, reg2 string) {
 	cg.throwRunTimeError()
 	cg.cgVisitPrintStatFunc_H("p_print_string")
 }
-
 
 // VISIT FUNCTIONS -------------------------------------------------------------
 
@@ -839,19 +837,19 @@ func (cg CodeGenerator) cgVisitParameter(node Evaluation, offset int) {
 // VISIT EXPRESSIONS -----------------------------------------------------------
 
 func (cg CodeGenerator) cgVisitUnopExpr(node Unop) {
-  cg.evalRHS(node.Expr, "r4")
+	cg.evalRHS(node.Expr, "r4")
 	switch node.Unary {
-	  case SUB:
-			//Negate the result in the register
-			appendAssembly(cg.instrs, "RSBS r4, r4, #0", 1, 1)
-		case LEN:
+	case SUB:
+		//Negate the result in the register
+		appendAssembly(cg.instrs, "RSBS r4, r4, #0", 1, 1)
+	case LEN:
 
-		case ORD:
+	case ORD:
 
-		case CHR:
+	case CHR:
 
-		default:
-			fmt.Println(node.Unary)
+	default:
+		fmt.Println(node.Unary)
 	}
 
 }
