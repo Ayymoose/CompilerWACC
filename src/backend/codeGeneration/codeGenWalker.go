@@ -645,7 +645,7 @@ func (cg CodeGenerator) cgVisitExitStat(node Exit) {
 
 func (cg CodeGenerator) cgVisitPrintStat(node Print) {
 	expr := node.Expr
-	dstReg := "r4"
+	dstReg := "r0" // TODO This register choice is very critical
 
 	// Get value of expr into dstReg
 	cg.evalRHS(expr, dstReg)
