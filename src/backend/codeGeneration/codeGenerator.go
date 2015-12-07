@@ -197,7 +197,7 @@ func (cg CodeGenerator) findIdentOffset(ident Ident, symTable *SymbolTable,
 	}
 
 	if !symTable.IsOffsetDefined(ident) {
-		return cg.findIdentOffset(ident, symTable.Parent, scope.parentScope, accOffset+scope.currPcg.currStack.extraOffset)
+		return cg.findIdentOffset(ident, symTable.Parent, scope.parentScope, accOffset+scope.currP+cg.currStack.extraOffset)
 	}
 
 	return symTable.GetOffset(string(ident)) + accOffset + cg.currStack.extraOffset, symTable.GetTypeOfIdent(ident)
