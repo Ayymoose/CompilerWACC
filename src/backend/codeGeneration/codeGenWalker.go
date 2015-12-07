@@ -493,29 +493,29 @@ func (cg CodeGenerator) cgVisitProgram(node *Program) {
 func (cg CodeGenerator) cgEvalStat(stat interface{}) {
 	switch stat.(type) {
 	case Declare:
-		cg.cgVisitDeclareStat(stat.(Declare))
-		/*	case Assignment:
-				cg.cgVisitAssignmentStat(stat.(Assignment))
-			case Read:
-				cg.cgVisitReadStat(stat.(Read))
-			case Free:
-				cg.cgVisitFreeStat(stat.(Free))
-			case Return:
-				cg.cgVisitReturnStat(stat.(Return))
-			case Exit:
-				cg.cgVisitExitStat(stat.(Exit))
-			case Print:
-				cg.cgVisitPrintStat(stat.(Print))
-			case Println:
-				cg.cgVisitPrintlnStat(stat.(Println))
-			case If:
-				cg.cgVisitIfStat(stat.(If))
-			case While:
-				cg.cgVisitWhileStat(stat.(While))
-			case Scope:
-				cg.cgVisitScopeStat(stat.(Scope))
-			default:
-				//	""
+		/*		cg.cgVisitDeclareStat(stat.(Declare))
+				case Assignment:
+					cg.cgVisitAssignmentStat(stat.(Assignment))
+				case Read:
+					cg.cgVisitReadStat(stat.(Read))
+				case Free:
+					cg.cgVisitFreeStat(stat.(Free))
+				case Return:
+		*/cg.cgVisitReturnStat(stat.(Return))
+	case Exit:
+		cg.cgVisitExitStat(stat.(Exit))
+		/*		case Print:
+					cg.cgVisitPrintStat(stat.(Print))
+				case Println:
+					cg.cgVisitPrintlnStat(stat.(Println))
+				case If:
+					cg.cgVisitIfStat(stat.(If))
+				case While:
+					cg.cgVisitWhileStat(stat.(While))
+				case Scope:
+					cg.cgVisitScopeStat(stat.(Scope))
+				default:
+					//	""
 		*/
 	}
 }
