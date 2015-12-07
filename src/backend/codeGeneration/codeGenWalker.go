@@ -287,6 +287,7 @@ func (cg CodeGenerator) evalRHS(t Evaluation, srcReg string) {
 	case PairElem:
 		cg.evalPairElem(t.(PairElem), srcReg)
 	case Call:
+		// TODO UNCOMMENT This when you are sure that its not causing the infinite loop
 	//	cg.cgVisitCallStat(t.(Call).Ident, t.(Call).ParamList)
 	default:
 		fmt.Println("ERROR: Expression can not be evaluated")
@@ -558,7 +559,6 @@ func (cg CodeGenerator) cgVisitDeclareStat(node Declare) {
 }
 
 func (cg CodeGenerator) cgVisitAssignmentStat(node Assignment) {
-
 	// Type
 	constType := cg.eval(node.Lhs.(Ident))
 	rhs := node.Rhs
@@ -574,7 +574,6 @@ func (cg CodeGenerator) cgVisitAssignmentStat(node Assignment) {
 	case PairElem:
 		fmt.Println("Pair elem not done")
 	default:
-		fmt.Println("Oh no something went really wrong!")
 	}
 
 	switch constType {
@@ -604,21 +603,13 @@ func (cg CodeGenerator) cgVisitReadStat(node Read) {
 	constType := cg.eval(node.AssignLHS.(Ident)) // Type
 	appendAssembly(cg.instrs, "ADD r4, sp, #0", 1, 1)
 	appendAssembly(cg.instrs, "MOV r0, r4", 1, 1)
-	switch node.AssignLHS.(type) {
-	case ArrayElem:
-	case PairElem:
-	}
 	switch constType {
-	case Bool:
 	case Char:
 		appendAssembly(cg.instrs, "BL p_read_char", 1, 1)
 		cg.cgVisitReadStatFunc_H("p_read_char")
 	case Int:
 		appendAssembly(cg.instrs, "BL p_read_int", 1, 1)
 		cg.cgVisitReadStatFunc_H("p_read_int")
-	case String:
-	case Pair:
-		// TODO
 	}
 }
 
@@ -645,7 +636,7 @@ func (cg CodeGenerator) cgVisitExitStat(node Exit) {
 
 func (cg CodeGenerator) cgVisitPrintStat(node Print) {
 	expr := node.Expr
-	dstReg := "r0" // TODO This register choice is very critical
+	dstReg := "r0"
 
 	// Get value of expr into dstReg
 	cg.evalRHS(expr, dstReg)
@@ -655,16 +646,12 @@ func (cg CodeGenerator) cgVisitPrintStat(node Print) {
 	case ConstType:
 		switch exprType.(ConstType) {
 		case String:
-			//TODO CHECK WHAT HAPPENS WITH MOV
-			//		appendAssembly(cg.instrs, "MOV, r0, r4", 1, 1)
 			// BL p_print_string
 			appendAssembly(cg.instrs, "BL p_print_string", 1, 1)
 			// Define relevant print function definition (iff it hasnt been defined)
 			cg.cgVisitPrintStatFunc_H("p_print_string")
 
 		case Int:
-			//TODO CHECK WHAT HAPPENS WITH MOV
-			appendAssembly(cg.instrs, "MOV r0, r4", 1, 1)
 			// BL p_print_int
 			appendAssembly(cg.instrs, "BL p_print_int", 1, 1)
 			// Define relevant print function definition (iff it hasnt been defined)
