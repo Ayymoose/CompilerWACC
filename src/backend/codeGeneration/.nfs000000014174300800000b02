@@ -149,7 +149,9 @@ func (cg CodeGenerator) cgVisitFreeStatFunc_H(funcName string) {
 	}
 
 	// if the program function has not been defined previously
-	cg.throwRunTimeError()
+	if !cg.AddCheckProgName("p_throw_runtime_error") {
+		cg.throwRunTimeError()
+	}
 	cg.cgVisitPrintStatFunc_H("p_print_string")
 }
 
@@ -269,24 +271,10 @@ func (cg CodeGenerator) evalRHS(t Evaluation, srcReg string) {
 	case PairLiter:
 		appendAssembly(cg.currInstrs(), "LDR "+srcReg+", =0", 1, 1)
 	case Ident:
-
-		var offset, resType = cg.getIdentOffset(t.(Ident))
-		switch resType {
-		case resType.(ConstType):
-			switch resType.(ConstType) {
-			case Bool, Char:
-				appendAssembly(cg.currInstrs(), "LDRSB "+srcReg+", [sp, #"+strconv.Itoa(offset)+"]", 1, 1)
-			case Int, String:
-				// If the type in the stack is a bool it should be LDRSB
-				// TODO:FIXs
-				appendAssembly(cg.currInstrs(), "LDR "+srcReg+", [sp, #"+strconv.Itoa(offset)+"]", 1, 1)
-			default:
-				fmt.Println("oh nos")
-			}
-		default: // Int, String, ArrayType, PairType:
-			appendAssembly(cg.currInstrs(), "LDR "+srcReg+", [sp, #"+strconv.Itoa(offset)+"]", 1, 1)
-		}
-
+		//If the Ident is a BOOL we use LDRSB !
+		//Fix
+		var value, _ = cg.getIdentOffset(t.(Ident))
+		appendAssembly(cg.currInstrs(), "LDR "+srcReg+", [sp, #"+strconv.Itoa(value)+"]", 1, 1)
 	case ArrayElem:
 		cg.evalArrayElem(t, srcReg, "r5")
 	case Unop:
@@ -301,7 +289,7 @@ func (cg CodeGenerator) evalRHS(t Evaluation, srcReg string) {
 		cg.evalPairElem(t.(PairElem), srcReg)
 	case Call:
 		// TODO UNCOMMENT This when you are sure that its not causing the infinite loop
-	//	cg.cgVisitCallStat(t.(Call).Ident, t.(Call).ParamList)*/
+	//	cg.cgVisitCallStat(t.(Call).Ident, t.(Call).ParamList)
 	default:
 		fmt.Println("ERROR: Expression can not be evaluated")
 	}
@@ -456,7 +444,7 @@ func (cg CodeGenerator) evalArrayElem(t Evaluation, reg1 string, reg2 string) {
 	cg.cgVisitPrintStatFunc_H("p_print_string")
 }
 
-// Evalutes a ord (MIGHT NOT NEED )
+// Evalutes a ord
 func (cg CodeGenerator) evalOrd(node Unop) {
 	switch node.Expr.(type) {
 	case Ident:
@@ -464,10 +452,9 @@ func (cg CodeGenerator) evalOrd(node Unop) {
 		var offset, _ = cg.getIdentOffset(node.Expr.(Ident))
 		appendAssembly(cg.currInstrs(), "LDRSB r4, [sp, #"+strconv.Itoa(offset)+"]", 1, 1)
 	case ArrayElem:
-		cg.evalRHS(node.Expr, "r4")
 		fmt.Println("ArrayElem not done for ord")
 	case Character:
-		appendAssembly(cg.currInstrs(), "MOV r4, #"+string(node.Expr.(Character)), 1, 1)
+		fmt.Println("Char not done for ord")
 	default:
 		fmt.Println("Oh no")
 	}
@@ -530,24 +517,25 @@ func (cg CodeGenerator) cgEvalStat(stat interface{}) {
 		cg.cgVisitAssignmentStat(stat.(Assignment))
 	case Read:
 		cg.cgVisitReadStat(stat.(Read))
-	case Free:
-		cg.cgVisitFreeStat(stat.(Free))
-	case Return:
-		cg.cgVisitReturnStat(stat.(Return))
+		/*				case Free:
+							cg.cgVisitFreeStat(stat.(Free))
+						case Return:
+		cg.cgVisitReturnStat(stat.(Return))*/
 	case Exit:
 		cg.cgVisitExitStat(stat.(Exit))
 	case Print:
 		cg.cgVisitPrintStat(stat.(Print))
 	case Println:
 		cg.cgVisitPrintlnStat(stat.(Println))
-	case If:
-		cg.cgVisitIfStat(stat.(If))
-	case While:
-		cg.cgVisitWhileStat(stat.(While))
-	case Scope:
-		cg.cgVisitScopeStat(stat.(Scope))
-	default:
-		//	""
+		/*		case If:
+					cg.cgVisitIfStat(stat.(If))
+				case While:
+					cg.cgVisitWhileStat(stat.(While))
+				case Scope:
+					cg.cgVisitScopeStat(stat.(Scope))
+				default:
+					//	""
+		*/
 	}
 }
 
@@ -652,7 +640,7 @@ func (cg CodeGenerator) cgVisitFreeStat(node Free) {
 }
 
 func (cg CodeGenerator) cgVisitReturnStat(node Return) {
-	cg.evalRHS(node.Expr, "r0")
+
 }
 
 func (cg CodeGenerator) cgVisitExitStat(node Exit) {
@@ -874,28 +862,27 @@ func (cg CodeGenerator) cgVisitParameter(node Evaluation, offset int) {
 // VISIT EXPRESSIONS -----------------------------------------------------------
 
 func (cg CodeGenerator) cgVisitUnopExpr(node Unop) {
-	switch node.Unary {
-	case SUB:
-		cg.evalRHS(node.Expr, "r4")
-		//Negate the result in the register
-		appendAssembly(cg.currInstrs(), "RSBS r4, r4, #0", 1, 1)
-	case LEN:
-		cg.evalRHS(node.Expr, "r4")
-		//Assume the RHS is always an array
-		//So the RHS type is an Ident
-		//Load the length of the array into the register
-		appendAssembly(cg.currInstrs(), "LDR r4, [r4]", 1, 1)
-	case ORD:
-		cg.evalOrd(node)
-	case CHR:
-		//CHR can take a range from 0 to 127 MAX
-		//FIX: CHR USES R3 INSTEAD OF R4 AND USES A PUSH instruction
-		//NOT FINISHED
-		cg.evalRHS(node.Expr, "r4")
-	default:
-		fmt.Println("Dont know this type in Unop")
-		fmt.Println(node.Unary)
-	}
+	/*
+		switch node.Unary {
+		case SUB:
+			cg.evalRHS(node.Expr, "r4")
+			//Negate the result in the register
+			appendAssembly(cg.currInstrs(), "RSBS r4, r4, #0", 1, 1)
+		case LEN:
+			cg.evalRHS(node.Expr, "r4")
+			//Assume the RHS is always an array
+			//So the RHS type is an Ident
+			//Load the length of the array into the register
+			appendAssembly(cg.currInstrs(), "LDR r4, [r4]", 1, 1)
+		case ORD:
+			cg.evalOrd(node)
+		case CHR:
+			cg.evalRHS(node.Expr, "r4")
+			fmt.Println("chr not done")
+		default:
+			fmt.Println("oh no")
+			fmt.Println(node.Unary)
+		}*/
 
 }
 
