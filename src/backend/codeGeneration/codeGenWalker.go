@@ -154,7 +154,7 @@ func (cg CodeGenerator) cgVisitDeclareStat(node Declare) {
 
 	case PairType:
 		// Evalutes a pair of elements onto the stack
-		cg.evalRHS(rhs,"r4")
+		cg.evalRHS(rhs, "r4")
 	case ArrayType:
 		// Evalute an array
 		cg.evalArrayLiter(node.DecType, rhs, "r5", "r4")
@@ -312,7 +312,7 @@ func (cg CodeGenerator) cgVisitExitStat(node Exit) {
 	var reg = "r4"
 	cg.evalRHS(node.Expr, reg)
 
-  typeOf(node.Expr)
+	typeOf(node.Expr)
 
 	appendAssembly(cg.instrs, "MOV r0, "+reg, 1, 1)
 	// BL exit : call exit
@@ -448,21 +448,23 @@ func (cg CodeGenerator) cgVisitIfStat(node If) {
 }
 
 func (cg CodeGenerator) cgVisitWhileStat(node While) {
-	appendAssembly(cg.instrs, "B L0", 1, 1)
-	appendAssembly(cg.instrs, "L1", 0, 1)
+	fstLabel := cg.getNewLabel()
+	sndLabel := cg.getNewLabel()
+	appendAssembly(cg.instrs, "B"+fstLabel, 1, 1)
+	appendAssembly(cg.instrs, sndLabel, 0, 1)
 
 	// traverse all statements by switching on statement type
 	for _, stat := range node.DoStat {
 		cg.cgEvalStat(stat)
 	}
 
-	appendAssembly(cg.instrs, "L0", 0, 1)
+	appendAssembly(cg.instrs, fstLabel, 0, 1)
 	cg.evalRHS(node.Conditional, "r4") // NEED TWO REGISTERS R4 and R5 to compare
 	appendAssembly(cg.instrs, "CMP r4, r5", 1, 1)
 	appendAssembly(cg.instrs, "MOVGT r4, #1", 1, 1)
 	appendAssembly(cg.instrs, "MOVLE r4, #0", 1, 1)
 	appendAssembly(cg.instrs, "CMP r4, #1", 1, 1)
-	appendAssembly(cg.instrs, "BEG L1", 1, 1)
+	appendAssembly(cg.instrs, "BEG "+sndLabel, 1, 1)
 }
 
 func (cg CodeGenerator) cgVisitScopeStat(node Scope) {
@@ -486,11 +488,11 @@ func (cg CodeGenerator) checkArrayBounds() {
 		appendAssembly(cg.progFuncInstrs, "p_check_array_bounds"+":", 0, 1)
 		appendAssembly(cg.progFuncInstrs, "PUSH {lr}", 1, 1)
 		appendAssembly(cg.progFuncInstrs, "CMP r0, #0", 1, 1)
-		appendAssembly(cg.progFuncInstrs, "LDRLT r0, " +cg.getMsgLabel(ARRAY_INDEX_NEGATIVE), 1, 1)
+		appendAssembly(cg.progFuncInstrs, "LDRLT r0, "+cg.getMsgLabel(ARRAY_INDEX_NEGATIVE), 1, 1)
 		appendAssembly(cg.progFuncInstrs, "BLLT p_throw_runtime_error", 1, 1)
 		appendAssembly(cg.progFuncInstrs, "LDR r1, [r1]", 1, 1)
 		appendAssembly(cg.progFuncInstrs, "CMP r0, r1", 1, 1)
-		appendAssembly(cg.progFuncInstrs, "LDRCS r0, " +cg.getMsgLabel(ARRAY_INDEX_LARGE), 1, 1)
+		appendAssembly(cg.progFuncInstrs, "LDRCS r0, "+cg.getMsgLabel(ARRAY_INDEX_LARGE), 1, 1)
 		appendAssembly(cg.progFuncInstrs, "BLCS p_throw_runtime_error", 1, 1)
 		appendAssembly(cg.progFuncInstrs, "POP {pc}", 1, 1)
 	}
@@ -506,9 +508,9 @@ func (cg CodeGenerator) evalArrayElem(t Evaluation, reg1 string, reg2 string) {
 	//Store the address at the next space in the stack (i.e SP - ADDRESS_SIZE)
 	//SHOULD HAVE A OFFSET FUNCTION FOR THIS
 	//TODO: FIX THIS CODE
-	appendAssembly(cg.instrs, "ADD "+reg1+", sp, #" + strconv.Itoa(cg.currStack.currP - ADDR_SIZE) , 1, 1)
-  //Load the index
-	cg.evalRHS(t.(ArrayElem).Exprs[0],reg2)
+	appendAssembly(cg.instrs, "ADD "+reg1+", sp, #"+strconv.Itoa(cg.currStack.currP-ADDR_SIZE), 1, 1)
+	//Load the index
+	cg.evalRHS(t.(ArrayElem).Exprs[0], reg2)
 
 	//Set a register to point to the array
 	appendAssembly(cg.instrs, "LDR "+reg1+", ["+reg1+"]", 1, 1)
@@ -553,7 +555,7 @@ func (cg CodeGenerator) evalRHS(t Evaluation, srcReg string) {
 		cg.CfunctionCall("malloc", strconv.Itoa(ADDR_SIZE*2))
 		cg.evalPair(t.(NewPair).FstExpr, t.(NewPair).SndExpr, "r5", srcReg)
 	case PairElem:
-    cg.evalPairElem(t.(PairElem) ,srcReg)
+		cg.evalPairElem(t.(PairElem), srcReg)
 	case Call:
 		appendAssembly(cg.instrs, "call not implemented", 1, 1)
 	default:
@@ -566,7 +568,7 @@ func (cg CodeGenerator) evalPairElem(t PairElem, srcReg string) {
 	//Load the address of the pair from the STACK
 	//TODO: FIX THIS
 	var offset = 0
-	appendAssembly(cg.instrs, "LDR "+srcReg+", [sp, #"+ strconv.Itoa(offset)+"]", 1, 1)
+	appendAssembly(cg.instrs, "LDR "+srcReg+", [sp, #"+strconv.Itoa(offset)+"]", 1, 1)
 	//Check for null pointer deference
 	appendAssembly(cg.instrs, "MOV r0, "+srcReg, 1, 1)
 	appendAssembly(cg.instrs, "BL p_check_null_pointer", 1, 1)
@@ -575,7 +577,7 @@ func (cg CodeGenerator) evalPairElem(t PairElem, srcReg string) {
 	cg.cgVisitPrintStatFunc_H("p_print_string")
 
 	//Depending on fst or snd , load the address
-	switch (t.Fsnd) {
+	switch t.Fsnd {
 	case Fst:
 		appendAssembly(cg.instrs, "LDR "+srcReg+", ["+srcReg+"]", 1, 1)
 	case Snd:
@@ -727,7 +729,6 @@ func (cg CodeGenerator) evalPair(fst Evaluation, snd Evaluation, reg1 string, re
 	var offset = 0 //, _ = cg.getIdentOffset(reg2)
 	appendAssembly(cg.instrs, "STR "+reg2+", [sp, #"+strconv.Itoa(offset)+"]", 1, 1)
 	//
-
 
 }
 
