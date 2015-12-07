@@ -448,6 +448,7 @@ func (cg CodeGenerator) cgVisitProgram(node *Program) {
 	// Set properties of global scope
 	cg.globalStack.size = GetScopeVarSize(node.StatList)
 	cg.globalStack.currP = cg.globalStack.size
+	cg.globalStack.isFunc = false
 
 	// ASSIGN functions to global variable
 	// WE WIll only traverse them if they are called
@@ -746,6 +747,8 @@ func (cg CodeGenerator) cgVisitScopeStat(node Scope) {
 	// Amount of bytes on the stack the scope takes up for variables
 	varSpaceSize := GetScopeVarSize(node.StatList)
 
+	cg.setNewScope(varSpaceSize)
+
 	// sub sp, sp, #n to create variable space
 	appendAssembly(cg.instrs, "SUB sp, sp, #"+strconv.Itoa(varSpaceSize), 1, 1)
 
@@ -756,6 +759,9 @@ func (cg CodeGenerator) cgVisitScopeStat(node Scope) {
 
 	// add sp, sp, #n to remove variable space
 	appendAssembly(cg.instrs, "ADD sp, sp, #"+strconv.Itoa(varSpaceSize), 1, 1)
+
+	cg.removeCurrScope()
+
 }
 
 // ONLY VISIT FUNCTION IF IT IS CALLED
