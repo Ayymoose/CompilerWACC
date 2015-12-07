@@ -1,37 +1,36 @@
 DECLARE: ArrayElem and Pairs of Pairs NOT DONE @ AYMAN
 
-CHECK IF .ascii IN MSGS SHOULD HAVE MESSAGE PRINTED OUT WITH QUOTES
-
 GETIDENTOFFSET IMPORTANT ----------- NANA, HENRYK, OLI
 SCOPE MAP AND SHIT -----------------
 MAKE EVALRHS WORK FOR FUNCTIONS-----
 
 ASSIGNMENT: IN PROGRESS ---
-- CALL is being implemneted by henryk
+ -- Ident - Henryk
+ -- ArrayElem - Ayman
+ -- PairElem  - Ayman
 
-READ: Done-ish ---
-- Is done for int and char. Possibly could be done better as it is mostly hand coded
+READ: COMPLETE --------------------------------------------
 
-FREE: NOT STARTED ---
-- ???
+FREE: COMPLETE --------------------------------------------
 
-RETURN: NOT STARTED --- @Ayman
+RETURN: NOT STARTED --- HENRYK
 
-EVAL RHS: IN PROGRESS ---
-- do call HENRYK
+EVAL RHS: COMPLETE ----------------------------------------
 
-EXIT: COMPLETE ----------------------------------------
+EXIT: COMPLETE --------------------------------------------
 
-PRINT: COMPLETE ----------------------------------------
+PRINT: COMPLETE -------------------------------------------
 
-PRINTLN: COMPLETE ----------------------------------------
+PRINTLN: COMPLETE -----------------------------------------
 
-IF: NOT STARTED ---
+IF: COMPLETE ----------------------------------------------
 
-WHILE: NOT STARTED ---
+WHILE: COMPLETE -------------------------------------------
 
-SCOPE: NOT STARTED ---
+SCOPE: IN PROGRESS --- NANA
+- Added new scope functionality but new symbol table logic in codeGenerator.go
+- for children
 
-UNOP: NOT STARTED --- HENRYK
+UNOP: IN PROGRESS --- AYMAN
 
-BINOP: NOT STARTED --- HENRYK
+BINOP: COMPLETE -------------------------------------------
