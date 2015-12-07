@@ -312,8 +312,6 @@ func (cg CodeGenerator) cgVisitExitStat(node Exit) {
 	var reg = "r4"
 	cg.evalRHS(node.Expr, reg)
 
-  typeOf(node.Expr)
-
 	appendAssembly(cg.instrs, "MOV r0, "+reg, 1, 1)
 	// BL exit : call exit
 	appendAssembly(cg.instrs, "BL exit", 1, 1)
@@ -787,6 +785,20 @@ func (cg CodeGenerator) evalArray(array []Evaluation, srcReg string, dstReg stri
 // VISIT EXPRESSIONS -----------------------------------------------------------
 
 func (cg CodeGenerator) cgVisitUnopExpr(node Unop) {
+  cg.evalRHS(node.Expr, "r4")
+	switch node.Unary {
+	  case SUB:
+			//Negate the result in the register
+			appendAssembly(cg.instrs, "RSBS r4, r4, #0", 1, 1)
+		case LEN:
+
+		case ORD:
+
+		case CHR:
+
+		default:
+			fmt.Println(node.Unary)
+	}
 
 }
 
