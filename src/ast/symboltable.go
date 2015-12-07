@@ -87,6 +87,10 @@ func (symbolTable *SymbolTable) getTypeOfIdent(key Ident) Type {
 	}
 }
 
+func (symbolTable *SymbolTable) GetTypeOfIdent(key Ident) Type {
+	return symbolTable.getTypeOfIdent(key)
+}
+
 // Removes the head of the children list
 func (symbolTable *SymbolTable) RemoveChild() {
 	symbolTable.Children = symbolTable.Children[1:]
