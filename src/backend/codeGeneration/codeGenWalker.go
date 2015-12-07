@@ -531,11 +531,11 @@ func (cg CodeGenerator) cgEvalStat(stat interface{}) {
 		cg.cgVisitIfStat(stat.(If))
 	case While:
 		cg.cgVisitWhileStat(stat.(While))
-		/*				case Scope:
-							cg.cgVisitScopeStat(stat.(Scope))
-						default:
-							//	""
-		*/
+	case Scope:
+		cg.cgVisitScopeStat(stat.(Scope))
+	default:
+		//	""
+
 	}
 }
 
