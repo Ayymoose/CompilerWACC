@@ -175,8 +175,8 @@ func (cg CodeGenerator) getIdentOffset(ident Ident) (int, Type) {
 
 // Checks if the ident is in the given symbol table. If not the parents are searched
 // The function assumes an offset will be found eventually (semantically correct)
-func findIdentOffset(ident Ident, symtable *symbolTable) (int, Type) {
-
+func findIdentOffset(ident Ident, symtable *SymbolTable) (int, Type) {
+	return 1, Int
 }
 
 func (cg CodeGenerator) getNewLabel() string {
