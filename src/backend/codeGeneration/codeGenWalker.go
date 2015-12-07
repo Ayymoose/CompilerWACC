@@ -941,13 +941,13 @@ func (cg CodeGenerator) cgVisitBinopExpr(node Binop) {
 	case OR:
 		appendAssembly(cg.currInstrs(), "ORR r4, r4, r5", 1, 1)
 	case LT:
-		appendassembly(cg.currInstrs(), "CMP r4, r5", 1, 1)
-		appendassembly(cg.currInstrs(), "MOVLT r4, #1", 1, 1)
-		appendassembly(cg.currInstrs(), "MOVGE r4, #0", 1, 1)
+		appendAssembly(cg.currInstrs(), "CMP r4, r5", 1, 1)
+		appendAssembly(cg.currInstrs(), "MOVLT r4, #1", 1, 1)
+		appendAssembly(cg.currInstrs(), "MOVGE r4, #0", 1, 1)
 	case GT:
-		appendassembly(cg.currInstrs(), "CMP r4, r5", 1, 1)
-		appendassembly(cg.currInstrs(), "MOVGT r4, #1", 1, 1)
-		appendassembly(cg.currInstrs(), "MOVLE r4, #0", 1, 1)
+		appendAssembly(cg.currInstrs(), "CMP r4, r5", 1, 1)
+		appendAssembly(cg.currInstrs(), "MOVGT r4, #1", 1, 1)
+		appendAssembly(cg.currInstrs(), "MOVLE r4, #0", 1, 1)
 	case LTE:
 		appendAssembly(cg.currInstrs(), "CMP r4, r5", 1, 1)
 		appendAssembly(cg.currInstrs(), "MOVLE r4, #1", 1, 1)
