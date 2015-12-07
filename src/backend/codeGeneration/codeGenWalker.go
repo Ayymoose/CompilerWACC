@@ -901,16 +901,14 @@ func (cg CodeGenerator) cgVisitUnopExpr(node Unop) {
 }
 
 func (cg CodeGenerator) cgVisitBinopExpr(node Binop) {
-	//Binary int
-	//Left   Evaluation
-	//Right  Evaluation
-	//cg.eval(node) // Type
-
-	cg.evalRHS(node.Left, "r4")
-	cg.evalRHS(node.Right, "r5")
+	cg.evalRHS(node.Left, "r0")
+	appendAssembly(cg.currInstrs(), "PUSH {r0}", 1, 1)
+	cg.evalRHS(node.Right, "r0")
+	appendAssembly(cg.currInstrs(), "MOV r1, r0", 1, 1)
+	appendAssembly(cg.currInstrs(), "POP {r0}", 1, 1)
 	switch node.Binary {
 	case PLUS:
-		appendAssembly(cg.currInstrs(), "ADDS r4, r4, r5", 1, 1)
+		appendAssembly(cg.currInstrs(), "ADDS r0, r0, r1", 1, 1)
 		appendAssembly(cg.currInstrs(), "BLVS p_throw_overflow_error", 1, 1)
 		cg.cgVisitBinopExpr_H("p_throw_overflow_error")
 	case SUB:
@@ -938,34 +936,41 @@ func (cg CodeGenerator) cgVisitBinopExpr(node Binop) {
 		cg.cgVisitBinopExpr_H("p_check_divide_by_zero")
 	case AND:
 		appendAssembly(cg.currInstrs(), "AND r4, r4, r5", 1, 1)
+		appendAssembly(cg.currInstrs(), "MOV r0, r4", 1, 1)
 	case OR:
 		appendAssembly(cg.currInstrs(), "ORR r4, r4, r5", 1, 1)
+		appendAssembly(cg.currInstrs(), "MOV r0, r4", 1, 1)
 	case LT:
 		appendAssembly(cg.currInstrs(), "CMP r4, r5", 1, 1)
 		appendAssembly(cg.currInstrs(), "MOVLT r4, #1", 1, 1)
 		appendAssembly(cg.currInstrs(), "MOVGE r4, #0", 1, 1)
+		appendAssembly(cg.currInstrs(), "MOV r0, r4", 1, 1)
 	case GT:
 		appendAssembly(cg.currInstrs(), "CMP r4, r5", 1, 1)
 		appendAssembly(cg.currInstrs(), "MOVGT r4, #1", 1, 1)
 		appendAssembly(cg.currInstrs(), "MOVLE r4, #0", 1, 1)
+		appendAssembly(cg.currInstrs(), "MOV r0, r4", 1, 1)
 	case LTE:
 		appendAssembly(cg.currInstrs(), "CMP r4, r5", 1, 1)
 		appendAssembly(cg.currInstrs(), "MOVLE r4, #1", 1, 1)
 		appendAssembly(cg.currInstrs(), "MOVGT r4, #0", 1, 1)
+		appendAssembly(cg.currInstrs(), "MOV r0, r4", 1, 1)
 	case GTE:
 		appendAssembly(cg.currInstrs(), "CMP r4, r5", 1, 1)
 		appendAssembly(cg.currInstrs(), "MOVGE r4, #1", 1, 1)
 		appendAssembly(cg.currInstrs(), "MOVLT r4, #0", 1, 1)
+		appendAssembly(cg.currInstrs(), "MOV r0, r4", 1, 1)
 	case EQ:
 		appendAssembly(cg.currInstrs(), "CMP r4, r5", 1, 1)
 		appendAssembly(cg.currInstrs(), "MOVEQ r4, #1", 1, 1)
 		appendAssembly(cg.currInstrs(), "MOVNE r4, #0", 1, 1)
+		appendAssembly(cg.currInstrs(), "MOV r0, r4", 1, 1)
 	case NEQ:
 		appendAssembly(cg.currInstrs(), "CMP r4, r5", 1, 1)
 		appendAssembly(cg.currInstrs(), "MOVNE r4, #1", 1, 1)
 		appendAssembly(cg.currInstrs(), "MOVEQ r4, #0", 1, 1)
+		appendAssembly(cg.currInstrs(), "MOV r0, r4", 1, 1)
 	}
-	appendAssembly(cg.currInstrs(), "MOV r0, r4", 1, 1)
 }
 
 // cgVisitBinopExpr helper function
