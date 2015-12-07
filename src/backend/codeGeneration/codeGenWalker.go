@@ -271,10 +271,16 @@ func (cg CodeGenerator) evalRHS(t Evaluation, srcReg string) {
 	case PairLiter:
 		appendAssembly(cg.currInstrs(), "LDR "+srcReg+", =0", 1, 1)
 	case Ident:
-		//If the Ident is a BOOL we use LDRSB !
-		//Fix
-		var value, _ = cg.getIdentOffset(t.(Ident))
-		appendAssembly(cg.currInstrs(), "LDR "+srcReg+", [sp, #"+strconv.Itoa(value)+"]", 1, 1)
+		var offset, resType = cg.getIdentOffset(t.(Ident))
+		switch resType {
+		case resType.(ConstType):
+			switch resType.(ConstType) {
+			case Bool, Char:
+				appendAssembly(cg.currInstrs(), "LDRSB "+srcReg+", [sp, #"+strconv.Itoa(offset)+"]", 1, 1)
+			}
+		default: // Int, String, ArrayType, PairType:
+			appendAssembly(cg.currInstrs(), "LDR "+srcReg+", [sp, #"+strconv.Itoa(offset)+"]", 1, 1)
+		}
 	case ArrayElem:
 		cg.evalArrayElem(t, srcReg, "r5")
 	case Unop:
@@ -535,7 +541,6 @@ func (cg CodeGenerator) cgEvalStat(stat interface{}) {
 		cg.cgVisitScopeStat(stat.(Scope))
 	default:
 		//	""
-
 	}
 }
 
@@ -640,7 +645,7 @@ func (cg CodeGenerator) cgVisitFreeStat(node Free) {
 }
 
 func (cg CodeGenerator) cgVisitReturnStat(node Return) {
-
+	cg.evalRHS(node.Expr, "r0")
 }
 
 func (cg CodeGenerator) cgVisitExitStat(node Exit) {
