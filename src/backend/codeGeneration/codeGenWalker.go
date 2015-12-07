@@ -48,6 +48,14 @@ const STACK_SIZE_MAX = 1024
 // Function global variable
 var functionList []*Function
 
+//TODO: Fails on waiting on Nana's getIdentOffset() function
+
+//TODO: intAssignment.wacc FAILS
+//TODO: intLeadingZeros.wacc FAILS
+//TODO: _VarNames.wacc FAILS
+//TODO: longVarNames.wacc FAILS
+//TODO: arrayLength.wacc FAILS
+
 // HELPER FUNCTIONS
 // cgVisitReadStat helper function
 // Adds a function definition to the progFuncInstrs ARMList depending on the
@@ -141,7 +149,9 @@ func (cg CodeGenerator) cgVisitFreeStatFunc_H(funcName string) {
 	}
 
 	// if the program function has not been defined previously
-	cg.throwRunTimeError()
+	if !cg.AddCheckProgName("p_throw_runtime_error") {
+		cg.throwRunTimeError()
+	}
 	cg.cgVisitPrintStatFunc_H("p_print_string")
 }
 
@@ -261,23 +271,16 @@ func (cg CodeGenerator) evalRHS(t Evaluation, srcReg string) {
 	case PairLiter:
 		appendAssembly(cg.currInstrs(), "LDR "+srcReg+", =0", 1, 1)
 	case Ident:
-
 		var offset, resType = cg.getIdentOffset(t.(Ident))
 		switch resType {
 		case resType.(ConstType):
 			switch resType.(ConstType) {
 			case Bool, Char:
 				appendAssembly(cg.currInstrs(), "LDRSB "+srcReg+", [sp, #"+strconv.Itoa(offset)+"]", 1, 1)
-			case Int, String:
-				// If the type in the stack is a bool it should be LDRSB
-				// TODO:FIXs
-				appendAssembly(cg.currInstrs(), "LDR "+srcReg+", [sp, #"+strconv.Itoa(offset)+"]", 1, 1)
-
 			}
 		default: // Int, String, ArrayType, PairType:
 			appendAssembly(cg.currInstrs(), "LDR "+srcReg+", [sp, #"+strconv.Itoa(offset)+"]", 1, 1)
 		}
-
 	case ArrayElem:
 		cg.evalArrayElem(t, srcReg, "r5")
 	case Unop:
@@ -447,7 +450,7 @@ func (cg CodeGenerator) evalArrayElem(t Evaluation, reg1 string, reg2 string) {
 	cg.cgVisitPrintStatFunc_H("p_print_string")
 }
 
-// Evalutes a ord (MIGHT NOT NEED )
+// Evalutes a ord
 func (cg CodeGenerator) evalOrd(node Unop) {
 	switch node.Expr.(type) {
 	case Ident:
@@ -455,10 +458,11 @@ func (cg CodeGenerator) evalOrd(node Unop) {
 		var offset, _ = cg.getIdentOffset(node.Expr.(Ident))
 		appendAssembly(cg.currInstrs(), "LDRSB r4, [sp, #"+strconv.Itoa(offset)+"]", 1, 1)
 	case ArrayElem:
-		cg.evalRHS(node.Expr, "r4")
+		fmt.Println("ArrayElem not done for ord")
 	case Character:
-		appendAssembly(cg.currInstrs(), "MOV r4, #"+string(node.Expr.(Character)), 1, 1)
+		fmt.Println("Char not done for ord")
 	default:
+		fmt.Println("Oh no")
 	}
 }
 
@@ -894,11 +898,11 @@ func (cg CodeGenerator) cgVisitUnopExpr(node Unop) {
 	case ORD:
 		cg.evalOrd(node)
 	case CHR:
-		//CHR can take a range from 0 to 127 MAX
-		//FIX: CHR USES R3 INSTEAD OF R4 AND USES A PUSH instruction
-		//NOT FINISHED
 		cg.evalRHS(node.Expr, "r4")
+		fmt.Println("chr not done")
 	default:
+		fmt.Println("oh no")
+		fmt.Println(node.Unary)
 	}
 
 }
