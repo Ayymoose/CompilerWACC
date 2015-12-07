@@ -12,16 +12,6 @@ var zeroCharater Character = "0"
 var zeroString Str = "0"
 var zeroBool Boolean = false
 
-// Contains the size in bytes of all print format strings
-var mapPrintFormatToSize = map[string]int{
-	INT_FORMAT:     3,
-	STRING_FORMAT:  5,
-	NEWLINE_MSG:    1,
-	TRUE_MSG:       5,
-	FALSE_MSG:      6,
-	POINTER_FORMAT: 3,
-}
-
 //Size in bytes for all the variables in the current scope
 func GetScopeVarSize(statList []Statement) int {
 	var scopeSize = 0
@@ -187,27 +177,20 @@ func addMsgLabel(msgInstrs *ARMList, label string, strValue string) {
 
 // Calculates the size of strValue in bytes
 func calculateWordSize(strValue string) int {
-	size, contained := mapPrintFormatToSize[strValue]
+	quotation := 2
+	var escapedChars int
+	backSlashSeen := false
 
-	// if strValue is a format string then
-	if contained {
-		return size
-	} else {
-		quotation := 2
-		var escapedChars int
-		backSlashSeen := false
-
-		for _, c := range strValue {
-			if c == '\\' && !backSlashSeen {
-				escapedChars++
-				backSlashSeen = true
-			} else {
-				backSlashSeen = false
-			}
+	for _, c := range strValue {
+		if c == '\\' && !backSlashSeen {
+			escapedChars++
+			backSlashSeen = true
+		} else {
+			backSlashSeen = false
 		}
-
-		return len(strValue) - escapedChars - quotation
 	}
+
+	return len(strValue) - escapedChars - quotation
 }
 
 // Returns "1" iff b = true. "0" otherwise
