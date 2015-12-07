@@ -273,8 +273,8 @@ func (cg CodeGenerator) evalRHS(t Evaluation, srcReg string) {
 	case Ident:
 		//If the Ident is a BOOL we use LDRSB !
 		//Fix
-		//var value, _ = cg.getIdentOffset(t.(Ident))
-		appendAssembly(cg.currInstrs(), "LDR "+srcReg+", [sp, #1]", 1, 1)
+		var value, _ = cg.getIdentOffset(t.(Ident))
+		appendAssembly(cg.currInstrs(), "LDR "+srcReg+", [sp, #"+strconv.Itoa(value)+"]", 1, 1)
 	/*case ArrayElem:
 		cg.evalArrayElem(t, srcReg, "r5")
 	case Unop:

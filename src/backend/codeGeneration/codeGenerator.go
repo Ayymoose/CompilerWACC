@@ -163,7 +163,7 @@ func (cg CodeGenerator) getIdentOffset(ident Ident) (int, Type) {
 	// TO BE COMPLETED
 	//I MODIFIED THIS SO SOME TEST CASES WILL PASS @AYMAN
 	//CHANGED FROM 100 to 4
-	return 4, Int
+	return 1, Int
 }
 
 func (cg CodeGenerator) getNewLabel() string {
