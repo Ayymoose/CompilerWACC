@@ -91,6 +91,7 @@ func (cg CodeGenerator) dereferenceNullPointer() {
 		appendAssembly(cg.progFuncInstrs, "BLEQ p_throw_runtime_error", 1, 1)
 		appendAssembly(cg.progFuncInstrs, "POP {pc}", 1, 1)
 	}
+	cg.throwRunTimeError()
 }
 
 // Run time error check
@@ -118,6 +119,7 @@ func (cg CodeGenerator) checkArrayBounds() {
 		appendAssembly(cg.progFuncInstrs, "BLCS p_throw_runtime_error", 1, 1)
 		appendAssembly(cg.progFuncInstrs, "POP {pc}", 1, 1)
 	}
+	cg.throwRunTimeError()
 }
 
 // cgVisitFreeStat helper function
@@ -147,11 +149,7 @@ func (cg CodeGenerator) cgVisitFreeStatFunc_H(funcName string) {
 		appendAssembly(cg.progFuncInstrs, "BL free", 1, 1)
 		appendAssembly(cg.progFuncInstrs, "POP {pc}", 1, 1)
 	}
-
-	// if the program function has not been defined previously
-	if !cg.AddCheckProgName("p_throw_runtime_error") {
-		cg.throwRunTimeError()
-	}
+	cg.throwRunTimeError()
 	cg.cgVisitPrintStatFunc_H("p_print_string")
 }
 
@@ -955,10 +953,9 @@ func (cg CodeGenerator) cgVisitBinopExpr_H(funcName string) {
 		case "p_throw_overflow_error":
 			appendAssembly(cg.progFuncInstrs, "LDR r0, "+cg.getMsgLabel(OVERFLOW), 1, 1)
 			appendAssembly(cg.progFuncInstrs, "BL p_throw_runtime_error", 1, 1)
-			cg.cgVisitBinopExpr_H("p_throw_runtime_error")
+			cg.throwRunTimeError()
 		case "p_throw_runtime_error":
 			cg.throwRunTimeError()
-
 		case "p_check_divide_by_zero":
 			appendAssembly(cg.progFuncInstrs, "PUSH {lr}", 1, 1)
 			appendAssembly(cg.progFuncInstrs, "CMP r1, #0", 1, 1)
