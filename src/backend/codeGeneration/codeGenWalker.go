@@ -47,7 +47,6 @@ const STACK_SIZE_MAX = 1024
 
 // Function global variable
 var functionList []*Function
-var paramMap map[Param]int
 
 //TODO: Fails on waiting on Nana's getIdentOffset() function
 

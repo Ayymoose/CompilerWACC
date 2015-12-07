@@ -45,12 +45,15 @@ func (cg CodeGenerator) eval(e Evaluation) Type {
 
 // Provides information about the stack in relation to a specific scope
 type scopeData struct {
-	currP       int        // the current position of the pointer to the stack
-	size        int        // size of the variable stack scope space in bytes
-	parentScope *scopeData // Address of the parent scope
-	isFunc      bool       // true iff the scope date is used for a function scope
+	currP       int            // the current position of the pointer to the stack
+	size        int            // size of the variable stack scope space in bytes
+	parentScope *scopeData     // Address of the parent scope
+	isFunc      bool           // true iff the scope date is used for a function scope
+	paramMap    *map[Param]int // Map of function parameters to their offset from the start of the function
+	// only used if isFunc is true
 }
 
+// Creates new scope data for a new scope.
 func (cg CodeGenerator) setNewScope(varSpaceSize int) {
 	newScope := new(scopeData)
 	newScope.currP = varSpaceSize
@@ -58,13 +61,44 @@ func (cg CodeGenerator) setNewScope(varSpaceSize int) {
 	newScope.parentScope = cg.currStack
 	newScope.isFunc = cg.currStack.isFunc
 
+	if newScope.isFunc {
+		newScope.paramMap = cg.currStack.paramMap
+	}
+
 	cg.currStack = newScope
 
 	//TODO: CODE TO SET CHILD SYMBOL TABLE
 }
 
-func (cg CodeGenerator) removeCurrScope() {
+// Creates new scope data for a new function scope. Sets isFunc to true which
+// set the code generator into function mode (So statements evaluate for functions not main)
+func (cg CodeGenerator) setNewFuncScope(varSpaceSize int, paramMap *map[Param]int) {
+	newScope := new(scopeData)
+	newScope.currP = varSpaceSize
+	newScope.size = varSpaceSize
+	newScope.parentScope = cg.currStack
+	newScope.isFunc = true
+	newScope.paramMap = paramMap
 
+	cg.currStack = newScope
+
+	//TODO: CODE TO SET CHILD SYMBOL TABLE
+}
+
+// Removes current scope and replaces it with the parent scope
+func (cg CodeGenerator) removeCurrScope() {
+	cg.currStack = cg.currStack.parentScope
+
+	//TODO: CODE TO SET CHILD SYMBOL TABLE
+}
+
+// Returns cg.funcInstrs iff the current scope is a function scope. cg.instrs otherwise
+func (cg CodeGenerator) currInstrs() *ARMList {
+	if cg.currStack.isFunc {
+		return cg.funcInstrs
+	} else {
+		return cg.instrs
+	}
 }
 
 // Decreases current pointer to the stack by n
