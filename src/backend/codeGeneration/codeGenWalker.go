@@ -493,10 +493,10 @@ func (cg CodeGenerator) cgVisitProgram(node *Program) {
 func (cg CodeGenerator) cgEvalStat(stat interface{}) {
 	switch stat.(type) {
 	case Declare:
-		/*		cg.cgVisitDeclareStat(stat.(Declare))
-				case Assignment:
-					cg.cgVisitAssignmentStat(stat.(Assignment))
-				case Read:
+		cg.cgVisitDeclareStat(stat.(Declare))
+	case Assignment:
+		cg.cgVisitAssignmentStat(stat.(Assignment))
+		/*		case Read:
 					cg.cgVisitReadStat(stat.(Read))
 				case Free:
 					cg.cgVisitFreeStat(stat.(Free))
@@ -638,7 +638,6 @@ func (cg CodeGenerator) cgVisitExitStat(node Exit) {
 	// LDR r0, =n : loads return type to r0 argument
 	var reg = "r4"
 	cg.evalRHS(node.Expr, reg)
-
 	appendAssembly(cg.instrs, "MOV r0, "+reg, 1, 1)
 	// BL exit : call exit
 	appendAssembly(cg.instrs, "BL exit", 1, 1)
