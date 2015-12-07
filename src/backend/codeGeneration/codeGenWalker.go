@@ -49,7 +49,6 @@ const STACK_SIZE_MAX = 1024
 var functionList []*Function
 var paramMap map[Param]int
 
-
 //TODO: Fails on waiting on Nana's getIdentOffset() function
 
 //TODO: intAssignment.wacc FAILS
@@ -57,7 +56,6 @@ var paramMap map[Param]int
 //TODO: _VarNames.wacc FAILS
 //TODO: longVarNames.wacc FAILS
 //TODO: arrayLength.wacc FAILS
-
 
 // HELPER FUNCTIONS
 // cgVisitReadStat helper function
@@ -103,6 +101,7 @@ func (cg CodeGenerator) throwRunTimeError() {
 		appendAssembly(cg.progFuncInstrs, "BL p_print_string", 1, 1)
 		appendAssembly(cg.progFuncInstrs, "MOV r0, #-1", 1, 1)
 		appendAssembly(cg.progFuncInstrs, "BL exit", 1, 1)
+		cg.cgVisitPrintStatFunc_H("p_print_string")
 	}
 }
 
@@ -152,10 +151,7 @@ func (cg CodeGenerator) cgVisitFreeStatFunc_H(funcName string) {
 
 	// if the program function has not been defined previously
 	if !cg.AddCheckProgName("p_throw_runtime_error") {
-		appendAssembly(cg.progFuncInstrs, "p_throw_runtime_error"+":", 0, 1)
-		appendAssembly(cg.progFuncInstrs, "BL p_print_string", 1, 1)
-		appendAssembly(cg.progFuncInstrs, "MOV r0, #-1", 1, 1)
-		appendAssembly(cg.progFuncInstrs, "BL exit", 1, 1)
+		cg.throwRunTimeError()
 	}
 	cg.cgVisitPrintStatFunc_H("p_print_string")
 }
@@ -494,36 +490,33 @@ func (cg CodeGenerator) cgVisitProgram(node *Program) {
 	appendAssembly(cg.instrs, ".ltorg", 1, 1)
 }
 
-func (cg CodeGenerator) cgCreateMsgs(instrs *ARMList) map[string]string {
-	return nil
-}
-
 func (cg CodeGenerator) cgEvalStat(stat interface{}) {
 	switch stat.(type) {
-	case Declare:
-		cg.cgVisitDeclareStat(stat.(Declare))
-	case Assignment:
-		cg.cgVisitAssignmentStat(stat.(Assignment))
-	case Read:
-		cg.cgVisitReadStat(stat.(Read))
-	case Free:
-		cg.cgVisitFreeStat(stat.(Free))
-	case Return:
-		cg.cgVisitReturnStat(stat.(Return))
-	case Exit:
-		cg.cgVisitExitStat(stat.(Exit))
-	case Print:
-		cg.cgVisitPrintStat(stat.(Print))
-	case Println:
-		cg.cgVisitPrintlnStat(stat.(Println))
-	case If:
-		cg.cgVisitIfStat(stat.(If))
-	case While:
-		cg.cgVisitWhileStat(stat.(While))
-	case Scope:
-		cg.cgVisitScopeStat(stat.(Scope))
-	default:
-		//	""
+	/*	case Declare:
+			cg.cgVisitDeclareStat(stat.(Declare))
+		case Assignment:
+			cg.cgVisitAssignmentStat(stat.(Assignment))
+		case Read:
+			cg.cgVisitReadStat(stat.(Read))
+		case Free:
+			cg.cgVisitFreeStat(stat.(Free))
+		case Return:
+			cg.cgVisitReturnStat(stat.(Return))
+		case Exit:
+			cg.cgVisitExitStat(stat.(Exit))
+		case Print:
+			cg.cgVisitPrintStat(stat.(Print))
+		case Println:
+			cg.cgVisitPrintlnStat(stat.(Println))
+		case If:
+			cg.cgVisitIfStat(stat.(If))
+		case While:
+			cg.cgVisitWhileStat(stat.(While))
+		case Scope:
+			cg.cgVisitScopeStat(stat.(Scope))
+		default:
+			//	""
+	*/
 	}
 }
 
@@ -573,7 +566,7 @@ func (cg CodeGenerator) cgVisitAssignmentStat(node Assignment) {
 	// lhs can be
 	// IDENT , ARRAY-ELEM , PAIR-ELEM
 	switch node.Lhs.(type) {
-  case Ident:
+	case Ident:
 		//Put the LHS into a reg and evaluate the RHS
 		fmt.Println("Ident not done")
 	case ArrayElem:
@@ -939,10 +932,8 @@ func (cg CodeGenerator) cgVisitBinopExpr_H(funcName string) {
 			appendAssembly(cg.progFuncInstrs, "BL p_throw_runtime_error", 1, 1)
 			cg.cgVisitBinopExpr_H("p_throw_runtime_error")
 		case "p_throw_runtime_error":
-			appendAssembly(cg.progFuncInstrs, "BL p_print_string", 1, 1)
-			appendAssembly(cg.progFuncInstrs, "MOV r0, #-1", 1, 1)
-			appendAssembly(cg.progFuncInstrs, "BL exit", 1, 1)
-			cg.cgVisitPrintStatFunc_H("p_print_string")
+			cg.throwRunTimeError()
+
 		case "p_check_divide_by_zero":
 			appendAssembly(cg.progFuncInstrs, "PUSH {lr}", 1, 1)
 			appendAssembly(cg.progFuncInstrs, "CMP r1, #0", 1, 1)
@@ -951,4 +942,8 @@ func (cg CodeGenerator) cgVisitBinopExpr_H(funcName string) {
 			appendAssembly(cg.progFuncInstrs, "POP {pc}", 1, 1)
 		}
 	}
+}
+
+func (cg CodeGenerator) cgCreateMsgs(instrs *ARMList) map[string]string {
+	return nil
 }
