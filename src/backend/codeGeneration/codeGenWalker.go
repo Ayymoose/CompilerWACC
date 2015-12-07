@@ -457,7 +457,7 @@ func (cg CodeGenerator) evalOrd(node Unop) {
 	case Ident:
 		//If it's an ident
 		var offset, _ = cg.getIdentOffset(node.Expr.(Ident))
-		appendAssembly(cg.currInstrs(), "LDRSB r4, [sp, #"+strconv.Itoa(offset)+"]", 1, 1)
+		appendAssembly(cg.currInstrs(), "LDRSB r0, [sp, #"+strconv.Itoa(offset)+"]", 1, 1)
 	case ArrayElem:
 		fmt.Println("ArrayElem not done for ord")
 	case Character:
