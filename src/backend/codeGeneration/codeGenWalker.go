@@ -496,19 +496,19 @@ func (cg CodeGenerator) cgEvalStat(stat interface{}) {
 		cg.cgVisitDeclareStat(stat.(Declare))
 	case Assignment:
 		cg.cgVisitAssignmentStat(stat.(Assignment))
-		/*		case Read:
-							cg.cgVisitReadStat(stat.(Read))
-						case Free:
+	case Read:
+		cg.cgVisitReadStat(stat.(Read))
+		/*				case Free:
 							cg.cgVisitFreeStat(stat.(Free))
 						case Return:
-				cg.cgVisitReturnStat(stat.(Return))
-		*/case Exit:
+		cg.cgVisitReturnStat(stat.(Return))*/
+	case Exit:
 		cg.cgVisitExitStat(stat.(Exit))
-		/*		case Print:
-					cg.cgVisitPrintStat(stat.(Print))
-				case Println:
-					cg.cgVisitPrintlnStat(stat.(Println))
-				case If:
+	case Print:
+		cg.cgVisitPrintStat(stat.(Print))
+	case Println:
+		cg.cgVisitPrintlnStat(stat.(Println))
+		/*		case If:
 					cg.cgVisitIfStat(stat.(If))
 				case While:
 					cg.cgVisitWhileStat(stat.(While))
@@ -661,6 +661,7 @@ func (cg CodeGenerator) cgVisitPrintStat(node Print) {
 			cg.cgVisitPrintStatFunc_H("p_print_string")
 
 		case Int:
+			appendAssembly(cg.instrs, "MOV, r0, r4", 1, 1)
 			// BL p_print_int
 			appendAssembly(cg.instrs, "BL p_print_int", 1, 1)
 			// Define relevant print function definition (iff it hasnt been defined)
@@ -699,6 +700,7 @@ func (cg CodeGenerator) cgVisitPrintlnStat(node Println) {
 	appendAssembly(cg.instrs, "BL p_print_ln", 1, 1)
 	// Define relevant print function definition (iff it hasnt been defined)
 	cg.cgVisitPrintStatFunc_H("p_print_ln")
+
 }
 
 func (cg CodeGenerator) cgVisitIfStat(node If) {
