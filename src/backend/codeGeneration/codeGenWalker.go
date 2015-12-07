@@ -267,20 +267,28 @@ func (cg CodeGenerator) evalRHS(t Evaluation, srcReg string) {
 	case Str:
 		appendAssembly(cg.currInstrs(), "LDR "+srcReg+", "+cg.getMsgLabel(string(t.(Str))), 1, 1)
 	case PairLiter:
+		//PAIR-LITER NOT DONE
 		appendAssembly(cg.currInstrs(), "LDR "+srcReg+", =0", 1, 1)
 	case Ident:
 		var offset, resType = cg.getIdentOffset(t.(Ident))
-		switch resType {
-		case resType.(ConstType):
+
+
+
+		switch resType.(type) {
+		case ConstType:
+
 			switch resType.(ConstType) {
 			case Bool, Char:
 				appendAssembly(cg.currInstrs(), "LDRSB "+srcReg+", [sp, #"+strconv.Itoa(offset)+"]", 1, 1)
 			case Int, String:
 				appendAssembly(cg.currInstrs(), "LDR "+srcReg+", [sp, #"+strconv.Itoa(offset)+"]", 1, 1)
+	    //Need pair in here too?
 			}
+
 		default:
 			appendAssembly(cg.currInstrs(), "LDR "+srcReg+", [sp, #"+strconv.Itoa(offset)+"]", 1, 1)
 		}
+
 	case ArrayElem:
 		cg.evalArrayElem(t, srcReg, "r5")
 	case Unop:
@@ -325,8 +333,8 @@ func (cg CodeGenerator) evalPairElem(t PairElem, srcReg string) {
 	}
 	//Double deference
 	appendAssembly(cg.currInstrs(), "LDR "+srcReg+", ["+srcReg+"]", 1, 1)
-	//Store on the next available space on the STACK
-	//TODO: FIX THIS
+
+	//Store on the next available space on the stack
 	appendAssembly(cg.currInstrs(), "STR "+srcReg+", [sp, #"+strconv.Itoa(offset)+"]", 1, 1)
 
 }
@@ -362,12 +370,9 @@ func (cg CodeGenerator) evalPair(fst Evaluation, snd Evaluation, reg1 string, re
 	appendAssembly(cg.currInstrs(), "STR r0, ["+reg2+", #4]", 1, 1)
 
 	//Store the address of the address that contains pointers to the first and second elements
-	//THIS DOESN'T WORK
-	//THE PROBLEM IS FINDING THE OFFSET OF WHERE THE REGISTER IS STORED ON THE STACK BUT
-	//WE SHOULD HAVE A FUNCTION THAT TELLS US THE OFFSET OF THE NEXT AVAILABLE SPACE ON THE STACK
-	var offset = 0 //, _ = cg.getIdentOffset(reg2)
+	//TODO: FIX LATER
+	var offset = 0//, _ = cg.getIdentOffset(reg2)
 	appendAssembly(cg.currInstrs(), "STR "+reg2+", [sp, #"+strconv.Itoa(offset)+"]", 1, 1)
-	//
 
 }
 
@@ -425,27 +430,48 @@ func (cg CodeGenerator) evalArray(array []Evaluation, srcReg string, dstReg stri
 
 // Evalutes array elements
 func (cg CodeGenerator) evalArrayElem(t Evaluation, reg1 string, reg2 string) {
-	//Create info
+	// Create info
 	cg.getMsgLabel(ARRAY_INDEX_NEGATIVE)
 	cg.getMsgLabel(ARRAY_INDEX_LARGE)
 	cg.getMsgLabel(STRING_FORMAT)
 
-	//Store the address at the next space in the stack (i.e SP - ADDRESS_SIZE)
-	//SHOULD HAVE A OFFSET FUNCTION FOR THIS
-	//TODO: FIX THIS CODE
-	appendAssembly(cg.currInstrs(), "ADD "+reg1+", sp, #"+strconv.Itoa(cg.currStack.currP-ADDR_SIZE), 1, 1)
-	//Load the index
+	// Store the address at the next space in the stack
+	var offset, _ = cg.getIdentOffset(t.(ArrayElem).Ident)
+	appendAssembly(cg.currInstrs(), "ADD "+reg1+", sp, #"+strconv.Itoa(offset), 1, 1)
+	// Load the index
 	cg.evalRHS(t.(ArrayElem).Exprs[0], reg2)
 
-	//Set a register to point to the array
+	// Set a register to point to the array
 	appendAssembly(cg.currInstrs(), "LDR "+reg1+", ["+reg1+"]", 1, 1)
 
 	// reg1 = Address of the array
 	// reg2 = Index
-	appendAssembly(cg.currInstrs(), "MOV r0, "+reg2, 1, 1)
+
+	// A little hack here... (Swapped these instructions around)
 	appendAssembly(cg.currInstrs(), "MOV r1, "+reg1, 1, 1)
-	//Jump
+	appendAssembly(cg.currInstrs(), "MOV r0, "+reg2, 1, 1)
+
+	// Jump
 	appendAssembly(cg.currInstrs(), "BL p_check_array_bounds", 1, 1)
+
+  // Still don't know what these assembly instructions do
+	/*
+		ADD r4, r4, #4
+		ADD r4, r4, r5, LSL #2
+		LDR r4, [r4]
+		MOV r0, r4
+	*/
+
+  appendAssembly(cg.currInstrs(), "ADD " + reg1 +", "+ reg1+", #4", 1, 1)
+	appendAssembly(cg.currInstrs(), "ADD " + reg1 +", "+ reg1+", " +reg2+", LSL #2", 1, 1)
+	appendAssembly(cg.currInstrs(), "LDR "+reg1+", ["+reg1+"]", 1, 1)
+
+	/ /Hack
+	if reg1 != "r0" {
+		appendAssembly(cg.currInstrs(), "MOV r0, "+reg1, 1, 1)
+	}
+
+	// Check bounds and errors
 	cg.checkArrayBounds()
 	cg.throwRunTimeError()
 	cg.cgVisitPrintStatFunc_H("p_print_string")
