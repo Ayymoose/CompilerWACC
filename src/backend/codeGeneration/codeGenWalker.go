@@ -664,7 +664,7 @@ func (cg CodeGenerator) cgVisitPrintStat(node Print) {
 
 		case Int:
 			//TODO CHECK WHAT HAPPENS WITH MOV
-			appendAssembly(cg.instrs, "MOV, r0, r4", 1, 1)
+			appendAssembly(cg.instrs, "MOV r0, r4", 1, 1)
 			// BL p_print_int
 			appendAssembly(cg.instrs, "BL p_print_int", 1, 1)
 			// Define relevant print function definition (iff it hasnt been defined)
