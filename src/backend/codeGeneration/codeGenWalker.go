@@ -444,7 +444,23 @@ func (cg CodeGenerator) cgVisitPrintlnStat(node Println) {
 }
 
 func (cg CodeGenerator) cgVisitIfStat(node If) {
+	fstLabel := cg.getNewLabel()
+	sndLabel := cg.getNewLabel()
+	cg.evalRHS(node.Conditional, "r4")
+	appendAssembly(cg.instrs, "BEG "+fstLabel, 1, 1)
 
+	for _, stat := range node.ThenStat {
+		cg.cgEvalStat(stat)
+	}
+
+	appendAssembly(cg.instrs, "B "+sndLabel, 1, 1)
+	appendAssembly(cg.instrs, fstLabel, 0, 1)
+
+	for _, stat := range node.ElseStat {
+		cg.cgEvalStat(stat)
+	}
+
+	appendAssembly(cg.instrs, sndLabel, 0, 1)
 }
 
 func (cg CodeGenerator) cgVisitWhileStat(node While) {
@@ -460,10 +476,6 @@ func (cg CodeGenerator) cgVisitWhileStat(node While) {
 
 	appendAssembly(cg.instrs, fstLabel, 0, 1)
 	cg.evalRHS(node.Conditional, "r4") // NEED TWO REGISTERS R4 and R5 to compare
-	appendAssembly(cg.instrs, "CMP r4, r5", 1, 1)
-	appendAssembly(cg.instrs, "MOVGT r4, #1", 1, 1)
-	appendAssembly(cg.instrs, "MOVLE r4, #0", 1, 1)
-	appendAssembly(cg.instrs, "CMP r4, #1", 1, 1)
 	appendAssembly(cg.instrs, "BEG "+sndLabel, 1, 1)
 }
 
