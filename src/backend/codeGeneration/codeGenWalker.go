@@ -569,7 +569,7 @@ func (cg CodeGenerator) evalRHS(t Evaluation, srcReg string) {
 	case PairElem:
 		cg.evalPairElem(t.(PairElem), srcReg)
 	case Call:
-		appendAssembly(cg.instrs, "call not implemented", 1, 1)
+		cg.cgVisitCallStat(t.(Call).Ident, t.(Call).ParamList)
 	default:
 		fmt.Println("ERROR: Expression can not be evaluated")
 	}
@@ -607,7 +607,7 @@ func (cg CodeGenerator) evalPairElem(t PairElem, srcReg string) {
 // IE WE ONLY PUSH ONTO STACK FUNC VARIABLES WHEN A FUNCTION IS CALLED
 // but
 // WE EXECUTE WHAT IS INSIDE THE FUNCTION REGARDLESS OF WHETHER IT IS CALLED OR NOT
-func (cg CodeGenerator) cgVisitCallStat(ident Ident, paramList []Param) {
+func (cg CodeGenerator) cgVisitCallStat(ident Ident, paramList []Evaluation) {
 	for _, function := range functionList {
 		if function.Ident == ident {
 			// sub sp, sp, #n to create variable space
@@ -658,7 +658,7 @@ func (cg CodeGenerator) cgVisitFunction(node Function) {
 }
 
 // VISIT STATEMENT -------------------------------------------------------------
-func (cg CodeGenerator) cgVisitParameter(node Param, offset int) {
+func (cg CodeGenerator) cgVisitParameter(node Evaluation, offset int) {
 	// node.Ident
 	/*switch node.ParamType.(type) {
 	case Boolean:
@@ -804,5 +804,28 @@ func (cg CodeGenerator) cgVisitUnopExpr(node Unop) {
 }
 
 func (cg CodeGenerator) cgVisitBinopExpr(node Binop) {
+	//Binary int
+	//Left   Evaluation
+	//Right  Evaluation
+	//cg.eval(node) // Type
+	switch node.Binary {
+	case PLUS:
+		cg.evalRHS(node.Left, "r4")
+		cg.evalRHS(node.Right, "r5")
+		appendAssembly(cg.instrs, "ADDS r4, r4, r5", 1, 1)
+		appendAssembly(cg.instrs, "BLVS p_throw_overflow_error", 1, 1)
+	case SUB:
 
+	case MUL:
+	case DIV:
+	case MOD:
+	case AND:
+	case OR:
+	case LT:
+	case LTE:
+	case GT:
+	case GTE:
+	case EQ:
+	case NEQ:
+	}
 }
