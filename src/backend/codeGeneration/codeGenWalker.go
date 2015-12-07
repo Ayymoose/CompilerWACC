@@ -585,42 +585,34 @@ func (cg CodeGenerator) cgVisitDeclareStat(node Declare) {
 }
 
 func (cg CodeGenerator) cgVisitAssignmentStat(node Assignment) {
-	// Type
-	constType := cg.eval(node.Lhs.(Ident))
 	rhs := node.Rhs
+
+	cg.evalRHS(rhs, "r4")
 
 	// lhs can be
 	// IDENT , ARRAY-ELEM , PAIR-ELEM
 	switch node.Lhs.(type) {
 	case Ident:
-		//Put the LHS into a reg and evaluate the RHS
-		fmt.Println("Ident not done")
+		ident := node.Lhs.(Ident)
+		typeIdent := cg.eval(ident)
+		switch typeIdent.(type) {
+		case ConstType:
+			offset, _ := cg.getIdentOffset(ident)
+			switch typeIdent.(ConstType) {
+			case Bool, Char:
+				// Using STRB, store it on the stack
+				appendAssembly(cg.currInstrs(), "STRB r4, [sp, #"+strconv.Itoa(offset)+"]", 1, 1)
+			case Int, String:
+				// Store the value of declaration to stack
+				appendAssembly(cg.currInstrs(), "STR r4, [sp, #"+strconv.Itoa(offset)+"]", 1, 1)
+			}
+		}
+
 	case ArrayElem:
 		fmt.Println("Array elem not done")
 	case PairElem:
 		fmt.Println("Pair elem not done")
 	default:
-	}
-
-	switch constType {
-	case Bool:
-		cg.evalRHS(rhs, "r4")
-		// Using STRB, store it on the stack
-		appendAssembly(cg.currInstrs(), "STRB r4, [sp, #"+cg.subCurrP(BOOL_SIZE)+"]", 1, 1)
-	case Char:
-		cg.evalRHS(rhs, "r4")
-		// Using STRB, store it on the stack
-		appendAssembly(cg.currInstrs(), "STRB r4, [sp, #"+cg.subCurrP(CHAR_SIZE)+"]", 1, 1)
-	case Int:
-		cg.evalRHS(rhs, "r4")
-		// Store the value of declaration to stack
-		appendAssembly(cg.currInstrs(), "STR r4, [sp, #"+cg.subCurrP(INT_SIZE)+"]", 1, 1)
-	case String:
-		cg.evalRHS(rhs, "r4")
-		// Store the address onto the stack
-		appendAssembly(cg.currInstrs(), "STR r4, [sp, #"+cg.subCurrP(STRING_SIZE)+"]", 1, 1)
-	case Pair:
-		fmt.Println("Pair not done")
 	}
 }
 
