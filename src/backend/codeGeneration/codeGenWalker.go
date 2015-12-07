@@ -258,7 +258,7 @@ func (cg CodeGenerator) removeStackSpace(stackSize int) {
 // Evalutes the RHS of an expression
 func (cg CodeGenerator) evalRHS(t Evaluation, srcReg string) {
 
-	switch t.(type) {
+	/*switch t.(type) {
 	// Literals
 	case Integer:
 		appendAssembly(cg.currInstrs(), "LDR "+srcReg+", ="+strconv.Itoa(int(t.(Integer))), 1, 1)
@@ -278,9 +278,9 @@ func (cg CodeGenerator) evalRHS(t Evaluation, srcReg string) {
 	case ArrayElem:
 		cg.evalArrayElem(t, srcReg, "r5")
 	case Unop:
-		//cg.cgVisitUnopExpr(t.(Unop))
+		cg.cgVisitUnopExpr(t.(Unop))
 	case Binop:
-		//cg.cgVisitBinopExpr(t.(Binop))
+		cg.cgVisitBinopExpr(t.(Binop))
 	case NewPair:
 		// First allocate memory to store two addresses (8-bytes)
 		cg.CfunctionCall("malloc", strconv.Itoa(ADDR_SIZE*2))
@@ -292,7 +292,7 @@ func (cg CodeGenerator) evalRHS(t Evaluation, srcReg string) {
 	//	cg.cgVisitCallStat(t.(Call).Ident, t.(Call).ParamList)
 	default:
 		fmt.Println("ERROR: Expression can not be evaluated")
-	}
+	}*/
 }
 
 // Evalute a pair element
