@@ -724,6 +724,9 @@ func (cg CodeGenerator) cgVisitPrintlnStat(node Println) {
 }
 
 func (cg CodeGenerator) cgVisitIfStat(node If) {
+	varSpaceSize := GetScopeVarSize(node.ThenStat)
+	cg.setNewScope(varSpaceSize)
+
 	fstLabel := cg.getNewLabel()
 	sndLabel := cg.getNewLabel()
 	cg.evalRHS(node.Conditional, "r4")
@@ -733,6 +736,10 @@ func (cg CodeGenerator) cgVisitIfStat(node If) {
 		cg.cgEvalStat(stat)
 	}
 
+	cg.removeCurrScope()
+	varSpaceSize = GetScopeVarSize(node.ElseStat)
+	cg.setNewScope(varSpaceSize)
+
 	appendAssembly(cg.currInstrs(), "B "+sndLabel, 1, 1)
 	appendAssembly(cg.currInstrs(), fstLabel, 0, 1)
 
@@ -741,12 +748,17 @@ func (cg CodeGenerator) cgVisitIfStat(node If) {
 	}
 
 	appendAssembly(cg.currInstrs(), sndLabel, 0, 1)
+
+	cg.removeCurrScope()
 }
 
 func (cg CodeGenerator) cgVisitWhileStat(node While) {
+	varSpaceSize := GetScopeVarSize(node.DoStat)
+	cg.setNewScope(varSpaceSize)
+
 	fstLabel := cg.getNewLabel()
 	sndLabel := cg.getNewLabel()
-	appendAssembly(cg.currInstrs(), "B"+fstLabel, 1, 1)
+	appendAssembly(cg.currInstrs(), "B "+fstLabel, 1, 1)
 	appendAssembly(cg.currInstrs(), sndLabel, 0, 1)
 
 	// traverse all statements by switching on statement type
@@ -757,6 +769,8 @@ func (cg CodeGenerator) cgVisitWhileStat(node While) {
 	appendAssembly(cg.currInstrs(), fstLabel, 0, 1)
 	cg.evalRHS(node.Conditional, "r4") // NEED TWO REGISTERS R4 and R5 to compare
 	appendAssembly(cg.currInstrs(), "BEG "+sndLabel, 1, 1)
+
+	cg.removeCurrScope()
 }
 
 func (cg CodeGenerator) cgVisitScopeStat(node Scope) {
