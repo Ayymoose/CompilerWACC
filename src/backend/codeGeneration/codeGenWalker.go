@@ -289,6 +289,7 @@ func (cg CodeGenerator) evalRHS(t Evaluation, srcReg string) {
 	case PairElem:
 		cg.evalPairElem(t.(PairElem), srcReg)
 	case Call:
+		// TODO UNCOMMENT This when you are sure that its not causing the infinite loop
 	//	cg.cgVisitCallStat(t.(Call).Ident, t.(Call).ParamList)
 	default:
 		fmt.Println("ERROR: Expression can not be evaluated")
@@ -466,6 +467,7 @@ func (cg CodeGenerator) cgVisitProgram(node *Program) {
 	// Set properties of global scope
 	cg.globalStack.size = GetScopeVarSize(node.StatList)
 	cg.globalStack.currP = cg.globalStack.size
+	cg.globalStack.isFunc = false
 
 	// ASSIGN functions to global variable
 	// WE WIll only traverse them if they are called
@@ -576,7 +578,6 @@ func (cg CodeGenerator) cgVisitDeclareStat(node Declare) {
 }
 
 func (cg CodeGenerator) cgVisitAssignmentStat(node Assignment) {
-
 	// Type
 	constType := cg.eval(node.Lhs.(Ident))
 	rhs := node.Rhs
@@ -592,7 +593,6 @@ func (cg CodeGenerator) cgVisitAssignmentStat(node Assignment) {
 	case PairElem:
 		fmt.Println("Pair elem not done")
 	default:
-		fmt.Println("Oh no something went really wrong!")
 	}
 
 	switch constType {
@@ -622,21 +622,13 @@ func (cg CodeGenerator) cgVisitReadStat(node Read) {
 	constType := cg.eval(node.AssignLHS.(Ident)) // Type
 	appendAssembly(cg.instrs, "ADD r4, sp, #0", 1, 1)
 	appendAssembly(cg.instrs, "MOV r0, r4", 1, 1)
-	switch node.AssignLHS.(type) {
-	case ArrayElem:
-	case PairElem:
-	}
 	switch constType {
-	case Bool:
 	case Char:
 		appendAssembly(cg.instrs, "BL p_read_char", 1, 1)
 		cg.cgVisitReadStatFunc_H("p_read_char")
 	case Int:
 		appendAssembly(cg.instrs, "BL p_read_int", 1, 1)
 		cg.cgVisitReadStatFunc_H("p_read_int")
-	case String:
-	case Pair:
-		// TODO
 	}
 }
 
@@ -760,6 +752,8 @@ func (cg CodeGenerator) cgVisitScopeStat(node Scope) {
 	// Amount of bytes on the stack the scope takes up for variables
 	varSpaceSize := GetScopeVarSize(node.StatList)
 
+	cg.setNewScope(varSpaceSize)
+
 	// sub sp, sp, #n to create variable space
 	appendAssembly(cg.instrs, "SUB sp, sp, #"+strconv.Itoa(varSpaceSize), 1, 1)
 
@@ -770,6 +764,9 @@ func (cg CodeGenerator) cgVisitScopeStat(node Scope) {
 
 	// add sp, sp, #n to remove variable space
 	appendAssembly(cg.instrs, "ADD sp, sp, #"+strconv.Itoa(varSpaceSize), 1, 1)
+
+	cg.removeCurrScope()
+
 }
 
 // ONLY VISIT FUNCTION IF IT IS CALLED

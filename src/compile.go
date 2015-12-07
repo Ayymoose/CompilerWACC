@@ -57,7 +57,7 @@ func main() {
 	fileARM := filename[0:len(filename)-len(ext)] + ".s"
 	fmt.Println(fileARM)
 
-	codeGen := cg.ConstructCodeGenerator(root, armList, *root.SymbolTable)
+	codeGen := cg.ConstructCodeGenerator(root, armList, root.SymbolTable)
 	codeGen.GenerateCode()
 	for _, instr := range *armList {
 		fmt.Print(instr)

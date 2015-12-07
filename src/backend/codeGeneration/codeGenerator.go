@@ -14,7 +14,7 @@ type CodeGenerator struct {
 	root              *Program          // Root of the AST
 	instrs            *ARMList          // List of assembly instructions for the program
 	msgInstrs         *ARMList          // List of assembly instructions to create msg labels
-	symTable          SymbolTable       // Used to map variable identifiers to their values
+	symTable          *SymbolTable      // Used to map variable identifiers to their values
 	funcInstrs        *ARMList          // List of assembly instructions that define functions and their labels
 	progFuncInstrs    *ARMList          // List of assembly instructions that define program generated functions e.g. p_print_string
 	progFuncNames     *[]string         // List of program defined function names. Used to avoid program redefinitions
@@ -25,7 +25,7 @@ type CodeGenerator struct {
 }
 
 // Constructor for the code generator.
-func ConstructCodeGenerator(cRoot *Program, cInstrs *ARMList, cSymTable SymbolTable) CodeGenerator {
+func ConstructCodeGenerator(cRoot *Program, cInstrs *ARMList, cSymTable *SymbolTable) CodeGenerator {
 	cg := CodeGenerator{root: cRoot, instrs: cInstrs, msgInstrs: new(ARMList),
 		funcInstrs: new(ARMList), progFuncInstrs: new(ARMList), progFuncNames: new([]string),
 		symTable: cSymTable, globalStack: &scopeData{}}
@@ -39,7 +39,7 @@ func ConstructCodeGenerator(cRoot *Program, cInstrs *ARMList, cSymTable SymbolTa
 
 // Evaluates the evaluation using the code generator
 func (cg CodeGenerator) eval(e Evaluation) Type {
-	eType, _ := e.Eval(cg.root.FunctionList, &(cg.symTable))
+	eType, _ := e.Eval(cg.root.FunctionList, cg.symTable)
 	return eType
 }
 
@@ -48,6 +48,23 @@ type scopeData struct {
 	currP       int        // the current position of the pointer to the stack
 	size        int        // size of the variable stack scope space in bytes
 	parentScope *scopeData // Address of the parent scope
+	isFunc      bool       // true iff the scope date is used for a function scope
+}
+
+func (cg CodeGenerator) setNewScope(varSpaceSize int) {
+	newScope := new(scopeData)
+	newScope.currP = varSpaceSize
+	newScope.size = varSpaceSize
+	newScope.parentScope = cg.currStack
+	newScope.isFunc = cg.currStack.isFunc
+
+	cg.currStack = newScope
+
+	//TODO: CODE TO SET CHILD SYMBOL TABLE
+}
+
+func (cg CodeGenerator) removeCurrScope() {
+
 }
 
 // Decreases current pointer to the stack by n
