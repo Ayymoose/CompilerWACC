@@ -279,7 +279,7 @@ func (cg CodeGenerator) evalRHS(t Evaluation, srcReg string) {
 		cg.cgVisitUnopExpr(t.(Unop))
 	case Binop:
 		cg.cgVisitBinopExpr(t.(Binop))
-	/*case NewPair:
+	case NewPair:
 		// First allocate memory to store two addresses (8-bytes)
 		cg.CfunctionCall("malloc", strconv.Itoa(ADDR_SIZE*2))
 		cg.evalPair(t.(NewPair).FstExpr, t.(NewPair).SndExpr, "r5", srcReg)
