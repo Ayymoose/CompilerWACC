@@ -523,11 +523,11 @@ func (cg CodeGenerator) cgEvalStat(stat interface{}) {
 		cg.cgVisitReturnStat(stat.(Return))*/
 	case Exit:
 		cg.cgVisitExitStat(stat.(Exit))
-	case Print:
-		cg.cgVisitPrintStat(stat.(Print))
-	case Println:
-		cg.cgVisitPrintlnStat(stat.(Println))
-		/*		case If:
+		/*	case Print:
+				cg.cgVisitPrintStat(stat.(Print))
+			case Println:
+				cg.cgVisitPrintlnStat(stat.(Println))
+		*/ /*		case If:
 					cg.cgVisitIfStat(stat.(If))
 				case While:
 					cg.cgVisitWhileStat(stat.(While))
