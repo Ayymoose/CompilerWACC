@@ -7,10 +7,8 @@
 # Program:
 
 begin
-  pair(pair, pair) p = null ;
-  println p ;
-  p = null ;
-  println p
+  pair(pair, pair) p = null 
+#  println p ;
+  #p = null ;
+  #println p
 end
-
-

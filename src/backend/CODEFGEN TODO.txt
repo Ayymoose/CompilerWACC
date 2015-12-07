@@ -1,4 +1,4 @@
-DECLARE: Almost done except pairs and arrays need to be fully implemented @Ayman
+DECLARE: ArrayElem and Pairs of Pairs NOT DONE @ AYMAN
 
 CHECK IF .ascii IN MSGS SHOULD HAVE MESSAGE PRINTED OUT WITH QUOTES
 
@@ -18,10 +18,6 @@ FREE: NOT STARTED ---
 RETURN: NOT STARTED --- @Ayman
 
 EVAL RHS: IN PROGRESS ---
-- do array elem AYMAN
-- do array liter AYMAN
-- do newpair AYMAN
-- do pairelem AYMAN
 - do call HENRYK
 
 EXIT: COMPLETE ----------------------------------------
