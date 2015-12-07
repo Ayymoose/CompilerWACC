@@ -518,9 +518,9 @@ func (cg CodeGenerator) cgEvalStat(stat interface{}) {
 	case Read:
 		cg.cgVisitReadStat(stat.(Read))
 		/*				case Free:
-							cg.cgVisitFreeStat(stat.(Free))
-						case Return:
-		cg.cgVisitReturnStat(stat.(Return))*/
+						cg.cgVisitFreeStat(stat.(Free))
+		*/case Return:
+		cg.cgVisitReturnStat(stat.(Return))
 	case Exit:
 		cg.cgVisitExitStat(stat.(Exit))
 		/*	case Print:
