@@ -23,6 +23,7 @@ type CodeGenerator struct {
 	globalStack       *scopeData        // Stack data for the global scope
 	currStack         *scopeData        // Stack data for the current scope
 	msgMap            map[string]string // Maps string values to their msg labels
+	messages          []string          // A slice of all messages used within the program
 	currentLabelIndex int               // The index of the current generic label (used in control flow functions)
 }
 
@@ -152,14 +153,12 @@ func (cg *CodeGenerator) buildFullInstr() {
 // with a new msg label value (which will be returned)
 // e.g. =msg_0
 func (cg *CodeGenerator) getMsgLabel(strValue string) string {
-	//	msgLabel, contained := cg.msgMap[strValue]
-	/* When comparing two strings stored in different lables which are the same
-	   in terms of value but different in terms of location means that this optimisation cannot be
-	   included yet
-	   	if contained {
-	   		return "=" + msgLabel
-	   	}
-	*/
+	msgLabel, contained := cg.msgMap[strValue]
+
+	if contained {
+		return "=" + msgLabel
+	}
+
 	cg.msgMap[strValue] = "msg_" + strconv.Itoa(len(cg.msgMap))
 	addMsgLabel(cg.msgInstrs, cg.msgMap[strValue], strValue)
 
