@@ -170,7 +170,7 @@ func (cg *CodeGenerator) getMsgLabel(ident Ident, strValue string) string {
 		cg.messages = append(cg.messages, strValue)
 		newLabel := "msg_" + strconv.Itoa(newIndex)
 		addMsgLabel(cg.msgInstrs, newLabel, strValue)
-		return newLabel
+		return "=" + newLabel
 	}
 
 	// If the ident hasnt been previously defined in a msg
@@ -182,12 +182,12 @@ func (cg *CodeGenerator) getMsgLabel(ident Ident, strValue string) string {
 
 		cg.currStack.identMsgLabelMap[ident] = newLabel
 
-		return newLabel
+		return "=" + newLabel
 	}
 
 	// Find the idents label using all scopes
 	label := findLabel(ident, cg.currStack)
-	return label
+	return "=" + label
 }
 
 // Adds the function name to cg.progFuncNames iff it isnt already in the list
