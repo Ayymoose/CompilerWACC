@@ -737,6 +737,7 @@ func (cg CodeGenerator) cgVisitPrintStat(node Print) {
 	}
 }
 
+//TODO: println for arrays should NOT print addresses @Nana fix please 
 func (cg CodeGenerator) cgVisitPrintlnStat(node Println) {
 	cg.cgVisitPrintStat(Print{Expr: node.Expr})
 	// BL p_print_ln
