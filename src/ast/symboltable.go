@@ -53,11 +53,7 @@ func (symbolTable *SymbolTable) IsOffsetDefined(key Ident) bool {
 
 	_, inMap := symbolTable.OffsetVals[string(key)]
 
-	if inMap {
-		return true
-	} else {
-		return symbolTable.Parent.IsOffsetDefined(key)
-	}
+	return inMap
 }
 
 // Checks if the key is already declared in the symbol table

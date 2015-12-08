@@ -69,7 +69,6 @@ func (cg *CodeGenerator) setNewScope(varSpaceSize int) {
 	}
 
 	cg.currStack = newScope
-
 	cg.symTable = cg.symTable.GetFrontChild()
 }
 
@@ -196,11 +195,14 @@ func (cg *CodeGenerator) findIdentOffset(ident Ident, symTable *SymbolTable,
 		return 0, Int
 	}
 
+	/*fmt.Println("Ident: ", ident, "  table: ", symTable, " accOffset: ", accOffset)
+	fmt.Println("Scope: ", scope)
+	fmt.Println("Defined?:", symTable.IsOffsetDefined(ident), "\n")*/
 	if !symTable.IsOffsetDefined(ident) {
-		return cg.findIdentOffset(ident, symTable.Parent, scope.parentScope, accOffset+scope.size+cg.currStack.extraOffset)
+		return cg.findIdentOffset(ident, symTable.Parent, scope.parentScope, accOffset+scope.size+scope.extraOffset)
 	}
 
-	return symTable.GetOffset(string(ident)) + accOffset + cg.currStack.extraOffset, symTable.GetTypeOfIdent(ident)
+	return symTable.GetOffset(string(ident)) + accOffset + scope.extraOffset, symTable.GetTypeOfIdent(ident)
 
 }
 
