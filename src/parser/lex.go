@@ -140,6 +140,13 @@ func (l *Lexer) currLocation() (line int, col int) {
 	return
 }
 
+//Returns line number and column number of current lexing item in .wacc file
+func (l *Lexer) LineAndCol(pos int) (line int, col int) {
+	line = 1 + strings.Count(l.input[:pos], "\n")
+	col = pos - strings.LastIndex(l.input[:pos], "\n")
+	return
+}
+
 // run runs the state machine for the lexer.
 func (l *Lexer) run() {
 	for state := lexText; state != nil; {
@@ -402,18 +409,20 @@ func (l *Lexer) Error(e string) {
 // Lex is used by the yacc-generated parser to fetch the next Lexeme.
 func (l *Lexer) Lex(lval *parserSymType) int {
 	token := l.NextItem()
+	position := token.Pos
+	//	linenum, _ := l.TokenLocation(token)
 	//	fmt.Println(token, token.Typ)
 	switch token.Typ {
 	case STRINGCONST:
-		*lval = parserSymType{stringconst: Str(token.Lexeme)}
+		*lval = parserSymType{stringconst: Str(token.Lexeme), pos: position}
 	case CHARACTER:
-		*lval = parserSymType{character: Character(token.Lexeme)}
+		*lval = parserSymType{character: Character(token.Lexeme), pos: position}
 	case IDENTIFIER:
-		*lval = parserSymType{ident: Ident(token.Lexeme)}
+		*lval = parserSymType{ident: Ident(token.Lexeme), pos: position}
 	case TRUE:
-		*lval = parserSymType{boolean: Boolean(true)}
+		*lval = parserSymType{boolean: Boolean(true), pos: position}
 	case FALSE:
-		*lval = parserSymType{boolean: Boolean(false)}
+		*lval = parserSymType{boolean: Boolean(false), pos: position}
 	case INTEGER:
 		num, err := strconv.Atoi(token.Lexeme)
 		if err != nil {
@@ -424,7 +433,9 @@ func (l *Lexer) Lex(lval *parserSymType) int {
 			fmt.Println("Int too big or small")
 			os.Exit(100)
 		}
-		*lval = parserSymType{integer: Integer(num)}
+		*lval = parserSymType{integer: Integer(num), pos: position}
+	default:
+		*lval = parserSymType{pos: position}
 	}
 	return token.Typ
 }

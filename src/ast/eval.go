@@ -9,7 +9,7 @@ func (value Call) Eval(functionTable []*Function, symbolTable *SymbolTable) (Typ
 	for _, function := range functionTable {
 		if value.Ident == function.Ident {
 			if len(value.ParamList) != len(function.ParameterTypes) {
-				return nil, errors.New("Different number of parameters in Call and Function Definition")
+				return nil, errors.New("line: " + fmt.Sprint(value.Pos) + " :Different number of parameters in Call and Function Definition")
 			}
 			for ind := range value.ParamList {
 				exprType, err := value.ParamList[ind].Eval(functionTable, symbolTable)
@@ -17,13 +17,13 @@ func (value Call) Eval(functionTable []*Function, symbolTable *SymbolTable) (Typ
 					return nil, err
 				}
 				if exprType != function.ParameterTypes[ind].ParamType {
-					return nil, errors.New("Parameters of call and defintion do not match")
+					return nil, errors.New("line: " + fmt.Sprint(value.Pos) + " :Parameters of call and defintion do not match")
 				}
 			}
 			return function.ReturnType, nil
 		}
 	}
-	return nil, errors.New("No such function defined")
+	return nil, errors.New("line: " + fmt.Sprint(value.Pos) + " :No such function defined")
 }
 
 func (value ArrayLiter) Eval(functionTable []*Function, symbolTable *SymbolTable) (Type, error) {
@@ -41,7 +41,7 @@ func (value ArrayLiter) Eval(functionTable []*Function, symbolTable *SymbolTable
 				return nil, err2
 			}
 			if currType2 != currType {
-				return nil, errors.New("Array has mixed types")
+				return nil, errors.New("line: " + fmt.Sprint(value.Pos) + " :Array has mixed types")
 			}
 		}
 		//		fmt.Println("DID WE GET HERE?", currType.typeString())
@@ -77,7 +77,7 @@ func (value PairElem) Eval(functionTable []*Function, symbolTable *SymbolTable) 
 			return exprTyp.(PairType).SndType, nil
 		}
 	}
-	return nil, errors.New("Cannot get elem of non pair type")
+	return nil, errors.New("line: " + fmt.Sprint(value.Pos) + " :Cannot get elem of non pair type")
 }
 
 func (value Integer) Eval(functionTable []*Function, symbolTable *SymbolTable) (Type, error) {
@@ -115,15 +115,15 @@ func (value ArrayElem) Eval(functionTable []*Function, symbolTable *SymbolTable)
 				return nil, err2
 			}
 			if currType2 != currType {
-				return nil, errors.New("Array has mixed types")
+				return nil, errors.New("line: " + fmt.Sprint(value.Pos) + " :Array has mixed types")
 			}
 		}
 	}
 	if currType != Int {
-		return nil, errors.New("Array cannot have non int expr")
+		return nil, errors.New("line: " + fmt.Sprint(value.Pos) + " :Array cannot have non int expr")
 	}
 	if !symbolTable.isDefined(value.Ident) {
-		return nil, errors.New("Array not defined, identifier cannot be found")
+		return nil, errors.New("line: " + fmt.Sprint(value.Pos) + " :Array not defined, identifier cannot be found")
 	}
 	arrayTyp := symbolTable.getTypeOfIdent(value.Ident)
 	for _ = range value.Exprs {
@@ -135,7 +135,7 @@ func (value ArrayElem) Eval(functionTable []*Function, symbolTable *SymbolTable)
 				return Char, nil
 			}
 		default:
-			return nil, errors.New("Too many nested indexes in array")
+			return nil, errors.New("line: " + fmt.Sprint(value.Pos) + " :Too many nested indexes in array")
 		}
 	}
 	return arrayTyp, nil
@@ -162,39 +162,39 @@ func (binop Binop) Eval(functionTable []*Function, symbolTable *SymbolTable) (Ty
 	switch binop.Binary {
 	case PLUS, SUB, MUL, DIV, MOD:
 		if typl != Int {
-			return nil, errors.New("Left expr of binary int operation is not an Int")
+			return nil, errors.New("line: " + fmt.Sprint(binop.Pos) + " :Left expr of binary int operation is not an Int")
 		}
 
 		if typr != Int {
-			return nil, errors.New("Right expr of binary int operation is not an Int")
+			return nil, errors.New("line: " + fmt.Sprint(binop.Pos) + " :Right expr of binary int operation is not an Int")
 		}
 		return Int, nil
 	case AND, OR:
 		if typl != Bool {
-			return nil, errors.New("Left expr of binary bool operation is not an Bool")
+			return nil, errors.New("line: " + fmt.Sprint(binop.Pos) + " :Left expr of binary bool operation is not an Bool")
 		}
 		if typr != Bool {
-			return nil, errors.New("Right expr of binary bool operation is not an Bool: " + typr.typeString() + " " + fmt.Sprint(binop.Right))
+			return nil, errors.New("line: " + fmt.Sprint(binop.Pos) + " :Right expr of binary bool operation is not an Bool: " + typr.typeString() + " " + fmt.Sprint(binop.Right))
 		}
 		return Bool, nil
 	case LT, LTE, GT, GTE:
 		if typl != Int && typl != Char {
-			return nil, errors.New("Left expr of binary conditional operation is not an Int or Char")
+			return nil, errors.New("line: " + fmt.Sprint(binop.Pos) + " :Left expr of binary conditional operation is not an Int or Char")
 		}
 		if typr != Int && typr != Char {
-			return nil, errors.New("Right expr of binary conditional operation is not an Int or Char")
+			return nil, errors.New("line: " + fmt.Sprint(binop.Pos) + " :Right expr of binary conditional operation is not an Int or Char")
 		}
 		if !typesMatch(typl, typr) {
-			return nil, errors.New("Left and right expr of binary conditional operation do not match")
+			return nil, errors.New("line: " + fmt.Sprint(binop.Pos) + " :Left and right expr of binary conditional operation do not match")
 		}
 		return Bool, nil
 	case EQ, NEQ:
 		if !typesMatch(typl, typr) {
-			return nil, errors.New("Left and right expr of binary conditional operation do not match")
+			return nil, errors.New("line: " + fmt.Sprint(binop.Pos) + " :Left and right expr of binary conditional operation do not match")
 		}
 		return Bool, nil
 	default:
-		return nil, errors.New("Binary operation not recognised")
+		return nil, errors.New("line: " + fmt.Sprint(binop.Pos) + " :Binary operation not recognised")
 	}
 }
 
@@ -206,12 +206,12 @@ func (value Unop) Eval(functionTable []*Function, symbolTable *SymbolTable) (Typ
 	switch value.Unary {
 	case NOT:
 		if typExpr != Bool {
-			return nil, errors.New("Cannot negate a non Bool expression")
+			return nil, errors.New("line: " + fmt.Sprint(value.Pos) + " :Cannot negate a non Bool expression")
 		}
 		return Bool, nil
 	case SUB:
 		if typExpr != Int {
-			return nil, errors.New("Cannot sub a non Int expression")
+			return nil, errors.New("line: " + fmt.Sprint(value.Pos) + " :Cannot sub a non Int expression")
 		}
 		return Int, nil
 	case LEN:
@@ -219,19 +219,19 @@ func (value Unop) Eval(functionTable []*Function, symbolTable *SymbolTable) (Typ
 		case ArrayType:
 			return Int, nil
 		}
-		return nil, errors.New("Cannot perform len on non Array expression")
+		return nil, errors.New("line: " + fmt.Sprint(value.Pos) + " :Cannot perform len on non Array expression")
 	case ORD:
 		if typExpr != Char {
-			return nil, errors.New("Cannot perform ord on non Char expression")
+			return nil, errors.New("line: " + fmt.Sprint(value.Pos) + " :Cannot perform ord on non Char expression")
 		}
 		return Int, nil
 	case CHR:
 		if typExpr != Int {
-			return nil, errors.New("Cannot perform len on non Int expression")
+			return nil, errors.New("line: " + fmt.Sprint(value.Pos) + " :Cannot perform len on non Int expression")
 		}
 		return Char, nil
 	default:
-		return nil, errors.New("Unary operation not recognised")
+		return nil, errors.New("line: " + fmt.Sprint(value.Pos) + " :Unary operation not recognised")
 	}
 }
 
