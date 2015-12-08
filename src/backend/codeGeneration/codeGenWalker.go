@@ -955,8 +955,8 @@ func (cg *CodeGenerator) cgVisitUnopExpr(node Unop) {
 
 		//		appendAssembly(cg.currInstrs(), "LDRSB r4, [sp, #"++"]", 1, 1)
 		appendAssembly(cg.currInstrs(), "EOR r4, r4, #1", 1, 1)
-		appendAssembly(cg.currInstrs(), "MOV r0, r4", 1, 1)
-		*/default:
+		*/appendAssembly(cg.currInstrs(), "MOV r0, r4", 1, 1)
+	default:
 		fmt.Println("oh no")
 		fmt.Println(node.Unary)
 	}
