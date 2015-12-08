@@ -158,9 +158,9 @@ func (node Skip) visitStatement(functionTable []*Function, symbolTable *SymbolTa
 
 func (node Declare) visitStatement(functionTable []*Function, symbolTable *SymbolTable) errorSlice {
 	var semanticErrors errorSlice
-	/*	if symbolTable.isDefinedInScope(node.Lhs) {
-		semanticErrors = append(semanticErrors, errors.New("line: "+fmt.Sprint(node.Line)+" :Variable already declared::"+string(node.Lhs)))
-	} */
+	if symbolTable.isDefinedInScope(node.Lhs) {
+		semanticErrors = append(semanticErrors, errors.New("line: "+fmt.Sprint(node.Pos)+" :Variable already declared::"+string(node.Lhs)))
+	}
 	exprType, errs := node.Rhs.Eval(functionTable, symbolTable)
 	if errs != nil {
 		semanticErrors = append(semanticErrors, errs)
