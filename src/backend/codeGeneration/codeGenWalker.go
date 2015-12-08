@@ -48,8 +48,6 @@ const STACK_SIZE_MAX = 1024
 // Function global variable
 var functionList []*Function
 
-//TODO: Fails on waiting on Nana's getIdentOffset() function
-
 //TODO: intAssignment.wacc FAILS
 //TODO: intLeadingZeros.wacc FAILS
 //TODO: _VarNames.wacc FAILS
@@ -273,6 +271,9 @@ func (cg CodeGenerator) evalRHS(t Evaluation, srcReg string) {
 		var offset, resType = cg.getIdentOffset(t.(Ident))
 
 		switch resType.(type) {
+		case ArrayType:
+
+			fmt.Println("Pair or array")
 		case ConstType:
 
 			switch resType.(ConstType) {
@@ -280,9 +281,7 @@ func (cg CodeGenerator) evalRHS(t Evaluation, srcReg string) {
 				appendAssembly(cg.currInstrs(), "LDRSB "+srcReg+", [sp, #"+strconv.Itoa(offset)+"]", 1, 1)
 			case Int, String:
 				appendAssembly(cg.currInstrs(), "LDR "+srcReg+", [sp, #"+strconv.Itoa(offset)+"]", 1, 1)
-				//Need pair in here too?
 			}
-
 		default:
 			appendAssembly(cg.currInstrs(), "LDR "+srcReg+", [sp, #"+strconv.Itoa(offset)+"]", 1, 1)
 		}
@@ -415,7 +414,14 @@ func (cg CodeGenerator) evalArray(array []Evaluation, srcReg string, dstReg stri
 			case Char:
 				appendAssembly(cg.currInstrs(), "STRB "+srcReg+", ["+dstReg+", #"+strconv.Itoa(ARRAY_SIZE+CHAR_SIZE*i)+"]", 1, 1)
 			default:
-				fmt.Println("Type not implemented")
+				//Must be an array type
+				//Loop through the array
+				var offset, _ = cg.getIdentOffset(array[i].(Ident))
+				switch t.(ArrayType).Type.(type) {
+				case ArrayType:
+					appendAssembly(cg.currInstrs(), "LDR "+srcReg+", [sp, #"+strconv.Itoa(offset)+"]", 1, 1)
+					appendAssembly(cg.currInstrs(), "STR "+srcReg+", [r4, #"+strconv.Itoa(ARRAY_SIZE+sizeOf(t)*i)+"]", 1, 1)
+				}
 			}
 		}
 	}
@@ -445,11 +451,8 @@ func (cg CodeGenerator) evalArrayElem(t Evaluation, reg1 string, reg2 string) {
 	// reg1 = Address of the array
 	// reg2 = Index
 
-	// A little hack here... (Swapped these instructions around)
-	appendAssembly(cg.currInstrs(), "MOV r1, "+reg1, 1, 1)
 	appendAssembly(cg.currInstrs(), "MOV r0, "+reg2, 1, 1)
-
-	// Jump
+	appendAssembly(cg.currInstrs(), "MOV r1, "+reg1, 1, 1)
 	appendAssembly(cg.currInstrs(), "BL p_check_array_bounds", 1, 1)
 
 	// Still don't know what these assembly instructions do
@@ -463,11 +466,7 @@ func (cg CodeGenerator) evalArrayElem(t Evaluation, reg1 string, reg2 string) {
 	appendAssembly(cg.currInstrs(), "ADD "+reg1+", "+reg1+", #4", 1, 1)
 	appendAssembly(cg.currInstrs(), "ADD "+reg1+", "+reg1+", "+reg2+", LSL #2", 1, 1)
 	appendAssembly(cg.currInstrs(), "LDR "+reg1+", ["+reg1+"]", 1, 1)
-
-	// Hack
-	if reg1 != "r0" {
-		appendAssembly(cg.currInstrs(), "MOV r0, "+reg1, 1, 1)
-	}
+	appendAssembly(cg.currInstrs(), "MOV r0, "+reg1, 1, 1)
 
 	// Check bounds and errors
 	cg.checkArrayBounds()
@@ -634,7 +633,9 @@ func (cg CodeGenerator) cgVisitAssignmentStat(node Assignment) {
 		}
 
 	case ArrayElem:
+		//Do last
 		fmt.Println("Array elem not done")
+
 	case PairElem:
 		fmt.Println("Pair elem not done")
 	default:
@@ -679,7 +680,10 @@ func (cg CodeGenerator) cgVisitExitStat(node Exit) {
 
 func (cg CodeGenerator) cgVisitPrintStat(node Print) {
 	expr := node.Expr
-	dstReg := "r0"
+
+	//DO NOT MAKE THIS r0 , IT WILL CAUSE ARRAY LOOKUP TO FAIL
+	dstReg := "r4"
+	//
 
 	// Get value of expr into dstReg
 	cg.evalRHS(expr, dstReg)
@@ -727,6 +731,7 @@ func (cg CodeGenerator) cgVisitPrintStat(node Print) {
 	}
 }
 
+//TODO: println for arrays should NOT print addresses @Nana fix please
 func (cg CodeGenerator) cgVisitPrintlnStat(node Println) {
 	cg.cgVisitPrintStat(Print{Expr: node.Expr})
 	// BL p_print_ln
@@ -915,6 +920,7 @@ func (cg CodeGenerator) cgVisitUnopExpr(node Unop) {
 		//So the RHS type is an Ident
 		//Load the length of the array into the register
 		appendAssembly(cg.currInstrs(), "LDR r4, [r4]", 1, 1)
+		appendAssembly(cg.currInstrs(), "MOV r0, r4", 1, 1)
 	case ORD:
 		cg.evalOrd(node)
 	case CHR:
