@@ -628,6 +628,8 @@ func (cg *CodeGenerator) cgVisitDeclareStat(node Declare) {
 			appendAssembly(cg.currInstrs(), "STR r4, [sp, #"+cg.subCurrP(STRING_SIZE)+"]", 1, 1)
 		case Pair:
 			fmt.Println("Pair not implemented")
+		default:
+
 		}
 
 	case PairType:
@@ -636,15 +638,18 @@ func (cg *CodeGenerator) cgVisitDeclareStat(node Declare) {
 			PAIR_INCLUDED = true
 			cg.evalPair(node.Lhs, rhs.(NewPair).FstExpr, rhs.(NewPair).SndExpr, "r5", "r4")
 		case Ident:
+			//TODO: UNFINISHED
 			cg.evalRHS(rhs.(Ident), "r5")
+		case PairLiter:
+			//Can only be Null
+			appendAssembly(cg.currInstrs(), "LDR r4, =0", 1, 1)
+			appendAssembly(cg.currInstrs(), "STR r4, [sp]", 1, 1)
 		case Call:
 
 		case PairElem:
-
+			fmt.Println("pair elem not done")
+		default:
 		}
-
-		// Evalutes a pair of elements onto the stack
-		//cg.evalRHS(rhs, "r4")
 
 	case ArrayType:
 		// Evalute an array
@@ -714,29 +719,46 @@ func (cg *CodeGenerator) cgVisitAssignmentStat(node Assignment) {
 			appendAssembly(cg.currInstrs(), "STRB r4, [r5]", 1, 1)
 		case Integer, Str:
 			appendAssembly(cg.currInstrs(), "STR r4, [r5]", 1, 1)
-		default:
-			fmt.Println("I don't know")
 		}
 	case PairElem:
 
-		fmt.Println("Pair elem not done")
+		//Load the address of the pair into a register
+		//Check if it's the fst or snd
+		switch node.Lhs.(PairElem).Fsnd {
+		case Fst:
+			var offset, _ = cg.getIdentOffset(node.Lhs.(PairElem).Expr.(Ident))
+			appendAssembly(cg.currInstrs(), "LDR r5, [sp, #"+strconv.Itoa(offset)+"]", 1, 1)
+			fmt.Println("Fst")
+		case Snd:
+			fmt.Println("Snd")
+		}
+
 	default:
 	}
 }
 
 func (cg *CodeGenerator) cgVisitReadStat(node Read) {
-	// Technically only read int / char
-	constType := cg.eval(node.AssignLHS.(Ident)) // Type
-	offset, _ := cg.getIdentOffset(node.AssignLHS.(Ident))
-	appendAssembly(cg.currInstrs(), "ADD r0, sp, #"+strconv.Itoa(offset), 1, 1)
-	switch constType {
-	case Char:
-		appendAssembly(cg.currInstrs(), "BL p_read_char", 1, 1)
-		cg.cgVisitReadStatFunc_H("p_read_char")
-	case Int:
-		appendAssembly(cg.currInstrs(), "BL p_read_int", 1, 1)
-		cg.cgVisitReadStatFunc_H("p_read_int")
+
+	switch node.AssignLHS.(type) {
+	case Ident:
+		// Technically only read int / char
+		constType := cg.eval(node.AssignLHS.(Ident)) // Type
+		offset, _ := cg.getIdentOffset(node.AssignLHS.(Ident))
+		appendAssembly(cg.currInstrs(), "ADD r0, sp, #"+strconv.Itoa(offset), 1, 1)
+		switch constType {
+		case Char:
+			appendAssembly(cg.currInstrs(), "BL p_read_char", 1, 1)
+			cg.cgVisitReadStatFunc_H("p_read_char")
+		case Int:
+			appendAssembly(cg.currInstrs(), "BL p_read_int", 1, 1)
+			cg.cgVisitReadStatFunc_H("p_read_int")
+		}
+	case ArrayElem:
+		//Complete
+	case PairElem:
+		//Complete
 	}
+
 }
 
 func (cg *CodeGenerator) cgVisitFreeStat(node Free) {
@@ -976,16 +998,10 @@ func (cg *CodeGenerator) cgVisitUnopExpr(node Unop) {
 	case CHR:
 		cg.evalRHS(node.Expr, "r4")
 		appendAssembly(cg.currInstrs(), "MOV r0, r4", 1, 1)
-		fmt.Println("chr not done")
 	case NOT:
 		cg.evalRHS(node.Expr, "r4")
 		appendAssembly(cg.currInstrs(), "EOR r4, r4, #1", 1, 1)
-		/*var offset, _ = cg.getIdentOffset(node.Expr.(Ident))
-		appendAssembly(cg.currInstrs(), "LDRSB r4, [sp, #"+strconv.Itoa(offset)+"]", 1, 1)
-
-		//		appendAssembly(cg.currInstrs(), "LDRSB r4, [sp, #"++"]", 1, 1)
-		appendAssembly(cg.currInstrs(), "EOR r4, r4, #1", 1, 1)
-		*/appendAssembly(cg.currInstrs(), "MOV r0, r4", 1, 1)
+		appendAssembly(cg.currInstrs(), "MOV r0, r4", 1, 1)
 	default:
 		fmt.Println("oh no")
 		fmt.Println(node.Unary)
