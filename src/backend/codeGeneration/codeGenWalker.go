@@ -999,8 +999,6 @@ func (cg *CodeGenerator) cgVisitBinopExpr(node Binop) {
 		appendAssembly(cg.currInstrs(), "BL p_check_divide_by_zero", 1, 1)
 		appendAssembly(cg.currInstrs(), "BL __aeabi_idivmod", 1, 1)
 		appendAssembly(cg.currInstrs(), "MOV r0, r1", 1, 1)
-
-		//		appendAssembly(cg.currInstrs(), "MOV r4, r5", 1, 1)
 		cg.cgVisitBinopExpr_H("p_check_divide_by_zero")
 	case AND:
 		appendAssembly(cg.currInstrs(), "AND r4, r4, r5", 1, 1)
@@ -1032,7 +1030,6 @@ func (cg *CodeGenerator) cgVisitBinopExpr(node Binop) {
 		appendAssembly(cg.currInstrs(), "CMP r4, r5", 1, 1)
 		appendAssembly(cg.currInstrs(), "MOVEQ r4, #1", 1, 1)
 		appendAssembly(cg.currInstrs(), "MOVNE r4, #0", 1, 1)
-		appendAssembly(cg.currInstrs(), "MOV r0, r4", 1, 1)
 	case NEQ:
 		appendAssembly(cg.currInstrs(), "CMP r4, r5", 1, 1)
 		appendAssembly(cg.currInstrs(), "MOVNE r4, #1", 1, 1)
