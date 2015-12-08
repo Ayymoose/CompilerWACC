@@ -101,7 +101,7 @@ const (
 )
 
 type Function struct {
-		FileText				*string
+	FileText				*string
 	Ident          Ident
 	ReturnType     Type
 	ParameterTypes []Param
@@ -125,7 +125,7 @@ type Program struct {
 
 // Binop struct
 type Binop struct {
-		FileText				*string
+	FileText				*string
 	Pos    int
 	Binary int
 	Left   Evaluation
@@ -134,7 +134,7 @@ type Binop struct {
 
 // Unop struct
 type Unop struct {
-		FileText				*string
+	FileText				*string
 	Pos   int
 	Unary int
 	Expr  Evaluation
@@ -158,7 +158,7 @@ type Declare struct {
 
 // Assignment struct
 type Assignment struct {
-		FileText				*string
+	FileText				*string
 	Pos int
 	Lhs Evaluation
 	Rhs Evaluation
@@ -166,7 +166,7 @@ type Assignment struct {
 
 // If struct
 type If struct {
-		FileText				*string
+	FileText				*string
 	Pos         int
 	Conditional Evaluation
 	ThenStat    []Statement
@@ -175,62 +175,62 @@ type If struct {
 
 // While struct
 type While struct {
-		FileText				*string
+	FileText				*string
 	Pos         int
 	Conditional Evaluation
 	DoStat      []Statement
 }
 
 type Scope struct {
-		FileText				*string
+	FileText				*string
 	Pos      int
 	StatList []Statement
 }
 
 // Read struct
 type Read struct {
-		FileText				*string
+	FileText				*string
 	Pos       int
 	AssignLHS Evaluation // should be an assignLHS
 }
 
 // Free struct
 type Free struct {
-		FileText				*string
+	FileText				*string
 	Pos  int
 	Expr Evaluation
 }
 
 // Return struct
 type Return struct {
-		FileText				*string
+	FileText				*string
 	Pos  int
 	Expr Evaluation
 }
 
 // Exit struct
 type Exit struct {
-		FileText				*string
+	FileText				*string
 	Pos  int
 	Expr Evaluation
 }
 
 // Print struct
 type Print struct {
-		FileText				*string
+	FileText				*string
 	Pos  int
 	Expr Evaluation
 }
 
 // Println struct
 type Println struct {
-		FileText				*string
+	FileText				*string
 	Pos  int
 	Expr Evaluation
 }
 
 type Call struct {
-		FileText				*string
+	FileText				*string
 	Pos       int
 	Ident     Ident
 	ParamList []Evaluation
@@ -242,20 +242,20 @@ type Ident struct {
 }
 */
 type PairElem struct {
-		FileText				*string
+	FileText				*string
 	Pos  int
 	Fsnd FSND
 	Expr Evaluation
 }
 
 type ArrayLiter struct {
-		FileText				*string
+	FileText				*string
 	Pos   int
 	Exprs []Evaluation
 }
 
 type ArrayElem struct {
-		FileText				*string
+	FileText				*string
 	Pos   int
 	Ident Ident
 	Exprs []Evaluation

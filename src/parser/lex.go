@@ -97,14 +97,6 @@ var TokenKeywordStrings = map[string]int{
 var TokenStrings = map[string]int{
 	",": COMMA,
 	";": SEMICOLON,
-	/*"\b": BACKSPACE,
-	"\t": TAB,
-	"\n": LINE_FEED,
-	"\f": FORM_FEED,
-	"\r": CARRIAGE_RETURN,
-	"\"": DOUBLEQUOTE,
-	"'":  SINGLEQUOTE,
-	"\\": BACKSLASH,    */
 	"%":  MOD,
 	"*":  MUL,
 	"/":  DIV,
@@ -173,10 +165,6 @@ func lexText(l *Lexer) stateFn {
 		}
 	}
 	//Correclty reached eof
-	/*	if l.pos > l.start {
-			l.emit(grammar.PLAINTEXT)
-		}
-		l.emit(grammar.EOF)  */
 	return nil
 }
 
@@ -201,7 +189,6 @@ func lexInsideProgram(l *Lexer) stateFn {
 	sort.Sort(sort.Reverse(keysForKeywords))
 	for _, str := range keysForKeywords {
 		if strings.HasPrefix(l.input[l.pos:], str) {
-			//		s := grammar.Token_keyword_strings[key]
 			l.width = len(str)
 			l.pos += l.width
 			if isAlphaNumeric(l.peek()) || l.peek() == '_' {
@@ -219,7 +206,6 @@ func lexInsideProgram(l *Lexer) stateFn {
 	sort.Sort(sort.Reverse(keysForTokens))
 	for _, str := range keysForTokens {
 		if strings.HasPrefix(l.input[l.pos:], str) {
-			//		s := grammar.Token_strings[str]
 			if (l.input[l.pos] == '+' || l.input[l.pos] == '-') && '0' <= l.input[l.pos+1] && l.input[l.pos+1] <= '9' {
 				switch l.lastItem.Typ {
 				case ASSIGNMENT, OPENROUND, OPENSQUARE, COMMA, SEMICOLON:
