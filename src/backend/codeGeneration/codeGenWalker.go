@@ -48,6 +48,9 @@ const STACK_SIZE_MAX = 1024
 // Function global variable
 var functionList []*Function
 
+// Boolean indicating if pairs are present
+var PAIR_INCLUDED bool
+
 // HELPER FUNCTIONS
 // cgVisitReadStat helper function
 // Adds a function definition to the progFuncInstrs ARMList depending on the
@@ -391,14 +394,14 @@ func (cg *CodeGenerator) evalPair(ident Evaluation, fst Evaluation, snd Evaluati
 	appendAssembly(cg.currInstrs(), "STR r0, ["+reg2+", #4]", 1, 1)
 
 	//Store the address of the pair on the stack
-	switch ident.(type) {
-	case Ident:
-		//Store the address of the address that contains pointers to the first and second elements
-		var offset, _ = cg.getIdentOffset(ident.(Ident))
-		appendAssembly(cg.currInstrs(), "STR "+reg2+", [sp, #"+strconv.Itoa(offset)+"]", 1, 1)
-	default:
-		fmt.Println("oh no")
-	}
+	//	switch ident.(type) {
+	//	case Ident:
+	//Store the address of the address that contains pointers to the first and second elements
+	//	var offset, _ = cg.getIdentOffset(ident.(Ident))
+	//	appendAssembly(cg.currInstrs(), "STR "+reg2+", [sp, #"+strconv.Itoa(offset)+"]", 1, 1)
+	//default:
+	//	fmt.Println("oh no")
+	//}
 
 }
 
@@ -553,6 +556,10 @@ func (cg *CodeGenerator) cgVisitProgram(node *Program) {
 		cg.cgEvalStat(stat)
 	}
 
+	if PAIR_INCLUDED {
+		appendAssembly(cg.currInstrs(), "STR r4, [sp]", 1, 1)
+	}
+
 	// add sp, sp, #n to remove variable space
 	if cg.currStack.size > 0 {
 		cg.removeStackSpace(cg.globalStack.size)
@@ -626,6 +633,7 @@ func (cg *CodeGenerator) cgVisitDeclareStat(node Declare) {
 	case PairType:
 		switch rhs.(type) {
 		case NewPair:
+			PAIR_INCLUDED = true
 			cg.evalPair(node.Lhs, rhs.(NewPair).FstExpr, rhs.(NewPair).SndExpr, "r5", "r4")
 		case Ident:
 			cg.evalRHS(rhs.(Ident), "r5")
