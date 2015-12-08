@@ -48,11 +48,11 @@ func (cg *CodeGenerator) eval(e Evaluation) Type {
 
 // Provides information about the stack in relation to a specific scope
 type scopeData struct {
-	currP       int            // the current position of the pointer to the stack
-	size        int            // size of the variable stack scope space in bytes
-	parentScope *scopeData     // Address of the parent scope
-	isFunc      bool           // true iff the scope date is used for a function scope
-	paramMap    *map[Param]int // Map of function parameters to their offset from the start of the function
+	currP       int        // the current position of the pointer to the stack
+	size        int        // size of the variable stack scope space in bytes
+	parentScope *scopeData // Address of the parent scope
+	isFunc      bool       // true iff the scope date is used for a function scope
+	paramList   *[]Param   // Map of function parameters to their offset from the start of the function
 	// only used if isFunc is true
 	identMsgLabelMap map[Ident]string // Map of string idents within this scope to their message labels
 	extraOffset      int              // Extra offset used when stack is used to store intermediate values
@@ -68,7 +68,7 @@ func (cg *CodeGenerator) setNewScope(varSpaceSize int) {
 	newScope.identMsgLabelMap = make(map[Ident]string)
 
 	if newScope.isFunc {
-		newScope.paramMap = cg.currStack.paramMap
+		newScope.paramList = cg.currStack.paramList
 	}
 
 	cg.currStack = newScope
@@ -77,13 +77,13 @@ func (cg *CodeGenerator) setNewScope(varSpaceSize int) {
 
 // Creates new scope data for a new function scope. Sets isFunc to true which
 // set the code generator into function mode (So statements evaluate for functions not main)
-func (cg *CodeGenerator) setNewFuncScope(varSpaceSize int, paramMap *map[Param]int) {
+func (cg *CodeGenerator) setNewFuncScope(varSpaceSize int, paramList *[]Param) {
 	newScope := &scopeData{}
 	newScope.currP = varSpaceSize
 	newScope.size = varSpaceSize
 	newScope.parentScope = cg.currStack
 	newScope.isFunc = true
-	newScope.paramMap = paramMap
+	newScope.paramList = paramList
 
 	cg.currStack = newScope
 
@@ -220,6 +220,10 @@ func (cg *CodeGenerator) findIdentOffset(ident Ident, symTable *SymbolTable,
 	if symTable == nil {
 		fmt.Println("ERROR: incorrect symbol table")
 		return 0, Int
+	}
+
+	if scope.isFunc {
+
 	}
 
 	/*fmt.Println("Ident: ", ident, "  table: ", symTable, " accOffset: ", accOffset)
