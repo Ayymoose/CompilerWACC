@@ -72,8 +72,7 @@ func (cg *CodeGenerator) setNewScope(varSpaceSize int) {
 	}
 
 	cg.currStack = newScope
-	table := cg.currSymTable()
-	*table = *table.GetFrontChild()
+	cg.symTable = cg.symTable.GetFrontChild()
 }
 
 // Creates new scope data for a new function scope. Sets isFunc to true which
@@ -94,11 +93,9 @@ func (cg *CodeGenerator) setNewFuncScope(varSpaceSize int, paramList *[]Param, f
 // Removes current scope and replaces it with the parent scope
 func (cg *CodeGenerator) removeCurrScope() {
 	cg.currStack = cg.currStack.parentScope
-
-	table := cg.currSymTable()
-	*table = *table.Parent
-	if cg.currSymTable() != nil {
-		cg.currSymTable().RemoveChild()
+	cg.symTable = cg.symTable.Parent
+	if cg.symTable != nil {
+		cg.symTable.RemoveChild()
 	}
 }
 
