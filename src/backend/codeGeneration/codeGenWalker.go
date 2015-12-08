@@ -48,14 +48,6 @@ const STACK_SIZE_MAX = 1024
 // Function global variable
 var functionList []*Function
 
-//TODO: Fails on waiting on Nana's getIdentOffset() function
-
-//TODO: intAssignment.wacc FAILS
-//TODO: intLeadingZeros.wacc FAILS
-//TODO: _VarNames.wacc FAILS
-//TODO: longVarNames.wacc FAILS
-//TODO: arrayLength.wacc FAILS
-
 // HELPER FUNCTIONS
 // cgVisitReadStat helper function
 // Adds a function definition to the progFuncInstrs ARMList depending on the
@@ -274,11 +266,8 @@ func (cg CodeGenerator) evalRHS(t Evaluation, srcReg string) {
 
 		switch resType.(type) {
 		  case ArrayType:
-
-
       fmt.Println("Pair or array")
 		  case ConstType:
-
 			switch resType.(ConstType) {
 			  case Bool, Char:
 			  	appendAssembly(cg.currInstrs(), "LDRSB "+srcReg+", [sp, #"+strconv.Itoa(offset)+"]", 1, 1)
@@ -287,7 +276,6 @@ func (cg CodeGenerator) evalRHS(t Evaluation, srcReg string) {
 	  	  default:
 			   fmt.Println("Pair or array")
 			}
-
 		default:
 			appendAssembly(cg.currInstrs(), "LDR "+srcReg+", [sp, #"+strconv.Itoa(offset)+"]", 1, 1)
 		}
@@ -639,6 +627,9 @@ func (cg CodeGenerator) cgVisitAssignmentStat(node Assignment) {
 		}
 
 	case ArrayElem:
+    
+
+
 		//Do last
 		fmt.Println("Array elem not done")
 
@@ -737,7 +728,7 @@ func (cg CodeGenerator) cgVisitPrintStat(node Print) {
 	}
 }
 
-//TODO: println for arrays should NOT print addresses @Nana fix please 
+//TODO: println for arrays should NOT print addresses @Nana fix please
 func (cg CodeGenerator) cgVisitPrintlnStat(node Println) {
 	cg.cgVisitPrintStat(Print{Expr: node.Expr})
 	// BL p_print_ln
