@@ -48,19 +48,11 @@ const STACK_SIZE_MAX = 1024
 // Function global variable
 var functionList []*Function
 
-//TODO: Fails on waiting on Nana's getIdentOffset() function
-
-//TODO: intAssignment.wacc FAILS
-//TODO: intLeadingZeros.wacc FAILS
-//TODO: _VarNames.wacc FAILS
-//TODO: longVarNames.wacc FAILS
-//TODO: arrayLength.wacc FAILS
-
 // HELPER FUNCTIONS
 // cgVisitReadStat helper function
 // Adds a function definition to the progFuncInstrs ARMList depending on the
 // function name provided
-func (cg CodeGenerator) cgVisitReadStatFunc_H(funcName string) {
+func (cg *CodeGenerator) cgVisitReadStatFunc_H(funcName string) {
 	if cg.AddCheckProgName(funcName) {
 		// if the program function has been defined previously
 		// a redefinition is unnecessary
@@ -82,7 +74,7 @@ func (cg CodeGenerator) cgVisitReadStatFunc_H(funcName string) {
 }
 
 // Null pointer dereference check
-func (cg CodeGenerator) dereferenceNullPointer() {
+func (cg *CodeGenerator) dereferenceNullPointer() {
 	if !cg.AddCheckProgName("p_check_null_pointer") {
 		appendAssembly(cg.progFuncInstrs, "p_check_null_pointer"+":", 0, 1)
 		appendAssembly(cg.progFuncInstrs, "PUSH {lr}", 1, 1)
@@ -91,10 +83,11 @@ func (cg CodeGenerator) dereferenceNullPointer() {
 		appendAssembly(cg.progFuncInstrs, "BLEQ p_throw_runtime_error", 1, 1)
 		appendAssembly(cg.progFuncInstrs, "POP {pc}", 1, 1)
 	}
+	cg.throwRunTimeError()
 }
 
 // Run time error check
-func (cg CodeGenerator) throwRunTimeError() {
+func (cg *CodeGenerator) throwRunTimeError() {
 	if !cg.AddCheckProgName("p_throw_runtime_error") {
 		appendAssembly(cg.progFuncInstrs, "p_throw_runtime_error"+":", 0, 1)
 		appendAssembly(cg.progFuncInstrs, "BL p_print_string", 1, 1)
@@ -105,7 +98,7 @@ func (cg CodeGenerator) throwRunTimeError() {
 }
 
 // Check array bounds
-func (cg CodeGenerator) checkArrayBounds() {
+func (cg *CodeGenerator) checkArrayBounds() {
 	if !cg.AddCheckProgName("p_check_array_bounds") {
 		appendAssembly(cg.progFuncInstrs, "p_check_array_bounds"+":", 0, 1)
 		appendAssembly(cg.progFuncInstrs, "PUSH {lr}", 1, 1)
@@ -118,12 +111,13 @@ func (cg CodeGenerator) checkArrayBounds() {
 		appendAssembly(cg.progFuncInstrs, "BLCS p_throw_runtime_error", 1, 1)
 		appendAssembly(cg.progFuncInstrs, "POP {pc}", 1, 1)
 	}
+	cg.throwRunTimeError()
 }
 
 // cgVisitFreeStat helper function
 // Adds a function definition to the progFuncInstrs ARMList depending on the
 // function name provided
-func (cg CodeGenerator) cgVisitFreeStatFunc_H(funcName string) {
+func (cg *CodeGenerator) cgVisitFreeStatFunc_H(funcName string) {
 	if cg.AddCheckProgName(funcName) {
 		// if the program function has been defined previously
 		// a redefinition is unnecessary
@@ -147,18 +141,14 @@ func (cg CodeGenerator) cgVisitFreeStatFunc_H(funcName string) {
 		appendAssembly(cg.progFuncInstrs, "BL free", 1, 1)
 		appendAssembly(cg.progFuncInstrs, "POP {pc}", 1, 1)
 	}
-
-	// if the program function has not been defined previously
-	if !cg.AddCheckProgName("p_throw_runtime_error") {
-		cg.throwRunTimeError()
-	}
+	cg.throwRunTimeError()
 	cg.cgVisitPrintStatFunc_H("p_print_string")
 }
 
 // cgVisitPrintStat helper function
 // Adds a function definition to the progFuncInstrs ARMList depending on the
 // function name provided
-func (cg CodeGenerator) cgVisitPrintStatFunc_H(funcName string) {
+func (cg *CodeGenerator) cgVisitPrintStatFunc_H(funcName string) {
 	if !cg.AddCheckProgName(funcName) {
 		// if the program function has been defined previously
 		// a redefinition is unnecessary
@@ -226,7 +216,7 @@ func (cg CodeGenerator) cgVisitPrintStatFunc_H(funcName string) {
 // Puts argument into r0 and calls functionName via BL
 // For C functions only!
 // NEED TO EDIT THIS FUNCTION TO SUPPORT MULTIPLE ARUGMENTS AND NOT USE JUST LDR BUT MOV TOO
-func (cg CodeGenerator) CfunctionCall(functionName string, argument string) {
+func (cg *CodeGenerator) CfunctionCall(functionName string, argument string) {
 	appendAssembly(cg.currInstrs(), "LDR r0, ="+argument, 1, 1)
 	appendAssembly(cg.currInstrs(), "BL "+functionName, 1, 1)
 }
@@ -234,8 +224,8 @@ func (cg CodeGenerator) CfunctionCall(functionName string, argument string) {
 // Because the maximum amount we can add or subtract the stack pointer by is 1024
 // These helper functions allocate and deallocate space on the stack for us
 
-func (cg CodeGenerator) createStackSpace(stackSize int) {
-	if STACK_SIZE_MAX-stackSize < 0 {
+func (cg *CodeGenerator) createStackSpace(stackSize int) {
+	if stackSize > STACK_SIZE_MAX {
 		appendAssembly(cg.currInstrs(), "SUB sp, sp, #"+strconv.Itoa(STACK_SIZE_MAX), 1, 1)
 		cg.createStackSpace(stackSize - STACK_SIZE_MAX)
 	} else {
@@ -244,8 +234,8 @@ func (cg CodeGenerator) createStackSpace(stackSize int) {
 }
 
 // This cleans the stack
-func (cg CodeGenerator) removeStackSpace(stackSize int) {
-	if STACK_SIZE_MAX-stackSize < 0 {
+func (cg *CodeGenerator) removeStackSpace(stackSize int) {
+	if stackSize > STACK_SIZE_MAX {
 		appendAssembly(cg.currInstrs(), "ADD sp, sp, #"+strconv.Itoa(STACK_SIZE_MAX), 1, 1)
 		cg.removeStackSpace(stackSize - STACK_SIZE_MAX)
 	} else {
@@ -256,7 +246,7 @@ func (cg CodeGenerator) removeStackSpace(stackSize int) {
 // EVALUATION FUNCTIONS
 
 // Evalutes the RHS of an expression
-func (cg CodeGenerator) evalRHS(t Evaluation, srcReg string) {
+func (cg *CodeGenerator) evalRHS(t Evaluation, srcReg string) {
 
 	switch t.(type) {
 	// Literals
@@ -269,21 +259,35 @@ func (cg CodeGenerator) evalRHS(t Evaluation, srcReg string) {
 	case Str:
 		appendAssembly(cg.currInstrs(), "LDR "+srcReg+", "+cg.getMsgLabel(string(t.(Str))), 1, 1)
 	case PairLiter:
+		//PAIR-LITER NOT DONE
 		appendAssembly(cg.currInstrs(), "LDR "+srcReg+", =0", 1, 1)
 	case Ident:
-		//If the Ident is a BOOL we use LDRSB !
-		//Fix
-		var value, _ = cg.getIdentOffset(t.(Ident))
-		appendAssembly(cg.currInstrs(), "LDR "+srcReg+", [sp, #"+strconv.Itoa(value)+"]", 1, 1)
-	/*case ArrayElem:
+		var offset, resType = cg.getIdentOffset(t.(Ident))
+
+		switch resType.(type) {
+
+		case ArrayType:
+			fmt.Println("Pair or array")
+		case ConstType:
+
+			switch resType.(ConstType) {
+			case Bool, Char:
+				appendAssembly(cg.currInstrs(), "LDRSB "+srcReg+", [sp, #"+strconv.Itoa(offset)+"]", 1, 1)
+			case Int, String:
+				appendAssembly(cg.currInstrs(), "LDR "+srcReg+", [sp, #"+strconv.Itoa(offset)+"]", 1, 1)
+			}
+		default:
+			appendAssembly(cg.currInstrs(), "LDR "+srcReg+", [sp, #"+strconv.Itoa(offset)+"]", 1, 1)
+		}
+
+	case ArrayElem:
 		cg.evalArrayElem(t, srcReg, "r5")
 	case Unop:
 		cg.cgVisitUnopExpr(t.(Unop))
 	case Binop:
 		cg.cgVisitBinopExpr(t.(Binop))
+		appendAssembly(cg.currInstrs(), "MOV "+srcReg+", r0", 1, 1)
 	case NewPair:
-		// First allocate memory to store two addresses (8-bytes)
-		cg.CfunctionCall("malloc", strconv.Itoa(ADDR_SIZE*2))
 		cg.evalPair(t.(NewPair).FstExpr, t.(NewPair).SndExpr, "r5", srcReg)
 	case PairElem:
 		cg.evalPairElem(t.(PairElem), srcReg)
@@ -296,7 +300,7 @@ func (cg CodeGenerator) evalRHS(t Evaluation, srcReg string) {
 }
 
 // Evalute a pair element
-func (cg CodeGenerator) evalPairElem(t PairElem, srcReg string) {
+func (cg *CodeGenerator) evalPairElem(t PairElem, srcReg string) {
 
 	//Load the address of the pair from the STACK
 	//TODO: FIX THIS
@@ -318,14 +322,16 @@ func (cg CodeGenerator) evalPairElem(t PairElem, srcReg string) {
 	}
 	//Double deference
 	appendAssembly(cg.currInstrs(), "LDR "+srcReg+", ["+srcReg+"]", 1, 1)
-	//Store on the next available space on the STACK
-	//TODO: FIX THIS
+
+	//Store on the next available space on the stack
 	appendAssembly(cg.currInstrs(), "STR "+srcReg+", [sp, #"+strconv.Itoa(offset)+"]", 1, 1)
 
 }
 
 // Evalutes a pair of elements onto the stack
-func (cg CodeGenerator) evalPair(fst Evaluation, snd Evaluation, reg1 string, reg2 string) {
+func (cg *CodeGenerator) evalPair(fst Evaluation, snd Evaluation, reg1 string, reg2 string) {
+	// First allocate memory to store two addresses (8-bytes)
+	cg.CfunctionCall("malloc", strconv.Itoa(ADDR_SIZE*2))
 	// Store the address in the free register
 	appendAssembly(cg.currInstrs(), "MOV "+reg2+", r0", 1, 1)
 
@@ -354,18 +360,21 @@ func (cg CodeGenerator) evalPair(fst Evaluation, snd Evaluation, reg1 string, re
 	//Store the address of allocated memory block of the pair on the stack
 	appendAssembly(cg.currInstrs(), "STR r0, ["+reg2+", #4]", 1, 1)
 
-	//Store the address of the address that contains pointers to the first and second elements
-	//THIS DOESN'T WORK
-	//THE PROBLEM IS FINDING THE OFFSET OF WHERE THE REGISTER IS STORED ON THE STACK BUT
-	//WE SHOULD HAVE A FUNCTION THAT TELLS US THE OFFSET OF THE NEXT AVAILABLE SPACE ON THE STACK
-	var offset = 0 //, _ = cg.getIdentOffset(reg2)
-	appendAssembly(cg.currInstrs(), "STR "+reg2+", [sp, #"+strconv.Itoa(offset)+"]", 1, 1)
-	//
+	//Store the address of the pair on the stack
+	/*switch ident.(type) {
+	case Ident:
+		//Store the address of the address that contains pointers to the first and second elements
+		//TODO: Fix this 0 output
+		var offset, _ = cg.getIdentOffset(ident.(Ident))
+		appendAssembly(cg.currInstrs(), "STR "+reg2+", [sp, #"+strconv.Itoa(offset)+"]", 1, 1)
+	default:
+		fmt.Println("oh no")
+	}*/
 
 }
 
 // Evaluates array literals
-func (cg CodeGenerator) evalArrayLiter(typeNode Type, rhs Evaluation, srcReg string, dstReg string) {
+func (cg *CodeGenerator) evalArrayLiter(typeNode Type, rhs Evaluation, srcReg string, dstReg string) {
 
 	switch rhs.(type) {
 	case ArrayLiter:
@@ -386,7 +395,7 @@ func (cg CodeGenerator) evalArrayLiter(typeNode Type, rhs Evaluation, srcReg str
 }
 
 // Evalutes an array (where t is the type of the array)
-func (cg CodeGenerator) evalArray(array []Evaluation, srcReg string, dstReg string, t Type) {
+func (cg *CodeGenerator) evalArray(array []Evaluation, srcReg string, dstReg string, t Type) {
 
 	var arraySize = len(array)
 	// Loop through the array pushing it onto the stack
@@ -405,7 +414,14 @@ func (cg CodeGenerator) evalArray(array []Evaluation, srcReg string, dstReg stri
 			case Char:
 				appendAssembly(cg.currInstrs(), "STRB "+srcReg+", ["+dstReg+", #"+strconv.Itoa(ARRAY_SIZE+CHAR_SIZE*i)+"]", 1, 1)
 			default:
-				fmt.Println("Type not implemented")
+				//Must be an array type
+				//Loop through the array
+				var offset, _ = cg.getIdentOffset(array[i].(Ident))
+				switch t.(ArrayType).Type.(type) {
+				case ArrayType:
+					appendAssembly(cg.currInstrs(), "LDR "+srcReg+", [sp, #"+strconv.Itoa(offset)+"]", 1, 1)
+					appendAssembly(cg.currInstrs(), "STR "+srcReg+", [r4, #"+strconv.Itoa(ARRAY_SIZE+sizeOf(t)*i)+"]", 1, 1)
+				}
 			}
 		}
 	}
@@ -417,40 +433,54 @@ func (cg CodeGenerator) evalArray(array []Evaluation, srcReg string, dstReg stri
 }
 
 // Evalutes array elements
-func (cg CodeGenerator) evalArrayElem(t Evaluation, reg1 string, reg2 string) {
-	//Create info
+func (cg *CodeGenerator) evalArrayElem(t Evaluation, reg1 string, reg2 string) {
+	// Create info
 	cg.getMsgLabel(ARRAY_INDEX_NEGATIVE)
 	cg.getMsgLabel(ARRAY_INDEX_LARGE)
 	cg.getMsgLabel(STRING_FORMAT)
 
-	//Store the address at the next space in the stack (i.e SP - ADDRESS_SIZE)
-	//SHOULD HAVE A OFFSET FUNCTION FOR THIS
-	//TODO: FIX THIS CODE
-	appendAssembly(cg.currInstrs(), "ADD "+reg1+", sp, #"+strconv.Itoa(cg.currStack.currP-ADDR_SIZE), 1, 1)
-	//Load the index
+	// Store the address at the next space in the stack
+	var offset, _ = cg.getIdentOffset(t.(ArrayElem).Ident)
+	appendAssembly(cg.currInstrs(), "ADD "+reg1+", sp, #"+strconv.Itoa(offset), 1, 1)
+	// Load the index
 	cg.evalRHS(t.(ArrayElem).Exprs[0], reg2)
 
-	//Set a register to point to the array
+	// Set a register to point to the array
 	appendAssembly(cg.currInstrs(), "LDR "+reg1+", ["+reg1+"]", 1, 1)
 
 	// reg1 = Address of the array
 	// reg2 = Index
+
 	appendAssembly(cg.currInstrs(), "MOV r0, "+reg2, 1, 1)
 	appendAssembly(cg.currInstrs(), "MOV r1, "+reg1, 1, 1)
-	//Jump
 	appendAssembly(cg.currInstrs(), "BL p_check_array_bounds", 1, 1)
+
+	// Still don't know what these assembly instructions do
+	/*
+		ADD r4, r4, #4
+		ADD r4, r4, r5, LSL #2
+		LDR r4, [r4]
+		MOV r0, r4
+	*/
+
+	appendAssembly(cg.currInstrs(), "ADD "+reg1+", "+reg1+", #4", 1, 1)
+	appendAssembly(cg.currInstrs(), "ADD "+reg1+", "+reg1+", "+reg2+", LSL #2", 1, 1)
+	appendAssembly(cg.currInstrs(), "LDR "+reg1+", ["+reg1+"]", 1, 1)
+	appendAssembly(cg.currInstrs(), "MOV r0, "+reg1, 1, 1)
+
+	// Check bounds and errors
 	cg.checkArrayBounds()
 	cg.throwRunTimeError()
 	cg.cgVisitPrintStatFunc_H("p_print_string")
 }
 
 // Evalutes a ord
-func (cg CodeGenerator) evalOrd(node Unop) {
+func (cg *CodeGenerator) evalOrd(node Unop) {
 	switch node.Expr.(type) {
 	case Ident:
 		//If it's an ident
 		var offset, _ = cg.getIdentOffset(node.Expr.(Ident))
-		appendAssembly(cg.currInstrs(), "LDRSB r4, [sp, #"+strconv.Itoa(offset)+"]", 1, 1)
+		appendAssembly(cg.currInstrs(), "LDRSB r0, [sp, #"+strconv.Itoa(offset)+"]", 1, 1)
 	case ArrayElem:
 		fmt.Println("ArrayElem not done for ord")
 	case Character:
@@ -462,11 +492,11 @@ func (cg CodeGenerator) evalOrd(node Unop) {
 
 // VISIT FUNCTIONS -------------------------------------------------------------
 
-func (cg CodeGenerator) cgVisitProgram(node *Program) {
+func (cg *CodeGenerator) cgVisitProgram(node *Program) {
 	// Set properties of global scope
-	cg.globalStack.size = GetScopeVarSize(node.StatList)
-	cg.globalStack.currP = cg.globalStack.size
-	cg.globalStack.isFunc = false
+	cg.currStack.size = GetScopeVarSize(node.StatList)
+	cg.currStack.currP = cg.currStack.size
+	cg.currStack.isFunc = false
 
 	// ASSIGN functions to global variable
 	// WE WIll only traverse them if they are called
@@ -485,7 +515,7 @@ func (cg CodeGenerator) cgVisitProgram(node *Program) {
 	appendAssembly(cg.currInstrs(), "PUSH {lr}", 1, 1)
 
 	// sub sp, sp, #n to create variable space
-	if cg.globalStack.size > 0 {
+	if cg.currStack.size > 0 {
 		cg.createStackSpace(cg.globalStack.size)
 	}
 
@@ -495,7 +525,7 @@ func (cg CodeGenerator) cgVisitProgram(node *Program) {
 	}
 
 	// add sp, sp, #n to remove variable space
-	if cg.globalStack.size > 0 {
+	if cg.currStack.size > 0 {
 		cg.removeStackSpace(cg.globalStack.size)
 	}
 
@@ -509,7 +539,7 @@ func (cg CodeGenerator) cgVisitProgram(node *Program) {
 	appendAssembly(cg.currInstrs(), ".ltorg", 1, 1)
 }
 
-func (cg CodeGenerator) cgEvalStat(stat interface{}) {
+func (cg *CodeGenerator) cgEvalStat(stat interface{}) {
 	switch stat.(type) {
 	case Declare:
 		cg.cgVisitDeclareStat(stat.(Declare))
@@ -535,11 +565,10 @@ func (cg CodeGenerator) cgEvalStat(stat interface{}) {
 		cg.cgVisitScopeStat(stat.(Scope))
 	default:
 		//	""
-
 	}
 }
 
-func (cg CodeGenerator) cgVisitDeclareStat(node Declare) {
+func (cg *CodeGenerator) cgVisitDeclareStat(node Declare) {
 	rhs := node.Rhs
 
 	switch node.DecType.(type) {
@@ -566,57 +595,93 @@ func (cg CodeGenerator) cgVisitDeclareStat(node Declare) {
 		}
 
 	case PairType:
+
+		// First allocate memory to store two addresses (8-bytes)
+		cg.CfunctionCall("malloc", strconv.Itoa(ADDR_SIZE*2))
+		cg.evalPair(rhs.(NewPair).FstExpr, rhs.(NewPair).SndExpr, "r5", "r4")
+
 		// Evalutes a pair of elements onto the stack
-		cg.evalRHS(rhs, "r4")
+		//cg.evalRHS(rhs, "r4")
+
 	case ArrayType:
 		// Evalute an array
 		cg.evalArrayLiter(node.DecType, rhs, "r5", "r4")
 	default:
 		typeOf(node.DecType)
 	}
+
+	// Saves Idents offset in the symbol tables offset map
+	cg.currSymTable().InsertOffset(string(node.Lhs), cg.currStack.currP)
 }
 
-func (cg CodeGenerator) cgVisitAssignmentStat(node Assignment) {
-	// Type
-	constType := cg.eval(node.Lhs.(Ident))
+func (cg *CodeGenerator) cgVisitAssignmentStat(node Assignment) {
 	rhs := node.Rhs
+
+	cg.evalRHS(rhs, "r4")
 
 	// lhs can be
 	// IDENT , ARRAY-ELEM , PAIR-ELEM
 	switch node.Lhs.(type) {
+
 	case Ident:
-		//Put the LHS into a reg and evaluate the RHS
-		fmt.Println("Ident not done")
+		ident := node.Lhs.(Ident)
+		typeIdent := cg.eval(ident)
+
+		switch typeIdent.(type) {
+		case ConstType:
+			offset, _ := cg.getIdentOffset(ident)
+			switch typeIdent.(ConstType) {
+			case Bool, Char:
+				// Using STRB, store it on the stack
+				appendAssembly(cg.currInstrs(), "STRB r4, [sp, #"+strconv.Itoa(offset)+"]", 1, 1)
+			case Int, String:
+				// Store the value of declaration to stack
+				appendAssembly(cg.currInstrs(), "STR r4, [sp, #"+strconv.Itoa(offset)+"]", 1, 1)
+			}
+		}
+
 	case ArrayElem:
-		fmt.Println("Array elem not done")
+
+		var offset, _ = cg.getIdentOffset(node.Lhs.(ArrayElem).Ident)
+
+		//Have a register point to the start of the array
+		appendAssembly(cg.currInstrs(), "ADD r5, sp, #"+strconv.Itoa(offset), 1, 1)
+
+		//Load the index
+		cg.evalRHS(node.Lhs.(ArrayElem).Exprs[0], "r6")
+		appendAssembly(cg.currInstrs(), "LDR r5, [r5]", 1, 1)
+
+		//r6 = Index
+		//r5 = Address of array
+		appendAssembly(cg.currInstrs(), "MOV r0, r6", 1, 1)
+		appendAssembly(cg.currInstrs(), "MOV r1, r5", 1, 1)
+
+		//Branch
+		appendAssembly(cg.currInstrs(), "BL p_check_array_bounds", 1, 1)
+		cg.checkArrayBounds()
+
+		//What does this instruction do?
+		appendAssembly(cg.currInstrs(), "ADD r5, r5, #4", 1, 1)
+		//Point to the element to be changed
+		appendAssembly(cg.currInstrs(), "ADD r5, r5, r6", 1, 1)
+
+		//Get the type of the RHS
+		switch node.Rhs.(type) {
+		case Boolean, Character:
+			appendAssembly(cg.currInstrs(), "STRB r4, [r5]", 1, 1)
+		case Integer, Str:
+			appendAssembly(cg.currInstrs(), "STR r4, [r5]", 1, 1)
+		default:
+			fmt.Println("I don't know")
+		}
 	case PairElem:
+
 		fmt.Println("Pair elem not done")
 	default:
 	}
-
-	switch constType {
-	case Bool:
-		cg.evalRHS(rhs, "r4")
-		// Using STRB, store it on the stack
-		appendAssembly(cg.currInstrs(), "STRB r4, [sp, #"+cg.subCurrP(BOOL_SIZE)+"]", 1, 1)
-	case Char:
-		cg.evalRHS(rhs, "r4")
-		// Using STRB, store it on the stack
-		appendAssembly(cg.currInstrs(), "STRB r4, [sp, #"+cg.subCurrP(CHAR_SIZE)+"]", 1, 1)
-	case Int:
-		cg.evalRHS(rhs, "r4")
-		// Store the value of declaration to stack
-		appendAssembly(cg.currInstrs(), "STR r4, [sp, #"+cg.subCurrP(INT_SIZE)+"]", 1, 1)
-	case String:
-		cg.evalRHS(rhs, "r4")
-		// Store the address onto the stack
-		appendAssembly(cg.currInstrs(), "STR r4, [sp, #"+cg.subCurrP(STRING_SIZE)+"]", 1, 1)
-	case Pair:
-		fmt.Println("Pair not done")
-	}
 }
 
-func (cg CodeGenerator) cgVisitReadStat(node Read) {
+func (cg *CodeGenerator) cgVisitReadStat(node Read) {
 	// Technically only read int / char
 	constType := cg.eval(node.AssignLHS.(Ident)) // Type
 	appendAssembly(cg.currInstrs(), "ADD r4, sp, #0", 1, 1)
@@ -631,7 +696,7 @@ func (cg CodeGenerator) cgVisitReadStat(node Read) {
 	}
 }
 
-func (cg CodeGenerator) cgVisitFreeStat(node Free) {
+func (cg *CodeGenerator) cgVisitFreeStat(node Free) {
 	// node.Expr.
 	appendAssembly(cg.currInstrs(), "LDR r4, [sp]", 1, 1)
 	appendAssembly(cg.currInstrs(), "MOV r0, r4", 1, 1)
@@ -639,11 +704,11 @@ func (cg CodeGenerator) cgVisitFreeStat(node Free) {
 	cg.cgVisitFreeStatFunc_H("p_free_pair")
 }
 
-func (cg CodeGenerator) cgVisitReturnStat(node Return) {
-
+func (cg *CodeGenerator) cgVisitReturnStat(node Return) {
+	cg.evalRHS(node.Expr, "r0")
 }
 
-func (cg CodeGenerator) cgVisitExitStat(node Exit) {
+func (cg *CodeGenerator) cgVisitExitStat(node Exit) {
 	// LDR r0, =n : loads return type to r0 argument
 	var reg = "r4"
 	cg.evalRHS(node.Expr, reg)
@@ -652,9 +717,11 @@ func (cg CodeGenerator) cgVisitExitStat(node Exit) {
 	appendAssembly(cg.currInstrs(), "BL exit", 1, 1)
 }
 
-func (cg CodeGenerator) cgVisitPrintStat(node Print) {
+func (cg *CodeGenerator) cgVisitPrintStat(node Print) {
 	expr := node.Expr
+
 	dstReg := "r0"
+	//
 
 	// Get value of expr into dstReg
 	cg.evalRHS(expr, dstReg)
@@ -702,7 +769,8 @@ func (cg CodeGenerator) cgVisitPrintStat(node Print) {
 	}
 }
 
-func (cg CodeGenerator) cgVisitPrintlnStat(node Println) {
+//TODO: println for arrays should NOT print addresses @Nana fix please
+func (cg *CodeGenerator) cgVisitPrintlnStat(node Println) {
 	cg.cgVisitPrintStat(Print{Expr: node.Expr})
 	// BL p_print_ln
 	appendAssembly(cg.currInstrs(), "BL p_print_ln", 1, 1)
@@ -711,58 +779,54 @@ func (cg CodeGenerator) cgVisitPrintlnStat(node Println) {
 
 }
 
-func (cg CodeGenerator) cgVisitIfStat(node If) {
-	fstLabel := cg.getNewLabel()
-	sndLabel := cg.getNewLabel()
-	cg.evalRHS(node.Conditional, "r4")
-	appendAssembly(cg.currInstrs(), "BEG "+fstLabel, 1, 1)
+func (cg *CodeGenerator) cgVisitIfStat(node If) {
+	fstLabel, sndLabel := cg.getNewLabel(), cg.getNewLabel()
+	cg.evalRHS(node.Conditional, "r0")
+	appendAssembly(cg.currInstrs(), "CMP r0, #0", 1, 1)
+	appendAssembly(cg.currInstrs(), "BEQ "+fstLabel, 1, 1)
 
-	for _, stat := range node.ThenStat {
-		cg.cgEvalStat(stat)
-	}
+	cg.cgVisitScopeStat(Scope{StatList: node.ThenStat})
 
 	appendAssembly(cg.currInstrs(), "B "+sndLabel, 1, 1)
-	appendAssembly(cg.currInstrs(), fstLabel, 0, 1)
+	appendAssembly(cg.currInstrs(), fstLabel+":", 0, 1)
 
-	for _, stat := range node.ElseStat {
-		cg.cgEvalStat(stat)
-	}
+	cg.cgVisitScopeStat(Scope{StatList: node.ElseStat})
 
-	appendAssembly(cg.currInstrs(), sndLabel, 0, 1)
+	appendAssembly(cg.currInstrs(), sndLabel+":", 0, 1)
+
 }
 
-func (cg CodeGenerator) cgVisitWhileStat(node While) {
-	fstLabel := cg.getNewLabel()
-	sndLabel := cg.getNewLabel()
-	appendAssembly(cg.currInstrs(), "B"+fstLabel, 1, 1)
-	appendAssembly(cg.currInstrs(), sndLabel, 0, 1)
+func (cg *CodeGenerator) cgVisitWhileStat(node While) {
+	fstLabel, sndLabel := cg.getNewLabel(), cg.getNewLabel()
 
-	// traverse all statements by switching on statement type
-	for _, stat := range node.DoStat {
-		cg.cgEvalStat(stat)
-	}
+	appendAssembly(cg.currInstrs(), "B "+fstLabel, 1, 1)
+	appendAssembly(cg.currInstrs(), sndLabel+":", 0, 1)
 
-	appendAssembly(cg.currInstrs(), fstLabel, 0, 1)
-	cg.evalRHS(node.Conditional, "r4") // NEED TWO REGISTERS R4 and R5 to compare
-	appendAssembly(cg.currInstrs(), "BEG "+sndLabel, 1, 1)
+	cg.cgVisitScopeStat(Scope{StatList: node.DoStat})
+
+	appendAssembly(cg.currInstrs(), fstLabel+":", 0, 1)
+	cg.evalRHS(node.Conditional, "r0")
+	appendAssembly(cg.currInstrs(), "CMP r0, #1", 1, 1)
+	appendAssembly(cg.currInstrs(), "BEQ "+sndLabel, 1, 1)
 }
 
-func (cg CodeGenerator) cgVisitScopeStat(node Scope) {
+func (cg *CodeGenerator) cgVisitScopeStat(node Scope) {
 	// Amount of bytes on the stack the scope takes up for variables
 	varSpaceSize := GetScopeVarSize(node.StatList)
-
 	cg.setNewScope(varSpaceSize)
-
 	// sub sp, sp, #n to create variable space
-	appendAssembly(cg.currInstrs(), "SUB sp, sp, #"+strconv.Itoa(varSpaceSize), 1, 1)
-
+	if varSpaceSize > 0 {
+		appendAssembly(cg.currInstrs(), "SUB sp, sp, #"+strconv.Itoa(varSpaceSize), 1, 1)
+	}
 	// traverse all statements by switching on statement type
 	for _, stat := range node.StatList {
 		cg.cgEvalStat(stat)
 	}
 
 	// add sp, sp, #n to remove variable space
-	appendAssembly(cg.currInstrs(), "ADD sp, sp, #"+strconv.Itoa(varSpaceSize), 1, 1)
+	if varSpaceSize > 0 {
+		appendAssembly(cg.currInstrs(), "ADD sp, sp, #"+strconv.Itoa(varSpaceSize), 1, 1)
+	}
 
 	cg.removeCurrScope()
 
@@ -772,7 +836,7 @@ func (cg CodeGenerator) cgVisitScopeStat(node Scope) {
 // IE WE ONLY PUSH ONTO STACK FUNC VARIABLES WHEN A FUNCTION IS CALLED
 // but
 // WE EXECUTE WHAT IS INSIDE THE FUNCTION REGARDLESS OF WHETHER IT IS CALLED OR NOT
-func (cg CodeGenerator) cgVisitCallStat(ident Ident, paramList []Evaluation) {
+func (cg *CodeGenerator) cgVisitCallStat(ident Ident, paramList []Evaluation) {
 	for _, function := range functionList {
 		if function.Ident == ident {
 			// sub sp, sp, #n to create variable space
@@ -804,7 +868,7 @@ func (cg CodeGenerator) cgVisitCallStat(ident Ident, paramList []Evaluation) {
 	}
 }
 
-func (cg CodeGenerator) cgVisitFunction(node Function) {
+func (cg *CodeGenerator) cgVisitFunction(node Function) {
 	// f_funcName:
 	appendAssembly(cg.currInstrs(), "f_"+string(node.Ident)+":", 0, 1)
 
@@ -823,7 +887,7 @@ func (cg CodeGenerator) cgVisitFunction(node Function) {
 }
 
 // VISIT STATEMENT -------------------------------------------------------------
-func (cg CodeGenerator) cgVisitParameter(node Evaluation, offset int) {
+func (cg *CodeGenerator) cgVisitParameter(node Evaluation, offset int) {
 	// node.Ident
 	/*switch node.ParamType.(type) {
 	case Boolean:
@@ -861,23 +925,35 @@ func (cg CodeGenerator) cgVisitParameter(node Evaluation, offset int) {
 
 // VISIT EXPRESSIONS -----------------------------------------------------------
 
-func (cg CodeGenerator) cgVisitUnopExpr(node Unop) {
+func (cg *CodeGenerator) cgVisitUnopExpr(node Unop) {
 	switch node.Unary {
 	case SUB:
 		cg.evalRHS(node.Expr, "r4")
 		//Negate the result in the register
 		appendAssembly(cg.currInstrs(), "RSBS r4, r4, #0", 1, 1)
+		appendAssembly(cg.currInstrs(), "MOV r0, r4", 1, 1)
+		appendAssembly(cg.currInstrs(), "BLVS p_throw_overflow_error", 1, 1)
+		cg.cgVisitBinopExpr_H("p_throw_overflow_error")
 	case LEN:
 		cg.evalRHS(node.Expr, "r4")
 		//Assume the RHS is always an array
 		//So the RHS type is an Ident
 		//Load the length of the array into the register
 		appendAssembly(cg.currInstrs(), "LDR r4, [r4]", 1, 1)
+		appendAssembly(cg.currInstrs(), "MOV r0, r4", 1, 1)
 	case ORD:
 		cg.evalOrd(node)
 	case CHR:
 		cg.evalRHS(node.Expr, "r4")
+		appendAssembly(cg.currInstrs(), "MOV r0, r4", 1, 1)
 		fmt.Println("chr not done")
+	case NOT:
+		var offset, _ = cg.getIdentOffset(node.Expr.(Ident))
+		appendAssembly(cg.currInstrs(), "LDRSB r4, [sp, #"+strconv.Itoa(offset)+"]", 1, 1)
+
+		//		appendAssembly(cg.currInstrs(), "LDRSB r4, [sp, #"++"]", 1, 1)
+		appendAssembly(cg.currInstrs(), "EOR r4, r4, #1", 1, 1)
+		appendAssembly(cg.currInstrs(), "MOV r0, r4", 1, 1)
 	default:
 		fmt.Println("oh no")
 		fmt.Println(node.Unary)
@@ -885,26 +961,29 @@ func (cg CodeGenerator) cgVisitUnopExpr(node Unop) {
 
 }
 
-func (cg CodeGenerator) cgVisitBinopExpr(node Binop) {
-	//Binary int
-	//Left   Evaluation
-	//Right  Evaluation
-	//cg.eval(node) // Type
-
+func (cg *CodeGenerator) cgVisitBinopExpr(node Binop) {
 	cg.evalRHS(node.Left, "r4")
-	cg.evalRHS(node.Right, "r5")
+	appendAssembly(cg.currInstrs(), "PUSH {r4}", 1, 1)
+	cg.addExtraOffset(4)
+	cg.evalRHS(node.Right, "r4")
+	appendAssembly(cg.currInstrs(), "MOV r5, r4", 1, 1)
+	appendAssembly(cg.currInstrs(), "POP {r4}", 1, 1)
+	cg.subExtraOffset(4)
 	switch node.Binary {
 	case PLUS:
 		appendAssembly(cg.currInstrs(), "ADDS r4, r4, r5", 1, 1)
 		appendAssembly(cg.currInstrs(), "BLVS p_throw_overflow_error", 1, 1)
+		appendAssembly(cg.currInstrs(), "MOV r0, r4", 1, 1)
 		cg.cgVisitBinopExpr_H("p_throw_overflow_error")
 	case SUB:
 		appendAssembly(cg.currInstrs(), "SUBS r4, r4, r5", 1, 1)
+		appendAssembly(cg.currInstrs(), "MOV r0, r4", 1, 1)
 		appendAssembly(cg.currInstrs(), "BLVS p_throw_overflow_error", 1, 1)
 		cg.cgVisitBinopExpr_H("p_throw_overflow_error")
 	case MUL:
 		appendAssembly(cg.currInstrs(), "SMULL r4, r5, r4, r5", 1, 1)
 		appendAssembly(cg.currInstrs(), "CMP r5, r4, ASR #31", 1, 1)
+		appendAssembly(cg.currInstrs(), "MOV r0, r4", 1, 1)
 		appendAssembly(cg.currInstrs(), "BLNE p_throw_overflow_error", 1, 1)
 		cg.cgVisitBinopExpr_H("p_throw_overflow_error")
 	case DIV:
@@ -919,27 +998,51 @@ func (cg CodeGenerator) cgVisitBinopExpr(node Binop) {
 		appendAssembly(cg.currInstrs(), "MOV r1, r5", 1, 1)
 		appendAssembly(cg.currInstrs(), "BL p_check_divide_by_zero", 1, 1)
 		appendAssembly(cg.currInstrs(), "BL __aeabi_idivmod", 1, 1)
-		appendAssembly(cg.currInstrs(), "MOV r4, r1", 1, 1)
+		//		appendAssembly(cg.currInstrs(), "MOV r4, r5", 1, 1)
 		cg.cgVisitBinopExpr_H("p_check_divide_by_zero")
 	case AND:
 		appendAssembly(cg.currInstrs(), "AND r4, r4, r5", 1, 1)
+		appendAssembly(cg.currInstrs(), "MOV r0, r4", 1, 1)
 	case OR:
 		appendAssembly(cg.currInstrs(), "ORR r4, r4, r5", 1, 1)
-	case LT, LTE, GT, GTE:
+		appendAssembly(cg.currInstrs(), "MOV r0, r4", 1, 1)
+	case LT:
 		appendAssembly(cg.currInstrs(), "CMP r4, r5", 1, 1)
 		appendAssembly(cg.currInstrs(), "MOVLT r4, #1", 1, 1)
 		appendAssembly(cg.currInstrs(), "MOVGE r4, #0", 1, 1)
-	case EQ, NEQ:
+		appendAssembly(cg.currInstrs(), "MOV r0, r4", 1, 1)
+	case GT:
+		appendAssembly(cg.currInstrs(), "CMP r4, r5", 1, 1)
+		appendAssembly(cg.currInstrs(), "MOVGT r4, #1", 1, 1)
+		appendAssembly(cg.currInstrs(), "MOVLE r4, #0", 1, 1)
+		appendAssembly(cg.currInstrs(), "MOV r0, r4", 1, 1)
+	case LTE:
+		appendAssembly(cg.currInstrs(), "CMP r4, r5", 1, 1)
+		appendAssembly(cg.currInstrs(), "MOVLE r4, #1", 1, 1)
+		appendAssembly(cg.currInstrs(), "MOVGT r4, #0", 1, 1)
+		appendAssembly(cg.currInstrs(), "MOV r0, r4", 1, 1)
+	case GTE:
+		appendAssembly(cg.currInstrs(), "CMP r4, r5", 1, 1)
+		appendAssembly(cg.currInstrs(), "MOVGE r4, #1", 1, 1)
+		appendAssembly(cg.currInstrs(), "MOVLT r4, #0", 1, 1)
+		appendAssembly(cg.currInstrs(), "MOV r0, r4", 1, 1)
+	case EQ:
 		appendAssembly(cg.currInstrs(), "CMP r4, r5", 1, 1)
 		appendAssembly(cg.currInstrs(), "MOVEQ r4, #1", 1, 1)
 		appendAssembly(cg.currInstrs(), "MOVNE r4, #0", 1, 1)
+		appendAssembly(cg.currInstrs(), "MOV r0, r4", 1, 1)
+	case NEQ:
+		appendAssembly(cg.currInstrs(), "CMP r4, r5", 1, 1)
+		appendAssembly(cg.currInstrs(), "MOVNE r4, #1", 1, 1)
+		appendAssembly(cg.currInstrs(), "MOVEQ r4, #0", 1, 1)
+		appendAssembly(cg.currInstrs(), "MOV r0, r4", 1, 1)
 	}
 }
 
 // cgVisitBinopExpr helper function
 // Adds a function definition to the progFuncInstrs ARMList depending on the
 // function name provided
-func (cg CodeGenerator) cgVisitBinopExpr_H(funcName string) {
+func (cg *CodeGenerator) cgVisitBinopExpr_H(funcName string) {
 	if !cg.AddCheckProgName(funcName) {
 		// if the program function has been defined previously
 		// a redefinition is unnecessary
@@ -950,20 +1053,20 @@ func (cg CodeGenerator) cgVisitBinopExpr_H(funcName string) {
 		case "p_throw_overflow_error":
 			appendAssembly(cg.progFuncInstrs, "LDR r0, "+cg.getMsgLabel(OVERFLOW), 1, 1)
 			appendAssembly(cg.progFuncInstrs, "BL p_throw_runtime_error", 1, 1)
-			cg.cgVisitBinopExpr_H("p_throw_runtime_error")
+			cg.throwRunTimeError()
 		case "p_throw_runtime_error":
 			cg.throwRunTimeError()
-
 		case "p_check_divide_by_zero":
 			appendAssembly(cg.progFuncInstrs, "PUSH {lr}", 1, 1)
 			appendAssembly(cg.progFuncInstrs, "CMP r1, #0", 1, 1)
 			appendAssembly(cg.progFuncInstrs, "LDREQ r0, "+cg.getMsgLabel(DIVIDE_BY_ZERO), 1, 1)
 			appendAssembly(cg.progFuncInstrs, "BLEQ p_throw_runtime_error", 1, 1)
 			appendAssembly(cg.progFuncInstrs, "POP {pc}", 1, 1)
+			cg.throwRunTimeError()
 		}
 	}
 }
 
-func (cg CodeGenerator) cgCreateMsgs(instrs *ARMList) map[string]string {
+func (cg *CodeGenerator) cgCreateMsgs(instrs *ARMList) map[string]string {
 	return nil
 }

@@ -36,13 +36,24 @@ func (symbolTable *SymbolTable) insert(key Ident, value Type) {
 }
 
 // Inserts the offset of a given key into symbol table
-func (symbolTable *SymbolTable) insertOffset(key string, offset int) {
+func (symbolTable *SymbolTable) InsertOffset(key string, offset int) {
 	symbolTable.OffsetVals[key] = offset
 }
 
 // Returns the offset of a given key
-func (symbolTable *SymbolTable) getOffset(key string) int {
+func (symbolTable *SymbolTable) GetOffset(key string) int {
 	return symbolTable.OffsetVals[key]
+}
+
+// Checks if the key is already declared in the offset map
+func (symbolTable *SymbolTable) IsOffsetDefined(key Ident) bool {
+	if symbolTable == nil {
+		return false
+	}
+
+	_, inMap := symbolTable.OffsetVals[string(key)]
+
+	return inMap
 }
 
 // Checks if the key is already declared in the symbol table
@@ -80,4 +91,21 @@ func (symbolTable *SymbolTable) getTypeOfIdent(key Ident) Type {
 	} else {
 		return symbolTable.Parent.getTypeOfIdent(key)
 	}
+}
+
+func (symbolTable *SymbolTable) GetTypeOfIdent(key Ident) Type {
+	return symbolTable.getTypeOfIdent(key)
+}
+
+// Removes the head of the children list
+func (symbolTable *SymbolTable) RemoveChild() {
+	if len(symbolTable.Children) == 0 {
+		return
+	}
+	symbolTable.Children = symbolTable.Children[1:]
+}
+
+// Returns head of the children list
+func (symbolTable *SymbolTable) GetFrontChild() *SymbolTable {
+	return symbolTable.Children[0]
 }

@@ -3,6 +3,7 @@ package codeGeneration
 import (
 	. "ast"
 	. "backend/filewriter"
+	"fmt"
 	"strconv"
 )
 
@@ -14,7 +15,8 @@ type CodeGenerator struct {
 	root              *Program          // Root of the AST
 	instrs            *ARMList          // List of assembly instructions for the program
 	msgInstrs         *ARMList          // List of assembly instructions to create msg labels
-	symTable          *SymbolTable      // Used to map variable identifiers to their values
+	symTable          *SymbolTable      // Used to map variable identifiers to their types
+	funcSymTable      *SymbolTable      // Used to map function variable indentifier to ther types
 	funcInstrs        *ARMList          // List of assembly instructions that define functions and their labels
 	progFuncInstrs    *ARMList          // List of assembly instructions that define program generated functions e.g. p_print_string
 	progFuncNames     *[]string         // List of program defined function names. Used to avoid program redefinitions
@@ -38,7 +40,7 @@ func ConstructCodeGenerator(cRoot *Program, cInstrs *ARMList, cSymTable *SymbolT
 }
 
 // Evaluates the evaluation using the code generator
-func (cg CodeGenerator) eval(e Evaluation) Type {
+func (cg *CodeGenerator) eval(e Evaluation) Type {
 	eType, _ := e.Eval(cg.root.FunctionList, cg.symTable)
 	return eType
 }
@@ -51,11 +53,12 @@ type scopeData struct {
 	isFunc      bool           // true iff the scope date is used for a function scope
 	paramMap    *map[Param]int // Map of function parameters to their offset from the start of the function
 	// only used if isFunc is true
+	extraOffset int // Extra offset used when stack is used to store intermediate values
 }
 
 // Creates new scope data for a new scope.
-func (cg CodeGenerator) setNewScope(varSpaceSize int) {
-	newScope := new(scopeData)
+func (cg *CodeGenerator) setNewScope(varSpaceSize int) {
+	newScope := &scopeData{}
 	newScope.currP = varSpaceSize
 	newScope.size = varSpaceSize
 	newScope.parentScope = cg.currStack
@@ -66,14 +69,13 @@ func (cg CodeGenerator) setNewScope(varSpaceSize int) {
 	}
 
 	cg.currStack = newScope
-
-	//TODO: CODE TO SET CHILD SYMBOL TABLE
+	cg.symTable = cg.symTable.GetFrontChild()
 }
 
 // Creates new scope data for a new function scope. Sets isFunc to true which
 // set the code generator into function mode (So statements evaluate for functions not main)
-func (cg CodeGenerator) setNewFuncScope(varSpaceSize int, paramMap *map[Param]int) {
-	newScope := new(scopeData)
+func (cg *CodeGenerator) setNewFuncScope(varSpaceSize int, paramMap *map[Param]int) {
+	newScope := &scopeData{}
 	newScope.currP = varSpaceSize
 	newScope.size = varSpaceSize
 	newScope.parentScope = cg.currStack
@@ -82,18 +84,30 @@ func (cg CodeGenerator) setNewFuncScope(varSpaceSize int, paramMap *map[Param]in
 
 	cg.currStack = newScope
 
-	//TODO: CODE TO SET CHILD SYMBOL TABLE
+	cg.funcSymTable = cg.funcSymTable.GetFrontChild()
 }
 
 // Removes current scope and replaces it with the parent scope
-func (cg CodeGenerator) removeCurrScope() {
+func (cg *CodeGenerator) removeCurrScope() {
 	cg.currStack = cg.currStack.parentScope
+	cg.symTable = cg.symTable.Parent
+	if cg.symTable != nil {
+		cg.symTable.RemoveChild()
+	}
+}
 
-	//TODO: CODE TO SET CHILD SYMBOL TABLE
+// Used to add extra offset to the current scope when intermediate values are stored on the stack
+func (cg *CodeGenerator) addExtraOffset(n int) {
+	cg.currStack.extraOffset += n
+}
+
+// Used to sub extra offset to the current scope when intermediate values are stored on the stack
+func (cg *CodeGenerator) subExtraOffset(n int) {
+	cg.currStack.extraOffset -= n
 }
 
 // Returns cg.funcInstrs iff the current scope is a function scope. cg.instrs otherwise
-func (cg CodeGenerator) currInstrs() *ARMList {
+func (cg *CodeGenerator) currInstrs() *ARMList {
 	if cg.currStack.isFunc {
 		return cg.funcInstrs
 	} else {
@@ -101,9 +115,18 @@ func (cg CodeGenerator) currInstrs() *ARMList {
 	}
 }
 
+// Returns cg.funcSymbolTable iff the current scope is a function scope. cg.symbolTable otherwise
+func (cg *CodeGenerator) currSymTable() *SymbolTable {
+	if cg.currStack.isFunc {
+		return cg.funcSymTable
+	} else {
+		return cg.symTable
+	}
+}
+
 // Decreases current pointer to the stack by n
 // Returns new currP as a string (Does not have to be used)
-func (cg CodeGenerator) subCurrP(n int) string {
+func (cg *CodeGenerator) subCurrP(n int) string {
 	cg.currStack.currP = cg.currStack.currP - n
 	return strconv.Itoa(cg.currStack.currP)
 }
@@ -111,14 +134,14 @@ func (cg CodeGenerator) subCurrP(n int) string {
 // Using the ARMList pointer provided in the constructor,
 // this function will fill the slice with an array of assembly instructions
 // based on the provided AST
-func (cg CodeGenerator) GenerateCode() {
+func (cg *CodeGenerator) GenerateCode() {
 	cg.cgVisitProgram(cg.root)
 	cg.buildFullInstr()
 }
 
 // Using all the code generators ARMList, instrs is modified to include
 // all ARMList instructions in the correct order
-func (cg CodeGenerator) buildFullInstr() {
+func (cg *CodeGenerator) buildFullInstr() {
 	*cg.instrs = append(*cg.funcInstrs, (*cg.instrs)...)
 	*cg.instrs = append(*cg.msgInstrs, (*cg.instrs)...)
 	*cg.instrs = append(*cg.instrs, *cg.progFuncInstrs...)
@@ -128,7 +151,7 @@ func (cg CodeGenerator) buildFullInstr() {
 // If strValue is not contained in the map then it will be added to the map
 // with a new msg label value (which will be returned)
 // e.g. =msg_0
-func (cg CodeGenerator) getMsgLabel(strValue string) string {
+func (cg *CodeGenerator) getMsgLabel(strValue string) string {
 	msgLabel, contained := cg.msgMap[strValue]
 
 	if contained {
@@ -143,7 +166,7 @@ func (cg CodeGenerator) getMsgLabel(strValue string) string {
 
 // Adds the function name to cg.progFuncNames iff it isnt already in the list
 // Returns true iff funcName is already in the list
-func (cg CodeGenerator) AddCheckProgName(progName string) bool {
+func (cg *CodeGenerator) AddCheckProgName(progName string) bool {
 	for _, s := range *cg.progFuncNames {
 		if s == progName {
 			// if progName has already been defined return true
@@ -159,14 +182,31 @@ func (cg CodeGenerator) AddCheckProgName(progName string) bool {
 
 // Using symbol tables, a offset to the sp is returned so the ident value can
 // be executed
-func (cg CodeGenerator) getIdentOffset(ident Ident) (int, Type) {
-	// TO BE COMPLETED
-	//I MODIFIED THIS SO SOME TEST CASES WILL PASS @AYMAN
-	//CHANGED FROM 100 to 4
-	return 1, Int
+func (cg *CodeGenerator) getIdentOffset(ident Ident) (int, Type) {
+	return cg.findIdentOffset(ident, cg.currSymTable(), cg.currStack, 0)
 }
 
-func (cg CodeGenerator) getNewLabel() string {
+// Checks if the ident is in the given symbol table. If not the parents are searched
+// The function assumes an offset will be found eventually (semantically correct)
+func (cg *CodeGenerator) findIdentOffset(ident Ident, symTable *SymbolTable,
+	scope *scopeData, accOffset int) (int, Type) {
+	if symTable == nil {
+		fmt.Println("ERROR: incorrect symbol table")
+		return 0, Int
+	}
+
+	/*fmt.Println("Ident: ", ident, "  table: ", symTable, " accOffset: ", accOffset)
+	fmt.Println("Scope: ", scope)
+	fmt.Println("Defined?:", symTable.IsOffsetDefined(ident), "\n")*/
+	if !symTable.IsOffsetDefined(ident) {
+		return cg.findIdentOffset(ident, symTable.Parent, scope.parentScope, accOffset+scope.size+scope.extraOffset)
+	}
+
+	return symTable.GetOffset(string(ident)) + accOffset + scope.extraOffset, symTable.GetTypeOfIdent(ident)
+
+}
+
+func (cg *CodeGenerator) getNewLabel() string {
 	newLabel := "L" + strconv.Itoa(cg.currentLabelIndex)
 	cg.currentLabelIndex++
 	return newLabel

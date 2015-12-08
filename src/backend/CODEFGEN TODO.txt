@@ -1,3 +1,6 @@
+NANA -> FOR STACK IMPLEMENTATION WE NEED TO ADD TO THE STACK POINTER A SPECIAL NUMBER AND SUB A NUMBER WHEN WE POP
+
+
 DECLARE: ArrayElem and Pairs of Pairs NOT DONE @ AYMAN
 
 GETIDENTOFFSET IMPORTANT ----------- NANA, HENRYK, OLI
@@ -13,7 +16,7 @@ READ: COMPLETE --------------------------------------------
 
 FREE: COMPLETE --------------------------------------------
 
-RETURN: NOT STARTED --- HENRYK
+RETURN: COMPLETE -----------------------------------------
 
 EVAL RHS: COMPLETE ----------------------------------------
 
@@ -23,9 +26,10 @@ PRINT: COMPLETE -------------------------------------------
 
 PRINTLN: COMPLETE -----------------------------------------
 
-IF: COMPLETE ----------------------------------------------
+IF: COMPLETE -----------------------------------------
 
-WHILE: COMPLETE -------------------------------------------
+WHILE: COMPLETE -----------------------------------------
+- scope logic should be tested// ERROR FROM REMOVING CHILDREN
 
 SCOPE: IN PROGRESS --- NANA
 - Added new scope functionality but new symbol table logic in codeGenerator.go
