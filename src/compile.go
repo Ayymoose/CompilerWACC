@@ -53,6 +53,7 @@ func main() {
 
 	fmt.Println("SUCCESSFUL FRONTEND: ")
 	root.SymbolTable.PrintChildren()
+			fmt.Println(*root.FileText)
 
 	filename := filepath.Base(file)
 	ext := filepath.Ext(filename)

@@ -140,13 +140,6 @@ func (l *Lexer) currLocation() (line int, col int) {
 	return
 }
 
-//Returns line number and column number of current lexing item in .wacc file
-func (l *Lexer) LineAndCol(pos int) (line int, col int) {
-	line = 1 + strings.Count(l.input[:pos], "\n")
-	col = pos - strings.LastIndex(l.input[:pos], "\n")
-	return
-}
-
 // run runs the state machine for the lexer.
 func (l *Lexer) run() {
 	for state := lexText; state != nil; {

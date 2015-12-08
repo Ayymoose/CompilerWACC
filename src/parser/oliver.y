@@ -95,7 +95,7 @@ pairelemtype Type
 %%
 
 program : BEGIN functions statements END {
-                                          parserlex.(*Lexer).prog = &Program{FunctionList : $2 , StatList : $3 , SymbolTable : NewInstance()}
+                                          parserlex.(*Lexer).prog = &Program{FunctionList : $2 , StatList : $3 , SymbolTable : NewInstance(), FileText :&parserlex.(*Lexer).input}
                                          }
 
 functions : functions function  { $$ = append($1, $2)}
@@ -105,13 +105,13 @@ function : typeDef IDENTIFIER OPENROUND CLOSEROUND IS statements END
            { if !checkStats($6) {
           	parserlex.Error("Missing return statement")
            }
-             $$ = &Function{Ident : $2, ReturnType : $1, StatList : $6, SymbolTable: NewInstance()}
+             $$ = &Function{Ident : $2, ReturnType : $1, StatList : $6, SymbolTable: NewInstance(), FileText :&parserlex.(*Lexer).input}
            }
          | typeDef IDENTIFIER OPENROUND paramlist CLOSEROUND IS statements END
            { if !checkStats($7) {
             	parserlex.Error("Missing return statement")
             }
-             $$ = &Function{Ident : $2, ReturnType : $1, StatList : $7, ParameterTypes : $4, SymbolTable: NewInstance()}
+             $$ = &Function{Ident : $2, ReturnType : $1, StatList : $7, ParameterTypes : $4, SymbolTable: NewInstance(), FileText :&parserlex.(*Lexer).input}
            }
 
 paramlist : paramlist COMMA param { $$ = append($1, $3)}
@@ -126,25 +126,25 @@ assignlhs : IDENTIFIER    {$$ = $1}
 assignrhs : expr                                           {$$ = $1}
           | arrayliter                                     {$$ = $1}
           | pairelem                                       {$$ = $1}
-          | NEWPAIR OPENROUND expr COMMA expr CLOSEROUND   { $$ = NewPair{FstExpr : $3, SndExpr : $5, Pos : $<pos>1 } }
-          | CALL IDENTIFIER OPENROUND exprlist CLOSEROUND  { $$ = Call{Ident : $2, ParamList : $4, Pos : $<pos>1  } }
+          | NEWPAIR OPENROUND expr COMMA expr CLOSEROUND   { $$ = NewPair{FstExpr : $3, SndExpr : $5, Pos : $<pos>1, FileText :&parserlex.(*Lexer).input } }
+          | CALL IDENTIFIER OPENROUND exprlist CLOSEROUND  { $$ = Call{Ident : $2, ParamList : $4, Pos : $<pos>1, FileText :&parserlex.(*Lexer).input  } }
 
 statements : statements SEMICOLON statement           { $$ = append($1,$3) }
            | statement                                { $$ = []Statement{$1} }
 
 
-statement : SKIP                                        { $$ = Skip{Pos : $<pos>1  } }
-          | typeDef IDENTIFIER ASSIGNMENT assignrhs     { $$ = Declare{DecType : $1, Lhs : $2, Rhs : $4, Pos : $<pos>1  } }
-          | assignlhs ASSIGNMENT assignrhs              { $$ = Assignment{Lhs : $1, Rhs : $3, Pos : $<pos>1 } }
-          | READ assignlhs                              { $$ = Read{ $<pos>1 , $2} }
-          | FREE expr                                   { $$ = Free{$<pos>1, $2} }
-          | RETURN expr                                 { $$ = Return{$<pos>1, $2} }
-          | EXIT expr                                   { $$ = Exit{$<pos>1, $2} }
-          | PRINT expr                                  { $$ = Print{$<pos>1, $2} }
-          | PRINTLN expr                                { $$ = Println{$<pos>1, $2} }
-          | IF expr THEN statements ELSE statements FI  { $$ = If{Conditional : $2, ThenStat : $4, ElseStat : $6, Pos : $<pos>1 } }
-          | WHILE expr DO statements DONE               { $$ = While{Conditional : $2, DoStat : $4, Pos : $<pos>1} }
-          | BEGIN statements END                        { $$ = Scope{StatList : $2, Pos : $<pos>1 } }
+statement : SKIP                                        { $$ = Skip{Pos : $<pos>1 ,FileText :&parserlex.(*Lexer).input } }
+          | typeDef IDENTIFIER ASSIGNMENT assignrhs     { $$ = Declare{DecType : $1, Lhs : $2, Rhs : $4, Pos : $<pos>1 ,FileText :&parserlex.(*Lexer).input } }
+          | assignlhs ASSIGNMENT assignrhs              { $$ = Assignment{Lhs : $1, Rhs : $3, Pos : $<pos>1 ,FileText :&parserlex.(*Lexer).input} }
+          | READ assignlhs                              { $$ = Read{ &parserlex.(*Lexer).input, $<pos>1 , $2, } }
+          | FREE expr                                   { $$ = Free{&parserlex.(*Lexer).input, $<pos>1, $2} }
+          | RETURN expr                                 { $$ = Return{&parserlex.(*Lexer).input, $<pos>1, $2} }
+          | EXIT expr                                   { $$ = Exit{&parserlex.(*Lexer).input, $<pos>1, $2} }
+          | PRINT expr                                  { $$ = Print{&parserlex.(*Lexer).input, $<pos>1, $2} }
+          | PRINTLN expr                                { $$ = Println{&parserlex.(*Lexer).input, $<pos>1, $2} }
+          | IF expr THEN statements ELSE statements FI  { $$ = If{Conditional : $2, ThenStat : $4, ElseStat : $6, Pos : $<pos>1, FileText :&parserlex.(*Lexer).input } }
+          | WHILE expr DO statements DONE               { $$ = While{Conditional : $2, DoStat : $4, Pos : $<pos>1, FileText :&parserlex.(*Lexer).input} }
+          | BEGIN statements END                        { $$ = Scope{StatList : $2, Pos : $<pos>1, FileText :&parserlex.(*Lexer).input } }
           | error SEMICOLON                             { $$ = nil }
           | error END                                   { $$ = nil }
           | error FI                                    { $$ = nil }
@@ -161,37 +161,37 @@ expr : INTEGER       { $$ =  $1 }
      | IDENTIFIER    { $$ =  $1 }
      | arrayelem     { $$ =  $1 }
 
-     | NOT expr     { $$ = Unop{Unary : NOT, Expr : $2, Pos : $<pos>1 } }
-     | LEN expr     { $$ = Unop{Unary : LEN, Expr : $2, Pos : $<pos>1 } }
-     | ORD expr     { $$ = Unop{Unary : ORD, Expr : $2, Pos : $<pos>1 } }
-     | CHR expr     { $$ = Unop{Unary : CHR, Expr : $2, Pos : $<pos>1 } }
-     | SUB expr     { $$ = Unop{Unary : SUB, Expr : $2, Pos : $<pos>1 } }
+     | NOT expr     { $$ = Unop{Unary : NOT, Expr : $2, Pos : $<pos>1,FileText :&parserlex.(*Lexer).input   } }
+     | LEN expr     { $$ = Unop{Unary : LEN, Expr : $2, Pos : $<pos>1,FileText :&parserlex.(*Lexer).input  } }
+     | ORD expr     { $$ = Unop{Unary : ORD, Expr : $2, Pos : $<pos>1, FileText :&parserlex.(*Lexer).input  } }
+     | CHR expr     { $$ = Unop{Unary : CHR, Expr : $2, Pos : $<pos>1, FileText :&parserlex.(*Lexer).input  } }
+     | SUB expr     { $$ = Unop{Unary : SUB, Expr : $2, Pos : $<pos>1, FileText :&parserlex.(*Lexer).input  } }
      | PLUS expr    { $$ = $2 }
 
 
-     | expr PLUS expr { $$ = Binop{Left : $1, Binary : PLUS, Right : $3, Pos : $<pos>1 } }
-     | expr SUB expr  { $$ = Binop{Left : $1, Binary : SUB, Right : $3,  Pos : $<pos>1 } }
-     | expr MUL expr  { $$ = Binop{Left : $1, Binary : MUL, Right : $3,  Pos : $<pos>1 } }
-     | expr MOD expr  { $$ = Binop{Left : $1, Binary : MOD, Right : $3,  Pos : $<pos>1 } }
-     | expr DIV expr  { $$ = Binop{Left : $1, Binary : DIV, Right : $3,  Pos : $<pos>1 } }
-     | expr LT expr   { $$ = Binop{Left : $1, Binary : LT, Right : $3,   Pos : $<pos>1 } }
-     | expr GT expr   { $$ = Binop{Left : $1, Binary : GT, Right : $3,   Pos : $<pos>1 } }
-     | expr LTE expr  { $$ = Binop{Left : $1, Binary : LTE, Right : $3,  Pos : $<pos>1 } }
-     | expr GTE expr  { $$ = Binop{Left : $1, Binary : GTE, Right : $3,  Pos : $<pos>1 } }
-     | expr EQ expr   { $$ = Binop{Left : $1, Binary : EQ, Right : $3,   Pos : $<pos>1 } }
-     | expr NEQ expr  { $$ = Binop{Left : $1, Binary : NEQ, Right : $3,  Pos : $<pos>1 } }
-     | expr AND expr  { $$ = Binop{Left : $1, Binary : AND, Right : $3,  Pos : $<pos>1 } }
-     | expr OR expr   { $$ = Binop{Left : $1, Binary : OR, Right : $3,   Pos : $<pos>1 } }
+     | expr PLUS expr { $$ = Binop{Left : $1, Binary : PLUS, Right : $3, Pos : $<pos>1, FileText :&parserlex.(*Lexer).input  } }
+     | expr SUB expr  { $$ = Binop{Left : $1, Binary : SUB, Right : $3,  Pos : $<pos>1, FileText :&parserlex.(*Lexer).input  } }
+     | expr MUL expr  { $$ = Binop{Left : $1, Binary : MUL, Right : $3,  Pos : $<pos>1, FileText :&parserlex.(*Lexer).input  } }
+     | expr MOD expr  { $$ = Binop{Left : $1, Binary : MOD, Right : $3,  Pos : $<pos>1, FileText :&parserlex.(*Lexer).input  } }
+     | expr DIV expr  { $$ = Binop{Left : $1, Binary : DIV, Right : $3,  Pos : $<pos>1, FileText :&parserlex.(*Lexer).input  } }
+     | expr LT expr   { $$ = Binop{Left : $1, Binary : LT, Right : $3,   Pos : $<pos>1, FileText :&parserlex.(*Lexer).input  } }
+     | expr GT expr   { $$ = Binop{Left : $1, Binary : GT, Right : $3,   Pos : $<pos>1, FileText :&parserlex.(*Lexer).input  } }
+     | expr LTE expr  { $$ = Binop{Left : $1, Binary : LTE, Right : $3,  Pos : $<pos>1, FileText :&parserlex.(*Lexer).input  } }
+     | expr GTE expr  { $$ = Binop{Left : $1, Binary : GTE, Right : $3,  Pos : $<pos>1, FileText :&parserlex.(*Lexer).input  } }
+     | expr EQ expr   { $$ = Binop{Left : $1, Binary : EQ, Right : $3,   Pos : $<pos>1, FileText :&parserlex.(*Lexer).input  } }
+     | expr NEQ expr  { $$ = Binop{Left : $1, Binary : NEQ, Right : $3,  Pos : $<pos>1, FileText :&parserlex.(*Lexer).input  } }
+     | expr AND expr  { $$ = Binop{Left : $1, Binary : AND, Right : $3,  Pos : $<pos>1, FileText :&parserlex.(*Lexer).input  } }
+     | expr OR expr   { $$ = Binop{Left : $1, Binary : OR, Right : $3,   Pos : $<pos>1, FileText :&parserlex.(*Lexer).input  } }
      | OPENROUND expr CLOSEROUND  { $$ = $2 }
 
 
-arrayliter : OPENSQUARE exprlist CLOSESQUARE { $$ = ArrayLiter{$<pos>1, $2 } }
+arrayliter : OPENSQUARE exprlist CLOSESQUARE { $$ = ArrayLiter{&parserlex.(*Lexer).input, $<pos>1, $2 } }
 
 exprlist : exprlist COMMA expr {$$ = append($1, $3)}
          | expr                {$$ = []Evaluation{$1}}
          |                     {$$ = []Evaluation{}}
 
-arrayelem : IDENTIFIER bracketed {$$ = ArrayElem{Ident: $1, Exprs : $2, Pos : $<pos>1 } }
+arrayelem : IDENTIFIER bracketed {$$ = ArrayElem{Ident: $1, Exprs : $2, Pos : $<pos>1,FileText :&parserlex.(*Lexer).input  } }
 
 bracketed : bracketed OPENSQUARE expr CLOSESQUARE {$$ = append($1, $3)}
           | OPENSQUARE expr CLOSESQUARE {$$ = []Evaluation{$2}}

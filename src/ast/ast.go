@@ -72,6 +72,7 @@ func (x PairType) typeString() string {
 }
 
 type Skip struct {
+	FileText				*string
 	Pos int
 }
 
@@ -100,6 +101,7 @@ const (
 )
 
 type Function struct {
+		FileText				*string
 	Ident          Ident
 	ReturnType     Type
 	ParameterTypes []Param
@@ -114,6 +116,7 @@ type Param struct {
 
 // Program ..
 type Program struct {
+	FileText				*string
 	Pos          int
 	FunctionList []*Function
 	StatList     []Statement
@@ -122,6 +125,7 @@ type Program struct {
 
 // Binop struct
 type Binop struct {
+		FileText				*string
 	Pos    int
 	Binary int
 	Left   Evaluation
@@ -130,12 +134,14 @@ type Binop struct {
 
 // Unop struct
 type Unop struct {
+		FileText				*string
 	Pos   int
 	Unary int
 	Expr  Evaluation
 }
 
 type NewPair struct {
+		FileText				*string
 	Pos     int
 	FstExpr Evaluation
 	SndExpr Evaluation
@@ -143,6 +149,7 @@ type NewPair struct {
 
 // Declare struct
 type Declare struct {
+		FileText				*string
 	Pos     int
 	DecType Type
 	Lhs     Ident
@@ -151,6 +158,7 @@ type Declare struct {
 
 // Assignment struct
 type Assignment struct {
+		FileText				*string
 	Pos int
 	Lhs Evaluation
 	Rhs Evaluation
@@ -158,6 +166,7 @@ type Assignment struct {
 
 // If struct
 type If struct {
+		FileText				*string
 	Pos         int
 	Conditional Evaluation
 	ThenStat    []Statement
@@ -166,53 +175,62 @@ type If struct {
 
 // While struct
 type While struct {
+		FileText				*string
 	Pos         int
 	Conditional Evaluation
 	DoStat      []Statement
 }
 
 type Scope struct {
+		FileText				*string
 	Pos      int
 	StatList []Statement
 }
 
 // Read struct
 type Read struct {
+		FileText				*string
 	Pos       int
 	AssignLHS Evaluation // should be an assignLHS
 }
 
 // Free struct
 type Free struct {
+		FileText				*string
 	Pos  int
 	Expr Evaluation
 }
 
 // Return struct
 type Return struct {
+		FileText				*string
 	Pos  int
 	Expr Evaluation
 }
 
 // Exit struct
 type Exit struct {
+		FileText				*string
 	Pos  int
 	Expr Evaluation
 }
 
 // Print struct
 type Print struct {
+		FileText				*string
 	Pos  int
 	Expr Evaluation
 }
 
 // Println struct
 type Println struct {
+		FileText				*string
 	Pos  int
 	Expr Evaluation
 }
 
 type Call struct {
+		FileText				*string
 	Pos       int
 	Ident     Ident
 	ParamList []Evaluation
@@ -224,17 +242,20 @@ type Ident struct {
 }
 */
 type PairElem struct {
+		FileText				*string
 	Pos  int
 	Fsnd FSND
 	Expr Evaluation
 }
 
 type ArrayLiter struct {
+		FileText				*string
 	Pos   int
 	Exprs []Evaluation
 }
 
 type ArrayElem struct {
+		FileText				*string
 	Pos   int
 	Ident Ident
 	Exprs []Evaluation
