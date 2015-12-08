@@ -38,7 +38,7 @@ const (
 	NULL_REFERENCE       = "\"NullReferenceError: dereference a null reference\\n\\0\""
 	ARRAY_INDEX_NEGATIVE = "\"ArrayIndexOutOfBoundsError: negative index\\n\\0\""
 	ARRAY_INDEX_LARGE    = "\"ArrayIndexOutOfBoundsError: index too large\\n\\0\""
-	OVERFLOW             = "\"OverflowError: the result is too small/large to store in a 4-byte signed-integer.\\n\\0\""
+	OVERFLOW             = "\"OverflowError: the result is too small/large to store in a 4-byte signed-integer.\\n\""
 	DIVIDE_BY_ZERO       = "\"DivideByZeroError: divide or modulo by zero\\n\\0\""
 )
 
@@ -292,7 +292,8 @@ func (cg *CodeGenerator) evalRHS(t Evaluation, srcReg string) {
 	case PairElem:
 		cg.evalPairElem(t.(PairElem), srcReg)
 	case Call:
-		cg.cgVisitCallStat(t.(Call).Ident, t.(Call).ParamList)
+		// TODO UNCOMMENT This when you are sure that its not causing the infinite loop
+	//	cg.cgVisitCallStat(t.(Call).Ident, t.(Call).ParamList)*/
 	default:
 		fmt.Println("ERROR: Expression can not be evaluated")
 	}
@@ -948,7 +949,6 @@ func (cg *CodeGenerator) cgVisitUnopExpr(node Unop) {
 		fmt.Println("chr not done")
 	case NOT:
 		cg.evalRHS(node.Expr, "r4")
-
 		appendAssembly(cg.currInstrs(), "EOR r4, r4, #1", 1, 1)
 		/*var offset, _ = cg.getIdentOffset(node.Expr.(Ident))
 		appendAssembly(cg.currInstrs(), "LDRSB r4, [sp, #"+strconv.Itoa(offset)+"]", 1, 1)
