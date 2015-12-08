@@ -43,7 +43,6 @@ func ConstructCodeGenerator(cRoot *Program, cInstrs *ARMList, cSymTable *SymbolT
 
 // Evaluates the evaluation using the code generator
 func (cg *CodeGenerator) eval(e Evaluation) Type {
-	fmt.Println(cg.symTable)
 	eType, _ := e.Eval(cg.root.FunctionList, cg.symTable)
 	return eType
 }
