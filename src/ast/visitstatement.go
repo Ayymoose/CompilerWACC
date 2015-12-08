@@ -324,7 +324,8 @@ func (node If) visitStatement(functionTable []*Function, symbolTable *SymbolTabl
 		semanticErrors = append(semanticErrors, err)
 	}
 	if cond != Bool {
-		semanticErrors = append(semanticErrors, errorConditional(node.FileText,node.Pos))
+		semanticErrors = append(semanticErrors, errors.New("line:"+fmt.Sprint(node.Pos)+" :Conditional is not boolean expression"))
+//		semanticErrors = append(semanticErrors, errorConditional(node.FileText,node.Pos))
 	}
 	thenSymTab := symbolTable.New()
 	symbolTable.Children = append(symbolTable.Children, thenSymTab)
@@ -355,7 +356,8 @@ func (node While) visitStatement(functionTable []*Function, symbolTable *SymbolT
 		semanticErrors = append(semanticErrors, err)
 	}
 	if cond != Bool {
-		semanticErrors = append(semanticErrors, errorConditional(node.FileText, node.Pos))
+				semanticErrors = append(semanticErrors, errors.New("line:"+fmt.Sprint(node.Pos)+" :Conditional is not boolean expression"))
+//		semanticErrors = append(semanticErrors, errorConditional(node.FileText, node.Pos))
 	}
 	whileSymTab := symbolTable.New()
 	symbolTable.Children = append(symbolTable.Children, whileSymTab)
