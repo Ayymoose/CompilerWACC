@@ -946,6 +946,7 @@ func (cg *CodeGenerator) cgVisitUnopExpr(node Unop) {
 		cg.evalOrd(node)
 	case CHR:
 		cg.evalRHS(node.Expr, "r4")
+		appendAssembly(cg.currInstrs(), "MOV r0, r4", 1, 1)
 		fmt.Println("chr not done")
 	case NOT:
 		var offset, _ = cg.getIdentOffset(node.Expr.(Ident))
