@@ -48,12 +48,6 @@ const STACK_SIZE_MAX = 1024
 // Function global variable
 var functionList []*Function
 
-//TODO: intAssignment.wacc FAILS
-//TODO: intLeadingZeros.wacc FAILS
-//TODO: _VarNames.wacc FAILS
-//TODO: longVarNames.wacc FAILS
-//TODO: arrayLength.wacc FAILS
-
 // HELPER FUNCTIONS
 // cgVisitReadStat helper function
 // Adds a function definition to the progFuncInstrs ARMList depending on the
@@ -271,10 +265,10 @@ func (cg CodeGenerator) evalRHS(t Evaluation, srcReg string) {
 		var offset, resType = cg.getIdentOffset(t.(Ident))
 
 		switch resType.(type) {
-		case ArrayType:
 
-			fmt.Println("Pair or array")
-		case ConstType:
+		  case ArrayType:
+      fmt.Println("Pair or array")
+		  case ConstType:
 
 			switch resType.(ConstType) {
 			case Bool, Char:
@@ -633,6 +627,9 @@ func (cg CodeGenerator) cgVisitAssignmentStat(node Assignment) {
 		}
 
 	case ArrayElem:
+
+
+
 		//Do last
 		fmt.Println("Array elem not done")
 
