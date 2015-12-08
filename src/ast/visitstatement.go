@@ -25,7 +25,7 @@ func (node If) checkIfReturn(functionTable []*Function, symbolTable *SymbolTable
 		semanticErrors = append(semanticErrors, err)
 	}
 	if cond != Bool {
-		semanticErrors = append(semanticErrors, errors.New("line:"+fmt.Sprint(node.Pos)+" :Conditional is not boolean expression"))
+		semanticErrors = append(semanticErrors, errorConditional(node.FileText,node.Pos))
 	}
 	thenSymTab := symbolTable.New()
 	symbolTable.Children = append(symbolTable.Children, thenSymTab)
@@ -82,7 +82,7 @@ func (node Return) checkReturnReturn(functionTable []*Function, symbolTable *Sym
 		semanticErrors = append(semanticErrors, err)
 	} else {
 		if !typesMatch(exprTyp, returnType) {
-			semanticErrors = append(semanticErrors, errors.New("line:"+fmt.Sprint(node.Pos)+":Return Types do not match: "+exprTyp.typeString()+"::"+returnType.typeString()))
+			semanticErrors = append(semanticErrors, errorReturn(node.FileText, node.Pos))
 		}
 	}
 	if len(semanticErrors) > 0 {
@@ -159,7 +159,7 @@ func (node Skip) visitStatement(functionTable []*Function, symbolTable *SymbolTa
 func (node Declare) visitStatement(functionTable []*Function, symbolTable *SymbolTable) errorSlice {
 	var semanticErrors errorSlice
 	if symbolTable.isDefinedInScope(node.Lhs) {
-		semanticErrors = append(semanticErrors, errors.New("line: "+fmt.Sprint(node.Pos)+" :Variable already declared::"+string(node.Lhs)))
+		semanticErrors = append(semanticErrors, errorDeclared(node.FileText, node.Pos))
 	}
 	exprType, errs := node.Rhs.Eval(functionTable, symbolTable)
 	if errs != nil {
@@ -175,10 +175,10 @@ func (node Declare) visitStatement(functionTable []*Function, symbolTable *Symbo
 					// Do nothing
 				case ConstType:
 					if exprType.(ConstType) != Pair {
-						semanticErrors = append(semanticErrors, errors.New("line:"+fmt.Sprint(node.Pos)+" :Types in declaration do not match:"+node.DecType.typeString()+","+exprType.typeString()))
+						semanticErrors = append(semanticErrors, errorTypeMatch(node.FileText, node.Pos))
 					}
 				default:
-					semanticErrors = append(semanticErrors, errors.New("line:"+fmt.Sprint(node.Pos)+" :Types in declaration do not match:"+node.DecType.typeString()+","+exprType.typeString()))
+					semanticErrors = append(semanticErrors, errorTypeMatch(node.FileText, node.Pos))
 				}
 			}
 			if pairTypeStruct.SndType == Pair {
@@ -187,14 +187,14 @@ func (node Declare) visitStatement(functionTable []*Function, symbolTable *Symbo
 					// Do nothing
 				case ConstType:
 					if exprType.(ConstType) != Pair {
-						semanticErrors = append(semanticErrors, errors.New("line:"+fmt.Sprint(node.Pos)+" :Types in declaration do not match:"+node.DecType.typeString()+","+exprType.typeString()))
+						semanticErrors = append(semanticErrors, errorTypeMatch(node.FileText, node.Pos))
 					}
 				default:
-					semanticErrors = append(semanticErrors, errors.New("line:"+fmt.Sprint(node.Pos)+" :Types in declaration do not match:"+node.DecType.typeString()+","+exprType.typeString()))
+					semanticErrors = append(semanticErrors, errorTypeMatch(node.FileText, node.Pos))
 				}
 			}
 		default:
-			semanticErrors = append(semanticErrors, errors.New("line:"+fmt.Sprint(node.Pos)+" :Types in declaration do not match:"+node.DecType.typeString()+","+exprType.typeString()))
+			semanticErrors = append(semanticErrors, errorTypeMatch(node.FileText, node.Pos))
 		}
 	}
 	symbolTable.insert(node.Lhs, node.DecType)
@@ -219,11 +219,11 @@ func (node Assignment) visitStatement(functionTable []*Function, symbolTable *Sy
 		case ArrayType:
 			// Do nothing
 		default:
-			semanticErrors = append(semanticErrors, errors.New("line:"+fmt.Sprint(node.Pos)+" :LHS is not of type Array"+lhsType.typeString()+","+rhsType.typeString()))
+			semanticErrors = append(semanticErrors, errorArray(node.FileText, node.Pos))
 		}
 	}
 	if !typesMatch(lhsType, rhsType) && rhsType != nil && lhsType != nil {
-		semanticErrors = append(semanticErrors, errors.New("line:"+fmt.Sprint(node.Pos)+" :Assignment types do not match"+lhsType.typeString()+","+rhsType.typeString()))
+		semanticErrors = append(semanticErrors, errorTypeMatch(node.FileText, node.Pos))
 	}
 	if len(semanticErrors) > 0 {
 		return semanticErrors
@@ -237,7 +237,7 @@ func (node Read) visitStatement(functionTable []*Function, symbolTable *SymbolTa
 	if err != nil {
 		semanticErrors = append(semanticErrors, err)
 	} else if exprTyp != Char && exprTyp != Int {
-		semanticErrors = append(semanticErrors, errors.New("line:"+fmt.Sprint(node.Pos)+" :Cannot read non Char or Int type"))
+		semanticErrors = append(semanticErrors,  errorRead(node.FileText, node.Pos))
 	}
 	if len(semanticErrors) > 0 {
 		return semanticErrors
@@ -256,7 +256,7 @@ func (node Free) visitStatement(functionTable []*Function, symbolTable *SymbolTa
 		// Do nothing
 	default:
 		if exprTyp != Pair {
-			semanticErrors = append(semanticErrors, errors.New("line:"+fmt.Sprint(node.Pos)+" :Cannot free non pair type"))
+			semanticErrors = append(semanticErrors, errorPair(node.FileText, node.Pos))
 		}
 	}
 	if len(semanticErrors) > 0 {
@@ -285,7 +285,7 @@ func (node Exit) visitStatement(functionTable []*Function, symbolTable *SymbolTa
 		semanticErrors = append(semanticErrors, err)
 	}
 	if exprTyp != Int {
-		semanticErrors = append(semanticErrors, errors.New("line:"+fmt.Sprint(node.Pos)+" :Bad exit expression, must be int"))
+		semanticErrors = append(semanticErrors, errorExit(node.FileText, node.Pos))
 	}
 	if len(semanticErrors) > 0 {
 		return semanticErrors
@@ -324,8 +324,8 @@ func (node If) visitStatement(functionTable []*Function, symbolTable *SymbolTabl
 		semanticErrors = append(semanticErrors, err)
 	}
 	if cond != Bool {
-		semanticErrors = append(semanticErrors, errors.New("line:"+fmt.Sprint(node.Pos)+" :Conditional is not boolean expression"))
-//		semanticErrors = append(semanticErrors, errorConditional(node.FileText,node.Pos))
+//		semanticErrors = append(semanticErrors, errors.New("line:"+fmt.Sprint(node.Pos)+" :Conditional is not boolean expression"))
+		semanticErrors = append(semanticErrors, errorConditional(node.FileText,node.Pos))
 	}
 	thenSymTab := symbolTable.New()
 	symbolTable.Children = append(symbolTable.Children, thenSymTab)
@@ -356,8 +356,8 @@ func (node While) visitStatement(functionTable []*Function, symbolTable *SymbolT
 		semanticErrors = append(semanticErrors, err)
 	}
 	if cond != Bool {
-				semanticErrors = append(semanticErrors, errors.New("line:"+fmt.Sprint(node.Pos)+" :Conditional is not boolean expression"))
-//		semanticErrors = append(semanticErrors, errorConditional(node.FileText, node.Pos))
+	//			semanticErrors = append(semanticErrors, errors.New("line:"+fmt.Sprint(node.Pos)+" :Conditional is not boolean expression"))
+		semanticErrors = append(semanticErrors, errorConditional(node.FileText, node.Pos))
 	}
 	whileSymTab := symbolTable.New()
 	symbolTable.Children = append(symbolTable.Children, whileSymTab)

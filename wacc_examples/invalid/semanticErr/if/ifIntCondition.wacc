@@ -10,8 +10,8 @@
 
 begin
   if 15 + 6 then 
-    skip 
-  else 
+    skip
+  else
     skip
   fi
 end
