@@ -772,6 +772,7 @@ func (cg *CodeGenerator) cgVisitPrintlnStat(node Println) {
 func (cg *CodeGenerator) cgVisitIfStat(node If) {
 	fstLabel, sndLabel := cg.getNewLabel(), cg.getNewLabel()
 	cg.evalRHS(node.Conditional, "r0")
+	appendAssembly(cg.currInstrs(), "CMP r0, #0"+fstLabel, 1, 1)
 	appendAssembly(cg.currInstrs(), "BEQ "+fstLabel, 1, 1)
 
 	cg.cgVisitScopeStat(Scope{StatList: node.ThenStat})
@@ -794,7 +795,8 @@ func (cg *CodeGenerator) cgVisitWhileStat(node While) {
 	cg.cgVisitScopeStat(Scope{StatList: node.DoStat})
 
 	appendAssembly(cg.currInstrs(), sndLabel, 0, 1)
-	cg.evalRHS(node.Conditional, "r0") // NEED TWO REGISTERS R4 and R5 to compare
+	cg.evalRHS(node.Conditional, "r0")
+	appendAssembly(cg.currInstrs(), "CMP r0, #0"+fstLabel, 1, 1)
 	appendAssembly(cg.currInstrs(), "BEQ "+fstLabel, 1, 1)
 }
 
