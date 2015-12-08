@@ -941,11 +941,11 @@ func (cg CodeGenerator) cgVisitUnopExpr(node Unop) {
 func (cg CodeGenerator) cgVisitBinopExpr(node Binop) {
 	cg.evalRHS(node.Left, "r0")
 	appendAssembly(cg.currInstrs(), "PUSH {r0}", 1, 1)
-	// TODO WE INCREMENT THE STACK POINTER AS WE PUSH ONTO THE STACK
+	cg.addExtraOffset(4)
 	cg.evalRHS(node.Right, "r0")
 	appendAssembly(cg.currInstrs(), "MOV r1, r0", 1, 1)
 	appendAssembly(cg.currInstrs(), "POP {r0}", 1, 1)
-	// TODO WE DECREMENT THE STACK POINTER AS WE POP OFF THE STACK
+	cg.subExtraOffset(4)
 	switch node.Binary {
 	case PLUS:
 		appendAssembly(cg.currInstrs(), "ADDS r0, r0, r1", 1, 1)
