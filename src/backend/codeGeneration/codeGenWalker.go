@@ -268,6 +268,9 @@ func (cg *CodeGenerator) evalRHS(t Evaluation, srcReg string) {
 
 		case ArrayType:
 			fmt.Println("Pair or array")
+		case PairType:
+			appendAssembly(cg.currInstrs(), "STR "+srcReg+", [sp, #"+strconv.Itoa(offset)+"]", 1, 1)
+			appendAssembly(cg.currInstrs(), "LDR "+srcReg+", [sp, #"+strconv.Itoa(offset)+"]", 1, 1)
 		case ConstType:
 
 			switch resType.(ConstType) {
@@ -288,7 +291,7 @@ func (cg *CodeGenerator) evalRHS(t Evaluation, srcReg string) {
 		cg.cgVisitBinopExpr(t.(Binop))
 		appendAssembly(cg.currInstrs(), "MOV "+srcReg+", r0", 1, 1)
 	case NewPair:
-		cg.evalPair(t.(NewPair).FstExpr, t.(NewPair).SndExpr, "r5", srcReg)
+		//cg.evalPair(t.(NewPair).FstExpr, t.(NewPair).SndExpr, "r5", srcReg)
 	case PairElem:
 		cg.evalPairElem(t.(PairElem), srcReg)
 	case Call:
@@ -334,14 +337,16 @@ func (cg *CodeGenerator) evalPairElem(t PairElem, srcReg string) {
 }
 
 // Evalutes a pair of elements onto the stack
-func (cg *CodeGenerator) evalPair(fst Evaluation, snd Evaluation, reg1 string, reg2 string) {
+func (cg *CodeGenerator) evalPair(ident Evaluation, fst Evaluation, snd Evaluation, reg1 string, reg2 string) {
+
 	// First allocate memory to store two addresses (8-bytes)
 	cg.CfunctionCall("malloc", strconv.Itoa(ADDR_SIZE*2))
 	// Store the address in the free register
 	appendAssembly(cg.currInstrs(), "MOV "+reg2+", r0", 1, 1)
 
 	//Get pair sizes
-	var fstSize, sndSize = sizeOf(cg.eval(fst)), sizeOf(cg.eval(snd))
+	var typeFst, typeSnd = cg.eval(fst), cg.eval(snd)
+	var fstSize, sndSize = sizeOf(typeFst), sizeOf(typeSnd)
 
 	// Load the first element into a register to be stored
 	cg.evalRHS(fst, reg1)
@@ -349,10 +354,20 @@ func (cg *CodeGenerator) evalPair(fst Evaluation, snd Evaluation, reg1 string, r
 	//Allocate memory for the first element
 	cg.CfunctionCall("malloc", strconv.Itoa(fstSize))
 
-	//Store the first element to the newly allocated memory onto the stack
+	//Store the first element in the register
 	appendAssembly(cg.currInstrs(), "STR "+reg1+", [r0]", 1, 1)
-	//Store the address of allocated memory block of the pair on the stack
-	appendAssembly(cg.currInstrs(), "STR r0, ["+reg2+"]", 1, 1)
+
+	switch typeFst.(type) {
+	case ConstType:
+		switch typeFst.(ConstType) {
+		case Bool, Char:
+			//Store the first element to the newly allocated memory onto the stack
+			appendAssembly(cg.currInstrs(), "STRB "+reg1+", [r0]", 1, 1)
+		case Int, String:
+			//Store the address of allocated memory block of the pair on the stack
+			appendAssembly(cg.currInstrs(), "STR r0, ["+reg2+"]", 1, 1)
+		}
+	}
 
 	//Load the second element into a register to be stored
 	cg.evalRHS(snd, reg1)
@@ -360,21 +375,30 @@ func (cg *CodeGenerator) evalPair(fst Evaluation, snd Evaluation, reg1 string, r
 	//Allocate memory for the second element
 	cg.CfunctionCall("malloc", strconv.Itoa(sndSize))
 
-	//Store the second element to the newly allocated memory onto the stack
-	appendAssembly(cg.currInstrs(), "STR "+reg1+", [r0]", 1, 1)
+	switch typeSnd.(type) {
+	case ConstType:
+		switch typeSnd.(ConstType) {
+		case Bool, Char:
+			//Store the second element to the newly allocated memory onto the stack
+			appendAssembly(cg.currInstrs(), "STRB "+reg1+", [r0]", 1, 1)
+		case Int, String:
+			//Store the second element to the newly allocated memory onto the stack
+			appendAssembly(cg.currInstrs(), "STR "+reg1+", [r0]", 1, 1)
+		}
+	}
+
 	//Store the address of allocated memory block of the pair on the stack
 	appendAssembly(cg.currInstrs(), "STR r0, ["+reg2+", #4]", 1, 1)
 
 	//Store the address of the pair on the stack
-	/*switch ident.(type) {
+	switch ident.(type) {
 	case Ident:
 		//Store the address of the address that contains pointers to the first and second elements
-		//TODO: Fix this 0 output
 		var offset, _ = cg.getIdentOffset(ident.(Ident))
 		appendAssembly(cg.currInstrs(), "STR "+reg2+", [sp, #"+strconv.Itoa(offset)+"]", 1, 1)
 	default:
 		fmt.Println("oh no")
-	}*/
+	}
 
 }
 
@@ -600,10 +624,16 @@ func (cg *CodeGenerator) cgVisitDeclareStat(node Declare) {
 		}
 
 	case PairType:
+		switch rhs.(type) {
+		case NewPair:
+			cg.evalPair(node.Lhs, rhs.(NewPair).FstExpr, rhs.(NewPair).SndExpr, "r5", "r4")
+		case Ident:
+			cg.evalRHS(rhs.(Ident), "r5")
+		case Call:
 
-		// First allocate memory to store two addresses (8-bytes)
-		cg.CfunctionCall("malloc", strconv.Itoa(ADDR_SIZE*2))
-		cg.evalPair(rhs.(NewPair).FstExpr, rhs.(NewPair).SndExpr, "r5", "r4")
+		case PairElem:
+
+		}
 
 		// Evalutes a pair of elements onto the stack
 		//cg.evalRHS(rhs, "r4")
