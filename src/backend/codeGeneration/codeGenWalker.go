@@ -48,8 +48,6 @@ const STACK_SIZE_MAX = 1024
 // Function global variable
 var functionList []*Function
 
-//TODO: Fails on waiting on Nana's getIdentOffset() function
-
 //TODO: intAssignment.wacc FAILS
 //TODO: intLeadingZeros.wacc FAILS
 //TODO: _VarNames.wacc FAILS
@@ -273,19 +271,18 @@ func (cg CodeGenerator) evalRHS(t Evaluation, srcReg string) {
 		var offset, resType = cg.getIdentOffset(t.(Ident))
 
 		switch resType.(type) {
-		  case ArrayType:
+		case ArrayType:
 
-
-      fmt.Println("Pair or array")
-		  case ConstType:
+			fmt.Println("Pair or array")
+		case ConstType:
 
 			switch resType.(ConstType) {
-			  case Bool, Char:
-			  	appendAssembly(cg.currInstrs(), "LDRSB "+srcReg+", [sp, #"+strconv.Itoa(offset)+"]", 1, 1)
-		  	case Int, String:
-			  	appendAssembly(cg.currInstrs(), "LDR "+srcReg+", [sp, #"+strconv.Itoa(offset)+"]", 1, 1)
-	  	  default:
-			   fmt.Println("Pair or array")
+			case Bool, Char:
+				appendAssembly(cg.currInstrs(), "LDRSB "+srcReg+", [sp, #"+strconv.Itoa(offset)+"]", 1, 1)
+			case Int, String:
+				appendAssembly(cg.currInstrs(), "LDR "+srcReg+", [sp, #"+strconv.Itoa(offset)+"]", 1, 1)
+			default:
+				fmt.Println("Pair or array")
 			}
 
 		default:
@@ -374,7 +371,7 @@ func (cg CodeGenerator) evalPair(fst Evaluation, snd Evaluation, reg1 string, re
 
 	//Store the address of the address that contains pointers to the first and second elements
 	//TODO: FIX LATER
-	var offset = 0//, _ = cg.getIdentOffset(reg2)
+	var offset = 0 //, _ = cg.getIdentOffset(reg2)
 	appendAssembly(cg.currInstrs(), "STR "+reg2+", [sp, #"+strconv.Itoa(offset)+"]", 1, 1)
 
 }
@@ -422,7 +419,7 @@ func (cg CodeGenerator) evalArray(array []Evaluation, srcReg string, dstReg stri
 			default:
 				//Must be an array type
 				//Loop through the array
-				var offset,_ = cg.getIdentOffset(array[i].(Ident))
+				var offset, _ = cg.getIdentOffset(array[i].(Ident))
 				switch t.(ArrayType).Type.(type) {
 				case ArrayType:
 					appendAssembly(cg.currInstrs(), "LDR "+srcReg+", [sp, #"+strconv.Itoa(offset)+"]", 1, 1)
@@ -461,7 +458,7 @@ func (cg CodeGenerator) evalArrayElem(t Evaluation, reg1 string, reg2 string) {
 	appendAssembly(cg.currInstrs(), "MOV r1, "+reg1, 1, 1)
 	appendAssembly(cg.currInstrs(), "BL p_check_array_bounds", 1, 1)
 
-  // Still don't know what these assembly instructions do
+	// Still don't know what these assembly instructions do
 	/*
 		ADD r4, r4, #4
 		ADD r4, r4, r5, LSL #2
@@ -469,10 +466,10 @@ func (cg CodeGenerator) evalArrayElem(t Evaluation, reg1 string, reg2 string) {
 		MOV r0, r4
 	*/
 
-  appendAssembly(cg.currInstrs(), "ADD " + reg1 +", "+ reg1+", #4", 1, 1)
-	appendAssembly(cg.currInstrs(), "ADD " + reg1 +", "+ reg1+", " +reg2+", LSL #2", 1, 1)
+	appendAssembly(cg.currInstrs(), "ADD "+reg1+", "+reg1+", #4", 1, 1)
+	appendAssembly(cg.currInstrs(), "ADD "+reg1+", "+reg1+", "+reg2+", LSL #2", 1, 1)
 	appendAssembly(cg.currInstrs(), "LDR "+reg1+", ["+reg1+"]", 1, 1)
-  appendAssembly(cg.currInstrs(), "MOV r0, "+reg1, 1, 1)
+	appendAssembly(cg.currInstrs(), "MOV r0, "+reg1, 1, 1)
 
 	// Check bounds and errors
 	cg.checkArrayBounds()
