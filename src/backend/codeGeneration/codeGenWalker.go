@@ -771,53 +771,32 @@ func (cg *CodeGenerator) cgVisitPrintlnStat(node Println) {
 }
 
 func (cg *CodeGenerator) cgVisitIfStat(node If) {
-	varSpaceSize := GetScopeVarSize(node.ThenStat)
-	cg.setNewScope(varSpaceSize)
+	fstLabel, sndLabel := cg.getNewLabel(), cg.getNewLabel()
+	cg.evalRHS(node.Conditional, "r0")
+	appendAssembly(cg.currInstrs(), "BEQ "+fstLabel, 1, 1)
 
-	fstLabel := cg.getNewLabel()
-	sndLabel := cg.getNewLabel()
-	cg.evalRHS(node.Conditional, "r4")
-	appendAssembly(cg.currInstrs(), "BEG "+fstLabel, 1, 1)
+	cg.cgVisitScopeStat(Scope{StatList: node.ThenStat})
 
-	for _, stat := range node.ThenStat {
-		cg.cgEvalStat(stat)
-	}
-
-	cg.removeCurrScope()
-	varSpaceSize = GetScopeVarSize(node.ElseStat)
-	cg.setNewScope(varSpaceSize)
-
-	appendAssembly(cg.currInstrs(), "B "+sndLabel, 1, 1)
+	appendAssembly(cg.currInstrs(), "B "+sndLabel+":", 1, 1)
 	appendAssembly(cg.currInstrs(), fstLabel, 0, 1)
 
-	for _, stat := range node.ElseStat {
-		cg.cgEvalStat(stat)
-	}
+	cg.cgVisitScopeStat(Scope{StatList: node.ElseStat})
 
-	appendAssembly(cg.currInstrs(), sndLabel, 0, 1)
+	appendAssembly(cg.currInstrs(), sndLabel+":", 0, 1)
 
-	cg.removeCurrScope()
 }
 
 func (cg *CodeGenerator) cgVisitWhileStat(node While) {
-	varSpaceSize := GetScopeVarSize(node.DoStat)
-	cg.setNewScope(varSpaceSize)
+	fstLabel, sndLabel := cg.getNewLabel(), cg.getNewLabel()
 
-	fstLabel := cg.getNewLabel()
-	sndLabel := cg.getNewLabel()
-	appendAssembly(cg.currInstrs(), "B "+fstLabel, 1, 1)
-	appendAssembly(cg.currInstrs(), sndLabel, 0, 1)
-
-	// traverse all statements by switching on statement type
-	for _, stat := range node.DoStat {
-		cg.cgEvalStat(stat)
-	}
-
+	appendAssembly(cg.currInstrs(), "B "+sndLabel+":", 1, 1)
 	appendAssembly(cg.currInstrs(), fstLabel, 0, 1)
-	cg.evalRHS(node.Conditional, "r4") // NEED TWO REGISTERS R4 and R5 to compare
-	appendAssembly(cg.currInstrs(), "BEG "+sndLabel, 1, 1)
 
-	cg.removeCurrScope()
+	cg.cgVisitScopeStat(Scope{StatList: node.DoStat})
+
+	appendAssembly(cg.currInstrs(), sndLabel, 0, 1)
+	cg.evalRHS(node.Conditional, "r0") // NEED TWO REGISTERS R4 and R5 to compare
+	appendAssembly(cg.currInstrs(), "BEQ "+fstLabel, 1, 1)
 }
 
 func (cg *CodeGenerator) cgVisitScopeStat(node Scope) {
@@ -992,10 +971,9 @@ func (cg *CodeGenerator) cgVisitBinopExpr(node Binop) {
 		cg.cgVisitBinopExpr_H("p_check_divide_by_zero")
 	case MOD:
 		appendAssembly(cg.currInstrs(), "MOV r0, r4", 1, 1)
-		appendAssembly(cg.currInstrs(), "MOV r1, r5", 1, 1)
 		appendAssembly(cg.currInstrs(), "BL p_check_divide_by_zero", 1, 1)
 		appendAssembly(cg.currInstrs(), "BL __aeabi_idivmod", 1, 1)
-		appendAssembly(cg.currInstrs(), "MOV r4, r1", 1, 1)
+		appendAssembly(cg.currInstrs(), "MOV r0, r4", 1, 1)
 		cg.cgVisitBinopExpr_H("p_check_divide_by_zero")
 	case AND:
 		appendAssembly(cg.currInstrs(), "AND r4, r4, r5", 1, 1)
