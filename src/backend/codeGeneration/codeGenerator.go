@@ -222,8 +222,8 @@ func (cg *CodeGenerator) findIdentOffset(ident Ident, symTable *SymbolTable,
 		return 0, Int
 	}
 
-	if scope.isFunc {
-
+	if scope.isFunc && isParamInList(ident, scope.paramList) {
+		return getParamOffset(ident, scope.paramList)
 	}
 
 	/*fmt.Println("Ident: ", ident, "  table: ", symTable, " accOffset: ", accOffset)

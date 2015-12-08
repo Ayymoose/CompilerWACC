@@ -239,6 +239,32 @@ func calculateWordSize(strValue string) int {
 	}
 }
 
+// Returns true iff ident is within in the paramList
+func isParamInList(ident Ident, paramList *[]Param) bool {
+	for _, param := range *paramList {
+		if ident == param.Ident {
+			return true
+		}
+	}
+
+	return false
+}
+
+// Returns the negative offset of the parameter
+func getParamOffset(ident Ident, paramList *[]Param) (int, Type) {
+	accOffset := 0
+
+	for _, param := range *paramList {
+		if ident == param.Ident {
+			return -accOffset - sizeOf(param.ParamType), param.ParamType
+		}
+
+		accOffset += sizeOf(param.ParamType)
+	}
+
+	return 0, Int // ERROR
+}
+
 // Returns "1" iff b = true. "0" otherwise
 func boolInt(b bool) string {
 	if b {
