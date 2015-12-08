@@ -793,6 +793,7 @@ func (cg *CodeGenerator) cgVisitPrintStat(node Print) {
 	cg.evalRHS(expr, dstReg)
 
 	exprType := cg.eval(expr)
+	fmt.Println("CHEECKK TJIIIIS:", exprType, expr)
 	switch exprType.(type) {
 	case ConstType:
 		switch exprType.(ConstType) {
@@ -831,7 +832,6 @@ func (cg *CodeGenerator) cgVisitPrintStat(node Print) {
 	default:
 		appendAssembly(cg.currInstrs(), "Error: type not implemented", 1, 1)
 		typeOf(expr)
-
 	}
 }
 
