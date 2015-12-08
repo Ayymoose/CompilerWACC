@@ -931,6 +931,9 @@ func (cg *CodeGenerator) cgVisitUnopExpr(node Unop) {
 		cg.evalRHS(node.Expr, "r4")
 		//Negate the result in the register
 		appendAssembly(cg.currInstrs(), "RSBS r4, r4, #0", 1, 1)
+		appendAssembly(cg.currInstrs(), "MOV r0, r4", 1, 1)
+		appendAssembly(cg.currInstrs(), "BLVS p_throw_overflow_error", 1, 1)
+		cg.cgVisitBinopExpr_H("p_throw_overflow_error")
 	case LEN:
 		cg.evalRHS(node.Expr, "r4")
 		//Assume the RHS is always an array
