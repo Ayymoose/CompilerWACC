@@ -639,7 +639,7 @@ func (cg *CodeGenerator) cgVisitAssignmentStat(node Assignment) {
 		var offset, _ = cg.getIdentOffset(node.Lhs.(ArrayElem).Ident)
 
 		//Have a register point to the start of the array
-		appendAssembly(cg.currInstrs(), "ADD r5, [sp, #"+strconv.Itoa(offset)+"]", 1, 1)
+		appendAssembly(cg.currInstrs(), "ADD r5, sp, #"+strconv.Itoa(offset), 1, 1)
 
 		//Load the index
 		cg.evalRHS(node.Lhs.(ArrayElem).Exprs[0],"r6")
