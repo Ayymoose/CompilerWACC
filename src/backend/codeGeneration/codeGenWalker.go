@@ -332,7 +332,6 @@ func (cg *CodeGenerator) evalPairElem(t PairElem, srcReg string) {
 func (cg *CodeGenerator) evalPair(fst Evaluation, snd Evaluation, reg1 string, reg2 string) {
 	// First allocate memory to store two addresses (8-bytes)
 	cg.CfunctionCall("malloc", strconv.Itoa(ADDR_SIZE*2))
-
 	// Store the address in the free register
 	appendAssembly(cg.currInstrs(), "MOV "+reg2+", r0", 1, 1)
 
@@ -361,10 +360,16 @@ func (cg *CodeGenerator) evalPair(fst Evaluation, snd Evaluation, reg1 string, r
 	//Store the address of allocated memory block of the pair on the stack
 	appendAssembly(cg.currInstrs(), "STR r0, ["+reg2+", #4]", 1, 1)
 
-	//Store the address of the address that contains pointers to the first and second elements
-	//TODO: FIX LATER
-	var offset = 0 //, _ = cg.getIdentOffset(reg2)
-	appendAssembly(cg.currInstrs(), "STR "+reg2+", [sp, #"+strconv.Itoa(offset)+"]", 1, 1)
+	//Store the address of the pair on the stack
+	/*switch ident.(type) {
+	case Ident:
+		//Store the address of the address that contains pointers to the first and second elements
+		//TODO: Fix this 0 output
+		var offset, _ = cg.getIdentOffset(ident.(Ident))
+		appendAssembly(cg.currInstrs(), "STR "+reg2+", [sp, #"+strconv.Itoa(offset)+"]", 1, 1)
+	default:
+		fmt.Println("oh no")
+	}*/
 
 }
 
@@ -590,8 +595,14 @@ func (cg *CodeGenerator) cgVisitDeclareStat(node Declare) {
 		}
 
 	case PairType:
+
+		// First allocate memory to store two addresses (8-bytes)
+		cg.CfunctionCall("malloc", strconv.Itoa(ADDR_SIZE*2))
+		cg.evalPair(rhs.(NewPair).FstExpr, rhs.(NewPair).SndExpr, "r5", "r4")
+
 		// Evalutes a pair of elements onto the stack
-		cg.evalRHS(rhs, "r4")
+		//cg.evalRHS(rhs, "r4")
+
 	case ArrayType:
 		// Evalute an array
 		cg.evalArrayLiter(node.DecType, rhs, "r5", "r4")
@@ -630,11 +641,6 @@ func (cg *CodeGenerator) cgVisitAssignmentStat(node Assignment) {
 		}
 
 	case ArrayElem:
-		/*
-			  a[0]
-				a[a[0]]
-				a[i]
-		*/
 
 		var offset, _ = cg.getIdentOffset(node.Lhs.(ArrayElem).Ident)
 
@@ -663,10 +669,13 @@ func (cg *CodeGenerator) cgVisitAssignmentStat(node Assignment) {
 		switch node.Rhs.(type) {
 		case Boolean, Character:
 			appendAssembly(cg.currInstrs(), "STRB r4, [r5]", 1, 1)
+		case Integer, Str:
+			appendAssembly(cg.currInstrs(), "STR r4, [r5]", 1, 1)
 		default:
 			fmt.Println("I don't know")
 		}
 	case PairElem:
+
 		fmt.Println("Pair elem not done")
 	default:
 	}
@@ -934,6 +943,13 @@ func (cg *CodeGenerator) cgVisitUnopExpr(node Unop) {
 	case CHR:
 		cg.evalRHS(node.Expr, "r4")
 		fmt.Println("chr not done")
+	case NOT:
+		var offset, _ = cg.getIdentOffset(node.Expr.(Ident))
+		appendAssembly(cg.currInstrs(), "LDRSB r4, [sp, #"+strconv.Itoa(offset)+"]", 1, 1)
+
+		//		appendAssembly(cg.currInstrs(), "LDRSB r4, [sp, #"++"]", 1, 1)
+		appendAssembly(cg.currInstrs(), "EOR r4, r4, #1", 1, 1)
+		appendAssembly(cg.currInstrs(), "MOV r0, r4", 1, 1)
 	default:
 		fmt.Println("oh no")
 		fmt.Println(node.Unary)
@@ -961,7 +977,7 @@ func (cg *CodeGenerator) cgVisitBinopExpr(node Binop) {
 		cg.cgVisitBinopExpr_H("p_throw_overflow_error")
 	case MUL:
 		appendAssembly(cg.currInstrs(), "SMULL r4, r5, r4, r5", 1, 1)
-		appendAssembly(cg.currInstrs(), "CMP r1, r0, ASR #31", 1, 1)
+		appendAssembly(cg.currInstrs(), "CMP r5, r4, ASR #31", 1, 1)
 		appendAssembly(cg.currInstrs(), "BLNE p_throw_overflow_error", 1, 1)
 		cg.cgVisitBinopExpr_H("p_throw_overflow_error")
 	case DIV:
@@ -972,10 +988,11 @@ func (cg *CodeGenerator) cgVisitBinopExpr(node Binop) {
 		appendAssembly(cg.currInstrs(), "MOV r4, r0", 1, 1)
 		cg.cgVisitBinopExpr_H("p_check_divide_by_zero")
 	case MOD:
+		appendAssembly(cg.currInstrs(), "MOV r0, r4", 1, 1)
 		appendAssembly(cg.currInstrs(), "MOV r1, r5", 1, 1)
 		appendAssembly(cg.currInstrs(), "BL p_check_divide_by_zero", 1, 1)
 		appendAssembly(cg.currInstrs(), "BL __aeabi_idivmod", 1, 1)
-		appendAssembly(cg.currInstrs(), "MOV r0, r4", 1, 1)
+		appendAssembly(cg.currInstrs(), "MOV r0, r5", 1, 1)
 		cg.cgVisitBinopExpr_H("p_check_divide_by_zero")
 	case AND:
 		appendAssembly(cg.currInstrs(), "AND r4, r4, r5", 1, 1)
