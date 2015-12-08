@@ -265,16 +265,16 @@ func (cg CodeGenerator) evalRHS(t Evaluation, srcReg string) {
 		var offset, resType = cg.getIdentOffset(t.(Ident))
 
 		switch resType.(type) {
+
 		  case ArrayType:
       fmt.Println("Pair or array")
 		  case ConstType:
+
 			switch resType.(ConstType) {
-			  case Bool, Char:
-			  	appendAssembly(cg.currInstrs(), "LDRSB "+srcReg+", [sp, #"+strconv.Itoa(offset)+"]", 1, 1)
-		  	case Int, String:
-			  	appendAssembly(cg.currInstrs(), "LDR "+srcReg+", [sp, #"+strconv.Itoa(offset)+"]", 1, 1)
-	  	  default:
-			   fmt.Println("Pair or array")
+			case Bool, Char:
+				appendAssembly(cg.currInstrs(), "LDRSB "+srcReg+", [sp, #"+strconv.Itoa(offset)+"]", 1, 1)
+			case Int, String:
+				appendAssembly(cg.currInstrs(), "LDR "+srcReg+", [sp, #"+strconv.Itoa(offset)+"]", 1, 1)
 			}
 		default:
 			appendAssembly(cg.currInstrs(), "LDR "+srcReg+", [sp, #"+strconv.Itoa(offset)+"]", 1, 1)
@@ -362,7 +362,7 @@ func (cg CodeGenerator) evalPair(fst Evaluation, snd Evaluation, reg1 string, re
 
 	//Store the address of the address that contains pointers to the first and second elements
 	//TODO: FIX LATER
-	var offset = 0//, _ = cg.getIdentOffset(reg2)
+	var offset = 0 //, _ = cg.getIdentOffset(reg2)
 	appendAssembly(cg.currInstrs(), "STR "+reg2+", [sp, #"+strconv.Itoa(offset)+"]", 1, 1)
 
 }
@@ -410,7 +410,7 @@ func (cg CodeGenerator) evalArray(array []Evaluation, srcReg string, dstReg stri
 			default:
 				//Must be an array type
 				//Loop through the array
-				var offset,_ = cg.getIdentOffset(array[i].(Ident))
+				var offset, _ = cg.getIdentOffset(array[i].(Ident))
 				switch t.(ArrayType).Type.(type) {
 				case ArrayType:
 					appendAssembly(cg.currInstrs(), "LDR "+srcReg+", [sp, #"+strconv.Itoa(offset)+"]", 1, 1)
@@ -449,7 +449,7 @@ func (cg CodeGenerator) evalArrayElem(t Evaluation, reg1 string, reg2 string) {
 	appendAssembly(cg.currInstrs(), "MOV r1, "+reg1, 1, 1)
 	appendAssembly(cg.currInstrs(), "BL p_check_array_bounds", 1, 1)
 
-  // Still don't know what these assembly instructions do
+	// Still don't know what these assembly instructions do
 	/*
 		ADD r4, r4, #4
 		ADD r4, r4, r5, LSL #2
@@ -457,10 +457,10 @@ func (cg CodeGenerator) evalArrayElem(t Evaluation, reg1 string, reg2 string) {
 		MOV r0, r4
 	*/
 
-  appendAssembly(cg.currInstrs(), "ADD " + reg1 +", "+ reg1+", #4", 1, 1)
-	appendAssembly(cg.currInstrs(), "ADD " + reg1 +", "+ reg1+", " +reg2+", LSL #2", 1, 1)
+	appendAssembly(cg.currInstrs(), "ADD "+reg1+", "+reg1+", #4", 1, 1)
+	appendAssembly(cg.currInstrs(), "ADD "+reg1+", "+reg1+", "+reg2+", LSL #2", 1, 1)
 	appendAssembly(cg.currInstrs(), "LDR "+reg1+", ["+reg1+"]", 1, 1)
-  appendAssembly(cg.currInstrs(), "MOV r0, "+reg1, 1, 1)
+	appendAssembly(cg.currInstrs(), "MOV r0, "+reg1, 1, 1)
 
 	// Check bounds and errors
 	cg.checkArrayBounds()
@@ -627,7 +627,7 @@ func (cg CodeGenerator) cgVisitAssignmentStat(node Assignment) {
 		}
 
 	case ArrayElem:
-    
+
 
 
 		//Do last
@@ -678,8 +678,7 @@ func (cg CodeGenerator) cgVisitExitStat(node Exit) {
 func (cg CodeGenerator) cgVisitPrintStat(node Print) {
 	expr := node.Expr
 
-	//DO NOT MAKE THIS r0 , IT WILL CAUSE ARRAY LOOKUP TO FAIL
-	dstReg := "r4"
+	dstReg := "r0"
 	//
 
 	// Get value of expr into dstReg
@@ -983,10 +982,9 @@ func (cg CodeGenerator) cgVisitBinopExpr(node Binop) {
 		appendAssembly(cg.currInstrs(), "MOVLE r4, #0", 1, 1)
 		appendAssembly(cg.currInstrs(), "MOV r0, r4", 1, 1)
 	case LTE:
-		appendAssembly(cg.currInstrs(), "CMP r4, r5", 1, 1)
+		appendAssembly(cg.currInstrs(), "CMP r0, r1", 1, 1)
 		appendAssembly(cg.currInstrs(), "MOVLE r4, #1", 1, 1)
 		appendAssembly(cg.currInstrs(), "MOVGT r4, #0", 1, 1)
-		appendAssembly(cg.currInstrs(), "MOV r0, r4", 1, 1)
 	case GTE:
 		appendAssembly(cg.currInstrs(), "CMP r4, r5", 1, 1)
 		appendAssembly(cg.currInstrs(), "MOVGE r4, #1", 1, 1)
