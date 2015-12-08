@@ -54,7 +54,8 @@ type scopeData struct {
 	isFunc      bool           // true iff the scope date is used for a function scope
 	paramMap    *map[Param]int // Map of function parameters to their offset from the start of the function
 	// only used if isFunc is true
-	extraOffset int // Extra offset used when stack is used to store intermediate values
+	identMsgLabelMap map[Ident]string // Map of string idents within this scope to their message labels
+	extraOffset      int              // Extra offset used when stack is used to store intermediate values
 }
 
 // Creates new scope data for a new scope.
@@ -152,8 +153,8 @@ func (cg *CodeGenerator) buildFullInstr() {
 // If strValue is not contained in the map then it will be added to the map
 // with a new msg label value (which will be returned)
 // e.g. =msg_0
-func (cg *CodeGenerator) getMsgLabel(strValue string) string {
-	msgLabel, contained := cg.msgMap[strValue]
+func (cg *CodeGenerator) getMsgLabel(ident Ident, strValue string) string {
+	/*msgLabel, contained := cg.msgMap[strValue]
 
 	if contained {
 		return "=" + msgLabel
@@ -161,8 +162,32 @@ func (cg *CodeGenerator) getMsgLabel(strValue string) string {
 
 	cg.msgMap[strValue] = "msg_" + strconv.Itoa(len(cg.msgMap))
 	addMsgLabel(cg.msgInstrs, cg.msgMap[strValue], strValue)
+	*/
 
-	return "=" + cg.msgMap[strValue]
+	// For string constants
+	if ident == "" {
+		newIndex := len(cg.messages)
+		cg.messages = append(cg.messages, strValue)
+		newLabel := "msg_" + strconv.Itoa(newIndex)
+		addMsgLabel(cg.msgInstrs, newLabel, strValue)
+		return newLabel
+	}
+
+	// If the ident hasnt been previously defined in a msg
+	if !strIdentPrevDefined(ident, cg.currStack) {
+		newIndex := len(cg.messages)
+		cg.messages = append(cg.messages, strValue)
+		newLabel := "msg_" + strconv.Itoa(newIndex)
+		addMsgLabel(cg.msgInstrs, newLabel, strValue)
+
+		cg.currStack.identMsgLabelMap[ident] = newLabel
+
+		return newLabel
+	}
+
+	// Find the idents label using all scopes
+	label := findLabel(ident, cg.currStack)
+	return label
 }
 
 // Adds the function name to cg.progFuncNames iff it isnt already in the list

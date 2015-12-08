@@ -64,9 +64,9 @@ func (cg *CodeGenerator) cgVisitReadStatFunc_H(funcName string) {
 	appendAssembly(cg.progFuncInstrs, "MOV r1, r0", 1, 1)
 	switch funcName {
 	case "p_read_char":
-		appendAssembly(cg.progFuncInstrs, "LDR r0, "+cg.getMsgLabel(READ_CHAR), 1, 1)
+		appendAssembly(cg.progFuncInstrs, "LDR r0, "+cg.getMsgLabel("", READ_CHAR), 1, 1)
 	case "p_read_int":
-		appendAssembly(cg.progFuncInstrs, "LDR r0, "+cg.getMsgLabel(READ_INT), 1, 1)
+		appendAssembly(cg.progFuncInstrs, "LDR r0, "+cg.getMsgLabel("", READ_INT), 1, 1)
 	}
 	appendAssembly(cg.progFuncInstrs, "ADD r0, r0, #4", 1, 1)
 	appendAssembly(cg.progFuncInstrs, "BL scanf", 1, 1)
@@ -79,7 +79,7 @@ func (cg *CodeGenerator) dereferenceNullPointer() {
 		appendAssembly(cg.progFuncInstrs, "p_check_null_pointer"+":", 0, 1)
 		appendAssembly(cg.progFuncInstrs, "PUSH {lr}", 1, 1)
 		appendAssembly(cg.progFuncInstrs, "CMP r0, #0", 1, 1)
-		appendAssembly(cg.progFuncInstrs, "LDREQ r0, "+cg.getMsgLabel(NULL_REFERENCE), 1, 1)
+		appendAssembly(cg.progFuncInstrs, "LDREQ r0, "+cg.getMsgLabel("", NULL_REFERENCE), 1, 1)
 		appendAssembly(cg.progFuncInstrs, "BLEQ p_throw_runtime_error", 1, 1)
 		appendAssembly(cg.progFuncInstrs, "POP {pc}", 1, 1)
 	}
@@ -103,11 +103,11 @@ func (cg *CodeGenerator) checkArrayBounds() {
 		appendAssembly(cg.progFuncInstrs, "p_check_array_bounds"+":", 0, 1)
 		appendAssembly(cg.progFuncInstrs, "PUSH {lr}", 1, 1)
 		appendAssembly(cg.progFuncInstrs, "CMP r0, #0", 1, 1)
-		appendAssembly(cg.progFuncInstrs, "LDRLT r0, "+cg.getMsgLabel(ARRAY_INDEX_NEGATIVE), 1, 1)
+		appendAssembly(cg.progFuncInstrs, "LDRLT r0, "+cg.getMsgLabel("", ARRAY_INDEX_NEGATIVE), 1, 1)
 		appendAssembly(cg.progFuncInstrs, "BLLT p_throw_runtime_error", 1, 1)
 		appendAssembly(cg.progFuncInstrs, "LDR r1, [r1]", 1, 1)
 		appendAssembly(cg.progFuncInstrs, "CMP r0, r1", 1, 1)
-		appendAssembly(cg.progFuncInstrs, "LDRCS r0, "+cg.getMsgLabel(ARRAY_INDEX_LARGE), 1, 1)
+		appendAssembly(cg.progFuncInstrs, "LDRCS r0, "+cg.getMsgLabel("", ARRAY_INDEX_LARGE), 1, 1)
 		appendAssembly(cg.progFuncInstrs, "BLCS p_throw_runtime_error", 1, 1)
 		appendAssembly(cg.progFuncInstrs, "POP {pc}", 1, 1)
 	}
@@ -129,7 +129,7 @@ func (cg *CodeGenerator) cgVisitFreeStatFunc_H(funcName string) {
 	case "p_free_pair":
 		appendAssembly(cg.progFuncInstrs, "PUSH {lr}", 1, 1)
 		appendAssembly(cg.progFuncInstrs, "CMP r0, #0", 1, 1)
-		appendAssembly(cg.progFuncInstrs, "LDREQ r0, "+cg.getMsgLabel(NULL_REFERENCE), 1, 1)
+		appendAssembly(cg.progFuncInstrs, "LDREQ r0, "+cg.getMsgLabel("", NULL_REFERENCE), 1, 1)
 		appendAssembly(cg.progFuncInstrs, "BEQ p_throw_runtime_error", 1, 1)
 		appendAssembly(cg.progFuncInstrs, "PUSH {r0}", 1, 1)
 		appendAssembly(cg.progFuncInstrs, "LDR r0, [r0]", 1, 1)
@@ -162,15 +162,15 @@ func (cg *CodeGenerator) cgVisitPrintStatFunc_H(funcName string) {
 			// r1 = int value
 			appendAssembly(cg.progFuncInstrs, "MOV r1, r0", 1, 1)
 			// r0 = int format string
-			appendAssembly(cg.progFuncInstrs, "LDR r0, "+cg.getMsgLabel(INT_FORMAT), 1, 1)
+			appendAssembly(cg.progFuncInstrs, "LDR r0, "+cg.getMsgLabel("", INT_FORMAT), 1, 1)
 
 		case "p_print_bool":
 			// Check bool value - 0
 			appendAssembly(cg.progFuncInstrs, "CMP r0, #0", 1, 1)
 			// If bool = true then r0 = "true"
-			appendAssembly(cg.progFuncInstrs, "LDRNE r0, "+cg.getMsgLabel(TRUE_MSG), 1, 1)
+			appendAssembly(cg.progFuncInstrs, "LDRNE r0, "+cg.getMsgLabel("", TRUE_MSG), 1, 1)
 			// If bool = false then r0 = "false"
-			appendAssembly(cg.progFuncInstrs, "LDREQ r0, "+cg.getMsgLabel(FALSE_MSG), 1, 1)
+			appendAssembly(cg.progFuncInstrs, "LDREQ r0, "+cg.getMsgLabel("", FALSE_MSG), 1, 1)
 
 		case "p_print_string":
 			// r1 = string value
@@ -178,17 +178,17 @@ func (cg *CodeGenerator) cgVisitPrintStatFunc_H(funcName string) {
 			// r2 = r0 + 4
 			appendAssembly(cg.progFuncInstrs, "ADD r2, r0, #4", 1, 1)
 			// r0 = string format string
-			appendAssembly(cg.progFuncInstrs, "LDR r0, "+cg.getMsgLabel(STRING_FORMAT), 1, 1)
+			appendAssembly(cg.progFuncInstrs, "LDR r0, "+cg.getMsgLabel("", STRING_FORMAT), 1, 1)
 
 		case "p_print_ln":
 			// r0 = new line string
-			appendAssembly(cg.progFuncInstrs, "LDR r0, "+cg.getMsgLabel(NEWLINE_MSG), 1, 1)
+			appendAssembly(cg.progFuncInstrs, "LDR r0, "+cg.getMsgLabel("", NEWLINE_MSG), 1, 1)
 
 		case "p_print_reference":
 			// r1 = int value
 			appendAssembly(cg.progFuncInstrs, "MOV r1, r0", 1, 1)
 			// r0 = pointer format string
-			appendAssembly(cg.progFuncInstrs, "LDR r0, "+cg.getMsgLabel(POINTER_FORMAT), 1, 1)
+			appendAssembly(cg.progFuncInstrs, "LDR r0, "+cg.getMsgLabel("", POINTER_FORMAT), 1, 1)
 		}
 
 		//
@@ -257,7 +257,7 @@ func (cg *CodeGenerator) evalRHS(t Evaluation, srcReg string) {
 	case Character:
 		appendAssembly(cg.currInstrs(), "MOV "+srcReg+", #"+string(t.(Character)), 1, 1)
 	case Str:
-		appendAssembly(cg.currInstrs(), "LDR "+srcReg+", "+cg.getMsgLabel(string(t.(Str))), 1, 1)
+		appendAssembly(cg.currInstrs(), "LDR "+srcReg+", "+cg.getMsgLabel("", string(t.(Str))), 1, 1)
 	case PairLiter:
 		//PAIR-LITER NOT DONE
 		appendAssembly(cg.currInstrs(), "LDR "+srcReg+", =0", 1, 1)
@@ -297,6 +297,11 @@ func (cg *CodeGenerator) evalRHS(t Evaluation, srcReg string) {
 	default:
 		fmt.Println("ERROR: Expression can not be evaluated")
 	}
+}
+
+// Evaluate a string with an optional string identifier
+func (cg *CodeGenerator) evalString(t Evaluation, srcReg string, ident Ident) {
+	appendAssembly(cg.currInstrs(), "LDR "+srcReg+", "+cg.getMsgLabel(ident, string(t.(Str))), 1, 1)
 }
 
 // Evalute a pair element
@@ -435,9 +440,9 @@ func (cg *CodeGenerator) evalArray(array []Evaluation, srcReg string, dstReg str
 // Evalutes array elements
 func (cg *CodeGenerator) evalArrayElem(t Evaluation, reg1 string, reg2 string) {
 	// Create info
-	cg.getMsgLabel(ARRAY_INDEX_NEGATIVE)
-	cg.getMsgLabel(ARRAY_INDEX_LARGE)
-	cg.getMsgLabel(STRING_FORMAT)
+	cg.getMsgLabel("", ARRAY_INDEX_NEGATIVE)
+	cg.getMsgLabel("", ARRAY_INDEX_LARGE)
+	cg.getMsgLabel("", STRING_FORMAT)
 
 	// Store the address at the next space in the stack
 	var offset, _ = cg.getIdentOffset(t.(ArrayElem).Ident)
@@ -587,7 +592,7 @@ func (cg *CodeGenerator) cgVisitDeclareStat(node Declare) {
 			// Store the value of declaration to stack
 			appendAssembly(cg.currInstrs(), "STR r4, [sp, #"+cg.subCurrP(INT_SIZE)+"]", 1, 1)
 		case String:
-			cg.evalRHS(rhs, "r4")
+			cg.evalString(rhs, "r4", node.Lhs)
 			// Store the address onto the stack
 			appendAssembly(cg.currInstrs(), "STR r4, [sp, #"+cg.subCurrP(STRING_SIZE)+"]", 1, 1)
 		case Pair:
@@ -1053,7 +1058,7 @@ func (cg *CodeGenerator) cgVisitBinopExpr_H(funcName string) {
 
 		switch funcName {
 		case "p_throw_overflow_error":
-			appendAssembly(cg.progFuncInstrs, "LDR r0, "+cg.getMsgLabel(OVERFLOW), 1, 1)
+			appendAssembly(cg.progFuncInstrs, "LDR r0, "+cg.getMsgLabel("", OVERFLOW), 1, 1)
 			appendAssembly(cg.progFuncInstrs, "BL p_throw_runtime_error", 1, 1)
 			cg.throwRunTimeError()
 		case "p_throw_runtime_error":
@@ -1061,7 +1066,7 @@ func (cg *CodeGenerator) cgVisitBinopExpr_H(funcName string) {
 		case "p_check_divide_by_zero":
 			appendAssembly(cg.progFuncInstrs, "PUSH {lr}", 1, 1)
 			appendAssembly(cg.progFuncInstrs, "CMP r1, #0", 1, 1)
-			appendAssembly(cg.progFuncInstrs, "LDREQ r0, "+cg.getMsgLabel(DIVIDE_BY_ZERO), 1, 1)
+			appendAssembly(cg.progFuncInstrs, "LDREQ r0, "+cg.getMsgLabel("", DIVIDE_BY_ZERO), 1, 1)
 			appendAssembly(cg.progFuncInstrs, "BLEQ p_throw_runtime_error", 1, 1)
 			appendAssembly(cg.progFuncInstrs, "POP {pc}", 1, 1)
 			cg.throwRunTimeError()
