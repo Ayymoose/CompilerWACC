@@ -937,6 +937,7 @@ func (cg *CodeGenerator) cgVisitBinopExpr(node Binop) {
 	case PLUS:
 		appendAssembly(cg.currInstrs(), "ADDS r4, r4, r5", 1, 1)
 		appendAssembly(cg.currInstrs(), "BLVS p_throw_overflow_error", 1, 1)
+		appendAssembly(cg.currInstrs(), "MOV r0, r4", 1, 1)
 		cg.cgVisitBinopExpr_H("p_throw_overflow_error")
 	case SUB:
 		appendAssembly(cg.currInstrs(), "SUBS r4, r4, r5", 1, 1)
