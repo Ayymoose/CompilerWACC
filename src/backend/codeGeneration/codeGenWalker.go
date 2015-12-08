@@ -681,8 +681,7 @@ func (cg CodeGenerator) cgVisitExitStat(node Exit) {
 func (cg CodeGenerator) cgVisitPrintStat(node Print) {
 	expr := node.Expr
 
-	//DO NOT MAKE THIS r0 , IT WILL CAUSE ARRAY LOOKUP TO FAIL
-	dstReg := "r4"
+	dstReg := "r0"
 	//
 
 	// Get value of expr into dstReg
