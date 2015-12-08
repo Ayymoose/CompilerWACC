@@ -31,7 +31,7 @@ type CodeGenerator struct {
 func ConstructCodeGenerator(cRoot *Program, cInstrs *ARMList, cSymTable *SymbolTable) CodeGenerator {
 	cg := CodeGenerator{root: cRoot, instrs: cInstrs, msgInstrs: new(ARMList),
 		funcInstrs: new(ARMList), progFuncInstrs: new(ARMList), progFuncNames: new([]string),
-		symTable: cSymTable, globalStack: &scopeData{}}
+		symTable: cSymTable, globalStack: &scopeData{identMsgLabelMap: make(map[Ident]string)}}
 
 	// The program starts off with the current scope as the global scope
 	cg.currStack = cg.globalStack
@@ -65,6 +65,7 @@ func (cg *CodeGenerator) setNewScope(varSpaceSize int) {
 	newScope.size = varSpaceSize
 	newScope.parentScope = cg.currStack
 	newScope.isFunc = cg.currStack.isFunc
+	newScope.identMsgLabelMap = make(map[Ident]string)
 
 	if newScope.isFunc {
 		newScope.paramMap = cg.currStack.paramMap
