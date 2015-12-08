@@ -767,6 +767,7 @@ func (cg *CodeGenerator) cgVisitFreeStat(node Free) {
 	appendAssembly(cg.currInstrs(), "MOV r0, r4", 1, 1)
 	appendAssembly(cg.currInstrs(), "BL p_free_pair", 1, 1)
 	cg.cgVisitFreeStatFunc_H("p_free_pair")
+	PAIR_INCLUDED = false
 }
 
 func (cg *CodeGenerator) cgVisitReturnStat(node Return) {
