@@ -948,7 +948,10 @@ func (cg *CodeGenerator) cgVisitUnopExpr(node Unop) {
 		cg.evalRHS(node.Expr, "r4")
 		fmt.Println("chr not done")
 	case NOT:
-		appendAssembly(cg.currInstrs(), "LDRSB r4, [sp, #1]", 1, 1)
+		var offset, _ = cg.getIdentOffset(node.Expr.(Ident))
+		appendAssembly(cg.currInstrs(), "LDRSB r0, [sp, #"+strconv.Itoa(offset)+"]", 1, 1)
+
+		//		appendAssembly(cg.currInstrs(), "LDRSB r4, [sp, #"++"]", 1, 1)
 		appendAssembly(cg.currInstrs(), "EOR r4, r4, #1", 1, 1)
 		appendAssembly(cg.currInstrs(), "MOV r0, r4", 1, 1)
 	default:
