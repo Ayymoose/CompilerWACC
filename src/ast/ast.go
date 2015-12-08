@@ -141,7 +141,7 @@ type Unop struct {
 }
 
 type NewPair struct {
-		FileText				*string
+	FileText				*string
 	Pos     int
 	FstExpr Evaluation
 	SndExpr Evaluation
@@ -149,7 +149,7 @@ type NewPair struct {
 
 // Declare struct
 type Declare struct {
-		FileText				*string
+	FileText				*string
 	Pos     int
 	DecType Type
 	Lhs     Ident

@@ -145,8 +145,8 @@ func (value Ident) Eval(functionTable []*Function, symbolTable *SymbolTable) (Ty
 	if symbolTable.isDefined(value) {
 		return symbolTable.getTypeOfIdent(value), nil
 	}
-	//fmt.Println("Supposed to GET HERE IDENT EVAL")
-	return nil, errorIdentNotDeclared(value.FileText, value.Pos)
+//	str :=
+	return nil, errors.New("line: " + " :Cannot sub a non Int expression")   // AWWHHHW
 }
 
 func (binop Binop) Eval(functionTable []*Function, symbolTable *SymbolTable) (Type, error) {
@@ -161,38 +161,38 @@ func (binop Binop) Eval(functionTable []*Function, symbolTable *SymbolTable) (Ty
 	switch binop.Binary {
 	case PLUS, SUB, MUL, DIV, MOD:
 		if typl != Int {
-			return nil, errorBadBinary(value.FileText, value.Pos)
+			return nil, errorBadBinary(binop.FileText, binop.Pos)
 		}
 		if typr != Int {
-			return nil, errorBadBinary(value.FileText, value.Pos)
+			return nil, errorBadBinary(binop.FileText, binop.Pos)
 		}
 		return Int, nil
 	case AND, OR:
 		if typl != Bool {
-			return nil, errorBadBinary(value.FileText, value.Pos)
+			return nil, errorBadBinary(binop.FileText, binop.Pos)
 		}
 		if typr != Bool {
-			return nil, errorBadBinary(value.FileText, value.Pos)
+			return nil, errorBadBinary(binop.FileText, binop.Pos)
 		}
 		return Bool, nil
 	case LT, LTE, GT, GTE:
 		if typl != Int && typl != Char {
-			return nil, errorBadBinary(value.FileText, value.Pos)
+			return nil, errorBadBinary(binop.FileText, binop.Pos)
 		}
 		if typr != Int && typr != Char {
-			return nil, errorBadBinary(value.FileText, value.Pos)
+			return nil, errorBadBinary(binop.FileText, binop.Pos)
 		}
 		if !typesMatch(typl, typr) {
-			return nil, errorBadBinary(value.FileText, value.Pos)
+			return nil, errorBadBinary(binop.FileText, binop.Pos)
 		}
 		return Bool, nil
 	case EQ, NEQ:
 		if !typesMatch(typl, typr) {
-			return nil, errorBadBinary(value.FileText, value.Pos)
+			return nil, errorBadBinary(binop.FileText, binop.Pos)
 		}
 		return Bool, nil
 	default:
-		return nil, errorBadBinary(value.FileText, value.Pos)
+		return nil, errorBadBinary(binop.FileText, binop.Pos)
 	}
 }
 
