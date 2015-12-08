@@ -947,6 +947,10 @@ func (cg *CodeGenerator) cgVisitUnopExpr(node Unop) {
 	case CHR:
 		cg.evalRHS(node.Expr, "r4")
 		fmt.Println("chr not done")
+	case NOT:
+		appendAssembly(cg.currInstrs(), "LDRSB r4, [sp, #1]", 1, 1)
+		appendAssembly(cg.currInstrs(), "EOR r4, r4, #1", 1, 1)
+		appendAssembly(cg.currInstrs(), "MOV r0, r4", 1, 1)
 	default:
 		fmt.Println("oh no")
 		fmt.Println(node.Unary)
