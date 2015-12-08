@@ -47,10 +47,10 @@ func sizeOf(t Type) int {
 		case Char:
 			size = CHAR_SIZE
 		case String:
-			size = ADDR_SIZE
+			size = ADDRESS_SIZE
 		}
 	case PairType:
-		size = ADDR_SIZE
+		size = ADDRESS_SIZE
 	case ArrayType:
 		size = sizeOf(t.(ArrayType).Type)
 	default:

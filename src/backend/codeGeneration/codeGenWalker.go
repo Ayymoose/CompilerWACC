@@ -11,13 +11,15 @@ import (
 
 // Type sizes in bytes
 const (
-	INT_SIZE    = 4
-	ARRAY_SIZE  = 4
-	BOOL_SIZE   = 1
-	CHAR_SIZE   = 1
-	STRING_SIZE = 4
-	PAIR_SIZE   = 4
-	ADDR_SIZE   = 4
+	INT_SIZE       = 4
+	ARRAY_SIZE     = 4
+	BOOL_SIZE      = 1
+	CHAR_SIZE      = 1
+	STRING_SIZE    = 4
+	PAIR_SIZE      = 4
+	ADDRESS_SIZE   = 4
+	// Maximum offset of stack pointer
+	STACK_SIZE_MAX = 1024
 )
 
 // Print format strings
@@ -40,9 +42,6 @@ const (
 	OVERFLOW             = "\"OverflowError: the result is too small/large to store in a 4-byte signed-integer.\\n\""
 	DIVIDE_BY_ZERO       = "\"DivideByZeroError: divide or modulo by zero\\n\\0\""
 )
-
-// Maximum offset of stack pointer
-const STACK_SIZE_MAX = 1024
 
 // Function global variable
 var functionList []*Function
@@ -203,16 +202,6 @@ func (cg *CodeGenerator) cgVisitPrintStatFuncHelper(funcName string) {
 	}
 }
 
-// Small helper function to do C function calls
-// Saves us having to write LDR and BL instructions each time
-// Puts argument into r0 and calls functionName via BL
-// For C functions only!
-// NEED TO EDIT THIS FUNCTION TO SUPPORT MULTIPLE ARUGMENTS AND NOT USE JUST LDR BUT MOV TOO
-func (cg *CodeGenerator) CfunctionCall(functionName string, argument string) {
-	appendAssembly(cg.currInstrs(), "LDR r0, ="+argument, 1, 1)
-	appendAssembly(cg.currInstrs(), "BL "+functionName, 1, 1)
-}
-
 // Because the maximum amount we can add or subtract the stack pointer by is 1024
 // These helper functions allocate and deallocate space on the stack for us
 
@@ -328,7 +317,10 @@ func (cg *CodeGenerator) evalPairElem(t PairElem, srcReg string) {
 func (cg *CodeGenerator) evalPair(ident Evaluation, fst Evaluation, snd Evaluation, reg1 string, reg2 string) {
 
 	// First allocate memory to store two addresses (8-bytes)
-	cg.CfunctionCall("malloc", strconv.Itoa(ADDR_SIZE*2))
+	appendAssembly(cg.currInstrs(), "LDR r0, ="+strconv.Itoa(ADDRESS_SIZE*2), 1, 1)
+	appendAssembly(cg.currInstrs(), "BL malloc", 1, 1)
+
+
 	// Store the address in the free register
 	appendAssembly(cg.currInstrs(), "MOV "+reg2+", r0", 1, 1)
 
@@ -340,7 +332,8 @@ func (cg *CodeGenerator) evalPair(ident Evaluation, fst Evaluation, snd Evaluati
 	cg.evalRHS(fst, reg1)
 
 	//Allocate memory for the first element
-	cg.CfunctionCall("malloc", strconv.Itoa(fstSize))
+	appendAssembly(cg.currInstrs(), "LDR r0, ="+strconv.Itoa(fstSize), 1, 1)
+	appendAssembly(cg.currInstrs(), "BL malloc", 1, 1)
 
 	//Store the first element in the register
 	appendAssembly(cg.currInstrs(), "STR "+reg1+", [r0]", 1, 1)
@@ -363,7 +356,8 @@ func (cg *CodeGenerator) evalPair(ident Evaluation, fst Evaluation, snd Evaluati
 	cg.evalRHS(snd, reg1)
 
 	//Allocate memory for the second element
-	cg.CfunctionCall("malloc", strconv.Itoa(sndSize))
+	appendAssembly(cg.currInstrs(), "LDR r0, ="+strconv.Itoa(sndSize), 1, 1)
+	appendAssembly(cg.currInstrs(), "BL malloc", 1, 1)
 
 	switch typeSnd.(type) {
 	case ConstType:
@@ -401,10 +395,13 @@ func (cg *CodeGenerator) evalArrayLiter(typeNode Type, rhs Evaluation, srcReg st
 	case ArrayLiter:
 		//Calculate the amount of storage space required for the array
 		// = ((arrayLength(array) * sizeOf(arrayType)) + ADDRESS_SIZE
-		var arrayStorage = (len(rhs.(ArrayLiter).Exprs) * sizeOf(typeNode)) + ADDR_SIZE
+		var arrayStorage = (len(rhs.(ArrayLiter).Exprs) * sizeOf(typeNode)) + ADDRESS_SIZE
 
 		//Allocate memory for the array
-		cg.CfunctionCall("malloc", strconv.Itoa(arrayStorage))
+		appendAssembly(cg.currInstrs(), "LDR r0, ="+strconv.Itoa(arrayStorage), 1, 1)
+		appendAssembly(cg.currInstrs(), "BL malloc", 1, 1)
+
+
 		appendAssembly(cg.currInstrs(), "MOV "+dstReg+", r0", 1, 1)
 
 		//Start loading each element in the array onto the stack
@@ -615,7 +612,8 @@ func (cg *CodeGenerator) cgVisitDeclareStat(node Declare) {
 			// Store the value of declaration to stack
 			appendAssembly(cg.currInstrs(), "STR r4, [sp, #"+cg.subCurrP(INT_SIZE)+"]", 1, 1)
 		case String:
-			cg.evalString(rhs, "r4", node.Lhs)
+			cg.evalRHS(rhs, "r4")
+			//cg.evalString(rhs, "r4", node.Lhs)
 			// Store the address onto the stack
 			appendAssembly(cg.currInstrs(), "STR r4, [sp, #"+cg.subCurrP(STRING_SIZE)+"]", 1, 1)
 		case Pair:
