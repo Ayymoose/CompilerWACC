@@ -268,11 +268,9 @@ func (cg *CodeGenerator) evalRHS(t Evaluation, srcReg string) {
 		var offset, resType = cg.getIdentOffset(t.(Ident))
 
 		switch resType.(type) {
-
 		case ArrayType:
-			fmt.Println("Pair or array")
+			fmt.Println("type is array")
 		case PairType:
-			appendAssembly(cg.currInstrs(), "STR "+srcReg+", [sp, #"+strconv.Itoa(offset)+"]", 1, 1)
 			appendAssembly(cg.currInstrs(), "LDR "+srcReg+", [sp, #"+strconv.Itoa(offset)+"]", 1, 1)
 		case ConstType:
 
@@ -293,8 +291,6 @@ func (cg *CodeGenerator) evalRHS(t Evaluation, srcReg string) {
 	case Binop:
 		cg.cgVisitBinopExpr(t.(Binop))
 		appendAssembly(cg.currInstrs(), "MOV "+srcReg+", r0", 1, 1)
-	case NewPair:
-		//cg.evalPair(t.(NewPair).FstExpr, t.(NewPair).SndExpr, "r5", srcReg)
 	case PairElem:
 		cg.evalPairElem(t.(PairElem), srcReg)
 	case Call:
@@ -370,6 +366,8 @@ func (cg *CodeGenerator) evalPair(ident Evaluation, fst Evaluation, snd Evaluati
 			//Store the address of allocated memory block of the pair on the stack
 			appendAssembly(cg.currInstrs(), "STR r0, ["+reg2+"]", 1, 1)
 		}
+	default:
+		appendAssembly(cg.currInstrs(), "STR "+reg1+", [r0]", 1, 1)
 	}
 
 	//Load the second element into a register to be stored
@@ -388,6 +386,8 @@ func (cg *CodeGenerator) evalPair(ident Evaluation, fst Evaluation, snd Evaluati
 			//Store the second element to the newly allocated memory onto the stack
 			appendAssembly(cg.currInstrs(), "STR "+reg1+", [r0]", 1, 1)
 		}
+	default:
+		appendAssembly(cg.currInstrs(), "STR "+reg1+", [r0]", 1, 1)
 	}
 
 	//Store the address of allocated memory block of the pair on the stack
@@ -722,17 +722,21 @@ func (cg *CodeGenerator) cgVisitAssignmentStat(node Assignment) {
 		}
 	case PairElem:
 
-		//Load the address of the pair into a register
-		//Check if it's the fst or snd
+		// Load the address of the pair into a register
+		var offset, _ = cg.getIdentOffset(node.Lhs.(PairElem).Expr.(Ident))
+		appendAssembly(cg.currInstrs(), "LDR r0, [sp, #"+strconv.Itoa(offset)+"]", 1, 1)
+		// Jump
+		appendAssembly(cg.currInstrs(), "BL p_check_null_pointer", 1, 1)
+		cg.dereferenceNullPointer()
+		// Check if it's the fst or snd
 		switch node.Lhs.(PairElem).Fsnd {
 		case Fst:
-			var offset, _ = cg.getIdentOffset(node.Lhs.(PairElem).Expr.(Ident))
-			appendAssembly(cg.currInstrs(), "LDR r5, [sp, #"+strconv.Itoa(offset)+"]", 1, 1)
-			fmt.Println("Fst")
+			appendAssembly(cg.currInstrs(), "LDR r5, [r5]", 1, 1)
 		case Snd:
-			fmt.Println("Snd")
+			appendAssembly(cg.currInstrs(), "LDR r5, [r5, #4]", 1, 1)
 		}
-
+		// Store the value into the pair
+		appendAssembly(cg.currInstrs(), "STR r4, [r5]", 1, 1)
 	default:
 	}
 }
