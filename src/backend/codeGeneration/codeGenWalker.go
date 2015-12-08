@@ -48,6 +48,9 @@ const STACK_SIZE_MAX = 1024
 // Function global variable
 var functionList []*Function
 
+// Boolean indicating if pairs are present
+var PAIR_INCLUDED bool
+
 // HELPER FUNCTIONS
 // cgVisitReadStat helper function
 // Adds a function definition to the progFuncInstrs ARMList depending on the
@@ -396,8 +399,8 @@ func (cg *CodeGenerator) evalPair(ident Evaluation, fst Evaluation, snd Evaluati
 		//Store the address of the address that contains pointers to the first and second elements
 		var offset, _ = cg.getIdentOffset(ident.(Ident))
 		appendAssembly(cg.currInstrs(), "STR "+reg2+", [sp, #"+strconv.Itoa(offset)+"]", 1, 1)
-	default:
-		fmt.Println("oh no")
+		//default:
+		//	fmt.Println("oh no")
 	}
 
 }
@@ -552,7 +555,11 @@ func (cg *CodeGenerator) cgVisitProgram(node *Program) {
 	for _, stat := range node.StatList {
 		cg.cgEvalStat(stat)
 	}
-
+	/*
+		if PAIR_INCLUDED {
+			appendAssembly(cg.currInstrs(), "STRttttt r4, [sp]", 1, 1)
+		}
+	*/
 	// add sp, sp, #n to remove variable space
 	if cg.currStack.size > 0 {
 		cg.removeStackSpace(cg.globalStack.size)
@@ -599,7 +606,7 @@ func (cg *CodeGenerator) cgEvalStat(stat interface{}) {
 
 func (cg *CodeGenerator) cgVisitDeclareStat(node Declare) {
 	rhs := node.Rhs
-
+	fmt.Println(node.DecType)
 	switch node.DecType.(type) {
 	case ConstType:
 		switch node.DecType.(ConstType) {
@@ -624,10 +631,11 @@ func (cg *CodeGenerator) cgVisitDeclareStat(node Declare) {
 		default:
 
 		}
-
 	case PairType:
+		fmt.Println("GOT TO THIS ST")
 		switch rhs.(type) {
 		case NewPair:
+			PAIR_INCLUDED = true
 			cg.evalPair(node.Lhs, rhs.(NewPair).FstExpr, rhs.(NewPair).SndExpr, "r5", "r4")
 		case Ident:
 			//TODO: UNFINISHED
@@ -763,6 +771,7 @@ func (cg *CodeGenerator) cgVisitFreeStat(node Free) {
 	appendAssembly(cg.currInstrs(), "MOV r0, r4", 1, 1)
 	appendAssembly(cg.currInstrs(), "BL p_free_pair", 1, 1)
 	cg.cgVisitFreeStatFunc_H("p_free_pair")
+	PAIR_INCLUDED = false
 }
 
 func (cg *CodeGenerator) cgVisitReturnStat(node Return) {
@@ -903,8 +912,6 @@ func (cg *CodeGenerator) cgVisitScopeStat(node Scope) {
 func (cg *CodeGenerator) cgVisitCallStat(ident Ident, paramList []Evaluation) {
 	for _, function := range functionList {
 		if function.Ident == ident {
-			// sub sp, sp, #n to create variable space
-			appendAssembly(cg.currInstrs(), "SUB sp, sp, #4", 1, 1)
 
 			for _, param := range paramList {
 				cg.cgVisitParameter(param)
@@ -913,7 +920,8 @@ func (cg *CodeGenerator) cgVisitCallStat(ident Ident, paramList []Evaluation) {
 			appendAssembly(cg.currInstrs(), "BL f_"+string(function.Ident), 1, 1)
 
 			if !(paramList == nil) {
-				appendAssembly(cg.currInstrs(), "ADD sp, sp, #"+"offset", 1, 1) // ADD LOGIC WHICH GETS GLOBAL OFFSET
+				offset := cg.cgGetParamSize(paramList)
+				appendAssembly(cg.currInstrs(), "ADD sp, sp, #"+strconv.Itoa(offset), 1, 1)
 			}
 			appendAssembly(cg.currInstrs(), "MOV r4, r0", 1, 1)
 			appendAssembly(cg.currInstrs(), "STR r4, [sp]", 1, 1)
@@ -922,7 +930,18 @@ func (cg *CodeGenerator) cgVisitCallStat(ident Ident, paramList []Evaluation) {
 	}
 }
 
+func (cg *CodeGenerator) cgGetParamSize(paramList []Evaluation) int {
+	totalCount := 0
+	for _, param := range paramList {
+		totalCount += sizeOf(cg.eval(param))
+	}
+	return totalCount
+}
+
 func (cg *CodeGenerator) cgVisitFunction(node Function) {
+	varSpaceSize := GetScopeVarSize(node.StatList)
+	cg.setNewFuncScope(varSpaceSize, &node.ParameterTypes, node.SymbolTable)
+
 	// f_funcName:
 	appendAssembly(cg.currInstrs(), "f_"+string(node.Ident)+":", 0, 1)
 
@@ -938,6 +957,8 @@ func (cg *CodeGenerator) cgVisitFunction(node Function) {
 
 	appendAssembly(cg.currInstrs(), "POP {pc}", 1, 1) // TEST harness uses double POP don't think we need it
 	appendAssembly(cg.currInstrs(), ".ltorg", 1, 2)
+
+	cg.removeFuncScope()
 }
 
 // VISIT STATEMENT -------------------------------------------------------------
