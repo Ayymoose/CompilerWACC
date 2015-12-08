@@ -185,6 +185,35 @@ func addMsgLabel(msgInstrs *ARMList, label string, strValue string) {
 	appendAssembly(msgInstrs, ".ascii "+strValue, 1, 2)
 }
 
+// Returns true iff the string ident as been previously assigned a label
+func strIdentPrevDefined(ident Ident, scope *scopeData) bool {
+	if scope == nil {
+		return false
+	}
+
+	_, inMap := scope.identMsgLabelMap[ident]
+	if inMap {
+		return true
+	} else {
+		return strIdentPrevDefined(ident, scope.parentScope)
+	}
+}
+
+// Returns the label of a ident. if it cant be found within the current scope,
+// the parent is searched
+func findLabel(ident Ident, scope *scopeData) string {
+	if scope == nil {
+		return "ERROR LABEL NOT FOUND"
+	}
+
+	label, inMap := scope.identMsgLabelMap[ident]
+	if inMap {
+		return label
+	} else {
+		return findLabel(ident, scope.parentScope)
+	}
+}
+
 // Calculates the size of strValue in bytes
 func calculateWordSize(strValue string) int {
 	size, contained := mapPrintFormatToSize[strValue]

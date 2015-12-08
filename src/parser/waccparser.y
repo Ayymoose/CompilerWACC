@@ -145,10 +145,21 @@ statement : SKIP                                        { $$ = Skip{Pos : $<pos>
           | IF expr THEN statements ELSE statements FI  { $$ = If{Conditional : $2, ThenStat : $4, ElseStat : $6, Pos : $<pos>1, FileText :&parserlex.(*Lexer).input } }
           | WHILE expr DO statements DONE               { $$ = While{Conditional : $2, DoStat : $4, Pos : $<pos>1, FileText :&parserlex.(*Lexer).input} }
           | BEGIN statements END                        { $$ = Scope{StatList : $2, Pos : $<pos>1, FileText :&parserlex.(*Lexer).input } }
-          | error SEMICOLON                             { $$ = nil }
-          | error END                                   { $$ = nil }
-          | error FI                                    { $$ = nil }
-          | error DONE                                  { $$ = nil }
+          | error SEMICOLON                             {
+                                                          parserlex.Error("Syntax error : Invalid statement")
+                                                          $$ = nil
+                                                        }
+          | error END                                   { parserlex.Error("Syntax error : Invalid statement")
+                                                          $$ = nil
+                                                        }
+          | error FI                                     {
+                                                          parserlex.Error("Syntax error : Invalid statement")
+                                                          $$ = nil
+                                                        }
+          | error DONE                                   {
+                                                          parserlex.Error("Syntax error : Invalid statement")
+                                                          $$ = nil
+                                                        }
 
 expr : INTEGER       { $$ =  $1 }
 

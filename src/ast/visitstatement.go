@@ -1,10 +1,5 @@
 package ast
 
-import (
-	"errors"
-	"fmt"
-)
-
 func containsDuplicateFunc(functionTable []*Function) bool {
 	freqMap := make(map[Ident]int)
 	for _, funcDec := range functionTable {
@@ -128,7 +123,7 @@ func (function *Function) checkFunc(root *Program) errorSlice {
 func (root *Program) SemanticCheck() errorSlice {
 	var semanticErrors []error
 	if containsDuplicateFunc(root.FunctionList) {
-		semanticErrors = append(semanticErrors, errors.New("line:"+fmt.Sprint(root.Pos)+"Program has function redefinitions"))
+		semanticErrors = append(semanticErrors, errorFuncRedef(root.FileText, root.Pos))
 	}
 	for _, functionProg := range root.FunctionList {
 		funcErrs := functionProg.checkFunc(root)
@@ -143,7 +138,7 @@ func (root *Program) SemanticCheck() errorSlice {
 		}
 		switch stat.(type) {
 		case Return:
-			semanticErrors = append(semanticErrors, errors.New("line:"+"Cannot have return statement in main"))
+			semanticErrors = append(semanticErrors, errorReturnInMain(root.FileText, root.Pos))
 		}
 	}
 	if len(semanticErrors) > 0 {

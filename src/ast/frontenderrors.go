@@ -6,6 +6,18 @@ import (
   "strings"
 )
 
+func errorFuncRedef(file *string, pos int) error {
+//  line, col := LineAndCol(file, pos)
+  msg := fmt.Sprint("Program has function redefinitions")
+  return errors.New(msg)
+}
+
+func errorReturnInMain(file *string, pos int) error {
+//  line, col := LineAndCol(file, pos)
+  msg := fmt.Sprint("Program has function redefinitions")
+  return errors.New(msg)
+}
+
 func errorConditional(file *string, pos int) error {
   line, col := LineAndCol(file, pos)
   msg := fmt.Sprint(line, ":", col,"  ", "invalid conditional:", getLine(file, pos))

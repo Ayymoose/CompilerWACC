@@ -39,6 +39,7 @@ func main() {
 	root, err := parser.ParseFile(file, s)
 	if err != nil {
 		os.Exit(SYNTAX_ERROR)
+				fmt.Println("SYNTAX_ERROR : 100")
 	}
 	fmt.Println(root)
 
