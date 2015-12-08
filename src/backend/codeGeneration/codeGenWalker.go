@@ -980,6 +980,7 @@ func (cg *CodeGenerator) cgVisitBinopExpr(node Binop) {
 	case MUL:
 		appendAssembly(cg.currInstrs(), "SMULL r4, r5, r4, r5", 1, 1)
 		appendAssembly(cg.currInstrs(), "CMP r5, r4, ASR #31", 1, 1)
+		appendAssembly(cg.currInstrs(), "MOV r0, r4", 1, 1)
 		appendAssembly(cg.currInstrs(), "BLNE p_throw_overflow_error", 1, 1)
 		cg.cgVisitBinopExpr_H("p_throw_overflow_error")
 	case DIV:
