@@ -293,7 +293,7 @@ func (cg *CodeGenerator) evalRHS(t Evaluation, srcReg string) {
 		cg.evalPairElem(t.(PairElem), srcReg)
 	case Call:
 		// TODO UNCOMMENT This when you are sure that its not causing the infinite loop
-	//	cg.cgVisitCallStat(t.(Call).Ident, t.(Call).ParamList)*/
+		cg.cgVisitCallStat(t.(Call).Ident, t.(Call).ParamList)
 	default:
 		fmt.Println("ERROR: Expression can not be evaluated")
 	}
@@ -837,6 +837,9 @@ func (cg *CodeGenerator) cgVisitScopeStat(node Scope) {
 
 }
 
+// Create a mpa of params to offsets
+// make sure visitFunction can take a pointer to this map
+
 // ONLY VISIT FUNCTION IF IT IS CALLED
 // IE WE ONLY PUSH ONTO STACK FUNC VARIABLES WHEN A FUNCTION IS CALLED
 // but
@@ -848,8 +851,7 @@ func (cg *CodeGenerator) cgVisitCallStat(ident Ident, paramList []Evaluation) {
 			appendAssembly(cg.currInstrs(), "SUB sp, sp, #4", 1, 1)
 
 			for _, param := range paramList {
-				cg.cgVisitParameter(param, 0) // NED SOME KIND OF MAP HERE FROM IDENT STRING TO IDENT OFFSET INT
-				// NEED SOMEHOW TO ACCUMULATE GLOBABL OFFSET
+				cg.cgVisitParameter(param)
 			}
 
 			appendAssembly(cg.currInstrs(), "BL f_"+string(function.Ident), 1, 1)
@@ -859,16 +861,7 @@ func (cg *CodeGenerator) cgVisitCallStat(ident Ident, paramList []Evaluation) {
 			}
 			appendAssembly(cg.currInstrs(), "MOV r4, r0", 1, 1)
 			appendAssembly(cg.currInstrs(), "STR r4, [sp]", 1, 1)
-
 			cg.cgVisitFunction(*function)
-
-			/*
-				if node.ParameterTypes != nil {
-					for _, param := range node.ParameterTypes {
-						cg.cgVisitParameter(param,0)
-					}
-				}*/
-
 		}
 	}
 }
@@ -892,40 +885,34 @@ func (cg *CodeGenerator) cgVisitFunction(node Function) {
 }
 
 // VISIT STATEMENT -------------------------------------------------------------
-func (cg *CodeGenerator) cgVisitParameter(node Evaluation, offset int) {
-	// node.Ident
-	/*switch node.ParamType.(type) {
-	case Boolean:
-		boolean := node.ParamType.(Boolean)
-		if bool(boolean) == true { // IS THIS CORRECT ????
-			appendAssembly(cg.currInstrs(), "MOV r4, #1", 1, 1)
-		} else {
-			appendAssembly(cg.currInstrs(), "MOV r4, #0", 1, 1)
+func (cg *CodeGenerator) cgVisitParameter(node Evaluation) {
+	resType := cg.eval(node)
+	switch resType {
+	case Bool:
+		cg.evalRHS(node, "r4")
+		appendAssembly(cg.currInstrs(), "STRB r4, [sp, #-"+strconv.Itoa(BOOL_SIZE)+"]!", 1, 1)
+	case Char:
+		cg.evalRHS(node, "r4")
+		appendAssembly(cg.currInstrs(), "STRB r4, [sp, #-"+strconv.Itoa(CHAR_SIZE)+"]!", 1, 1)
+	case Int:
+		cg.evalRHS(node, "r4")
+		appendAssembly(cg.currInstrs(), "STR r4, [sp, #-"+strconv.Itoa(INT_SIZE)+"]!", 1, 1)
+	case String:
+		cg.evalRHS(node, "r4")
+		appendAssembly(cg.currInstrs(), "STR r4, [sp, #"+strconv.Itoa(STRING_SIZE)+"]!", 1, 1)
+	case Pair:
+		cg.evalRHS(node, "r4")
+		appendAssembly(cg.currInstrs(), "STR r4, [sp, #-"+strconv.Itoa(PAIR_SIZE)+"]!", 1, 1)
+	default:
+		switch resType.(type) {
+		case PairType:
+			cg.evalRHS(node, "r4")
+			appendAssembly(cg.currInstrs(), "STR r4, [sp, #-"+strconv.Itoa(PAIR_SIZE)+"]!", 1, 1)
+		case ArrayType:
+			cg.evalRHS(node, "r4")
+			appendAssembly(cg.currInstrs(), "STR r4, [sp, #-"+strconv.Itoa(ARRAY_SIZE)+"]!", 1, 1)
 		}
-		appendAssembly(cg.currInstrs(), "STRB r4, [sp, #"+cg.subCurrP(BOOL_SIZE)+"]!", 1, 1)
-		paramMap[boolean] = BOOL_SIZE
-	case Character:
-		char := node.ParamType.(Character)
-		appendAssembly(cg.currInstrs(), "MOV r4, #"+string(char), 1, 1)
-		appendAssembly(cg.currInstrs(), "STRB r4, [sp, #"+cg.subCurrP(CHAR_SIZE)+"]!", 1, 1)
-		paramMap[char] = CHAR_SIZE
-	case Integer:
-		integer := node.ParamType.(Integer)
-		appendAssembly(cg.currInstrs(), "LDR r4, ="+strconv.Itoa(int(integer)), 1, 1)
-		appendAssembly(cg.currInstrs(), "STR r4, [sp, #"+cg.subCurrP(INT_SIZE)+"]!", 1, 1)
-		paramMap[integer] = INT_SIZE
-	case Str: // OR char[] need to implement
-		appendAssembly(cg.currInstrs(), "LDR r4, =msg_"+"0", 1, 1) // NEED TO ADD FUNCTIONALITY WHICH UPDATES THE MESSAGE NUMBERS
-		appendAssembly(cg.currInstrs(), "STR r4, [sp, #"+cg.subCurrP(STRING_SIZE)+"]!", 1, 1)
-		paramMap["msg_0"] = STRING_SIZE // NEED TO MODIFIY THIS SHIITT
-
-	case ArrayType:
-
-	case PairType: // there is only a pariliteral 'null for this case'
-		appendAssembly(cg.currInstrs(), "LDR r4, =0", 1, 1)
-		appendAssembly(cg.currInstrs(), "STR r4, [sp, #-4]!", 1, 1)
-
-	}*/
+	}
 }
 
 // VISIT EXPRESSIONS -----------------------------------------------------------
