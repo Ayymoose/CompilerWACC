@@ -394,14 +394,14 @@ func (cg *CodeGenerator) evalPair(ident Evaluation, fst Evaluation, snd Evaluati
 	appendAssembly(cg.currInstrs(), "STR r0, ["+reg2+", #4]", 1, 1)
 
 	//Store the address of the pair on the stack
-	//	switch ident.(type) {
-	//	case Ident:
-	//Store the address of the address that contains pointers to the first and second elements
-	//	var offset, _ = cg.getIdentOffset(ident.(Ident))
-	//	appendAssembly(cg.currInstrs(), "STR "+reg2+", [sp, #"+strconv.Itoa(offset)+"]", 1, 1)
-	//default:
-	//	fmt.Println("oh no")
-	//}
+	switch ident.(type) {
+	case Ident:
+		//Store the address of the address that contains pointers to the first and second elements
+		var offset, _ = cg.getIdentOffset(ident.(Ident))
+		appendAssembly(cg.currInstrs(), "STR "+reg2+", [sp, #"+strconv.Itoa(offset)+"]", 1, 1)
+		//default:
+		//	fmt.Println("oh no")
+	}
 
 }
 
@@ -555,11 +555,11 @@ func (cg *CodeGenerator) cgVisitProgram(node *Program) {
 	for _, stat := range node.StatList {
 		cg.cgEvalStat(stat)
 	}
-
-	if PAIR_INCLUDED {
-		appendAssembly(cg.currInstrs(), "STRttttt r4, [sp]", 1, 1)
-	}
-
+	/*
+		if PAIR_INCLUDED {
+			appendAssembly(cg.currInstrs(), "STRttttt r4, [sp]", 1, 1)
+		}
+	*/
 	// add sp, sp, #n to remove variable space
 	if cg.currStack.size > 0 {
 		cg.removeStackSpace(cg.globalStack.size)
