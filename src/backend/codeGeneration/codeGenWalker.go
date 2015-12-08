@@ -391,7 +391,7 @@ func (cg *CodeGenerator) evalPair(ident Evaluation, fst Evaluation, snd Evaluati
 	}
 
 	//Store the address of allocated memory block of the pair on the stack
-	appendAssembly(cg.currInstrs(), "STRerewrewrew r0, ["+reg2+", #4]", 1, 1)
+	appendAssembly(cg.currInstrs(), "STR r0, ["+reg2+", #4]", 1, 1)
 
 	//Store the address of the pair on the stack
 	//	switch ident.(type) {
@@ -636,7 +636,7 @@ func (cg *CodeGenerator) cgVisitDeclareStat(node Declare) {
 		switch rhs.(type) {
 		case NewPair:
 			PAIR_INCLUDED = true
-			cg.evalPair(node.Lhs, rhs.(NewPair).FstExpr, rhs.(NewPair).SndExpr, "r5999999", "r4")
+			cg.evalPair(node.Lhs, rhs.(NewPair).FstExpr, rhs.(NewPair).SndExpr, "r5", "r4")
 		case Ident:
 			//TODO: UNFINISHED
 			cg.evalRHS(rhs.(Ident), "r5")
