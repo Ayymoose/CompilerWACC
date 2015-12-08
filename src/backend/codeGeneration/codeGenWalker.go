@@ -684,8 +684,8 @@ func (cg *CodeGenerator) cgVisitAssignmentStat(node Assignment) {
 func (cg *CodeGenerator) cgVisitReadStat(node Read) {
 	// Technically only read int / char
 	constType := cg.eval(node.AssignLHS.(Ident)) // Type
-	appendAssembly(cg.currInstrs(), "ADD r4, sp, #0", 1, 1)
-	appendAssembly(cg.currInstrs(), "MOV r0, r4", 1, 1)
+	offset, _ := cg.getIdentOffset(node.AssignLHS.(Ident))
+	appendAssembly(cg.currInstrs(), "ADD r0, sp, #"+strconv.Itoa(offset), 1, 1)
 	switch constType {
 	case Char:
 		appendAssembly(cg.currInstrs(), "BL p_read_char", 1, 1)
