@@ -628,12 +628,11 @@ func (cg *CodeGenerator) cgVisitAssignmentStat(node Assignment) {
 			}
 		}
 
-
 	case ArrayElem:
-    /*
-		  a[0]
-			a[a[0]]
-			a[i]
+		/*
+			  a[0]
+				a[a[0]]
+				a[i]
 		*/
 
 		var offset, _ = cg.getIdentOffset(node.Lhs.(ArrayElem).Ident)
@@ -642,13 +641,13 @@ func (cg *CodeGenerator) cgVisitAssignmentStat(node Assignment) {
 		appendAssembly(cg.currInstrs(), "ADD r5, [sp, #"+strconv.Itoa(offset)+"]", 1, 1)
 
 		//Load the index
-		cg.evalRHS(node.Lhs.(ArrayElem).Exprs[0],"r6")
-    appendAssembly(cg.currInstrs(), "LDR r5, [r5]", 1, 1)
+		cg.evalRHS(node.Lhs.(ArrayElem).Exprs[0], "r6")
+		appendAssembly(cg.currInstrs(), "LDR r5, [r5]", 1, 1)
 
 		//r6 = Index
 		//r5 = Address of array
 		appendAssembly(cg.currInstrs(), "MOV r0, r6", 1, 1)
-    appendAssembly(cg.currInstrs(), "MOV r1, r5", 1, 1)
+		appendAssembly(cg.currInstrs(), "MOV r1, r5", 1, 1)
 
 		//Branch
 		appendAssembly(cg.currInstrs(), "BL p_check_array_bounds", 1, 1)
@@ -659,9 +658,9 @@ func (cg *CodeGenerator) cgVisitAssignmentStat(node Assignment) {
 		//Point to the element to be changed
 		appendAssembly(cg.currInstrs(), "ADD r5, r5, r6", 1, 1)
 
-	  //Get the type of the RHS
+		//Get the type of the RHS
 		switch node.Rhs.(type) {
-		case Boolean,Character:
+		case Boolean, Character:
 			appendAssembly(cg.currInstrs(), "STRB r4, [r5]", 1, 1)
 		default:
 			fmt.Println("I don't know")
@@ -994,7 +993,7 @@ func (cg *CodeGenerator) cgVisitBinopExpr(node Binop) {
 		appendAssembly(cg.currInstrs(), "MOV r0, r4", 1, 1)
 		appendAssembly(cg.currInstrs(), "BL p_check_divide_by_zero", 1, 1)
 		appendAssembly(cg.currInstrs(), "BL __aeabi_idivmod", 1, 1)
-		appendAssembly(cg.currInstrs(), "MOV r0, r4", 1, 1)
+		appendAssembly(cg.currInstrs(), "MOV r0, r5", 1, 1)
 		cg.cgVisitBinopExpr_H("p_check_divide_by_zero")
 	case AND:
 		appendAssembly(cg.currInstrs(), "AND r4, r4, r5", 1, 1)
