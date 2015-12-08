@@ -25,6 +25,7 @@ type CodeGenerator struct {
 	msgMap            map[string]string // Maps string values to their msg labels
 	messages          []string          // A slice of all messages used within the program
 	currentLabelIndex int               // The index of the current generic label (used in control flow functions)
+	functionDefs      []Ident           // A list of function identifiers that have been defined
 }
 
 // Constructor for the code generator.
@@ -242,7 +243,9 @@ func (cg *CodeGenerator) findIdentOffset(ident Ident, symTable *SymbolTable,
 	}
 
 	if scope.isFunc && isParamInList(ident, scope.paramList) {
-		return getParamOffset(ident, scope.paramList)
+		offset, typ := getParamOffset(ident, scope.paramList)
+		offset = -offset
+		return offset, typ
 	}
 
 	/*fmt.Println("Ident: ", ident, "  table: ", symTable, " accOffset: ", accOffset)
@@ -260,4 +263,17 @@ func (cg *CodeGenerator) getNewLabel() string {
 	newLabel := "L" + strconv.Itoa(cg.currentLabelIndex)
 	cg.currentLabelIndex++
 	return newLabel
+}
+
+func (cg *CodeGenerator) isFunctionDefined(ident Ident) bool {
+	for _, def := range cg.functionDefs {
+		if ident == def {
+			return true
+		}
+	}
+	return false
+}
+
+func (cg *CodeGenerator) addFunctionDef(ident Ident) {
+	cg.functionDefs = append(cg.functionDefs, ident)
 }

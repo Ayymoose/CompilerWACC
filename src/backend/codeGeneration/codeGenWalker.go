@@ -540,7 +540,7 @@ func (cg *CodeGenerator) cgVisitProgram(node *Program) {
 	appendAssembly(cg.currInstrs(), ".text", 0, 2)
 
 	// .global main
-	appendAssembly(cg.currInstrs(), ".global main", 0, 1)
+	appendAssembly(cg.funcInstrs, ".global main", 0, 1)
 
 	//main:
 	appendAssembly(cg.currInstrs(), "main:", 0, 1)
@@ -799,6 +799,7 @@ func (cg *CodeGenerator) cgVisitPrintStat(node Print) {
 	cg.evalRHS(expr, dstReg)
 
 	exprType := cg.eval(expr)
+	fmt.Println("CHEECKK TJIIIIS:", exprType, expr)
 	switch exprType.(type) {
 	case ConstType:
 		switch exprType.(ConstType) {
@@ -837,9 +838,8 @@ func (cg *CodeGenerator) cgVisitPrintStat(node Print) {
 		cg.cgVisitPrintStatFunc_H("p_print_reference")
 
 	default:
-		appendAssembly(cg.currInstrs(), "Error: type not implemented", 1, 1)
+//		appendAssembly(cg.currInstrs(), "Error: type not implemented", 1, 1)
 		typeOf(expr)
-
 	}
 }
 
@@ -942,6 +942,11 @@ func (cg *CodeGenerator) cgGetParamSize(paramList []Evaluation) int {
 }
 
 func (cg *CodeGenerator) cgVisitFunction(node Function) {
+	if cg.isFunctionDefined(node.Ident) {
+		return
+	} else {
+		cg.addFunctionDef(node.Ident)
+	}
 	varSpaceSize := GetScopeVarSize(node.StatList)
 	cg.setNewFuncScope(varSpaceSize, &node.ParameterTypes, node.SymbolTable)
 
