@@ -645,7 +645,6 @@ func (cg *CodeGenerator) cgVisitAssignmentStat(node Assignment) {
 			}
 		}
 
-
 	case ArrayElem:
 
 		var offset, _ = cg.getIdentOffset(node.Lhs.(ArrayElem).Ident)
@@ -654,13 +653,13 @@ func (cg *CodeGenerator) cgVisitAssignmentStat(node Assignment) {
 		appendAssembly(cg.currInstrs(), "ADD r5, sp, #"+strconv.Itoa(offset), 1, 1)
 
 		//Load the index
-		cg.evalRHS(node.Lhs.(ArrayElem).Exprs[0],"r6")
-    appendAssembly(cg.currInstrs(), "LDR r5, [r5]", 1, 1)
+		cg.evalRHS(node.Lhs.(ArrayElem).Exprs[0], "r6")
+		appendAssembly(cg.currInstrs(), "LDR r5, [r5]", 1, 1)
 
 		//r6 = Index
 		//r5 = Address of array
 		appendAssembly(cg.currInstrs(), "MOV r0, r6", 1, 1)
-    appendAssembly(cg.currInstrs(), "MOV r1, r5", 1, 1)
+		appendAssembly(cg.currInstrs(), "MOV r1, r5", 1, 1)
 
 		//Branch
 		appendAssembly(cg.currInstrs(), "BL p_check_array_bounds", 1, 1)
@@ -671,9 +670,9 @@ func (cg *CodeGenerator) cgVisitAssignmentStat(node Assignment) {
 		//Point to the element to be changed
 		appendAssembly(cg.currInstrs(), "ADD r5, r5, r6", 1, 1)
 
-	  //Get the type of the RHS
+		//Get the type of the RHS
 		switch node.Rhs.(type) {
-		case Boolean,Character:
+		case Boolean, Character:
 			appendAssembly(cg.currInstrs(), "STRB r4, [r5]", 1, 1)
 		case Integer,Str:
 			appendAssembly(cg.currInstrs(), "STR r4, [r5]", 1, 1)
@@ -792,12 +791,13 @@ func (cg *CodeGenerator) cgVisitPrintlnStat(node Println) {
 func (cg *CodeGenerator) cgVisitIfStat(node If) {
 	fstLabel, sndLabel := cg.getNewLabel(), cg.getNewLabel()
 	cg.evalRHS(node.Conditional, "r0")
+	appendAssembly(cg.currInstrs(), "CMP r0, #0", 1, 1)
 	appendAssembly(cg.currInstrs(), "BEQ "+fstLabel, 1, 1)
 
 	cg.cgVisitScopeStat(Scope{StatList: node.ThenStat})
 
-	appendAssembly(cg.currInstrs(), "B "+sndLabel+":", 1, 1)
-	appendAssembly(cg.currInstrs(), fstLabel, 0, 1)
+	appendAssembly(cg.currInstrs(), "B "+sndLabel, 1, 1)
+	appendAssembly(cg.currInstrs(), fstLabel+":", 0, 1)
 
 	cg.cgVisitScopeStat(Scope{StatList: node.ElseStat})
 
@@ -808,13 +808,14 @@ func (cg *CodeGenerator) cgVisitIfStat(node If) {
 func (cg *CodeGenerator) cgVisitWhileStat(node While) {
 	fstLabel, sndLabel := cg.getNewLabel(), cg.getNewLabel()
 
-	appendAssembly(cg.currInstrs(), "B "+sndLabel+":", 1, 1)
-	appendAssembly(cg.currInstrs(), fstLabel, 0, 1)
+	appendAssembly(cg.currInstrs(), "B "+sndLabel, 1, 1)
+	appendAssembly(cg.currInstrs(), fstLabel+":", 0, 1)
 
 	cg.cgVisitScopeStat(Scope{StatList: node.DoStat})
 
-	appendAssembly(cg.currInstrs(), sndLabel, 0, 1)
-	cg.evalRHS(node.Conditional, "r0") // NEED TWO REGISTERS R4 and R5 to compare
+	appendAssembly(cg.currInstrs(), sndLabel+":", 0, 1)
+	cg.evalRHS(node.Conditional, "r0")
+	appendAssembly(cg.currInstrs(), "CMP r0, #0", 1, 1)
 	appendAssembly(cg.currInstrs(), "BEQ "+fstLabel, 1, 1)
 }
 
@@ -978,7 +979,7 @@ func (cg *CodeGenerator) cgVisitBinopExpr(node Binop) {
 		cg.cgVisitBinopExpr_H("p_throw_overflow_error")
 	case MUL:
 		appendAssembly(cg.currInstrs(), "SMULL r4, r5, r4, r5", 1, 1)
-		appendAssembly(cg.currInstrs(), "CMP r1, r0, ASR #31", 1, 1)
+		appendAssembly(cg.currInstrs(), "CMP r5, r4, ASR #31", 1, 1)
 		appendAssembly(cg.currInstrs(), "BLNE p_throw_overflow_error", 1, 1)
 		cg.cgVisitBinopExpr_H("p_throw_overflow_error")
 	case DIV:
@@ -989,7 +990,7 @@ func (cg *CodeGenerator) cgVisitBinopExpr(node Binop) {
 		appendAssembly(cg.currInstrs(), "MOV r4, r0", 1, 1)
 		cg.cgVisitBinopExpr_H("p_check_divide_by_zero")
 	case MOD:
-		appendAssembly(cg.currInstrs(), "MOV r0, r4", 1, 1)
+		//	appendAssembly(cg.currInstrs(), "MOV r1, r5", 1, 1)
 		appendAssembly(cg.currInstrs(), "BL p_check_divide_by_zero", 1, 1)
 		appendAssembly(cg.currInstrs(), "BL __aeabi_idivmod", 1, 1)
 		appendAssembly(cg.currInstrs(), "MOV r0, r4", 1, 1)
