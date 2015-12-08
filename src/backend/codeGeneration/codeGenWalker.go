@@ -292,8 +292,7 @@ func (cg *CodeGenerator) evalRHS(t Evaluation, srcReg string) {
 	case PairElem:
 		cg.evalPairElem(t.(PairElem), srcReg)
 	case Call:
-		// TODO UNCOMMENT This when you are sure that its not causing the infinite loop
-	//	cg.cgVisitCallStat(t.(Call).Ident, t.(Call).ParamList)*/
+		cg.cgVisitCallStat(t.(Call).Ident, t.(Call).ParamList)
 	default:
 		fmt.Println("ERROR: Expression can not be evaluated")
 	}
