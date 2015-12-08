@@ -72,6 +72,7 @@ func (x PairType) typeString() string {
 }
 
 type Skip struct {
+	Pos int
 }
 
 const (
@@ -113,6 +114,7 @@ type Param struct {
 
 // Program ..
 type Program struct {
+	Pos          int
 	FunctionList []*Function
 	StatList     []Statement
 	SymbolTable  *SymbolTable
@@ -120,6 +122,7 @@ type Program struct {
 
 // Binop struct
 type Binop struct {
+	Pos    int
 	Binary int
 	Left   Evaluation
 	Right  Evaluation
@@ -127,17 +130,20 @@ type Binop struct {
 
 // Unop struct
 type Unop struct {
+	Pos   int
 	Unary int
 	Expr  Evaluation
 }
 
 type NewPair struct {
+	Pos     int
 	FstExpr Evaluation
 	SndExpr Evaluation
 }
 
 // Declare struct
 type Declare struct {
+	Pos     int
 	DecType Type
 	Lhs     Ident
 	Rhs     Evaluation
@@ -145,12 +151,14 @@ type Declare struct {
 
 // Assignment struct
 type Assignment struct {
+	Pos int
 	Lhs Evaluation
 	Rhs Evaluation
 }
 
 // If struct
 type If struct {
+	Pos         int
 	Conditional Evaluation
 	ThenStat    []Statement
 	ElseStat    []Statement
@@ -158,46 +166,54 @@ type If struct {
 
 // While struct
 type While struct {
+	Pos         int
 	Conditional Evaluation
 	DoStat      []Statement
 }
 
 type Scope struct {
-	//SymbolTable *SymbolTable
+	Pos      int
 	StatList []Statement
 }
 
 // Read struct
 type Read struct {
+	Pos       int
 	AssignLHS Evaluation // should be an assignLHS
 }
 
 // Free struct
 type Free struct {
+	Pos  int
 	Expr Evaluation
 }
 
 // Return struct
 type Return struct {
+	Pos  int
 	Expr Evaluation
 }
 
 // Exit struct
 type Exit struct {
+	Pos  int
 	Expr Evaluation
 }
 
 // Print struct
 type Print struct {
+	Pos  int
 	Expr Evaluation
 }
 
 // Println struct
 type Println struct {
+	Pos  int
 	Expr Evaluation
 }
 
 type Call struct {
+	Pos       int
 	Ident     Ident
 	ParamList []Evaluation
 }
@@ -208,15 +224,18 @@ type Ident struct {
 }
 */
 type PairElem struct {
+	Pos  int
 	Fsnd FSND
 	Expr Evaluation
 }
 
 type ArrayLiter struct {
+	Pos   int
 	Exprs []Evaluation
 }
 
 type ArrayElem struct {
+	Pos   int
 	Ident Ident
 	Exprs []Evaluation
 }

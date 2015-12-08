@@ -1,6 +1,9 @@
 package ast
 
-import "errors"
+import (
+	"errors"
+	"fmt"
+)
 
 func containsDuplicateFunc(functionTable []*Function) bool {
 	freqMap := make(map[Ident]int)
@@ -22,7 +25,7 @@ func (node If) checkIfReturn(functionTable []*Function, symbolTable *SymbolTable
 		semanticErrors = append(semanticErrors, err)
 	}
 	if cond != Bool {
-		semanticErrors = append(semanticErrors, errors.New("Conditional is not boolean expression"))
+		semanticErrors = append(semanticErrors, errors.New("line:"+fmt.Sprint(node.Pos)+" :Conditional is not boolean expression"))
 	}
 	thenSymTab := symbolTable.New()
 	symbolTable.Children = append(symbolTable.Children, thenSymTab)
@@ -79,7 +82,7 @@ func (node Return) checkReturnReturn(functionTable []*Function, symbolTable *Sym
 		semanticErrors = append(semanticErrors, err)
 	} else {
 		if !typesMatch(exprTyp, returnType) {
-			semanticErrors = append(semanticErrors, errors.New("Return Types do not match: "+exprTyp.typeString()+"::"+returnType.typeString()))
+			semanticErrors = append(semanticErrors, errors.New("line:"+fmt.Sprint(node.Pos)+":Return Types do not match: "+exprTyp.typeString()+"::"+returnType.typeString()))
 		}
 	}
 	if len(semanticErrors) > 0 {
@@ -125,7 +128,7 @@ func (function *Function) checkFunc(root *Program) errorSlice {
 func (root *Program) SemanticCheck() errorSlice {
 	var semanticErrors []error
 	if containsDuplicateFunc(root.FunctionList) {
-		semanticErrors = append(semanticErrors, errors.New("Program has function redefinitions"))
+		semanticErrors = append(semanticErrors, errors.New("line:"+fmt.Sprint(root.Pos)+"Program has function redefinitions"))
 	}
 	for _, functionProg := range root.FunctionList {
 		funcErrs := functionProg.checkFunc(root)
@@ -140,7 +143,7 @@ func (root *Program) SemanticCheck() errorSlice {
 		}
 		switch stat.(type) {
 		case Return:
-			semanticErrors = append(semanticErrors, errors.New("Cannot have return statement in main"))
+			semanticErrors = append(semanticErrors, errors.New("line:"+"Cannot have return statement in main"))
 		}
 	}
 	if len(semanticErrors) > 0 {
@@ -155,9 +158,9 @@ func (node Skip) visitStatement(functionTable []*Function, symbolTable *SymbolTa
 
 func (node Declare) visitStatement(functionTable []*Function, symbolTable *SymbolTable) errorSlice {
 	var semanticErrors errorSlice
-	if symbolTable.isDefinedInScope(node.Lhs) {
-		semanticErrors = append(semanticErrors, errors.New("Variable already declared::"+string(node.Lhs)))
-	}
+	/*	if symbolTable.isDefinedInScope(node.Lhs) {
+		semanticErrors = append(semanticErrors, errors.New("line: "+fmt.Sprint(node.Line)+" :Variable already declared::"+string(node.Lhs)))
+	} */
 	exprType, errs := node.Rhs.Eval(functionTable, symbolTable)
 	if errs != nil {
 		semanticErrors = append(semanticErrors, errs)
@@ -172,10 +175,10 @@ func (node Declare) visitStatement(functionTable []*Function, symbolTable *Symbo
 					// Do nothing
 				case ConstType:
 					if exprType.(ConstType) != Pair {
-						semanticErrors = append(semanticErrors, errors.New("Types in declaration do not match:"+node.DecType.typeString()+","+exprType.typeString()))
+						semanticErrors = append(semanticErrors, errors.New("line:"+fmt.Sprint(node.Pos)+" :Types in declaration do not match:"+node.DecType.typeString()+","+exprType.typeString()))
 					}
 				default:
-					semanticErrors = append(semanticErrors, errors.New("Types in declaration do not match:"+node.DecType.typeString()+","+exprType.typeString()))
+					semanticErrors = append(semanticErrors, errors.New("line:"+fmt.Sprint(node.Pos)+" :Types in declaration do not match:"+node.DecType.typeString()+","+exprType.typeString()))
 				}
 			}
 			if pairTypeStruct.SndType == Pair {
@@ -184,14 +187,14 @@ func (node Declare) visitStatement(functionTable []*Function, symbolTable *Symbo
 					// Do nothing
 				case ConstType:
 					if exprType.(ConstType) != Pair {
-						semanticErrors = append(semanticErrors, errors.New("Types in declaration do not match:"+node.DecType.typeString()+","+exprType.typeString()))
+						semanticErrors = append(semanticErrors, errors.New("line:"+fmt.Sprint(node.Pos)+" :Types in declaration do not match:"+node.DecType.typeString()+","+exprType.typeString()))
 					}
 				default:
-					semanticErrors = append(semanticErrors, errors.New("Types in declaration do not match:"+node.DecType.typeString()+","+exprType.typeString()))
+					semanticErrors = append(semanticErrors, errors.New("line:"+fmt.Sprint(node.Pos)+" :Types in declaration do not match:"+node.DecType.typeString()+","+exprType.typeString()))
 				}
 			}
 		default:
-			semanticErrors = append(semanticErrors, errors.New("Types in declaration do not match:"+node.DecType.typeString()+","+exprType.typeString()))
+			semanticErrors = append(semanticErrors, errors.New("line:"+fmt.Sprint(node.Pos)+" :Types in declaration do not match:"+node.DecType.typeString()+","+exprType.typeString()))
 		}
 	}
 	symbolTable.insert(node.Lhs, node.DecType)
@@ -216,11 +219,11 @@ func (node Assignment) visitStatement(functionTable []*Function, symbolTable *Sy
 		case ArrayType:
 			// Do nothing
 		default:
-			semanticErrors = append(semanticErrors, errors.New("LHS is not of type Array"+lhsType.typeString()+","+rhsType.typeString()))
+			semanticErrors = append(semanticErrors, errors.New("line:"+fmt.Sprint(node.Pos)+" :LHS is not of type Array"+lhsType.typeString()+","+rhsType.typeString()))
 		}
 	}
 	if !typesMatch(lhsType, rhsType) && rhsType != nil && lhsType != nil {
-		semanticErrors = append(semanticErrors, errors.New("Assignment types do not match"+lhsType.typeString()+","+rhsType.typeString()))
+		semanticErrors = append(semanticErrors, errors.New("line:"+fmt.Sprint(node.Pos)+" :Assignment types do not match"+lhsType.typeString()+","+rhsType.typeString()))
 	}
 	if len(semanticErrors) > 0 {
 		return semanticErrors
@@ -234,7 +237,7 @@ func (node Read) visitStatement(functionTable []*Function, symbolTable *SymbolTa
 	if err != nil {
 		semanticErrors = append(semanticErrors, err)
 	} else if exprTyp != Char && exprTyp != Int {
-		semanticErrors = append(semanticErrors, errors.New("Cannot read non Char or Int type"))
+		semanticErrors = append(semanticErrors, errors.New("line:"+fmt.Sprint(node.Pos)+" :Cannot read non Char or Int type"))
 	}
 	if len(semanticErrors) > 0 {
 		return semanticErrors
@@ -253,7 +256,7 @@ func (node Free) visitStatement(functionTable []*Function, symbolTable *SymbolTa
 		// Do nothing
 	default:
 		if exprTyp != Pair {
-			semanticErrors = append(semanticErrors, errors.New("Cannot free non pair type"))
+			semanticErrors = append(semanticErrors, errors.New("line:"+fmt.Sprint(node.Pos)+" :Cannot free non pair type"))
 		}
 	}
 	if len(semanticErrors) > 0 {
@@ -282,7 +285,7 @@ func (node Exit) visitStatement(functionTable []*Function, symbolTable *SymbolTa
 		semanticErrors = append(semanticErrors, err)
 	}
 	if exprTyp != Int {
-		semanticErrors = append(semanticErrors, errors.New("Bad exit expression, must be int"))
+		semanticErrors = append(semanticErrors, errors.New("line:"+fmt.Sprint(node.Pos)+" :Bad exit expression, must be int"))
 	}
 	if len(semanticErrors) > 0 {
 		return semanticErrors
@@ -321,7 +324,7 @@ func (node If) visitStatement(functionTable []*Function, symbolTable *SymbolTabl
 		semanticErrors = append(semanticErrors, err)
 	}
 	if cond != Bool {
-		semanticErrors = append(semanticErrors, errors.New("Conditional is not boolean expression"))
+		semanticErrors = append(semanticErrors, errors.New("line:"+fmt.Sprint(node.Pos)+" :Conditional is not boolean expression"))
 	}
 	thenSymTab := symbolTable.New()
 	symbolTable.Children = append(symbolTable.Children, thenSymTab)
@@ -352,7 +355,7 @@ func (node While) visitStatement(functionTable []*Function, symbolTable *SymbolT
 		semanticErrors = append(semanticErrors, err)
 	}
 	if cond != Bool {
-		semanticErrors = append(semanticErrors, errors.New("Conditional is not boolean expression"))
+		semanticErrors = append(semanticErrors, errors.New("line:"+fmt.Sprint(node.Pos)+" :Conditional is not boolean expression"))
 	}
 	whileSymTab := symbolTable.New()
 	symbolTable.Children = append(symbolTable.Children, whileSymTab)
