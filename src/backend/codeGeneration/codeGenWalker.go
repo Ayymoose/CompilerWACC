@@ -288,8 +288,6 @@ func (cg *CodeGenerator) evalRHS(t Evaluation, srcReg string) {
 		cg.cgVisitBinopExpr(t.(Binop))
 		appendAssembly(cg.currInstrs(), "MOV "+srcReg+", r0", 1, 1)
 	case NewPair:
-		// First allocate memory to store two addresses (8-bytes)
-		cg.CfunctionCall("malloc", strconv.Itoa(ADDR_SIZE*2))
 		cg.evalPair(t.(NewPair).FstExpr, t.(NewPair).SndExpr, "r5", srcReg)
 	case PairElem:
 		cg.evalPairElem(t.(PairElem), srcReg)
@@ -332,6 +330,9 @@ func (cg *CodeGenerator) evalPairElem(t PairElem, srcReg string) {
 
 // Evalutes a pair of elements onto the stack
 func (cg *CodeGenerator) evalPair(fst Evaluation, snd Evaluation, reg1 string, reg2 string) {
+	// First allocate memory to store two addresses (8-bytes)
+	cg.CfunctionCall("malloc", strconv.Itoa(ADDR_SIZE*2))
+
 	// Store the address in the free register
 	appendAssembly(cg.currInstrs(), "MOV "+reg2+", r0", 1, 1)
 
@@ -796,7 +797,7 @@ func (cg *CodeGenerator) cgVisitWhileStat(node While) {
 
 	appendAssembly(cg.currInstrs(), sndLabel+":", 0, 1)
 	cg.evalRHS(node.Conditional, "r0")
-	appendAssembly(cg.currInstrs(), "CMP r0, #0", 1, 1)
+	appendAssembly(cg.currInstrs(), "CMP r0, #1", 1, 1)
 	appendAssembly(cg.currInstrs(), "BEQ "+fstLabel, 1, 1)
 }
 

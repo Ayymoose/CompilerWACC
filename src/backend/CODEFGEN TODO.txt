@@ -24,10 +24,9 @@ PRINT: COMPLETE -------------------------------------------
 PRINTLN: COMPLETE -----------------------------------------
 
 IF: COMPLETE -----------------------------------------
-- scope logic should be tested
 
 WHILE: COMPLETE -----------------------------------------
-- scope logic should be tested
+- scope logic should be tested// ERROR FROM REMOVING CHILDREN
 
 SCOPE: IN PROGRESS --- NANA
 - Added new scope functionality but new symbol table logic in codeGenerator.go
