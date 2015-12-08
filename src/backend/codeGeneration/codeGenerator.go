@@ -72,12 +72,13 @@ func (cg *CodeGenerator) setNewScope(varSpaceSize int) {
 	}
 
 	cg.currStack = newScope
-	cg.symTable = cg.symTable.GetFrontChild()
+	table := cg.currSymTable()
+	*table = *cg.currSymTable().GetFrontChild()
 }
 
 // Creates new scope data for a new function scope. Sets isFunc to true which
 // set the code generator into function mode (So statements evaluate for functions not main)
-func (cg *CodeGenerator) setNewFuncScope(varSpaceSize int, paramList *[]Param) {
+func (cg *CodeGenerator) setNewFuncScope(varSpaceSize int, paramList *[]Param, funcSymTable *SymbolTable) {
 	newScope := &scopeData{}
 	newScope.currP = varSpaceSize
 	newScope.size = varSpaceSize
@@ -87,15 +88,21 @@ func (cg *CodeGenerator) setNewFuncScope(varSpaceSize int, paramList *[]Param) {
 
 	cg.currStack = newScope
 
-	cg.funcSymTable = cg.funcSymTable.GetFrontChild()
+	cg.funcSymTable = funcSymTable
 }
 
 // Removes current scope and replaces it with the parent scope
 func (cg *CodeGenerator) removeCurrScope() {
+	beforeMode := cg.currStack.isFunc
 	cg.currStack = cg.currStack.parentScope
-	cg.symTable = cg.symTable.Parent
-	if cg.symTable != nil {
-		cg.symTable.RemoveChild()
+	afterMode := cg.currStack.isFunc
+
+	if beforeMode == afterMode {
+		table := cg.currSymTable()
+		*table = *cg.currSymTable().Parent
+		if cg.currSymTable() != nil {
+			cg.currSymTable().RemoveChild()
+		}
 	}
 }
 

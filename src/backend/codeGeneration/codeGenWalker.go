@@ -927,6 +927,9 @@ func (cg *CodeGenerator) cgVisitCallStat(ident Ident, paramList []Evaluation) {
 }
 
 func (cg *CodeGenerator) cgVisitFunction(node Function) {
+	varSpaceSize := GetScopeVarSize(node.StatList)
+	cg.setNewFuncScope(varSpaceSize, &node.ParameterTypes, node.SymbolTable)
+
 	// f_funcName:
 	appendAssembly(cg.currInstrs(), "f_"+string(node.Ident)+":", 0, 1)
 
@@ -942,6 +945,8 @@ func (cg *CodeGenerator) cgVisitFunction(node Function) {
 
 	appendAssembly(cg.currInstrs(), "POP {pc}", 1, 1) // TEST harness uses double POP don't think we need it
 	appendAssembly(cg.currInstrs(), ".ltorg", 1, 2)
+
+	cg.removeCurrScope()
 }
 
 // VISIT STATEMENT -------------------------------------------------------------
