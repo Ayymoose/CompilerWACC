@@ -9,7 +9,7 @@ func (value Call) Eval(functionTable []*Function, symbolTable *SymbolTable) (Typ
 	for _, function := range functionTable {
 		if value.Ident == function.Ident {
 			if len(value.ParamList) != len(function.ParameterTypes) {
-				return nil, errors.New("line: " + fmt.Sprint(value.Pos) + " :Different number of parameters in Call and Function Definition")
+				return nil, errorCallParam(value.FileText, value.Pos)
 			}
 			for ind := range value.ParamList {
 				exprType, err := value.ParamList[ind].Eval(functionTable, symbolTable)
@@ -17,13 +17,13 @@ func (value Call) Eval(functionTable []*Function, symbolTable *SymbolTable) (Typ
 					return nil, err
 				}
 				if exprType != function.ParameterTypes[ind].ParamType {
-					return nil, errors.New("line: " + fmt.Sprint(value.Pos) + " :Parameters of call and defintion do not match")
+					return nil, errorCallParam(value.FileText, value.Pos)
 				}
 			}
 			return function.ReturnType, nil
 		}
 	}
-	return nil, errors.New("line: " + fmt.Sprint(value.Pos) + " :No such function defined")
+	return nil, errorNoFunction(value.FileText, value.Pos)
 }
 
 func (value ArrayLiter) Eval(functionTable []*Function, symbolTable *SymbolTable) (Type, error) {
@@ -41,10 +41,9 @@ func (value ArrayLiter) Eval(functionTable []*Function, symbolTable *SymbolTable
 				return nil, err2
 			}
 			if currType2 != currType {
-				return nil, errors.New("line: " + fmt.Sprint(value.Pos) + " :Array has mixed types")
+				return nil, errorBadArrayLiter(value.FileText, value.Pos)
 			}
 		}
-		//		fmt.Println("DID WE GET HERE?", currType.typeString())
 		return ArrayType{Type: currType}, nil
 	}
 	return nil, nil
@@ -77,7 +76,7 @@ func (value PairElem) Eval(functionTable []*Function, symbolTable *SymbolTable) 
 			return exprTyp.(PairType).SndType, nil
 		}
 	}
-	return nil, errors.New("line: " + fmt.Sprint(value.Pos) + " :Cannot get elem of non pair type")
+	return nil, errorBadElemPair(value.FileText, value.Pos)
 }
 
 func (value Integer) Eval(functionTable []*Function, symbolTable *SymbolTable) (Type, error) {
@@ -115,15 +114,15 @@ func (value ArrayElem) Eval(functionTable []*Function, symbolTable *SymbolTable)
 				return nil, err2
 			}
 			if currType2 != currType {
-				return nil, errors.New("line: " + fmt.Sprint(value.Pos) + " :Array has mixed types")
+				return nil, errorBadArrayLiter(value.FileText, value.Pos)
 			}
 		}
 	}
 	if currType != Int {
-		return nil, errors.New("line: " + fmt.Sprint(value.Pos) + " :Array cannot have non int expr")
+		return nil, errorArrayAccessExpr(value.FileText, value.Pos)
 	}
 	if !symbolTable.isDefined(value.Ident) {
-		return nil, errors.New("line: " + fmt.Sprint(value.Pos) + " :Array not defined, identifier cannot be found")
+		return nil, errorArrayNotDefined(value.FileText, value.Pos)
 	}
 	arrayTyp := symbolTable.getTypeOfIdent(value.Ident)
 	for _ = range value.Exprs {
@@ -135,7 +134,7 @@ func (value ArrayElem) Eval(functionTable []*Function, symbolTable *SymbolTable)
 				return Char, nil
 			}
 		default:
-			return nil, errors.New("line: " + fmt.Sprint(value.Pos) + " :Too many nested indexes in array")
+			return nil, errorArrayTooMuchNesting(value.FileText, value.Pos)
 		}
 	}
 	return arrayTyp, nil
@@ -147,7 +146,7 @@ func (value Ident) Eval(functionTable []*Function, symbolTable *SymbolTable) (Ty
 		return symbolTable.getTypeOfIdent(value), nil
 	}
 	//fmt.Println("Supposed to GET HERE IDENT EVAL")
-	return nil, errors.New("Identifier not declared")
+	return nil, errorIdentNotDeclared(value.FileText, value.Pos)
 }
 
 func (binop Binop) Eval(functionTable []*Function, symbolTable *SymbolTable) (Type, error) {
@@ -162,39 +161,38 @@ func (binop Binop) Eval(functionTable []*Function, symbolTable *SymbolTable) (Ty
 	switch binop.Binary {
 	case PLUS, SUB, MUL, DIV, MOD:
 		if typl != Int {
-			return nil, errors.New("line: " + fmt.Sprint(binop.Pos) + " :Left expr of binary int operation is not an Int")
+			return nil, errorBadBinary(value.FileText, value.Pos)
 		}
-
 		if typr != Int {
-			return nil, errors.New("line: " + fmt.Sprint(binop.Pos) + " :Right expr of binary int operation is not an Int")
+			return nil, errorBadBinary(value.FileText, value.Pos)
 		}
 		return Int, nil
 	case AND, OR:
 		if typl != Bool {
-			return nil, errors.New("line: " + fmt.Sprint(binop.Pos) + " :Left expr of binary bool operation is not an Bool")
+			return nil, errorBadBinary(value.FileText, value.Pos)
 		}
 		if typr != Bool {
-			return nil, errors.New("line: " + fmt.Sprint(binop.Pos) + " :Right expr of binary bool operation is not an Bool: " + typr.typeString() + " " + fmt.Sprint(binop.Right))
+			return nil, errorBadBinary(value.FileText, value.Pos)
 		}
 		return Bool, nil
 	case LT, LTE, GT, GTE:
 		if typl != Int && typl != Char {
-			return nil, errors.New("line: " + fmt.Sprint(binop.Pos) + " :Left expr of binary conditional operation is not an Int or Char")
+			return nil, errorBadBinary(value.FileText, value.Pos)
 		}
 		if typr != Int && typr != Char {
-			return nil, errors.New("line: " + fmt.Sprint(binop.Pos) + " :Right expr of binary conditional operation is not an Int or Char")
+			return nil, errorBadBinary(value.FileText, value.Pos)
 		}
 		if !typesMatch(typl, typr) {
-			return nil, errors.New("line: " + fmt.Sprint(binop.Pos) + " :Left and right expr of binary conditional operation do not match")
+			return nil, errorBadBinary(value.FileText, value.Pos)
 		}
 		return Bool, nil
 	case EQ, NEQ:
 		if !typesMatch(typl, typr) {
-			return nil, errors.New("line: " + fmt.Sprint(binop.Pos) + " :Left and right expr of binary conditional operation do not match")
+			return nil, errorBadBinary(value.FileText, value.Pos)
 		}
 		return Bool, nil
 	default:
-		return nil, errors.New("line: " + fmt.Sprint(binop.Pos) + " :Binary operation not recognised")
+		return nil, errorBadBinary(value.FileText, value.Pos)
 	}
 }
 
