@@ -102,6 +102,11 @@ func (cg *CodeGenerator) removeCurrScope() {
 	}
 }
 
+// Removes current function scope
+func (cg *CodeGenerator) removeFuncScope() {
+	cg.currStack = cg.currStack.parentScope
+}
+
 // Used to add extra offset to the current scope when intermediate values are stored on the stack
 func (cg *CodeGenerator) addExtraOffset(n int) {
 	cg.currStack.extraOffset += n

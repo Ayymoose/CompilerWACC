@@ -947,7 +947,7 @@ func (cg *CodeGenerator) cgVisitFunction(node Function) {
 	appendAssembly(cg.currInstrs(), "POP {pc}", 1, 1) // TEST harness uses double POP don't think we need it
 	appendAssembly(cg.currInstrs(), ".ltorg", 1, 2)
 
-	cg.removeCurrScope()
+	cg.removeFuncScope()
 }
 
 // VISIT STATEMENT -------------------------------------------------------------
