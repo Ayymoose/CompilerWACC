@@ -926,24 +926,24 @@ func (cg *CodeGenerator) cgVisitUnopExpr(node Unop) {
 }
 
 func (cg *CodeGenerator) cgVisitBinopExpr(node Binop) {
-	cg.evalRHS(node.Left, "r0")
-	appendAssembly(cg.currInstrs(), "PUSH {r0}", 1, 1)
+	cg.evalRHS(node.Left, "r4")
+	appendAssembly(cg.currInstrs(), "PUSH {r4}", 1, 1)
 	cg.addExtraOffset(4)
-	cg.evalRHS(node.Right, "r0")
-	appendAssembly(cg.currInstrs(), "MOV r1, r0", 1, 1)
-	appendAssembly(cg.currInstrs(), "POP {r0}", 1, 1)
+	cg.evalRHS(node.Right, "r4")
+	appendAssembly(cg.currInstrs(), "MOV r5, r4", 1, 1)
+	appendAssembly(cg.currInstrs(), "POP {r4}", 1, 1)
 	cg.subExtraOffset(4)
 	switch node.Binary {
 	case PLUS:
-		appendAssembly(cg.currInstrs(), "ADDS r0, r0, r1", 1, 1)
+		appendAssembly(cg.currInstrs(), "ADDS r4, r4, r5", 1, 1)
 		appendAssembly(cg.currInstrs(), "BLVS p_throw_overflow_error", 1, 1)
 		cg.cgVisitBinopExpr_H("p_throw_overflow_error")
 	case SUB:
-		appendAssembly(cg.currInstrs(), "SUBS r0, r0, r1", 1, 1)
+		appendAssembly(cg.currInstrs(), "SUBS r4, r4, r5", 1, 1)
 		appendAssembly(cg.currInstrs(), "BLVS p_throw_overflow_error", 1, 1)
 		cg.cgVisitBinopExpr_H("p_throw_overflow_error")
 	case MUL:
-		appendAssembly(cg.currInstrs(), "SMULL r0, r1, r0, r1", 1, 1)
+		appendAssembly(cg.currInstrs(), "SMULL r4, r5, r4, r5", 1, 1)
 		appendAssembly(cg.currInstrs(), "CMP r1, r0, ASR #31", 1, 1)
 		appendAssembly(cg.currInstrs(), "BLNE p_throw_overflow_error", 1, 1)
 		cg.cgVisitBinopExpr_H("p_throw_overflow_error")
@@ -978,10 +978,10 @@ func (cg *CodeGenerator) cgVisitBinopExpr(node Binop) {
 		appendAssembly(cg.currInstrs(), "MOVLE r4, #0", 1, 1)
 		appendAssembly(cg.currInstrs(), "MOV r0, r4", 1, 1)
 	case LTE:
-		appendAssembly(cg.currInstrs(), "CMP r4, r1", 1, 1)
+		appendAssembly(cg.currInstrs(), "CMP r4, r5", 1, 1)
 		appendAssembly(cg.currInstrs(), "MOVLE r4, #1", 1, 1)
 		appendAssembly(cg.currInstrs(), "MOVGT r4, #0", 1, 1)
-		appendAssembly(cg.currInstrs(), "MOV r0, r4", 1, 1)
+		//		appendAssembly(cg.currInstrs(), "MOV r0, r4", 1, 1)
 	case GTE:
 		appendAssembly(cg.currInstrs(), "CMP r4, r5", 1, 1)
 		appendAssembly(cg.currInstrs(), "MOVGE r4, #1", 1, 1)
