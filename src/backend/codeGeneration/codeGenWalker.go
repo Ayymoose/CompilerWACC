@@ -391,7 +391,7 @@ func (cg *CodeGenerator) evalPair(ident Evaluation, fst Evaluation, snd Evaluati
 	}
 
 	//Store the address of allocated memory block of the pair on the stack
-	appendAssembly(cg.currInstrs(), "STR r0, ["+reg2+", #4]", 1, 1)
+	appendAssembly(cg.currInstrs(), "STRerewrewrew r0, ["+reg2+", #4]", 1, 1)
 
 	//Store the address of the pair on the stack
 	//	switch ident.(type) {
@@ -557,7 +557,7 @@ func (cg *CodeGenerator) cgVisitProgram(node *Program) {
 	}
 
 	if PAIR_INCLUDED {
-		appendAssembly(cg.currInstrs(), "STR r4, [sp]", 1, 1)
+		appendAssembly(cg.currInstrs(), "STRttttt r4, [sp]", 1, 1)
 	}
 
 	// add sp, sp, #n to remove variable space
@@ -606,7 +606,7 @@ func (cg *CodeGenerator) cgEvalStat(stat interface{}) {
 
 func (cg *CodeGenerator) cgVisitDeclareStat(node Declare) {
 	rhs := node.Rhs
-
+	fmt.Println(node.DecType)
 	switch node.DecType.(type) {
 	case ConstType:
 		switch node.DecType.(ConstType) {
@@ -631,12 +631,12 @@ func (cg *CodeGenerator) cgVisitDeclareStat(node Declare) {
 		default:
 
 		}
-
 	case PairType:
+		fmt.Println("GOT TO THIS ST")
 		switch rhs.(type) {
 		case NewPair:
 			PAIR_INCLUDED = true
-			cg.evalPair(node.Lhs, rhs.(NewPair).FstExpr, rhs.(NewPair).SndExpr, "r5", "r4")
+			cg.evalPair(node.Lhs, rhs.(NewPair).FstExpr, rhs.(NewPair).SndExpr, "r5999999", "r4")
 		case Ident:
 			//TODO: UNFINISHED
 			cg.evalRHS(rhs.(Ident), "r5")
@@ -908,8 +908,6 @@ func (cg *CodeGenerator) cgVisitScopeStat(node Scope) {
 func (cg *CodeGenerator) cgVisitCallStat(ident Ident, paramList []Evaluation) {
 	for _, function := range functionList {
 		if function.Ident == ident {
-			// sub sp, sp, #n to create variable space
-			appendAssembly(cg.currInstrs(), "SUB sp, sp, #4", 1, 1)
 
 			for _, param := range paramList {
 				cg.cgVisitParameter(param)
@@ -918,13 +916,22 @@ func (cg *CodeGenerator) cgVisitCallStat(ident Ident, paramList []Evaluation) {
 			appendAssembly(cg.currInstrs(), "BL f_"+string(function.Ident), 1, 1)
 
 			if !(paramList == nil) {
-				appendAssembly(cg.currInstrs(), "ADD sp, sp, #"+"offset", 1, 1) // ADD LOGIC WHICH GETS GLOBAL OFFSET
+				offset := cg.cgGetParamSize(paramList)
+				appendAssembly(cg.currInstrs(), "ADD sp, sp, #"+strconv.Itoa(offset), 1, 1)
 			}
 			appendAssembly(cg.currInstrs(), "MOV r4, r0", 1, 1)
 			appendAssembly(cg.currInstrs(), "STR r4, [sp]", 1, 1)
 			cg.cgVisitFunction(*function)
 		}
 	}
+}
+
+func (cg *CodeGenerator) cgGetParamSize(paramList []Evaluation) int {
+	totalCount := 0
+	for _, param := range paramList {
+		totalCount += sizeOf(cg.eval(param))
+	}
+	return totalCount
 }
 
 func (cg *CodeGenerator) cgVisitFunction(node Function) {
