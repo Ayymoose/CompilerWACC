@@ -788,9 +788,7 @@ func (cg CodeGenerator) cgVisitWhileStat(node While) {
 func (cg CodeGenerator) cgVisitScopeStat(node Scope) {
 	// Amount of bytes on the stack the scope takes up for variables
 	varSpaceSize := GetScopeVarSize(node.StatList)
-
 	cg.setNewScope(varSpaceSize)
-
 	// sub sp, sp, #n to create variable space
 	if varSpaceSize > 0 {
 		appendAssembly(cg.currInstrs(), "SUB sp, sp, #"+strconv.Itoa(varSpaceSize), 1, 1)

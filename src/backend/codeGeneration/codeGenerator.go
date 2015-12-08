@@ -58,7 +58,7 @@ type scopeData struct {
 
 // Creates new scope data for a new scope.
 func (cg CodeGenerator) setNewScope(varSpaceSize int) {
-	newScope := new(scopeData)
+	newScope := &scopeData{}
 	newScope.currP = varSpaceSize
 	newScope.size = varSpaceSize
 	newScope.parentScope = cg.currStack
@@ -76,7 +76,7 @@ func (cg CodeGenerator) setNewScope(varSpaceSize int) {
 // Creates new scope data for a new function scope. Sets isFunc to true which
 // set the code generator into function mode (So statements evaluate for functions not main)
 func (cg CodeGenerator) setNewFuncScope(varSpaceSize int, paramMap *map[Param]int) {
-	newScope := new(scopeData)
+	newScope := &scopeData{}
 	newScope.currP = varSpaceSize
 	newScope.size = varSpaceSize
 	newScope.parentScope = cg.currStack
@@ -85,7 +85,7 @@ func (cg CodeGenerator) setNewFuncScope(varSpaceSize int, paramMap *map[Param]in
 
 	cg.currStack = newScope
 
-	//TODO: CODE TO SET CHILD SYMBOL TABLE
+	cg.funcSymTable = cg.funcSymTable.GetFrontChild()
 }
 
 // Removes current scope and replaces it with the parent scope
