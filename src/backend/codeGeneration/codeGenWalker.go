@@ -471,6 +471,8 @@ func (cg *CodeGenerator) evalArrayElem(t Evaluation, reg1 string, reg2 string) {
 	cg.getMsgLabel("", ARRAY_INDEX_LARGE)
 	cg.getMsgLabel("", STRING_FORMAT)
 
+	appendAssembly(cg.currInstrs(), "MOV "+reg1+", r4", 1, 1)
+
 	// Store the address at the next space in the stack
 	var offset, _ = cg.getIdentOffset(t.(ArrayElem).Ident)
 	appendAssembly(cg.currInstrs(), "ADD "+reg1+", sp, #"+strconv.Itoa(offset), 1, 1)
@@ -828,10 +830,12 @@ func (cg *CodeGenerator) cgVisitPrintStat(node Print) {
 			cg.cgVisitPrintStatFunc_H("p_print_reference")
 		}
 	case PairType, ArrayType:
+
 		// BL p_print_reference
 		appendAssembly(cg.currInstrs(), "BL p_print_reference", 1, 1)
 		// Define relevant print function definition (iff it hasnt been defined)
 		cg.cgVisitPrintStatFunc_H("p_print_reference")
+
 	default:
 		appendAssembly(cg.currInstrs(), "Error: type not implemented", 1, 1)
 		typeOf(expr)
@@ -839,7 +843,6 @@ func (cg *CodeGenerator) cgVisitPrintStat(node Print) {
 	}
 }
 
-//TODO: println for arrays should NOT print addresses @Nana fix please
 func (cg *CodeGenerator) cgVisitPrintlnStat(node Println) {
 	cg.cgVisitPrintStat(Print{Expr: node.Expr})
 	// BL p_print_ln
