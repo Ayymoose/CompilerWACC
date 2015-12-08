@@ -778,7 +778,7 @@ func (cg *CodeGenerator) cgVisitIfStat(node If) {
 	cg.cgVisitScopeStat(Scope{StatList: node.ThenStat})
 
 	appendAssembly(cg.currInstrs(), "B "+sndLabel+":", 1, 1)
-	appendAssembly(cg.currInstrs(), fstLabel, 0, 1)
+	appendAssembly(cg.currInstrs(), fstLabel+":", 0, 1)
 
 	cg.cgVisitScopeStat(Scope{StatList: node.ElseStat})
 
@@ -790,11 +790,11 @@ func (cg *CodeGenerator) cgVisitWhileStat(node While) {
 	fstLabel, sndLabel := cg.getNewLabel(), cg.getNewLabel()
 
 	appendAssembly(cg.currInstrs(), "B "+sndLabel+":", 1, 1)
-	appendAssembly(cg.currInstrs(), fstLabel, 0, 1)
+	appendAssembly(cg.currInstrs(), fstLabel+":", 0, 1)
 
 	cg.cgVisitScopeStat(Scope{StatList: node.DoStat})
 
-	appendAssembly(cg.currInstrs(), sndLabel, 0, 1)
+	appendAssembly(cg.currInstrs(), sndLabel+":", 0, 1)
 	cg.evalRHS(node.Conditional, "r0")
 	appendAssembly(cg.currInstrs(), "CMP r0, #0", 1, 1)
 	appendAssembly(cg.currInstrs(), "BEQ "+fstLabel, 1, 1)
