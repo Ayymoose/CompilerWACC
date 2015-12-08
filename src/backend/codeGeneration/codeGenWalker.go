@@ -684,8 +684,7 @@ func (cg CodeGenerator) cgVisitExitStat(node Exit) {
 func (cg CodeGenerator) cgVisitPrintStat(node Print) {
 	expr := node.Expr
 
-	//DO NOT MAKE THIS r0 , IT WILL CAUSE ARRAY LOOKUP TO FAIL
-	dstReg := "r4"
+	dstReg := "r0"
 	//
 
 	// Get value of expr into dstReg
@@ -734,7 +733,7 @@ func (cg CodeGenerator) cgVisitPrintStat(node Print) {
 	}
 }
 
-//TODO: println for arrays should NOT print addresses @Nana fix please 
+//TODO: println for arrays should NOT print addresses @Nana fix please
 func (cg CodeGenerator) cgVisitPrintlnStat(node Println) {
 	cg.cgVisitPrintStat(Print{Expr: node.Expr})
 	// BL p_print_ln
