@@ -39,7 +39,6 @@ func main() {
 	root, err := parser.ParseFile(file, s)
 	if err != nil {
 		os.Exit(SYNTAX_ERROR)
-				fmt.Println("SYNTAX_ERROR : 100")
 	}
 	fmt.Println(root)
 
@@ -48,18 +47,13 @@ func main() {
 		for _, str := range errs {
 			fmt.Println(str)
 		}
-		fmt.Println("Semantic Error : 200")
 		os.Exit(SEMANTIC_ERROR)
 	}
-
-	fmt.Println("SUCCESSFUL FRONTEND: ")
 	root.SymbolTable.PrintChildren()
-			fmt.Println(*root.FileText)
 
 	filename := filepath.Base(file)
 	ext := filepath.Ext(filename)
 	fileARM := filename[0:len(filename)-len(ext)] + ".s"
-	fmt.Println(fileARM)
 
 	codeGen := cg.ConstructCodeGenerator(root, armList, root.SymbolTable)
 	codeGen.GenerateCode()

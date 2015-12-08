@@ -834,7 +834,7 @@ func (cg *CodeGenerator) cgVisitPrintStat(node Print) {
 		// Define relevant print function definition (iff it hasnt been defined)
 		cg.cgVisitPrintStatFunc_H("p_print_reference")
 	default:
-		appendAssembly(cg.currInstrs(), "Error: type not implemented", 1, 1)
+//		appendAssembly(cg.currInstrs(), "Error: type not implemented", 1, 1)
 		typeOf(expr)
 	}
 }
