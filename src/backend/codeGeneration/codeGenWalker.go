@@ -112,6 +112,47 @@ func (cg *CodeGenerator) checkArrayBounds() {
 	cg.throwRunTimeError()
 }
 
+
+// Checks the bounds of an array
+func (cg *CodeGenerator) arrayCheckBounds(array []Evaluation, reg1 string, reg2 string) {
+
+ 	// Load the first index
+ 	cg.evalRHS(array[0], reg2)
+
+ 	// Set a register to point to the array
+ 	appendAssembly(cg.currInstrs(), "LDR "+reg1+", ["+reg1+"]", 1, 1)
+
+ 	// reg1 = Address of the array
+ 	// reg2 = Index
+
+ 	appendAssembly(cg.currInstrs(), "MOV r0, "+reg2, 1, 1)
+ 	appendAssembly(cg.currInstrs(), "MOV r1, "+reg1, 1, 1)
+ 	appendAssembly(cg.currInstrs(), "BL p_check_array_bounds", 1, 1)
+
+ 	// Get offset of
+ 	appendAssembly(cg.currInstrs(), "ADD "+reg1+", "+reg1+", #4", 1, 1)
+ 	appendAssembly(cg.currInstrs(), "ADD "+reg1+", "+reg1+", "+reg2+", LSL #2", 1, 1)
+ 	appendAssembly(cg.currInstrs(), "LDR "+reg1+", ["+reg1+"]", 1, 1)
+
+ 	//Load the second index if there is one
+ 	if len(array) > 1{
+ 		cg.evalRHS(array[1], reg2)
+
+ 		appendAssembly(cg.currInstrs(), "MOV r0, "+reg2, 1, 1)
+ 		appendAssembly(cg.currInstrs(), "MOV r1, "+reg1, 1, 1)
+ 		appendAssembly(cg.currInstrs(), "BL p_check_array_bounds", 1, 1)
+
+ 		// Get offset of
+ 		appendAssembly(cg.currInstrs(), "ADD "+reg1+", "+reg1+", #4", 1, 1)
+ 		appendAssembly(cg.currInstrs(), "ADD "+reg1+", "+reg1+", "+reg2+", LSL #2", 1, 1)
+ 		appendAssembly(cg.currInstrs(), "LDR "+reg1+", ["+reg1+"]", 1, 1)
+
+ 	}
+
+	appendAssembly(cg.currInstrs(), "MOV r0, "+reg1, 1, 1)
+
+}
+
 // cgVisitFreeStat helper function
 // Adds a function definition to the progFuncInstrs ARMList depending on the
 // function name provided
@@ -464,6 +505,7 @@ func (cg *CodeGenerator) evalArray(array []Evaluation, srcReg string, dstReg str
 	appendAssembly(cg.currInstrs(), "STR "+dstReg+", [sp, #"+cg.subCurrP(INT_SIZE)+"]", 1, 1)
 }
 
+
 // Evalutes array elements
 func (cg *CodeGenerator) evalArrayElem(t Evaluation, reg1 string, reg2 string) {
 
@@ -483,27 +525,10 @@ func (cg *CodeGenerator) evalArrayElem(t Evaluation, reg1 string, reg2 string) {
 	var offset, _ = cg.getIdentOffset(t.(ArrayElem).Ident)
 	appendAssembly(cg.currInstrs(), "ADD "+reg1+", sp, #"+strconv.Itoa(offset), 1, 1)
 
-	// Load the index
-	cg.evalRHS(t.(ArrayElem).Exprs[0], reg2)
+	//Check the array
+	var array = t.(ArrayElem).Exprs
 
-	// Set a register to point to the array
-	appendAssembly(cg.currInstrs(), "LDR "+reg1+", ["+reg1+"]", 1, 1)
-
-	// reg1 = Address of the array
-	// reg2 = Index
-
-	appendAssembly(cg.currInstrs(), "MOV r0, "+reg2, 1, 1)
-	appendAssembly(cg.currInstrs(), "MOV r1, "+reg1, 1, 1)
-	appendAssembly(cg.currInstrs(), "BL p_check_array_bounds", 1, 1)
-
-	// Get offset of
-	appendAssembly(cg.currInstrs(), "ADD "+reg1+", "+reg1+", #4", 1, 1)
-	appendAssembly(cg.currInstrs(), "ADD "+reg1+", "+reg1+", "+reg2+", LSL #2", 1, 1)
-	appendAssembly(cg.currInstrs(), "LDR "+reg1+", ["+reg1+"]", 1, 1)
-
-	//Load the second index if there is one
-
-	appendAssembly(cg.currInstrs(), "MOV r0, "+reg1, 1, 1)
+	cg.arrayCheckBounds(array,reg1,reg2)
 
 	// Check bounds and errors
 	cg.checkArrayBounds()
