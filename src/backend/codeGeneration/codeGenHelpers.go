@@ -3,7 +3,6 @@ package codeGeneration
 import (
 	. "ast"
 	. "backend/filewriter"
-	"fmt"
 	"strconv"
 )
 
@@ -53,101 +52,11 @@ func sizeOf(t Type) int {
 		size = ADDRESS_SIZE
 	case ArrayType:
 		size = sizeOf(t.(ArrayType).Type)
-	default:
-		fmt.Println("sizeOf(t) t is an unknown type")
-		typeOf(t)
 	}
-
 	return size
 }
 
 type Generic interface{}
-
-// Small function to print the type (remove later)
-func typeOf(t Generic) {
-	switch t.(type) {
-	case ConstType:
-		fmt.Println("ConstType")
-	case FSND:
-		fmt.Println("FSND")
-	case nil:
-		fmt.Println("nil")
-	case Function:
-		fmt.Println("Function")
-	case Param:
-		fmt.Println("Param")
-	case ArrayType:
-		fmt.Println("ArrayType")
-	case PairType:
-		fmt.Println("PairType")
-	case Program:
-		fmt.Println("Program")
-	case Binop:
-		fmt.Println("Binop")
-	case Unop:
-		fmt.Println("Unop")
-	case NewPair:
-		fmt.Println("Newpair")
-	case Declare:
-		fmt.Println("Declare")
-	case Assignment:
-		fmt.Println("Assignment")
-	case If:
-		fmt.Println("If")
-	case While:
-		fmt.Println("While")
-	case Scope:
-		fmt.Println("Scope")
-	case Read:
-		fmt.Println("Read")
-	case Free:
-		fmt.Println("Free")
-	case Return:
-		fmt.Println("Return")
-	case Exit:
-		fmt.Println("Exit")
-	case Print:
-		fmt.Println("Print")
-	case Println:
-		fmt.Println("Println")
-	case Call:
-		fmt.Println("Call")
-	case Ident:
-		fmt.Println("Ident")
-	case PairElem:
-		fmt.Println("PairElem")
-	case ArrayLiter:
-		fmt.Println("ArrayLiter")
-	case ArrayElem:
-		fmt.Println("ArrayElem")
-	case Evaluation:
-		fmt.Println("Evaluation")
-	case Statement:
-		fmt.Println("Statement")
-	case Integer:
-		fmt.Println("Integer")
-	case Str:
-		fmt.Println("Str")
-	case Boolean:
-		fmt.Println("Bool")
-	case Character:
-		fmt.Println("Character")
-	case PairLiter:
-		fmt.Println("PairLiter")
-	case Skip:
-		fmt.Println("Skip")
-	case int:
-		fmt.Println("int")
-	case bool:
-		fmt.Println("bool")
-	case string:
-		fmt.Println("string")
-	case rune:
-		fmt.Println("rune")
-	default:
-		fmt.Println("Unknown")
-	}
-}
 
 // Adds the string code to the list of instructions instrs.
 // numTabs  \t will be added before the string and
