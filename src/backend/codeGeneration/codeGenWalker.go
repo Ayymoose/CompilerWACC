@@ -11,13 +11,13 @@ import (
 
 // Type sizes in bytes
 const (
-	INT_SIZE       = 4
-	ARRAY_SIZE     = 4
-	BOOL_SIZE      = 1
-	CHAR_SIZE      = 1
-	STRING_SIZE    = 4
-	PAIR_SIZE      = 4
-	ADDRESS_SIZE   = 4
+	INT_SIZE     = 4
+	ARRAY_SIZE   = 4
+	BOOL_SIZE    = 1
+	CHAR_SIZE    = 1
+	STRING_SIZE  = 4
+	PAIR_SIZE    = 4
+	ADDRESS_SIZE = 4
 	// Maximum offset of stack pointer
 	STACK_SIZE_MAX = 1024
 )
@@ -55,19 +55,19 @@ var PAIR_INCLUDED bool
 // function name provided
 func (cg *CodeGenerator) cgVisitReadStatFuncHelper(funcName string) {
 	if !cg.AddCheckProgName(funcName) {
-	// Define the read function
-	appendAssembly(cg.progFuncInstrs, funcName+":", 0, 1)
-	appendAssembly(cg.progFuncInstrs, "PUSH {lr}", 1, 1)
-	appendAssembly(cg.progFuncInstrs, "MOV r1, r0", 1, 1)
-	switch funcName {
-	case "p_read_char":
-		appendAssembly(cg.progFuncInstrs, "LDR r0, "+cg.getMsgLabel("", READ_CHAR), 1, 1)
-	case "p_read_int":
-		appendAssembly(cg.progFuncInstrs, "LDR r0, "+cg.getMsgLabel("", READ_INT), 1, 1)
-	}
-	appendAssembly(cg.progFuncInstrs, "ADD r0, r0, #4", 1, 1)
-	appendAssembly(cg.progFuncInstrs, "BL scanf", 1, 1)
-	appendAssembly(cg.progFuncInstrs, "POP {pc}", 1, 1)
+		// Define the read function
+		appendAssembly(cg.progFuncInstrs, funcName+":", 0, 1)
+		appendAssembly(cg.progFuncInstrs, "PUSH {lr}", 1, 1)
+		appendAssembly(cg.progFuncInstrs, "MOV r1, r0", 1, 1)
+		switch funcName {
+		case "p_read_char":
+			appendAssembly(cg.progFuncInstrs, "LDR r0, "+cg.getMsgLabel("", READ_CHAR), 1, 1)
+		case "p_read_int":
+			appendAssembly(cg.progFuncInstrs, "LDR r0, "+cg.getMsgLabel("", READ_INT), 1, 1)
+		}
+		appendAssembly(cg.progFuncInstrs, "ADD r0, r0, #4", 1, 1)
+		appendAssembly(cg.progFuncInstrs, "BL scanf", 1, 1)
+		appendAssembly(cg.progFuncInstrs, "POP {pc}", 1, 1)
 	}
 }
 
@@ -117,26 +117,26 @@ func (cg *CodeGenerator) checkArrayBounds() {
 // function name provided
 func (cg *CodeGenerator) cgVisitFreeStatFuncHelper(funcName string) {
 	if !cg.AddCheckProgName(funcName) {
-	// Define the read function
-	appendAssembly(cg.progFuncInstrs, funcName+":", 0, 1)
-	switch funcName {
-	case "p_free_pair":
-		appendAssembly(cg.progFuncInstrs, "PUSH {lr}", 1, 1)
-		appendAssembly(cg.progFuncInstrs, "CMP r0, #0", 1, 1)
-		appendAssembly(cg.progFuncInstrs, "LDREQ r0, "+cg.getMsgLabel("", NULL_REFERENCE), 1, 1)
-		appendAssembly(cg.progFuncInstrs, "BEQ p_throw_runtime_error", 1, 1)
-		appendAssembly(cg.progFuncInstrs, "PUSH {r0}", 1, 1)
-		appendAssembly(cg.progFuncInstrs, "LDR r0, [r0]", 1, 1)
-		appendAssembly(cg.progFuncInstrs, "BL free", 1, 1)
-		appendAssembly(cg.progFuncInstrs, "LDR r0, [sp]", 1, 1)
-		appendAssembly(cg.progFuncInstrs, "LDR r0, [r0, #4]", 1, 1)
-		appendAssembly(cg.progFuncInstrs, "BL free", 1, 1)
-		appendAssembly(cg.progFuncInstrs, "POP {r0}", 1, 1)
-		appendAssembly(cg.progFuncInstrs, "BL free", 1, 1)
-		appendAssembly(cg.progFuncInstrs, "POP {pc}", 1, 1)
-	}
-	cg.throwRunTimeError()
-	cg.cgVisitPrintStatFuncHelper("p_print_string")
+		// Define the read function
+		appendAssembly(cg.progFuncInstrs, funcName+":", 0, 1)
+		switch funcName {
+		case "p_free_pair":
+			appendAssembly(cg.progFuncInstrs, "PUSH {lr}", 1, 1)
+			appendAssembly(cg.progFuncInstrs, "CMP r0, #0", 1, 1)
+			appendAssembly(cg.progFuncInstrs, "LDREQ r0, "+cg.getMsgLabel("", NULL_REFERENCE), 1, 1)
+			appendAssembly(cg.progFuncInstrs, "BEQ p_throw_runtime_error", 1, 1)
+			appendAssembly(cg.progFuncInstrs, "PUSH {r0}", 1, 1)
+			appendAssembly(cg.progFuncInstrs, "LDR r0, [r0]", 1, 1)
+			appendAssembly(cg.progFuncInstrs, "BL free", 1, 1)
+			appendAssembly(cg.progFuncInstrs, "LDR r0, [sp]", 1, 1)
+			appendAssembly(cg.progFuncInstrs, "LDR r0, [r0, #4]", 1, 1)
+			appendAssembly(cg.progFuncInstrs, "BL free", 1, 1)
+			appendAssembly(cg.progFuncInstrs, "POP {r0}", 1, 1)
+			appendAssembly(cg.progFuncInstrs, "BL free", 1, 1)
+			appendAssembly(cg.progFuncInstrs, "POP {pc}", 1, 1)
+		}
+		cg.throwRunTimeError()
+		cg.cgVisitPrintStatFuncHelper("p_print_string")
 	}
 }
 
@@ -273,7 +273,7 @@ func (cg *CodeGenerator) evalRHS(t Evaluation, srcReg string) {
 		cg.cgVisitBinopExpr(t.(Binop))
 		appendAssembly(cg.currInstrs(), "MOV "+srcReg+", r0", 1, 1)
 	case PairElem:
-		cg.evalPairElem(t.(PairElem),srcReg)
+		cg.evalPairElem(t.(PairElem), srcReg)
 	case Call:
 		// TODO UNCOMMENT This when you are sure that its not causing the infinite loop
 		cg.cgVisitCallStat(t.(Call).Ident, t.(Call).ParamList)
@@ -288,7 +288,7 @@ func (cg *CodeGenerator) evalString(t Evaluation, srcReg string, ident Ident) {
 }
 
 // Evalute a pair element
-func (cg *CodeGenerator) evalPairElem(t PairElem,srcReg string) {
+func (cg *CodeGenerator) evalPairElem(t PairElem, srcReg string) {
 
 	//Load the address of the pair from the stack
 	var offset, _ = cg.getIdentOffset(t.Expr.(Ident))
@@ -310,7 +310,7 @@ func (cg *CodeGenerator) evalPairElem(t PairElem,srcReg string) {
 	//Double deference
 	appendAssembly(cg.currInstrs(), "LDR "+srcReg+", ["+srcReg+"]", 1, 1)
 
-  //if it's a pair load the address or else store on the next available space
+	//if it's a pair load the address or else store on the next available space
 	switch t.Fsnd {
 	case Fst:
 	case Snd:
@@ -320,13 +320,9 @@ func (cg *CodeGenerator) evalPairElem(t PairElem,srcReg string) {
 		appendAssembly(cg.currInstrs(), "STR "+srcReg+", [sp, #"+strconv.Itoa(offset)+"]", 1, 1)
 	}
 
-
-
 	//	appendAssembly(cg.currInstrs(), "STOREEEEEEE]", 1, 1)
 
-
 	//HERE
-
 
 }
 
@@ -336,7 +332,6 @@ func (cg *CodeGenerator) evalPair(ident Evaluation, fst Evaluation, snd Evaluati
 	// First allocate memory to store two addresses (8-bytes)
 	appendAssembly(cg.currInstrs(), "LDR r0, ="+strconv.Itoa(ADDRESS_SIZE*2), 1, 1)
 	appendAssembly(cg.currInstrs(), "BL malloc", 1, 1)
-
 
 	// Store the address in the free register
 	appendAssembly(cg.currInstrs(), "MOV "+reg2+", r0", 1, 1)
@@ -396,16 +391,16 @@ func (cg *CodeGenerator) evalPair(ident Evaluation, fst Evaluation, snd Evaluati
 	//Store the address of the pair on the stack
 	appendAssembly(cg.currInstrs(), "STR "+reg2+", [sp, #"+cg.subCurrP(PAIR_SIZE)+"]", 1, 1)
 
-/*
-	//Store the address of the pair on the stack
-	switch ident.(type) {
-	case Ident:
-		//Store the address of the address that contains pointers to the first and second elements
-		var offset, _ = cg.getIdentOffset(ident.(Ident))
-		appendAssembly(cg.currInstrs(), "STR "+reg2+", [sp, #"+strconv.Itoa(offset)+"]", 1, 1)
-		//default:
-		//	fmt.Println("oh no")
-	}*/
+	/*
+		//Store the address of the pair on the stack
+		switch ident.(type) {
+		case Ident:
+			//Store the address of the address that contains pointers to the first and second elements
+			var offset, _ = cg.getIdentOffset(ident.(Ident))
+			appendAssembly(cg.currInstrs(), "STR "+reg2+", [sp, #"+strconv.Itoa(offset)+"]", 1, 1)
+			//default:
+			//	fmt.Println("oh no")
+		}*/
 
 }
 
@@ -421,7 +416,6 @@ func (cg *CodeGenerator) evalArrayLiter(typeNode Type, rhs Evaluation, srcReg st
 		//Allocate memory for the array
 		appendAssembly(cg.currInstrs(), "LDR r0, ="+strconv.Itoa(arrayStorage), 1, 1)
 		appendAssembly(cg.currInstrs(), "BL malloc", 1, 1)
-
 
 		appendAssembly(cg.currInstrs(), "MOV "+dstReg+", r0", 1, 1)
 
@@ -618,7 +612,6 @@ func (cg *CodeGenerator) cgVisitDeclareStat(node Declare) {
 
 	case ConstType:
 
-
 		switch node.DecType.(ConstType) {
 		case Bool:
 			cg.evalRHS(rhs, "r4")
@@ -642,7 +635,6 @@ func (cg *CodeGenerator) cgVisitDeclareStat(node Declare) {
 		default:
 
 		}
-
 
 	case PairType:
 		fmt.Println("GOT TO THIS ST")
@@ -681,7 +673,7 @@ func (cg *CodeGenerator) cgVisitDeclareStat(node Declare) {
 func (cg *CodeGenerator) cgVisitAssignmentStat(node Assignment) {
 
 	var rhs = node.Rhs
-  var lhs = node.Lhs
+	var lhs = node.Lhs
 
 	//Evaluate the rhs first
 	cg.evalRHS(rhs, "r4")
@@ -695,18 +687,17 @@ func (cg *CodeGenerator) cgVisitAssignmentStat(node Assignment) {
 		typeIdent := cg.eval(ident)
 
 		switch typeIdent.(type) {
-			case PairType:
+		case PairType:
 
-				switch rhs.(type) {
-				case PairLiter:
-					//Store null in the pair
-					var offset, _ = cg.getIdentOffset(lhs.(Ident))
-					appendAssembly(cg.currInstrs(), "STR r4, [sp, #"+strconv.Itoa(offset)+"]", 1, 1)
-				default:
-					appendAssembly(cg.currInstrs(), "fffffffffffffffffffffffffffffffff", 1, 1)
-					//Complete
-				}
-
+			switch rhs.(type) {
+			case PairLiter:
+				//Store null in the pair
+				var offset, _ = cg.getIdentOffset(lhs.(Ident))
+				appendAssembly(cg.currInstrs(), "STR r4, [sp, #"+strconv.Itoa(offset)+"]", 1, 1)
+			default:
+				appendAssembly(cg.currInstrs(), "fffffffffffffffffffffffffffffffff", 1, 1)
+				//Complete
+			}
 
 		case ConstType:
 			offset, _ := cg.getIdentOffset(ident)
@@ -757,7 +748,7 @@ func (cg *CodeGenerator) cgVisitAssignmentStat(node Assignment) {
 		// Load the address of the pair into a register
 		var offset, _ = cg.getIdentOffset(lhs.(PairElem).Expr.(Ident))
 		appendAssembly(cg.currInstrs(), "LDR r5, [sp, #"+strconv.Itoa(offset)+"]", 1, 1)
-    appendAssembly(cg.currInstrs(), "MOV r0, r5", 1, 1)
+		appendAssembly(cg.currInstrs(), "MOV r0, r5", 1, 1)
 
 		// Jump
 		appendAssembly(cg.currInstrs(), "BL p_check_null_pointer", 1, 1)
@@ -805,7 +796,8 @@ func (cg *CodeGenerator) cgVisitReadStat(node Read) {
 
 // Visit Free node
 func (cg *CodeGenerator) cgVisitFreeStat(node Free) {
-	appendAssembly(cg.currInstrs(), "LDR r4, [sp]", 1, 1)
+	testoffset, _ := cg.getIdentOffset(node.Expr.(PairElem).Expr.(Ident))
+	appendAssembly(cg.currInstrs(), "LDR r4, [sp, #"+strconv.Itoa(testoffset)+"]", 1, 1)
 	appendAssembly(cg.currInstrs(), "MOV r0, r4", 1, 1)
 	appendAssembly(cg.currInstrs(), "BL p_free_pair", 1, 1)
 	cg.cgVisitFreeStatFuncHelper("p_free_pair")
@@ -873,7 +865,7 @@ func (cg *CodeGenerator) cgVisitPrintStat(node Print) {
 		cg.cgVisitPrintStatFuncHelper("p_print_reference")
 
 	default:
-//		appendAssembly(cg.currInstrs(), "Error: type not implemented", 1, 1)
+		//		appendAssembly(cg.currInstrs(), "Error: type not implemented", 1, 1)
 		typeOf(expr)
 	}
 }
@@ -1000,7 +992,7 @@ func (cg *CodeGenerator) cgVisitFunction(node Function) {
 		cg.cgEvalStat(stat)
 	}
 
-  // TEST harness uses double POP don't think we need it
+	// TEST harness uses double POP don't think we need it
 	// You're right , we don't need it!
 	appendAssembly(cg.currInstrs(), "POP {pc}", 1, 1)
 	appendAssembly(cg.currInstrs(), ".ltorg", 1, 2)
