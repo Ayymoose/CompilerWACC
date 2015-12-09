@@ -119,6 +119,19 @@ func (cg *CodeGenerator) arrayCheckBounds(array []Evaluation, reg1 string, reg2 
  	// Load the first index
  	cg.evalRHS(array[0], reg2)
 
+  // Load the ident into register
+/*	switch array[0].(type) {
+	case Ident:
+		var offset, _ = cg.getIdentOffset(array[0].(Ident))
+		appendAssembly(cg.currInstrs(), "LDR "+reg2+", [sp, #"+strconv.Itoa(offset)+"]", 1, 1)
+	//case ConstType:
+		/*switch array[0].(ConstType) {
+
+		}
+	default:
+		appendAssembly(cg.currInstrs(), "Case not implemented", 1, 1)
+	}*/
+
  	// Set a register to point to the array
  	appendAssembly(cg.currInstrs(), "LDR "+reg1+", ["+reg1+"]", 1, 1)
 
@@ -301,10 +314,10 @@ func (cg *CodeGenerator) evalRHS(t Evaluation, srcReg string) {
 			case Bool, Char:
 				appendAssembly(cg.currInstrs(), "LDRSB "+srcReg+", [sp, #"+strconv.Itoa(offset)+"]", 1, 1)
 			case Int, String:
-				appendAssembly(cg.currInstrs(), "LDR r4, [sp, #"+strconv.Itoa(offset)+"]", 1, 1)
+				appendAssembly(cg.currInstrs(), "LDR "+srcReg+", [sp, #"+strconv.Itoa(offset)+"]", 1, 1)
 
 				//MIGHT NEED TO MOVE OUT
-				appendAssembly(cg.currInstrs(), "MOV r0, r4", 1, 1)
+				//appendAssembly(cg.currInstrs(), "MOV r0, r4", 1, 1)
 			}
 		default:
 			appendAssembly(cg.currInstrs(), "LDR "+srcReg+", [sp, #"+strconv.Itoa(offset)+"]", 1, 1)
@@ -519,7 +532,7 @@ func (cg *CodeGenerator) evalArrayElem(t Evaluation, reg1 string, reg2 string) {
 		reg1 = "r4"
 	}
 
-	cg.debug("----- DEBUG - evalArrayElem() start -----")
+	//cg.debug("----- DEBUG - evalArrayElem() start -----")
 
 	// Store the address at the next space in the stack
 	var offset, _ = cg.getIdentOffset(t.(ArrayElem).Ident)
@@ -528,13 +541,14 @@ func (cg *CodeGenerator) evalArrayElem(t Evaluation, reg1 string, reg2 string) {
 	//Check the array
 	var array = t.(ArrayElem).Exprs
 
+  //Check the bounds of the array
 	cg.arrayCheckBounds(array,reg1,reg2)
 
-	// Check bounds and errors
+	// Add message labels
 	cg.checkArrayBounds()
 	cg.cgVisitPrintStatFuncHelper("p_print_string")
 
-	cg.debug("----- DEBUG - evalArrayElem() end -----")
+//	cg.debug("----- DEBUG - evalArrayElem() end -----")
 }
 
 // Evalutes a ord
