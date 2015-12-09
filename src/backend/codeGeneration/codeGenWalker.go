@@ -46,7 +46,7 @@ const (
 // Function global variable
 var functionList []*Function
 
-var DEBUG = true
+var DEBUG = !true
 
 // HELPER FUNCTIONS
 // cgVisitReadStat helper function
@@ -374,17 +374,12 @@ func (cg *CodeGenerator) evalPairElem(t PairElem, srcReg string) {
 
 	//if it's a pair load the address or else store on the next available space
 	switch t.Fsnd {
-	case Fst:
-	case Snd:
-
+	case Fst,Snd:
+    appendAssembly(cg.currInstrs(), "STR "+srcReg+", [sp, #"+cg.subCurrP(PAIR_SIZE)+"]", 1, 1)
 	default:
 		//Store on the next available space on the stack
 		appendAssembly(cg.currInstrs(), "STR "+srcReg+", [sp, #"+strconv.Itoa(offset)+"]", 1, 1)
 	}
-
-	//	appendAssembly(cg.currInstrs(), "STOREEEEEEE]", 1, 1)
-
-	//HERE
 
 }
 
@@ -409,22 +404,21 @@ func (cg *CodeGenerator) evalPair(ident Evaluation, fst Evaluation, snd Evaluati
 	appendAssembly(cg.currInstrs(), "LDR r0, ="+strconv.Itoa(fstSize), 1, 1)
 	appendAssembly(cg.currInstrs(), "BL malloc", 1, 1)
 
-	//Store the first element in the register
-	appendAssembly(cg.currInstrs(), "STR "+reg1+", [r0]", 1, 1)
-
+  //Store the first element in the register
 	switch typeFst.(type) {
 	case ConstType:
 		switch typeFst.(ConstType) {
 		case Bool, Char:
-			//Store the first element to the newly allocated memory onto the stack
 			appendAssembly(cg.currInstrs(), "STRB "+reg1+", [r0]", 1, 1)
 		case Int, String:
-			//Store the address of allocated memory block of the pair on the stack
-			appendAssembly(cg.currInstrs(), "STR r0, ["+reg2+"]", 1, 1)
+			appendAssembly(cg.currInstrs(), "STR "+reg1+", [r0]", 1, 1)
+		case Pair:
+	    appendAssembly(cg.currInstrs(), "STR "+reg1+", [r0]", 1, 1)
 		}
-	default:
-		appendAssembly(cg.currInstrs(), "STR "+reg1+", [r0]", 1, 1)
 	}
+
+	//Store first address onto the stack
+	appendAssembly(cg.currInstrs(), "STR r0, ["+reg2+"]", 1, 1)
 
 	//Load the second element into a register to be stored
 	cg.evalRHS(snd, reg1)
@@ -433,6 +427,7 @@ func (cg *CodeGenerator) evalPair(ident Evaluation, fst Evaluation, snd Evaluati
 	appendAssembly(cg.currInstrs(), "LDR r0, ="+strconv.Itoa(sndSize), 1, 1)
 	appendAssembly(cg.currInstrs(), "BL malloc", 1, 1)
 
+  //Store the second element into register
 	switch typeSnd.(type) {
 	case ConstType:
 		switch typeSnd.(ConstType) {
@@ -442,27 +437,16 @@ func (cg *CodeGenerator) evalPair(ident Evaluation, fst Evaluation, snd Evaluati
 		case Int, String:
 			//Store the second element to the newly allocated memory onto the stack
 			appendAssembly(cg.currInstrs(), "STR "+reg1+", [r0]", 1, 1)
+		case Pair:
+	  	appendAssembly(cg.currInstrs(), "STR "+reg1+", [r0]", 1, 1)
 		}
-	default:
-		appendAssembly(cg.currInstrs(), "STR "+reg1+", [r0]", 1, 1)
 	}
 
-	//Store the address of allocated memory block of the pair on the stack
+	//Store the second address of the element onto the stack
 	appendAssembly(cg.currInstrs(), "STR r0, ["+reg2+", #4]", 1, 1)
 
 	//Store the address of the pair on the stack
 	appendAssembly(cg.currInstrs(), "STR "+reg2+", [sp, #"+cg.subCurrP(PAIR_SIZE)+"]", 1, 1)
-
-	/*
-		//Store the address of the pair on the stack
-		switch ident.(type) {
-		case Ident:
-			//Store the address of the address that contains pointers to the first and second elements
-			var offset, _ = cg.getIdentOffset(ident.(Ident))
-			appendAssembly(cg.currInstrs(), "STR "+reg2+", [sp, #"+strconv.Itoa(offset)+"]", 1, 1)
-			//default:
-			//	fmt.Println("oh no")
-		}*/
 
 }
 
@@ -684,6 +668,7 @@ func (cg *CodeGenerator) cgVisitDeclareStat(node Declare) {
 		}
 
 	case PairType:
+
 		switch rhs.(type) {
 		case NewPair:
 			cg.evalPair(node.Lhs, rhs.(NewPair).FstExpr, rhs.(NewPair).SndExpr, "r5", "r4")
@@ -698,13 +683,12 @@ func (cg *CodeGenerator) cgVisitDeclareStat(node Declare) {
 			cg.evalRHS(rhs.(Call), "r4")
 			appendAssembly(cg.currInstrs(), "STR r4, [sp, #"+cg.subCurrP(sizeOf(cg.eval(rhs.(Call))))+"]", 1, 1)
 		case PairElem:
-			fmt.Println("pair elem not done")
+			cg.evalRHS(rhs.(PairElem),"r4")
 		default:
 			appendAssembly(cg.currInstrs(), "Unknown type 1", 1, 1)
 		}
 
 	case ArrayType:
-		// Evalute an array
 		cg.evalArrayLiter(node.DecType, rhs, "r5", "r4")
 	default:
 		appendAssembly(cg.currInstrs(), "Unknown type 2", 1, 1)

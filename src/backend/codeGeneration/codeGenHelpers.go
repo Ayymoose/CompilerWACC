@@ -3,6 +3,7 @@ package codeGeneration
 import (
 	. "ast"
 	. "backend/filewriter"
+	//"fmt"
 	"strconv"
 )
 
@@ -47,6 +48,8 @@ func sizeOf(t Type) int {
 			size = CHAR_SIZE
 		case String:
 			size = ADDRESS_SIZE
+		case Pair:
+			size = PAIR_SIZE
 		}
 	case PairType:
 		size = ADDRESS_SIZE
