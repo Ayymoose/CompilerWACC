@@ -377,6 +377,10 @@ func (cg *CodeGenerator) evalPair(ident Evaluation, fst Evaluation, snd Evaluati
 	appendAssembly(cg.currInstrs(), "STR r0, ["+reg2+", #4]", 1, 1)
 
 	//Store the address of the pair on the stack
+	appendAssembly(cg.currInstrs(), "STR "+reg2+", [sp, #"+cg.subCurrP(PAIR_SIZE)+"]", 1, 1)
+
+/*
+	//Store the address of the pair on the stack
 	switch ident.(type) {
 	case Ident:
 		//Store the address of the address that contains pointers to the first and second elements
@@ -384,7 +388,7 @@ func (cg *CodeGenerator) evalPair(ident Evaluation, fst Evaluation, snd Evaluati
 		appendAssembly(cg.currInstrs(), "STR "+reg2+", [sp, #"+strconv.Itoa(offset)+"]", 1, 1)
 		//default:
 		//	fmt.Println("oh no")
-	}
+	}*/
 
 }
 
@@ -669,6 +673,18 @@ func (cg *CodeGenerator) cgVisitAssignmentStat(node Assignment) {
 		typeIdent := cg.eval(ident)
 
 		switch typeIdent.(type) {
+			case PairType:
+
+				switch rhs.(type) {
+				case PairLiter:
+					//Store null in the pair
+					var offset, _ = cg.getIdentOffset(node.Lhs.(Ident))
+					appendAssembly(cg.currInstrs(), "STR r4, [sp, #"+strconv.Itoa(offset)+"]", 1, 1)
+				default:
+					//Complete
+				}
+
+
 		case ConstType:
 			offset, _ := cg.getIdentOffset(ident)
 			switch typeIdent.(ConstType) {
