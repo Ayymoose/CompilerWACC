@@ -289,7 +289,7 @@ func (cg *CodeGenerator) evalPairElem(t PairElem, srcReg string) {
 
 	//Load the address of the pair from the STACK
 	//TODO: FIX THIS
-	var offset = 0
+	var offset = -999
 	appendAssembly(cg.currInstrs(), "LDR "+srcReg+", [sp, #"+strconv.Itoa(offset)+"]", 1, 1)
 	//Check for null pointer deference
 	appendAssembly(cg.currInstrs(), "MOV r0, "+srcReg, 1, 1)
