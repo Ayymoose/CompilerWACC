@@ -611,13 +611,13 @@ func (cg *CodeGenerator) cgEvalStat(stat interface{}) {
 // Visit Declare node
 func (cg *CodeGenerator) cgVisitDeclareStat(node Declare) {
 	rhs := node.Rhs
-//	fmt.Println(node.DecType)
+	//	fmt.Println(node.DecType)
 
 	switch node.DecType.(type) {
 
 	case ConstType:
 
-    cg.evalRHS(rhs, "r4")
+		cg.evalRHS(rhs, "r4")
 
 		switch node.DecType.(ConstType) {
 		case Bool:
@@ -639,7 +639,7 @@ func (cg *CodeGenerator) cgVisitDeclareStat(node Declare) {
 		}
 
 	case PairType:
-	//	fmt.Println("GOT TO THIS ST")
+		//	fmt.Println("GOT TO THIS ST")
 
 		switch rhs.(type) {
 		case NewPair:
@@ -651,9 +651,9 @@ func (cg *CodeGenerator) cgVisitDeclareStat(node Declare) {
 		case PairLiter:
 			//Can only be Null
 			appendAssembly(cg.currInstrs(), "LDR r4, =0", 1, 1)
-			appendAssembly(cg.currInstrs(), "STR r4, [sp]", 1, 1)
+			appendAssembly(cg.currInstrs(), "STR r4, [sp"+strconv.Itoa(cg.currStack.currP)+"]", 1, 1)
 		case Call:
-
+			cg.evalRHS(rhs.(Call), "r5")
 		case PairElem:
 			fmt.Println("pair elem not done")
 		default:
@@ -865,8 +865,8 @@ func (cg *CodeGenerator) cgVisitPrintStat(node Print) {
 		cg.cgVisitPrintStatFuncHelper("p_print_reference")
 
 	default:
-				appendAssembly(cg.currInstrs(), "Error: type not implemented", 1, 1)
-	//	typeOf(expr)
+		appendAssembly(cg.currInstrs(), "Error: type not implemented", 1, 1)
+		//	typeOf(expr)
 	}
 }
 
