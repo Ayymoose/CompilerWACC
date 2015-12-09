@@ -287,12 +287,11 @@ func (cg *CodeGenerator) evalString(t Evaluation, srcReg string, ident Ident) {
 // Evalute a pair element
 func (cg *CodeGenerator) evalPairElem(t PairElem, srcReg string) {
 
-	//Load the address of the pair from the STACK
-	//TODO: FIX THIS
-	var offset = -999
-	appendAssembly(cg.currInstrs(), "LDR "+srcReg+", [sp, #"+strconv.Itoa(offset)+"]", 1, 1)
+	//Load the address of the pair from the stack
+	var offset, _ = cg.getIdentOffset(t.Expr.(Ident))
+	appendAssembly(cg.currInstrs(), "LDR r0, [sp, #"+strconv.Itoa(offset)+"]", 1, 1)
 	//Check for null pointer deference
-	appendAssembly(cg.currInstrs(), "MOV r0, "+srcReg, 1, 1)
+//	appendAssembly(cg.currInstrs(), "MOV r0, "+srcReg, 1, 1)
 	appendAssembly(cg.currInstrs(), "BL p_check_null_pointer", 1, 1)
 	cg.dereferenceNullPointer()
 	//cg.throwRunTimeError()
@@ -308,8 +307,25 @@ func (cg *CodeGenerator) evalPairElem(t PairElem, srcReg string) {
 	//Double deference
 	appendAssembly(cg.currInstrs(), "LDR "+srcReg+", ["+srcReg+"]", 1, 1)
 
-	//Store on the next available space on the stack
-	appendAssembly(cg.currInstrs(), "STR "+srcReg+", [sp, #"+strconv.Itoa(offset)+"]", 1, 1)
+  //if it's a pair load the address or else store on the next available space
+	switch t.Fsnd {
+	case Fst:
+
+		appendAssembly(cg.currInstrs(), "load meeeeeee", 1, 1)
+	case Snd:
+
+	default:
+		//Store on the next available space on the stack
+		appendAssembly(cg.currInstrs(), "STR "+srcReg+", [sp, #"+strconv.Itoa(offset)+"]", 1, 1)
+	}
+
+
+
+	//	appendAssembly(cg.currInstrs(), "STOREEEEEEE]", 1, 1)
+
+
+	//HERE
+
 
 }
 
@@ -645,12 +661,14 @@ func (cg *CodeGenerator) cgVisitDeclareStat(node Declare) {
 		case PairElem:
 			fmt.Println("pair elem not done")
 		default:
+			appendAssembly(cg.currInstrs(), "Unknown type 1", 1, 1)
 		}
 
 	case ArrayType:
 		// Evalute an array
 		cg.evalArrayLiter(node.DecType, rhs, "r5", "r4")
 	default:
+		appendAssembly(cg.currInstrs(), "Unknown type 2", 1, 1)
 		typeOf(node.DecType)
 	}
 
@@ -660,16 +678,19 @@ func (cg *CodeGenerator) cgVisitDeclareStat(node Declare) {
 
 // Visit Assignment node
 func (cg *CodeGenerator) cgVisitAssignmentStat(node Assignment) {
-	rhs := node.Rhs
 
+	var rhs = node.Rhs
+  var lhs = node.Rhs
+
+	//Evaluate the rhs first
 	cg.evalRHS(rhs, "r4")
 
 	// lhs can be
 	// IDENT , ARRAY-ELEM , PAIR-ELEM
-	switch node.Lhs.(type) {
+	switch lhs.(type) {
 
 	case Ident:
-		ident := node.Lhs.(Ident)
+		ident := lhs.(Ident)
 		typeIdent := cg.eval(ident)
 
 		switch typeIdent.(type) {
@@ -678,9 +699,10 @@ func (cg *CodeGenerator) cgVisitAssignmentStat(node Assignment) {
 				switch rhs.(type) {
 				case PairLiter:
 					//Store null in the pair
-					var offset, _ = cg.getIdentOffset(node.Lhs.(Ident))
+					var offset, _ = cg.getIdentOffset(lhs.(Ident))
 					appendAssembly(cg.currInstrs(), "STR r4, [sp, #"+strconv.Itoa(offset)+"]", 1, 1)
 				default:
+					appendAssembly(cg.currInstrs(), "fffffffffffffffffffffffffffffffff", 1, 1)
 					//Complete
 				}
 
@@ -699,13 +721,13 @@ func (cg *CodeGenerator) cgVisitAssignmentStat(node Assignment) {
 
 	case ArrayElem:
 
-		var offset, _ = cg.getIdentOffset(node.Lhs.(ArrayElem).Ident)
+		var offset, _ = cg.getIdentOffset(lhs.(ArrayElem).Ident)
 
 		//Have a register point to the start of the array
 		appendAssembly(cg.currInstrs(), "ADD r5, sp, #"+strconv.Itoa(offset), 1, 1)
 
 		//Load the index
-		cg.evalRHS(node.Lhs.(ArrayElem).Exprs[0], "r6")
+		cg.evalRHS(lhs.(ArrayElem).Exprs[0], "r6")
 		appendAssembly(cg.currInstrs(), "LDR r5, [r5]", 1, 1)
 
 		//r6 = Index
@@ -723,7 +745,7 @@ func (cg *CodeGenerator) cgVisitAssignmentStat(node Assignment) {
 		appendAssembly(cg.currInstrs(), "ADD r5, r5, r6", 1, 1)
 
 		//Get the type of the RHS
-		switch node.Rhs.(type) {
+		switch rhs.(type) {
 		case Boolean, Character:
 			appendAssembly(cg.currInstrs(), "STRB r4, [r5]", 1, 1)
 		case Integer, Str:
@@ -732,13 +754,13 @@ func (cg *CodeGenerator) cgVisitAssignmentStat(node Assignment) {
 	case PairElem:
 
 		// Load the address of the pair into a register
-		var offset, _ = cg.getIdentOffset(node.Lhs.(PairElem).Expr.(Ident))
+		var offset, _ = cg.getIdentOffset(lhs.(PairElem).Expr.(Ident))
 		appendAssembly(cg.currInstrs(), "LDR r0, [sp, #"+strconv.Itoa(offset)+"]", 1, 1)
 		// Jump
 		appendAssembly(cg.currInstrs(), "BL p_check_null_pointer", 1, 1)
 		cg.dereferenceNullPointer()
 		// Check if it's the fst or snd
-		switch node.Lhs.(PairElem).Fsnd {
+		switch lhs.(PairElem).Fsnd {
 		case Fst:
 			appendAssembly(cg.currInstrs(), "LDR r5, [r5]", 1, 1)
 		case Snd:
