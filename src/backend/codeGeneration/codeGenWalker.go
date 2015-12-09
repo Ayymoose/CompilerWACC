@@ -350,7 +350,7 @@ func (cg *CodeGenerator) evalPairElem(t PairElem, srcReg string) {
 	//Double deference
 	appendAssembly(cg.currInstrs(), "LDR "+srcReg+", ["+srcReg+"]", 1, 1)
 
-	//if it's a pair load the address or else store on the next available space
+ 	//if it's a pair load the address or else store on the next available space
 	switch t.Fsnd {
 	case Fst:
 	case Snd:
