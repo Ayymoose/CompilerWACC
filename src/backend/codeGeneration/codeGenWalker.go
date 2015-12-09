@@ -224,6 +224,10 @@ func (cg *CodeGenerator) removeStackSpace(stackSize int) {
 	}
 }
 
+func (cg *CodeGenerator) debug(message string) {
+		appendAssembly(cg.currInstrs(), "# " + message, 1, 1)
+}
+
 // EVALUATION FUNCTIONS
 
 // Evalutes the RHS of an expression
@@ -473,6 +477,8 @@ func (cg *CodeGenerator) evalArrayElem(t Evaluation, reg1 string, reg2 string) {
 		reg1 = "r4"
 	}
 
+	cg.debug("----- DEBUG - evalArrayElem() start -----")
+
 	// Store the address at the next space in the stack
 	var offset, _ = cg.getIdentOffset(t.(ArrayElem).Ident)
 	appendAssembly(cg.currInstrs(), "ADD "+reg1+", sp, #"+strconv.Itoa(offset), 1, 1)
@@ -494,11 +500,16 @@ func (cg *CodeGenerator) evalArrayElem(t Evaluation, reg1 string, reg2 string) {
 	appendAssembly(cg.currInstrs(), "ADD "+reg1+", "+reg1+", #4", 1, 1)
 	appendAssembly(cg.currInstrs(), "ADD "+reg1+", "+reg1+", "+reg2+", LSL #2", 1, 1)
 	appendAssembly(cg.currInstrs(), "LDR "+reg1+", ["+reg1+"]", 1, 1)
+
+	//Load the second index if there is one
+
 	appendAssembly(cg.currInstrs(), "MOV r0, "+reg1, 1, 1)
 
 	// Check bounds and errors
 	cg.checkArrayBounds()
 	cg.cgVisitPrintStatFuncHelper("p_print_string")
+
+	cg.debug("----- DEBUG - evalArrayElem() end -----")
 }
 
 // Evalutes a ord
