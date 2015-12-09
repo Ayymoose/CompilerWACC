@@ -270,7 +270,7 @@ func (cg *CodeGenerator) evalRHS(t Evaluation, srcReg string) {
 		cg.cgVisitBinopExpr(t.(Binop))
 		appendAssembly(cg.currInstrs(), "MOV "+srcReg+", r0", 1, 1)
 	case PairElem:
-		cg.evalPairElem(t.(PairElem), srcReg)
+		cg.evalPairElem(t.(PairElem), , srcReg)
 	case Call:
 		// TODO UNCOMMENT This when you are sure that its not causing the infinite loop
 		cg.cgVisitCallStat(t.(Call).Ident, t.(Call).ParamList)
@@ -285,7 +285,7 @@ func (cg *CodeGenerator) evalString(t Evaluation, srcReg string, ident Ident) {
 }
 
 // Evalute a pair element
-func (cg *CodeGenerator) evalPairElem(t PairElem, srcReg string) {
+func (cg *CodeGenerator) evalPairElem(t PairElem, pairType Type, srcReg string) {
 
 	//Load the address of the pair from the stack
 	var offset, _ = cg.getIdentOffset(t.Expr.(Ident))
@@ -311,7 +311,7 @@ func (cg *CodeGenerator) evalPairElem(t PairElem, srcReg string) {
 	switch t.Fsnd {
 	case Fst:
 
-		appendAssembly(cg.currInstrs(), "load meeeeeee", 1, 1)
+		//appendAssembly(cg.currInstrs(), "load meeeeeee", 1, 1)
 	case Snd:
 
 	default:
