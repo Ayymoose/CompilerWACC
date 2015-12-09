@@ -282,11 +282,6 @@ func (cg *CodeGenerator) evalRHS(t Evaluation, srcReg string) {
 	}
 }
 
-// Evaluate a string with an optional string identifier
-func (cg *CodeGenerator) evalString(t Evaluation, srcReg string, ident Ident) {
-	appendAssembly(cg.currInstrs(), "LDR "+srcReg+", "+cg.getMsgLabel(ident, string(t.(Str))), 1, 1)
-}
-
 // Evalute a pair element
 func (cg *CodeGenerator) evalPairElem(t PairElem, srcReg string) {
 
@@ -473,6 +468,11 @@ func (cg *CodeGenerator) evalArrayElem(t Evaluation, reg1 string, reg2 string) {
 	cg.getMsgLabel("", ARRAY_INDEX_LARGE)
 	cg.getMsgLabel("", STRING_FORMAT)
 
+	// HACK
+	if reg1 == "r0" {
+		reg1 = "r4"
+	}
+
 	// Store the address at the next space in the stack
 	var offset, _ = cg.getIdentOffset(t.(ArrayElem).Ident)
 	appendAssembly(cg.currInstrs(), "ADD "+reg1+", sp, #"+strconv.Itoa(offset), 1, 1)
@@ -490,14 +490,7 @@ func (cg *CodeGenerator) evalArrayElem(t Evaluation, reg1 string, reg2 string) {
 	appendAssembly(cg.currInstrs(), "MOV r1, "+reg1, 1, 1)
 	appendAssembly(cg.currInstrs(), "BL p_check_array_bounds", 1, 1)
 
-	// Still don't know what these assembly instructions do
-	/*
-		ADD r4, r4, #4
-		ADD r4, r4, r5, LSL #2
-		LDR r4, [r4]
-		MOV r0, r4
-	*/
-
+	// Get offset of
 	appendAssembly(cg.currInstrs(), "ADD "+reg1+", "+reg1+", #4", 1, 1)
 	appendAssembly(cg.currInstrs(), "ADD "+reg1+", "+reg1+", "+reg2+", LSL #2", 1, 1)
 	appendAssembly(cg.currInstrs(), "LDR "+reg1+", ["+reg1+"]", 1, 1)
@@ -607,27 +600,25 @@ func (cg *CodeGenerator) cgEvalStat(stat interface{}) {
 // Visit Declare node
 func (cg *CodeGenerator) cgVisitDeclareStat(node Declare) {
 	rhs := node.Rhs
-	fmt.Println(node.DecType)
+//	fmt.Println(node.DecType)
+
 	switch node.DecType.(type) {
 
 	case ConstType:
 
+    cg.evalRHS(rhs, "r4")
+
 		switch node.DecType.(ConstType) {
 		case Bool:
-			cg.evalRHS(rhs, "r4")
 			// Using STRB, store it on the stack
 			appendAssembly(cg.currInstrs(), "STRB r4, [sp, #"+cg.subCurrP(BOOL_SIZE)+"]", 1, 1)
 		case Char:
-			cg.evalRHS(rhs, "r4")
 			// Using STRB, store it on the stack
 			appendAssembly(cg.currInstrs(), "STRB r4, [sp, #"+cg.subCurrP(CHAR_SIZE)+"]", 1, 1)
 		case Int:
-			cg.evalRHS(rhs, "r4")
 			// Store the value of declaration to stack
 			appendAssembly(cg.currInstrs(), "STR r4, [sp, #"+cg.subCurrP(INT_SIZE)+"]", 1, 1)
 		case String:
-			cg.evalRHS(rhs, "r4")
-			//cg.evalString(rhs, "r4", node.Lhs)
 			// Store the address onto the stack
 			appendAssembly(cg.currInstrs(), "STR r4, [sp, #"+cg.subCurrP(STRING_SIZE)+"]", 1, 1)
 		case Pair:
@@ -637,7 +628,8 @@ func (cg *CodeGenerator) cgVisitDeclareStat(node Declare) {
 		}
 
 	case PairType:
-		fmt.Println("GOT TO THIS ST")
+	//	fmt.Println("GOT TO THIS ST")
+
 		switch rhs.(type) {
 		case NewPair:
 			PAIR_INCLUDED = true
@@ -819,14 +811,11 @@ func (cg *CodeGenerator) cgVisitExitStat(node Exit) {
 
 // Visit Print node
 func (cg *CodeGenerator) cgVisitPrintStat(node Print) {
-	expr := node.Expr
-	dstReg := "r0"
 
 	// Get value of expr into dstReg
-	cg.evalRHS(expr, dstReg)
+	cg.evalRHS(node.Expr, "r0")
+	exprType := cg.eval(node.Expr)
 
-	exprType := cg.eval(expr)
-	//fmt.Println("CHEECKK TJIIIIS:", exprType, expr)
 	switch exprType.(type) {
 	case ConstType:
 		switch exprType.(ConstType) {
@@ -865,8 +854,8 @@ func (cg *CodeGenerator) cgVisitPrintStat(node Print) {
 		cg.cgVisitPrintStatFuncHelper("p_print_reference")
 
 	default:
-		//		appendAssembly(cg.currInstrs(), "Error: type not implemented", 1, 1)
-		typeOf(expr)
+				appendAssembly(cg.currInstrs(), "Error: type not implemented", 1, 1)
+	//	typeOf(expr)
 	}
 }
 
