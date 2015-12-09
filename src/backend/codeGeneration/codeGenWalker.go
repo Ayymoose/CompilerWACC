@@ -796,8 +796,8 @@ func (cg *CodeGenerator) cgVisitReadStat(node Read) {
 
 // Visit Free node
 func (cg *CodeGenerator) cgVisitFreeStat(node Free) {
-	testoffset, _ := cg.getIdentOffset(node.Expr.(PairElem).Expr.(Ident))
-	appendAssembly(cg.currInstrs(), "LDR r4, [sp, #"+strconv.Itoa(testoffset)+"]", 1, 1)
+	//testoffset, _ := cg.getIdentOffset(node.Expr.(PairElem).Expr.(Ident))
+	appendAssembly(cg.currInstrs(), "LDR r4, [sp]", 1, 1)
 	appendAssembly(cg.currInstrs(), "MOV r0, r4", 1, 1)
 	appendAssembly(cg.currInstrs(), "BL p_free_pair", 1, 1)
 	cg.cgVisitFreeStatFuncHelper("p_free_pair")
