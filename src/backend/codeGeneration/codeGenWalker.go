@@ -256,7 +256,10 @@ func (cg *CodeGenerator) evalRHS(t Evaluation, srcReg string) {
 			case Bool, Char:
 				appendAssembly(cg.currInstrs(), "LDRSB "+srcReg+", [sp, #"+strconv.Itoa(offset)+"]", 1, 1)
 			case Int, String:
-				appendAssembly(cg.currInstrs(), "LDR "+srcReg+", [sp, #"+strconv.Itoa(offset)+"]", 1, 1)
+				appendAssembly(cg.currInstrs(), "LDR r4, [sp, #"+strconv.Itoa(offset)+"]", 1, 1)
+
+				//MIGHT NEED TO MOVE OUT
+				appendAssembly(cg.currInstrs(), "MOV r0, r4", 1, 1)
 			}
 		default:
 			appendAssembly(cg.currInstrs(), "LDR "+srcReg+", [sp, #"+strconv.Itoa(offset)+"]", 1, 1)
@@ -270,7 +273,7 @@ func (cg *CodeGenerator) evalRHS(t Evaluation, srcReg string) {
 		cg.cgVisitBinopExpr(t.(Binop))
 		appendAssembly(cg.currInstrs(), "MOV "+srcReg+", r0", 1, 1)
 	case PairElem:
-		cg.evalPairElem(t.(PairElem), , srcReg)
+		cg.evalPairElem(t.(PairElem),srcReg)
 	case Call:
 		// TODO UNCOMMENT This when you are sure that its not causing the infinite loop
 		cg.cgVisitCallStat(t.(Call).Ident, t.(Call).ParamList)
@@ -285,13 +288,13 @@ func (cg *CodeGenerator) evalString(t Evaluation, srcReg string, ident Ident) {
 }
 
 // Evalute a pair element
-func (cg *CodeGenerator) evalPairElem(t PairElem, pairType Type, srcReg string) {
+func (cg *CodeGenerator) evalPairElem(t PairElem,srcReg string) {
 
 	//Load the address of the pair from the stack
 	var offset, _ = cg.getIdentOffset(t.Expr.(Ident))
-	appendAssembly(cg.currInstrs(), "LDR r0, [sp, #"+strconv.Itoa(offset)+"]", 1, 1)
+	appendAssembly(cg.currInstrs(), "LDR "+srcReg+", [sp, #"+strconv.Itoa(offset)+"]", 1, 1)
 	//Check for null pointer deference
-//	appendAssembly(cg.currInstrs(), "MOV r0, "+srcReg, 1, 1)
+	appendAssembly(cg.currInstrs(), "MOV r0, "+srcReg, 1, 1)
 	appendAssembly(cg.currInstrs(), "BL p_check_null_pointer", 1, 1)
 	cg.dereferenceNullPointer()
 	//cg.throwRunTimeError()
@@ -310,8 +313,6 @@ func (cg *CodeGenerator) evalPairElem(t PairElem, pairType Type, srcReg string) 
   //if it's a pair load the address or else store on the next available space
 	switch t.Fsnd {
 	case Fst:
-
-		//appendAssembly(cg.currInstrs(), "load meeeeeee", 1, 1)
 	case Snd:
 
 	default:
@@ -680,7 +681,7 @@ func (cg *CodeGenerator) cgVisitDeclareStat(node Declare) {
 func (cg *CodeGenerator) cgVisitAssignmentStat(node Assignment) {
 
 	var rhs = node.Rhs
-  var lhs = node.Rhs
+  var lhs = node.Lhs
 
 	//Evaluate the rhs first
 	cg.evalRHS(rhs, "r4")
@@ -755,7 +756,9 @@ func (cg *CodeGenerator) cgVisitAssignmentStat(node Assignment) {
 
 		// Load the address of the pair into a register
 		var offset, _ = cg.getIdentOffset(lhs.(PairElem).Expr.(Ident))
-		appendAssembly(cg.currInstrs(), "LDR r0, [sp, #"+strconv.Itoa(offset)+"]", 1, 1)
+		appendAssembly(cg.currInstrs(), "LDR r5, [sp, #"+strconv.Itoa(offset)+"]", 1, 1)
+    appendAssembly(cg.currInstrs(), "MOV r0, r5", 1, 1)
+
 		// Jump
 		appendAssembly(cg.currInstrs(), "BL p_check_null_pointer", 1, 1)
 		cg.dereferenceNullPointer()
@@ -769,6 +772,10 @@ func (cg *CodeGenerator) cgVisitAssignmentStat(node Assignment) {
 		// Store the value into the pair
 		appendAssembly(cg.currInstrs(), "STR r4, [r5]", 1, 1)
 	default:
+
+		//Assume it must be a PAIR-ELEM
+		fmt.Println("its neither ")
+
 	}
 }
 
