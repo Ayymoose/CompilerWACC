@@ -27,7 +27,7 @@ const (
 	INT_FORMAT     = "\"%d\\0\""
 	STRING_FORMAT  = "\"%.*s\\0\""
 	NEWLINE_MSG    = "\"\\0\""
-	TRUE_MSG       = "\"true\\0\""
+	TRUE_MSG       = "\"true\\0\"" 
 	FALSE_MSG      = "\"false\\0\""
 	READ_INT       = "\"%d\\0\""
 	READ_CHAR      = "\"%c\\0\""
@@ -46,8 +46,7 @@ const (
 // Function global variable
 var functionList []*Function
 
-// Boolean indicating if pairs are present
-var PAIR_INCLUDED bool
+var DEBUG = !true
 
 // HELPER FUNCTIONS
 // cgVisitReadStat helper function
@@ -266,13 +265,17 @@ func (cg *CodeGenerator) removeStackSpace(stackSize int) {
 }
 
 func (cg *CodeGenerator) debug(message string) {
-		appendAssembly(cg.currInstrs(), "# " + message, 1, 1)
+	if DEBUG == true {
+		appendAssembly(cg.currInstrs(), "# "+message, 0, 1)
+	}
 }
 
 // EVALUATION FUNCTIONS
 
 // Evalutes the RHS of an expression
 func (cg *CodeGenerator) evalRHS(t Evaluation, srcReg string) {
+
+  cg.debug("----- DEBUG - evalRHS() start -----")
 
 	switch t.(type) {
 	// Literals
@@ -283,7 +286,16 @@ func (cg *CodeGenerator) evalRHS(t Evaluation, srcReg string) {
 	case Character:
 		appendAssembly(cg.currInstrs(), "MOV "+srcReg+", #"+string(t.(Character)), 1, 1)
 	case Str:
-		appendAssembly(cg.currInstrs(), "LDR "+srcReg+", "+cg.getMsgLabel("", string(t.(Str))), 1, 1)
+
+
+		//HACK
+		if srcReg == "r0" {
+			srcReg = "r4"
+
+		}
+		  appendAssembly(cg.currInstrs(), "LDR "+srcReg+", "+cg.getMsgLabel("", string(t.(Str))), 1, 1)
+			appendAssembly(cg.currInstrs(), "MOV r0, r4", 1, 1)
+
 	case PairLiter:
 		//PAIR-LITER NOT DONE
 		appendAssembly(cg.currInstrs(), "LDR "+srcReg+", =0", 1, 1)
@@ -292,7 +304,15 @@ func (cg *CodeGenerator) evalRHS(t Evaluation, srcReg string) {
 
 		switch resType.(type) {
 		case ArrayType:
-			fmt.Println("type is array")
+
+      //HACK
+      if srcReg == "r0" {
+				srcReg = "r4"
+			}
+
+			appendAssembly(cg.currInstrs(), "LDR "+srcReg+", [sp, #"+strconv.Itoa(offset)+"]", 1, 1)
+			appendAssembly(cg.currInstrs(), "MOV r0, r4", 1, 1)
+
 		case PairType:
 			appendAssembly(cg.currInstrs(), "LDR "+srcReg+", [sp, #"+strconv.Itoa(offset)+"]", 1, 1)
 		case ConstType:
@@ -301,10 +321,10 @@ func (cg *CodeGenerator) evalRHS(t Evaluation, srcReg string) {
 			case Bool, Char:
 				appendAssembly(cg.currInstrs(), "LDRSB "+srcReg+", [sp, #"+strconv.Itoa(offset)+"]", 1, 1)
 			case Int, String:
-				appendAssembly(cg.currInstrs(), "LDR r4, [sp, #"+strconv.Itoa(offset)+"]", 1, 1)
+				appendAssembly(cg.currInstrs(), "LDR "+srcReg+", [sp, #"+strconv.Itoa(offset)+"]", 1, 1)
 
 				//MIGHT NEED TO MOVE OUT
-				appendAssembly(cg.currInstrs(), "MOV r0, r4", 1, 1)
+				//appendAssembly(cg.currInstrs(), "MOV r0, r4", 1, 1)
 			}
 		default:
 			appendAssembly(cg.currInstrs(), "LDR "+srcReg+", [sp, #"+strconv.Itoa(offset)+"]", 1, 1)
@@ -325,6 +345,8 @@ func (cg *CodeGenerator) evalRHS(t Evaluation, srcReg string) {
 	default:
 		fmt.Println("ERROR: Expression can not be evaluated")
 	}
+
+	cg.debug("----- DEBUG - evalRHS() end -----")
 }
 
 // Evalute a pair element
@@ -352,17 +374,12 @@ func (cg *CodeGenerator) evalPairElem(t PairElem, srcReg string) {
 
  	//if it's a pair load the address or else store on the next available space
 	switch t.Fsnd {
-	case Fst:
-	case Snd:
-
+	case Fst,Snd:
+    appendAssembly(cg.currInstrs(), "STR "+srcReg+", [sp, #"+cg.subCurrP(PAIR_SIZE)+"]", 1, 1)
 	default:
 		//Store on the next available space on the stack
 		appendAssembly(cg.currInstrs(), "STR "+srcReg+", [sp, #"+strconv.Itoa(offset)+"]", 1, 1)
 	}
-
-	//	appendAssembly(cg.currInstrs(), "STOREEEEEEE]", 1, 1)
-
-	//HERE
 
 }
 
@@ -387,22 +404,21 @@ func (cg *CodeGenerator) evalPair(ident Evaluation, fst Evaluation, snd Evaluati
 	appendAssembly(cg.currInstrs(), "LDR r0, ="+strconv.Itoa(fstSize), 1, 1)
 	appendAssembly(cg.currInstrs(), "BL malloc", 1, 1)
 
-	//Store the first element in the register
-	appendAssembly(cg.currInstrs(), "STR "+reg1+", [r0]", 1, 1)
-
+  //Store the first element in the register
 	switch typeFst.(type) {
 	case ConstType:
 		switch typeFst.(ConstType) {
 		case Bool, Char:
-			//Store the first element to the newly allocated memory onto the stack
 			appendAssembly(cg.currInstrs(), "STRB "+reg1+", [r0]", 1, 1)
 		case Int, String:
-			//Store the address of allocated memory block of the pair on the stack
-			appendAssembly(cg.currInstrs(), "STR r0, ["+reg2+"]", 1, 1)
+			appendAssembly(cg.currInstrs(), "STR "+reg1+", [r0]", 1, 1)
+		case Pair:
+	    appendAssembly(cg.currInstrs(), "STR "+reg1+", [r0]", 1, 1)
 		}
-	default:
-		appendAssembly(cg.currInstrs(), "STR "+reg1+", [r0]", 1, 1)
 	}
+
+	//Store first address onto the stack
+	appendAssembly(cg.currInstrs(), "STR r0, ["+reg2+"]", 1, 1)
 
 	//Load the second element into a register to be stored
 	cg.evalRHS(snd, reg1)
@@ -411,6 +427,7 @@ func (cg *CodeGenerator) evalPair(ident Evaluation, fst Evaluation, snd Evaluati
 	appendAssembly(cg.currInstrs(), "LDR r0, ="+strconv.Itoa(sndSize), 1, 1)
 	appendAssembly(cg.currInstrs(), "BL malloc", 1, 1)
 
+  //Store the second element into register
 	switch typeSnd.(type) {
 	case ConstType:
 		switch typeSnd.(ConstType) {
@@ -420,27 +437,16 @@ func (cg *CodeGenerator) evalPair(ident Evaluation, fst Evaluation, snd Evaluati
 		case Int, String:
 			//Store the second element to the newly allocated memory onto the stack
 			appendAssembly(cg.currInstrs(), "STR "+reg1+", [r0]", 1, 1)
+		case Pair:
+	  	appendAssembly(cg.currInstrs(), "STR "+reg1+", [r0]", 1, 1)
 		}
-	default:
-		appendAssembly(cg.currInstrs(), "STR "+reg1+", [r0]", 1, 1)
 	}
 
-	//Store the address of allocated memory block of the pair on the stack
+	//Store the second address of the element onto the stack
 	appendAssembly(cg.currInstrs(), "STR r0, ["+reg2+", #4]", 1, 1)
 
 	//Store the address of the pair on the stack
 	appendAssembly(cg.currInstrs(), "STR "+reg2+", [sp, #"+cg.subCurrP(PAIR_SIZE)+"]", 1, 1)
-
-	/*
-		//Store the address of the pair on the stack
-		switch ident.(type) {
-		case Ident:
-			//Store the address of the address that contains pointers to the first and second elements
-			var offset, _ = cg.getIdentOffset(ident.(Ident))
-			appendAssembly(cg.currInstrs(), "STR "+reg2+", [sp, #"+strconv.Itoa(offset)+"]", 1, 1)
-			//default:
-			//	fmt.Println("oh no")
-		}*/
 
 }
 
@@ -528,9 +534,10 @@ func (cg *CodeGenerator) evalArrayElem(t Evaluation, reg1 string, reg2 string) {
 	//Check the array
 	var array = t.(ArrayElem).Exprs
 
+  //Check the bounds of the array
 	cg.arrayCheckBounds(array,reg1,reg2)
 
-	// Check bounds and errors
+	// Add message labels
 	cg.checkArrayBounds()
 	cg.cgVisitPrintStatFuncHelper("p_print_string")
 
@@ -636,13 +643,12 @@ func (cg *CodeGenerator) cgEvalStat(stat interface{}) {
 // Visit Declare node
 func (cg *CodeGenerator) cgVisitDeclareStat(node Declare) {
 	rhs := node.Rhs
-//	fmt.Println(node.DecType)
 
 	switch node.DecType.(type) {
 
 	case ConstType:
 
-    cg.evalRHS(rhs, "r4")
+		cg.evalRHS(rhs, "r4")
 
 		switch node.DecType.(ConstType) {
 		case Bool:
@@ -659,16 +665,12 @@ func (cg *CodeGenerator) cgVisitDeclareStat(node Declare) {
 			appendAssembly(cg.currInstrs(), "STR r4, [sp, #"+cg.subCurrP(STRING_SIZE)+"]", 1, 1)
 		case Pair:
 			fmt.Println("Pair not implemented")
-		default:
-
 		}
 
 	case PairType:
-	//	fmt.Println("GOT TO THIS ST")
 
 		switch rhs.(type) {
 		case NewPair:
-			PAIR_INCLUDED = true
 			cg.evalPair(node.Lhs, rhs.(NewPair).FstExpr, rhs.(NewPair).SndExpr, "r5", "r4")
 		case Ident:
 			//TODO: UNFINISHED
@@ -676,21 +678,20 @@ func (cg *CodeGenerator) cgVisitDeclareStat(node Declare) {
 		case PairLiter:
 			//Can only be Null
 			appendAssembly(cg.currInstrs(), "LDR r4, =0", 1, 1)
-			appendAssembly(cg.currInstrs(), "STR r4, [sp]", 1, 1)
+			appendAssembly(cg.currInstrs(), "STR r4, [sp, #"+cg.subCurrP(ADDRESS_SIZE)+"]", 1, 1)
 		case Call:
-
+			cg.evalRHS(rhs.(Call), "r4")
+			appendAssembly(cg.currInstrs(), "STR r4, [sp, #"+cg.subCurrP(sizeOf(cg.eval(rhs.(Call))))+"]", 1, 1)
 		case PairElem:
-			fmt.Println("pair elem not done")
+			cg.evalRHS(rhs.(PairElem),"r4")
 		default:
 			appendAssembly(cg.currInstrs(), "Unknown type 1", 1, 1)
 		}
 
 	case ArrayType:
-		// Evalute an array
 		cg.evalArrayLiter(node.DecType, rhs, "r5", "r4")
 	default:
 		appendAssembly(cg.currInstrs(), "Unknown type 2", 1, 1)
-		typeOf(node.DecType)
 	}
 
 	// Saves Idents offset in the symbol tables offset map
@@ -699,6 +700,8 @@ func (cg *CodeGenerator) cgVisitDeclareStat(node Declare) {
 
 // Visit Assignment node
 func (cg *CodeGenerator) cgVisitAssignmentStat(node Assignment) {
+
+  cg.debug("----- DEBUG - cgVisitAssignmentStat start -----")
 
 	var rhs = node.Rhs
 	var lhs = node.Lhs
@@ -711,6 +714,9 @@ func (cg *CodeGenerator) cgVisitAssignmentStat(node Assignment) {
 	switch lhs.(type) {
 
 	case Ident:
+
+	  cg.debug("----- DEBUG - cgVisitAssignmentStat - Ident start -----")
+
 		ident := lhs.(Ident)
 		typeIdent := cg.eval(ident)
 
@@ -739,7 +745,11 @@ func (cg *CodeGenerator) cgVisitAssignmentStat(node Assignment) {
 			}
 		}
 
+		cg.debug("----- DEBUG - cgVisitAssignmentStat - Ident end -----")
+
 	case ArrayElem:
+
+    cg.debug("----- DEBUG - cgVisitAssignmentStat - ArrayElem start -----")
 
 		var offset, _ = cg.getIdentOffset(lhs.(ArrayElem).Ident)
 
@@ -762,7 +772,7 @@ func (cg *CodeGenerator) cgVisitAssignmentStat(node Assignment) {
 		//What does this instruction do?
 		appendAssembly(cg.currInstrs(), "ADD r5, r5, #4", 1, 1)
 		//Point to the element to be changed
-		appendAssembly(cg.currInstrs(), "ADD r5, r5, r6", 1, 1)
+		appendAssembly(cg.currInstrs(), "ADD r5, r5, r6, LSL #2", 1, 1)
 
 		//Get the type of the RHS
 		switch rhs.(type) {
@@ -770,8 +780,17 @@ func (cg *CodeGenerator) cgVisitAssignmentStat(node Assignment) {
 			appendAssembly(cg.currInstrs(), "STRB r4, [r5]", 1, 1)
 		case Integer, Str:
 			appendAssembly(cg.currInstrs(), "STR r4, [r5]", 1, 1)
+		case Ident:
+			appendAssembly(cg.currInstrs(), "STR r4, [r5]", 1, 1)
+		default:
+			appendAssembly(cg.currInstrs(), "Type not added", 1, 1)
 		}
+
+  cg.debug("----- DEBUG - cgVisitAssignmentStat - ArrayElem end -----")
+
 	case PairElem:
+
+		cg.debug("----- DEBUG - cgVisitAssignmentStat - PairElem start -----")
 
 		// Load the address of the pair into a register
 		var offset, _ = cg.getIdentOffset(lhs.(PairElem).Expr.(Ident))
@@ -790,12 +809,14 @@ func (cg *CodeGenerator) cgVisitAssignmentStat(node Assignment) {
 		}
 		// Store the value into the pair
 		appendAssembly(cg.currInstrs(), "STR r4, [r5]", 1, 1)
+
+    cg.debug("----- DEBUG - cgVisitAssignmentStat - PairElem end -----")
+
 	default:
-
-		//Assume it must be a PAIR-ELEM
-		fmt.Println("its neither ")
-
+		fmt.Println("its neither")
 	}
+
+	cg.debug("----- DEBUG - cgVisitAssignmentStat end -----")
 }
 
 // Visit Read node
@@ -829,7 +850,6 @@ func (cg *CodeGenerator) cgVisitFreeStat(node Free) {
 	appendAssembly(cg.currInstrs(), "MOV r0, r4", 1, 1)
 	appendAssembly(cg.currInstrs(), "BL p_free_pair", 1, 1)
 	cg.cgVisitFreeStatFuncHelper("p_free_pair")
-	PAIR_INCLUDED = false
 }
 
 // Visit Return node
@@ -847,6 +867,8 @@ func (cg *CodeGenerator) cgVisitExitStat(node Exit) {
 
 // Visit Print node
 func (cg *CodeGenerator) cgVisitPrintStat(node Print) {
+
+  	cg.debug("----- DEBUG - printStat() start -----")
 
 	// Get value of expr into dstReg
 	cg.evalRHS(node.Expr, "r0")
@@ -890,9 +912,11 @@ func (cg *CodeGenerator) cgVisitPrintStat(node Print) {
 		cg.cgVisitPrintStatFuncHelper("p_print_reference")
 
 	default:
-				appendAssembly(cg.currInstrs(), "Error: type not implemented", 1, 1)
-	//	typeOf(expr)
+		appendAssembly(cg.currInstrs(), "Error: type not implemented", 1, 1)
+		//	typeOf(expr)
 	}
+
+	cg.debug("----- DEBUG - printStat() end -----")
 }
 
 // Visit Println node
