@@ -339,7 +339,7 @@ func (cg *CodeGenerator) evalRHS(t Evaluation, srcReg string) {
 		cg.evalPairElem(t.(PairElem), srcReg)
 	case Call:
 		// TODO UNCOMMENT This when you are sure that its not causing the infinite loop
-		cg.cgVisitCallStat(t.(Call).Ident, t.(Call).ParamList)
+		cg.cgVisitCallStat(t.(Call).Ident, t.(Call).ParamList, srcReg)
 	default:
 		fmt.Println("ERROR: Expression can not be evaluated")
 	}
@@ -1024,7 +1024,7 @@ func (cg *CodeGenerator) cgVisitScopeStat(node Scope) {
 // IE WE ONLY PUSH ONTO STACK FUNC VARIABLES WHEN A FUNCTION IS CALLED
 // but
 // WE EXECUTE WHAT IS INSIDE THE FUNCTION REGARDLESS OF WHETHER IT IS CALLED OR NOT
-func (cg *CodeGenerator) cgVisitCallStat(ident Ident, paramList []Evaluation) {
+func (cg *CodeGenerator) cgVisitCallStat(ident Ident, paramList []Evaluation, srcReg string) {
 	for _, function := range functionList {
 		if function.Ident == ident {
 
@@ -1034,12 +1034,13 @@ func (cg *CodeGenerator) cgVisitCallStat(ident Ident, paramList []Evaluation) {
 
 			appendAssembly(cg.currInstrs(), "BL f_"+string(function.Ident), 1, 1)
 
-			if !(paramList == nil) {
-				offset := cg.cgGetParamSize(paramList)
-				appendAssembly(cg.currInstrs(), "ADD sp, sp, #"+strconv.Itoa(offset), 1, 1)
-			}
+			offset := cg.cgGetParamSize(paramList)
+			appendAssembly(cg.currInstrs(), "ADD sp, sp, #"+strconv.Itoa(offset), 1, 1)
+
 			appendAssembly(cg.currInstrs(), "MOV r4, r0", 1, 1)
-			appendAssembly(cg.currInstrs(), "STR r4, [sp]", 1, 1)
+			// Remove store line moe to declare
+			///TODO
+			//appendAssembly(cg.currInstrs(), "STR r4, [sp]", 1, 1)
 			cg.cgVisitFunction(*function)
 		}
 	}
