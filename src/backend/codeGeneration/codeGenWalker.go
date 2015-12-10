@@ -852,9 +852,31 @@ func (cg *CodeGenerator) cgVisitReadStat(node Read) {
 	case ArrayElem:
 		//Complete
 	case PairElem:
-		//Complete
-	}
+		switch node.AssignLHS.(PairElem).Fsnd {
+		case Fst:
+			appendAssembly(cg.currInstrs(), "LDR r4, [sp]", 1, 1)
+			appendAssembly(cg.currInstrs(), "MOV r0, r4", 1, 1)
+			cg.dereferenceNullPointer()
+			appendAssembly(cg.currInstrs(), "LDR r4, [r4]", 1, 1)
+			appendAssembly(cg.currInstrs(), "MOV r0, r4", 1, 1)
+		case Snd:
+			appendAssembly(cg.currInstrs(), "LDR r4, [sp]", 1, 1)
+			appendAssembly(cg.currInstrs(), "MOV r0, r4", 1, 1)
+			cg.dereferenceNullPointer()
+			appendAssembly(cg.currInstrs(), "LDR r4, [r4, #4]", 1, 1)
+			appendAssembly(cg.currInstrs(), "MOV r0, r4", 1, 1)
+		}
+		//	BL p_read_int
+		switch cg.eval(node.AssignLHS.(PairElem)) {
+		case Char:
+			appendAssembly(cg.currInstrs(), "BL p_read_char", 1, 1)
+			cg.cgVisitReadStatFuncHelper("p_read_char")
+		case Int:
+			appendAssembly(cg.currInstrs(), "BL p_read_int", 1, 1)
+			cg.cgVisitReadStatFuncHelper("p_read_int")
+		}
 
+	}
 }
 
 // Visit Free node
