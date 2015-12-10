@@ -856,12 +856,14 @@ func (cg *CodeGenerator) cgVisitReadStat(node Read) {
 		case Fst:
 			appendAssembly(cg.currInstrs(), "LDR r4, [sp]", 1, 1)
 			appendAssembly(cg.currInstrs(), "MOV r0, r4", 1, 1)
+			appendAssembly(cg.currInstrs(), "BL p_check_null_pointer", 1, 1)
 			cg.dereferenceNullPointer()
 			appendAssembly(cg.currInstrs(), "LDR r4, [r4]", 1, 1)
 			appendAssembly(cg.currInstrs(), "MOV r0, r4", 1, 1)
 		case Snd:
 			appendAssembly(cg.currInstrs(), "LDR r4, [sp]", 1, 1)
 			appendAssembly(cg.currInstrs(), "MOV r0, r4", 1, 1)
+			appendAssembly(cg.currInstrs(), "BL p_check_null_pointer", 1, 1)
 			cg.dereferenceNullPointer()
 			appendAssembly(cg.currInstrs(), "LDR r4, [r4, #4]", 1, 1)
 			appendAssembly(cg.currInstrs(), "MOV r0, r4", 1, 1)
