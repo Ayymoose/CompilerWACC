@@ -387,7 +387,7 @@ func (cg *CodeGenerator) evalPairElem(t PairElem, srcReg string) {
 }
 
 // Evalutes a pair of elements onto the stack
-func (cg *CodeGenerator) evalPair(ident Evaluation, fst Evaluation, snd Evaluation, reg1 string, reg2 string) {
+func (cg *CodeGenerator) evalNewPair(fst Evaluation, snd Evaluation, reg1 string, reg2 string) {
 
 	// First allocate memory to store two addresses (8-bytes)
 	appendAssembly(cg.currInstrs(), "LDR r0, ="+strconv.Itoa(ADDRESS_SIZE*2), 1, 1)
@@ -447,17 +447,6 @@ func (cg *CodeGenerator) evalPair(ident Evaluation, fst Evaluation, snd Evaluati
 
 	//Store the address of allocated memory block of the pair on the stack
 	appendAssembly(cg.currInstrs(), "STR r0, ["+reg2+", #4]", 1, 1)
-
-	/*
-		//Store the address of the pair on the stack
-		switch ident.(type) {
-		case Ident:
-			//Store the address of the address that contains pointers to the first and second elements
-			var offset, _ = cg.getIdentOffset(ident.(Ident))
-			appendAssembly(cg.currInstrs(), "STR "+reg2+", [sp, #"+strconv.Itoa(offset)+"]", 1, 1)
-			//default:
-			//	fmt.Println("oh no")
-		}*/
 
 }
 
@@ -680,7 +669,7 @@ func (cg *CodeGenerator) cgVisitDeclareStat(node Declare) {
 	case PairType:
 		switch rhs.(type) {
 		case NewPair:
-			cg.evalPair(node.Lhs, rhs.(NewPair).FstExpr, rhs.(NewPair).SndExpr, "r5", "r4")
+			cg.evalNewPair(rhs.(NewPair).FstExpr, rhs.(NewPair).SndExpr, "r5", "r4")
 			//Store the address of the pair on the stack
 			appendAssembly(cg.currInstrs(), "STR r4, [sp, #"+cg.subCurrP(PAIR_SIZE)+"]", 1, 1)
 		case Ident:
@@ -744,7 +733,9 @@ func (cg *CodeGenerator) cgVisitAssignmentStat(node Assignment) {
 			case Ident:
 				//Complete
 			case NewPair:
-				//Complete
+				var offset, _ = cg.getIdentOffset(lhs.(Ident))
+				cg.evalNewPair(rhs.(NewPair).FstExpr, rhs.(NewPair).SndExpr, "r5", "r4")
+				appendAssembly(cg.currInstrs(), "STR r4, [sp, #"+strconv.Itoa(offset)+"]", 1, 1)
 			}
 
 		case ConstType:
