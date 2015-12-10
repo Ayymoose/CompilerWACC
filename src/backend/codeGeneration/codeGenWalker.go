@@ -868,7 +868,6 @@ func (cg *CodeGenerator) cgVisitReadStat(node Read) {
 			appendAssembly(cg.currInstrs(), "LDR r4, [r4, #4]", 1, 1)
 			appendAssembly(cg.currInstrs(), "MOV r0, r4", 1, 1)
 		}
-		//	BL p_read_int
 		switch cg.eval(node.AssignLHS.(PairElem)) {
 		case Char:
 			appendAssembly(cg.currInstrs(), "BL p_read_char", 1, 1)
@@ -877,7 +876,6 @@ func (cg *CodeGenerator) cgVisitReadStat(node Read) {
 			appendAssembly(cg.currInstrs(), "BL p_read_int", 1, 1)
 			cg.cgVisitReadStatFuncHelper("p_read_int")
 		}
-
 	}
 }
 
