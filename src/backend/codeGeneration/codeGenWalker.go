@@ -705,6 +705,7 @@ func (cg *CodeGenerator) cgVisitDeclareStat(node Declare) {
 			cg.evalRHS(rhs.(Ident), "r4")
 			appendAssembly(cg.currInstrs(), "STR r4, [sp, #"+cg.subCurrP(ADDRESS_SIZE)+"]", 1, 1)
 		case PairLiter:
+
 			//Can only be Null
 			appendAssembly(cg.currInstrs(), "LDR r4, =0", 1, 1)
 			appendAssembly(cg.currInstrs(), "STR r4, [sp, #"+cg.subCurrP(ADDRESS_SIZE)+"]", 1, 1)
