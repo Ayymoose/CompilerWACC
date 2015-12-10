@@ -1095,14 +1095,6 @@ func (cg *CodeGenerator) cgVisitFunction(node Function) {
 	// push {lr} to save the caller address
 	appendAssembly(cg.currInstrs(), "PUSH {lr}", 1, 1)
 
-	// TODO
-	//if cg.currStack.size > 0 {
-	///	cg.createStackSpace(cg.globalStack.size)
-	//}
-	//var offset, _ = cg.getIdentOffset(node.Ident)
-	//appendAssembly(cg.currInstrs(), "SUB sp, sp, #"+strconv.Itoa(offset), 1, 1)
-	// TODO
-
 	// traverse all statements by switching on statement type
 	// BUT NEED TO KNOW THAT WE NEED TO ADD THIS TO DUNCTION MESSGES??
 	// FLAGG??
