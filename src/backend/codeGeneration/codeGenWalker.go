@@ -274,7 +274,7 @@ func (cg *CodeGenerator) debug(message string) {
 // Evalutes the RHS of an expression
 func (cg *CodeGenerator) evalRHS(t Evaluation, srcReg string) {
 
-	//	cg.debug("----- DEBUG - evalRHS() start -----")
+	cg.debug("----- DEBUG - evalRHS() start -----")
 
 	switch t.(type) {
 	// Literals
@@ -344,7 +344,7 @@ func (cg *CodeGenerator) evalRHS(t Evaluation, srcReg string) {
 		fmt.Println("ERROR: Expression can not be evaluated")
 	}
 
-	//	cg.debug("----- DEBUG - evalRHS() end -----")
+	cg.debug("----- DEBUG - evalRHS() end -----")
 }
 
 // Evalute a pair element
@@ -353,11 +353,11 @@ func (cg *CodeGenerator) evalPairElem(t PairElem, srcReg string) {
 	//Load the address of the pair from the stack
 	var offset, _ = cg.getIdentOffset(t.Expr.(Ident))
 	appendAssembly(cg.currInstrs(), "LDR "+srcReg+", [sp, #"+strconv.Itoa(offset)+"]", 1, 1)
+
 	//Check for null pointer deference
 	appendAssembly(cg.currInstrs(), "MOV r0, "+srcReg, 1, 1)
 	appendAssembly(cg.currInstrs(), "BL p_check_null_pointer", 1, 1)
 	cg.dereferenceNullPointer()
-	//cg.throwRunTimeError()
 	cg.cgVisitPrintStatFuncHelper("p_print_string")
 
 	//Depending on fst or snd , load the address
@@ -370,16 +370,6 @@ func (cg *CodeGenerator) evalPairElem(t PairElem, srcReg string) {
 
 	//Double deference
 	appendAssembly(cg.currInstrs(), "LDR "+srcReg+", ["+srcReg+"]", 1, 1)
-
-	//if it's a pair load the address or else store on the next available space
-	/*switch t.Fsnd {
-	case Fst:
-	case Snd:
-
-	default:
-		//Store on the next available space on the stack
-		appendAssembly(cg.currInstrs(), "STR "+srcReg+", [sp, #"+strconv.Itoa(offset)+"]", 1, 1)
-	}*/
 
 }
 
@@ -503,9 +493,7 @@ func (cg *CodeGenerator) evalArray(array []Evaluation, srcReg string, dstReg str
 	}
 	// Put the size of the array onto the stack
 	appendAssembly(cg.currInstrs(), "LDR "+srcReg+", ="+strconv.Itoa(arraySize), 1, 1)
-	// Now store the address of the array onto the stack
-	appendAssembly(cg.currInstrs(), "STR "+srcReg+", ["+dstReg+"]", 1, 1)
-	appendAssembly(cg.currInstrs(), "STR "+dstReg+", [sp, #"+cg.subCurrP(INT_SIZE)+"]", 1, 1)
+
 }
 
 // Evalutes array elements
@@ -691,6 +679,11 @@ func (cg *CodeGenerator) cgVisitDeclareStat(node Declare) {
 	case ArrayType:
 		// Evalute an array
 		cg.evalArrayLiter(node.DecType, rhs, "r5", "r4")
+
+		// Now store the address of the array onto the stack
+		appendAssembly(cg.currInstrs(), "STR r5, [r4]", 1, 1)
+		appendAssembly(cg.currInstrs(), "STR r4, [sp, #"+cg.subCurrP(INT_SIZE)+"]", 1, 1)
+
 	default:
 		appendAssembly(cg.currInstrs(), "Unknown type 2", 1, 1)
 	}
