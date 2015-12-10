@@ -1061,11 +1061,16 @@ func (cg *CodeGenerator) cgVisitFunction(node Function) {
 	// push {lr} to save the caller address
 	appendAssembly(cg.currInstrs(), "PUSH {lr}", 1, 1)
 
-	// traverse all statements by switching on statement type
-	// BUT NEED TO KNOW THAT WE NEED TO ADD THIS TO DUNCTION MESSGES??
-	// FLAGG??
+	if varSpaceSize > 0 {
+		appendAssembly(cg.currInstrs(), "SUB sp, sp, #"+strconv.Itoa(varSpaceSize), 1, 1)
+	}
+
 	for _, stat := range node.StatList {
 		cg.cgEvalStat(stat)
+	}
+
+	if varSpaceSize > 0 {
+		appendAssembly(cg.currInstrs(), "ADD sp, sp, #"+strconv.Itoa(varSpaceSize), 1, 1)
 	}
 
 	// TEST harness uses double POP don't think we need it
