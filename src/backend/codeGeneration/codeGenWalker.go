@@ -300,7 +300,7 @@ func (cg *CodeGenerator) debug(message string) {
 // Evalutes the RHS of an expression
 func (cg *CodeGenerator) evalRHS(t Evaluation, srcReg string) {
 
-	//	cg.debug("----- DEBUG - evalRHS() start -----")
+	cg.debug("----- DEBUG - evalRHS() start -----")
 
 	switch t.(type) {
 	// Literals
@@ -370,7 +370,7 @@ func (cg *CodeGenerator) evalRHS(t Evaluation, srcReg string) {
 		fmt.Println("ERROR: Expression can not be evaluated")
 	}
 
-	//	cg.debug("----- DEBUG - evalRHS() end -----")
+	cg.debug("----- DEBUG - evalRHS() end -----")
 }
 
 // Evalute a pair element
@@ -421,21 +421,22 @@ func (cg *CodeGenerator) evalNewPair(fst Evaluation, snd Evaluation, reg1 string
 	appendAssembly(cg.currInstrs(), "BL malloc", 1, 1)
 
 	//Store the first element in the register
-	appendAssembly(cg.currInstrs(), "STR "+reg1+", [r0]", 1, 1)
-
 	switch typeFst.(type) {
 	case ConstType:
 		switch typeFst.(ConstType) {
 		case Bool, Char:
 			//Store the first element to the newly allocated memory onto the stack
 			appendAssembly(cg.currInstrs(), "STRB "+reg1+", [r0]", 1, 1)
-		case Int, String:
+		case Int, String, Pair:
 			//Store the address of allocated memory block of the pair on the stack
-			appendAssembly(cg.currInstrs(), "STR r0, ["+reg2+"]", 1, 1)
+			appendAssembly(cg.currInstrs(), "STR "+reg1+", [r0]", 1, 1)
 		}
 	default:
-		appendAssembly(cg.currInstrs(), "STR "+reg1+", [r0]", 1, 1)
+
 	}
+
+	//Store first address onto the stack
+	appendAssembly(cg.currInstrs(), "STR r0, ["+reg2+"]", 1, 1)
 
 	//Load the second element into a register to be stored
 	cg.evalRHS(snd, reg1)
@@ -444,18 +445,19 @@ func (cg *CodeGenerator) evalNewPair(fst Evaluation, snd Evaluation, reg1 string
 	appendAssembly(cg.currInstrs(), "LDR r0, ="+strconv.Itoa(sndSize), 1, 1)
 	appendAssembly(cg.currInstrs(), "BL malloc", 1, 1)
 
+	//Store the second element into register
 	switch typeSnd.(type) {
 	case ConstType:
 		switch typeSnd.(ConstType) {
 		case Bool, Char:
 			//Store the second element to the newly allocated memory onto the stack
 			appendAssembly(cg.currInstrs(), "STRB "+reg1+", [r0]", 1, 1)
-		case Int, String:
+		case Int, String, Pair:
 			//Store the second element to the newly allocated memory onto the stack
 			appendAssembly(cg.currInstrs(), "STR "+reg1+", [r0]", 1, 1)
 		}
 	default:
-		appendAssembly(cg.currInstrs(), "STR "+reg1+", [r0]", 1, 1)
+
 	}
 
 	//Store the address of allocated memory block of the pair on the stack
@@ -920,7 +922,7 @@ func (cg *CodeGenerator) cgVisitExitStat(node Exit) {
 // Visit Print node
 func (cg *CodeGenerator) cgVisitPrintStat(node Print) {
 
-	//cg.debug("----- DEBUG - printStat() start -----")
+	cg.debug("----- DEBUG - printStat() start -----")
 
 	// Get value of expr into dstReg
 	cg.evalRHS(node.Expr, "r0")
@@ -968,17 +970,19 @@ func (cg *CodeGenerator) cgVisitPrintStat(node Print) {
 		//	typeOf(expr)
 	}
 
-	//cg.debug("----- DEBUG - printStat() end -----")
+	cg.debug("----- DEBUG - printStat() end -----")
 }
 
 // Visit Println node
 func (cg *CodeGenerator) cgVisitPrintlnStat(node Println) {
+	cg.debug("----- DEBUG - PrintLnStat() start -----")
+
 	cg.cgVisitPrintStat(Print{Expr: node.Expr})
 	// BL p_print_ln
 	appendAssembly(cg.currInstrs(), "BL p_print_ln", 1, 1)
 	// Define relevant print function definition (iff it hasnt been defined)
 	cg.cgVisitPrintStatFuncHelper("p_print_ln")
-
+	cg.debug("----- DEBUG - printLnStat() end -----")
 }
 
 // Visit If node
