@@ -367,22 +367,19 @@ func (cg *CodeGenerator) evalPairElem(t PairElem, srcReg string) {
 	case Snd:
 		appendAssembly(cg.currInstrs(), "LDR "+srcReg+", ["+srcReg+", #4]", 1, 1)
 	}
+
 	//Double deference
 	appendAssembly(cg.currInstrs(), "LDR "+srcReg+", ["+srcReg+"]", 1, 1)
 
 	//if it's a pair load the address or else store on the next available space
-	switch t.Fsnd {
+	/*switch t.Fsnd {
 	case Fst:
 	case Snd:
 
 	default:
 		//Store on the next available space on the stack
 		appendAssembly(cg.currInstrs(), "STR "+srcReg+", [sp, #"+strconv.Itoa(offset)+"]", 1, 1)
-	}
-
-	//	appendAssembly(cg.currInstrs(), "STOREEEEEEE]", 1, 1)
-
-	//HERE
+	}*/
 
 }
 
@@ -684,7 +681,8 @@ func (cg *CodeGenerator) cgVisitDeclareStat(node Declare) {
 			cg.evalRHS(rhs.(Call), "r4")
 			appendAssembly(cg.currInstrs(), "STR r4, [sp, #"+cg.subCurrP(sizeOf(cg.eval(rhs.(Call))))+"]", 1, 1)
 		case PairElem:
-			fmt.Println("pair elem not done")
+			cg.evalPairElem(rhs.(PairElem), "r4")
+			appendAssembly(cg.currInstrs(), "STR r4, [sp, #"+strconv.Itoa(offset)+"]", 1, 1)
 		default:
 			appendAssembly(cg.currInstrs(), "Unknown type 1", 1, 1)
 		}
