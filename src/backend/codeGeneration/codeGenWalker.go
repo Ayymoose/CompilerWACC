@@ -1040,7 +1040,6 @@ func (cg *CodeGenerator) cgVisitCallStat(ident Ident, paramList []Evaluation) {
 				appendAssembly(cg.currInstrs(), "ADD sp, sp, #"+strconv.Itoa(offset), 1, 1)
 			}
 			appendAssembly(cg.currInstrs(), "MOV r4, r0", 1, 1)
-			appendAssembly(cg.currInstrs(), "STR r4, [sp]", 1, 1)
 			cg.cgVisitFunction(*function)
 		}
 	}
