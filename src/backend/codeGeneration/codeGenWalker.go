@@ -274,7 +274,7 @@ func (cg *CodeGenerator) debug(message string) {
 // Evalutes the RHS of an expression
 func (cg *CodeGenerator) evalRHS(t Evaluation, srcReg string) {
 
-	cg.debug("----- DEBUG - evalRHS() start -----")
+	//	cg.debug("----- DEBUG - evalRHS() start -----")
 
 	switch t.(type) {
 	// Literals
@@ -344,7 +344,7 @@ func (cg *CodeGenerator) evalRHS(t Evaluation, srcReg string) {
 		fmt.Println("ERROR: Expression can not be evaluated")
 	}
 
-	cg.debug("----- DEBUG - evalRHS() end -----")
+	//	cg.debug("----- DEBUG - evalRHS() end -----")
 }
 
 // Evalute a pair element
@@ -493,6 +493,8 @@ func (cg *CodeGenerator) evalArray(array []Evaluation, srcReg string, dstReg str
 	}
 	// Put the size of the array onto the stack
 	appendAssembly(cg.currInstrs(), "LDR "+srcReg+", ="+strconv.Itoa(arraySize), 1, 1)
+
+	appendAssembly(cg.currInstrs(), "STR "+srcReg+", ["+dstReg+"]", 1, 1)
 
 }
 
@@ -681,7 +683,6 @@ func (cg *CodeGenerator) cgVisitDeclareStat(node Declare) {
 		cg.evalArrayLiter(node.DecType, rhs, "r5", "r4")
 
 		// Now store the address of the array onto the stack
-		appendAssembly(cg.currInstrs(), "STR r5, [r4]", 1, 1)
 		appendAssembly(cg.currInstrs(), "STR r4, [sp, #"+cg.subCurrP(INT_SIZE)+"]", 1, 1)
 
 	default:
@@ -1061,16 +1062,11 @@ func (cg *CodeGenerator) cgVisitFunction(node Function) {
 	// push {lr} to save the caller address
 	appendAssembly(cg.currInstrs(), "PUSH {lr}", 1, 1)
 
-	if varSpaceSize > 0 {
-		appendAssembly(cg.currInstrs(), "SUB sp, sp, #"+strconv.Itoa(varSpaceSize), 1, 1)
-	}
-
+	// traverse all statements by switching on statement type
+	// BUT NEED TO KNOW THAT WE NEED TO ADD THIS TO DUNCTION MESSGES??
+	// FLAGG??
 	for _, stat := range node.StatList {
 		cg.cgEvalStat(stat)
-	}
-
-	if varSpaceSize > 0 {
-		appendAssembly(cg.currInstrs(), "ADD sp, sp, #"+strconv.Itoa(varSpaceSize), 1, 1)
 	}
 
 	// TEST harness uses double POP don't think we need it
