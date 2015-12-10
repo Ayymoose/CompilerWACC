@@ -111,42 +111,41 @@ func (cg *CodeGenerator) checkArrayBounds() {
 	cg.throwRunTimeError()
 }
 
-
 // Checks the bounds of an array
 func (cg *CodeGenerator) arrayCheckBounds(array []Evaluation, reg1 string, reg2 string) {
 
- 	// Load the first index
- 	cg.evalRHS(array[0], reg2)
+	// Load the first index
+	cg.evalRHS(array[0], reg2)
 
- 	// Set a register to point to the array
- 	appendAssembly(cg.currInstrs(), "LDR "+reg1+", ["+reg1+"]", 1, 1)
+	// Set a register to point to the array
+	appendAssembly(cg.currInstrs(), "LDR "+reg1+", ["+reg1+"]", 1, 1)
 
- 	// reg1 = Address of the array
- 	// reg2 = Index
+	// reg1 = Address of the array
+	// reg2 = Index
 
- 	appendAssembly(cg.currInstrs(), "MOV r0, "+reg2, 1, 1)
- 	appendAssembly(cg.currInstrs(), "MOV r1, "+reg1, 1, 1)
- 	appendAssembly(cg.currInstrs(), "BL p_check_array_bounds", 1, 1)
+	appendAssembly(cg.currInstrs(), "MOV r0, "+reg2, 1, 1)
+	appendAssembly(cg.currInstrs(), "MOV r1, "+reg1, 1, 1)
+	appendAssembly(cg.currInstrs(), "BL p_check_array_bounds", 1, 1)
 
- 	// Get offset of
- 	appendAssembly(cg.currInstrs(), "ADD "+reg1+", "+reg1+", #4", 1, 1)
- 	appendAssembly(cg.currInstrs(), "ADD "+reg1+", "+reg1+", "+reg2+", LSL #2", 1, 1)
- 	appendAssembly(cg.currInstrs(), "LDR "+reg1+", ["+reg1+"]", 1, 1)
+	// Get offset of
+	appendAssembly(cg.currInstrs(), "ADD "+reg1+", "+reg1+", #4", 1, 1)
+	appendAssembly(cg.currInstrs(), "ADD "+reg1+", "+reg1+", "+reg2+", LSL #2", 1, 1)
+	appendAssembly(cg.currInstrs(), "LDR "+reg1+", ["+reg1+"]", 1, 1)
 
- 	//Load the second index if there is one
- 	if len(array) > 1{
- 		cg.evalRHS(array[1], reg2)
+	//Load the second index if there is one
+	if len(array) > 1 {
+		cg.evalRHS(array[1], reg2)
 
- 		appendAssembly(cg.currInstrs(), "MOV r0, "+reg2, 1, 1)
- 		appendAssembly(cg.currInstrs(), "MOV r1, "+reg1, 1, 1)
- 		appendAssembly(cg.currInstrs(), "BL p_check_array_bounds", 1, 1)
+		appendAssembly(cg.currInstrs(), "MOV r0, "+reg2, 1, 1)
+		appendAssembly(cg.currInstrs(), "MOV r1, "+reg1, 1, 1)
+		appendAssembly(cg.currInstrs(), "BL p_check_array_bounds", 1, 1)
 
- 		// Get offset of
- 		appendAssembly(cg.currInstrs(), "ADD "+reg1+", "+reg1+", #4", 1, 1)
- 		appendAssembly(cg.currInstrs(), "ADD "+reg1+", "+reg1+", "+reg2+", LSL #2", 1, 1)
- 		appendAssembly(cg.currInstrs(), "LDR "+reg1+", ["+reg1+"]", 1, 1)
+		// Get offset of
+		appendAssembly(cg.currInstrs(), "ADD "+reg1+", "+reg1+", #4", 1, 1)
+		appendAssembly(cg.currInstrs(), "ADD "+reg1+", "+reg1+", "+reg2+", LSL #2", 1, 1)
+		appendAssembly(cg.currInstrs(), "LDR "+reg1+", ["+reg1+"]", 1, 1)
 
- 	}
+	}
 
 	appendAssembly(cg.currInstrs(), "MOV r0, "+reg1, 1, 1)
 
@@ -275,7 +274,7 @@ func (cg *CodeGenerator) debug(message string) {
 // Evalutes the RHS of an expression
 func (cg *CodeGenerator) evalRHS(t Evaluation, srcReg string) {
 
-  cg.debug("----- DEBUG - evalRHS() start -----")
+	cg.debug("----- DEBUG - evalRHS() start -----")
 
 	switch t.(type) {
 	// Literals
@@ -287,14 +286,13 @@ func (cg *CodeGenerator) evalRHS(t Evaluation, srcReg string) {
 		appendAssembly(cg.currInstrs(), "MOV "+srcReg+", #"+string(t.(Character)), 1, 1)
 	case Str:
 
-
 		//HACK
 		if srcReg == "r0" {
 			srcReg = "r4"
 
 		}
-		  appendAssembly(cg.currInstrs(), "LDR "+srcReg+", "+cg.getMsgLabel("", string(t.(Str))), 1, 1)
-			appendAssembly(cg.currInstrs(), "MOV r0, r4", 1, 1)
+		appendAssembly(cg.currInstrs(), "LDR "+srcReg+", "+cg.getMsgLabel("", string(t.(Str))), 1, 1)
+		appendAssembly(cg.currInstrs(), "MOV r0, r4", 1, 1)
 
 	case PairLiter:
 		//PAIR-LITER NOT DONE
@@ -305,8 +303,8 @@ func (cg *CodeGenerator) evalRHS(t Evaluation, srcReg string) {
 		switch resType.(type) {
 		case ArrayType:
 
-      //HACK
-      if srcReg == "r0" {
+			//HACK
+			if srcReg == "r0" {
 				srcReg = "r4"
 			}
 
@@ -527,7 +525,6 @@ func (cg *CodeGenerator) evalArray(array []Evaluation, srcReg string, dstReg str
 	appendAssembly(cg.currInstrs(), "STR "+dstReg+", [sp, #"+cg.subCurrP(INT_SIZE)+"]", 1, 1)
 }
 
-
 // Evalutes array elements
 func (cg *CodeGenerator) evalArrayElem(t Evaluation, reg1 string, reg2 string) {
 
@@ -550,8 +547,8 @@ func (cg *CodeGenerator) evalArrayElem(t Evaluation, reg1 string, reg2 string) {
 	//Check the array
 	var array = t.(ArrayElem).Exprs
 
-  //Check the bounds of the array
-	cg.arrayCheckBounds(array,reg1,reg2)
+	//Check the bounds of the array
+	cg.arrayCheckBounds(array, reg1, reg2)
 
 	// Add message labels
 	cg.checkArrayBounds()
@@ -717,7 +714,7 @@ func (cg *CodeGenerator) cgVisitDeclareStat(node Declare) {
 // Visit Assignment node
 func (cg *CodeGenerator) cgVisitAssignmentStat(node Assignment) {
 
-  cg.debug("----- DEBUG - cgVisitAssignmentStat start -----")
+	cg.debug("----- DEBUG - cgVisitAssignmentStat start -----")
 
 	var rhs = node.Rhs
 	var lhs = node.Lhs
@@ -731,7 +728,7 @@ func (cg *CodeGenerator) cgVisitAssignmentStat(node Assignment) {
 
 	case Ident:
 
-	  cg.debug("----- DEBUG - cgVisitAssignmentStat - Ident start -----")
+		cg.debug("----- DEBUG - cgVisitAssignmentStat - Ident start -----")
 
 		ident := lhs.(Ident)
 		typeIdent := cg.eval(ident)
@@ -765,7 +762,7 @@ func (cg *CodeGenerator) cgVisitAssignmentStat(node Assignment) {
 
 	case ArrayElem:
 
-    cg.debug("----- DEBUG - cgVisitAssignmentStat - ArrayElem start -----")
+		cg.debug("----- DEBUG - cgVisitAssignmentStat - ArrayElem start -----")
 
 		var offset, _ = cg.getIdentOffset(lhs.(ArrayElem).Ident)
 
@@ -802,7 +799,7 @@ func (cg *CodeGenerator) cgVisitAssignmentStat(node Assignment) {
 			appendAssembly(cg.currInstrs(), "Type not added", 1, 1)
 		}
 
-  cg.debug("----- DEBUG - cgVisitAssignmentStat - ArrayElem end -----")
+		cg.debug("----- DEBUG - cgVisitAssignmentStat - ArrayElem end -----")
 
 	case PairElem:
 
@@ -826,7 +823,7 @@ func (cg *CodeGenerator) cgVisitAssignmentStat(node Assignment) {
 		// Store the value into the pair
 		appendAssembly(cg.currInstrs(), "STR r4, [r5]", 1, 1)
 
-    cg.debug("----- DEBUG - cgVisitAssignmentStat - PairElem end -----")
+		cg.debug("----- DEBUG - cgVisitAssignmentStat - PairElem end -----")
 
 	default:
 		fmt.Println("its neither")
@@ -884,7 +881,7 @@ func (cg *CodeGenerator) cgVisitExitStat(node Exit) {
 // Visit Print node
 func (cg *CodeGenerator) cgVisitPrintStat(node Print) {
 
-  	cg.debug("----- DEBUG - printStat() start -----")
+	cg.debug("----- DEBUG - printStat() start -----")
 
 	// Get value of expr into dstReg
 	cg.evalRHS(node.Expr, "r0")
@@ -1040,6 +1037,8 @@ func (cg *CodeGenerator) cgGetParamSize(paramList []Evaluation) int {
 func (cg *CodeGenerator) cgVisitFunction(node Function) {
 	if !cg.isFunctionDefined(node.Ident) {
 		cg.addFunctionDef(node.Ident)
+	} else {
+		return
 	}
 	varSpaceSize := GetScopeVarSize(node.StatList)
 	cg.setNewFuncScope(varSpaceSize, &node.ParameterTypes, node.SymbolTable)
