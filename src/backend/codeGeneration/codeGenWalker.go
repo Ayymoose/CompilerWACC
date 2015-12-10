@@ -1088,6 +1088,10 @@ func (cg *CodeGenerator) cgVisitFunction(node Function) {
 	// f_funcName:
 	appendAssembly(cg.currInstrs(), "f_"+string(node.Ident)+":", 0, 1)
 
+	if varSpaceSize > 0 {
+		appendAssembly(cg.currInstrs(), "SUB sp, sp, #"+strconv.Itoa(varSpaceSize), 1, 1)
+	}
+
 	// push {lr} to save the caller address
 	appendAssembly(cg.currInstrs(), "PUSH {lr}", 1, 1)
 
@@ -1104,6 +1108,11 @@ func (cg *CodeGenerator) cgVisitFunction(node Function) {
 	// FLAGG??
 	for _, stat := range node.StatList {
 		cg.cgEvalStat(stat)
+	}
+
+	// add sp, sp, #n to remove variable space
+	if varSpaceSize > 0 {
+		appendAssembly(cg.currInstrs(), "ADD sp, sp, #"+strconv.Itoa(varSpaceSize), 1, 1)
 	}
 
 	// TEST harness uses double POP don't think we need it
