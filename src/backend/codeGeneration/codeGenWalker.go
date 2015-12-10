@@ -46,7 +46,7 @@ const (
 // Function global variable
 var functionList []*Function
 
-var DEBUG = true
+var DEBUG = false
 
 // HELPER FUNCTIONS
 // cgVisitReadStat helper function
