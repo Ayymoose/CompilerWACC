@@ -1,6 +1,4 @@
 begin
-  pair(int,string) p1 = newpair(30,"Hello");
-  pair(int,string) p2 = newpair(31,"World");
-  pair(int,string) p3 = newpair(32,"!");
-  p2 = null
+  pair(int,int) p = null;
+  p = newpair(69,420)
 end

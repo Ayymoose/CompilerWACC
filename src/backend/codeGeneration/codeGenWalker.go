@@ -448,9 +448,6 @@ func (cg *CodeGenerator) evalPair(ident Evaluation, fst Evaluation, snd Evaluati
 	//Store the address of allocated memory block of the pair on the stack
 	appendAssembly(cg.currInstrs(), "STR r0, ["+reg2+", #4]", 1, 1)
 
-	//Store the address of the pair on the stack
-	appendAssembly(cg.currInstrs(), "STR "+reg2+", [sp, #"+cg.subCurrP(PAIR_SIZE)+"]", 1, 1)
-
 	/*
 		//Store the address of the pair on the stack
 		switch ident.(type) {
@@ -684,6 +681,8 @@ func (cg *CodeGenerator) cgVisitDeclareStat(node Declare) {
 		switch rhs.(type) {
 		case NewPair:
 			cg.evalPair(node.Lhs, rhs.(NewPair).FstExpr, rhs.(NewPair).SndExpr, "r5", "r4")
+			//Store the address of the pair on the stack
+			appendAssembly(cg.currInstrs(), "STR r4, [sp, #"+cg.subCurrP(PAIR_SIZE)+"]", 1, 1)
 		case Ident:
 			//TODO: UNFINISHED
 			cg.evalRHS(rhs.(Ident), "r4")
@@ -742,8 +741,9 @@ func (cg *CodeGenerator) cgVisitAssignmentStat(node Assignment) {
 				//Store null in the pair
 				var offset, _ = cg.getIdentOffset(lhs.(Ident))
 				appendAssembly(cg.currInstrs(), "STR r4, [sp, #"+strconv.Itoa(offset)+"]", 1, 1)
-			default:
-				appendAssembly(cg.currInstrs(), "fffffffffffffffffffffffffffffffff", 1, 1)
+			case Ident:
+				//Complete
+			case NewPair:
 				//Complete
 			}
 
