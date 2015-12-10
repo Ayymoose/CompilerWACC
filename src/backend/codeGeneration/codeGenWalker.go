@@ -1091,6 +1091,14 @@ func (cg *CodeGenerator) cgVisitFunction(node Function) {
 	// push {lr} to save the caller address
 	appendAssembly(cg.currInstrs(), "PUSH {lr}", 1, 1)
 
+	// TODO
+	if cg.currStack.size > 0 {
+		cg.createStackSpace(cg.globalStack.size)
+	}
+	var offset, _ = cg.getIdentOffset(node.Ident)
+	appendAssembly(cg.currInstrs(), "SUB sp, sp, #"+strconv.Itoa(offset), 1, 1)
+	// TODO
+
 	// traverse all statements by switching on statement type
 	// BUT NEED TO KNOW THAT WE NEED TO ADD THIS TO DUNCTION MESSGES??
 	// FLAGG??
@@ -1186,7 +1194,7 @@ func (cg *CodeGenerator) cgVisitBinopExpr(node Binop) {
 	case PLUS:
 		appendAssembly(cg.currInstrs(), "ADDS r4, r4, r5", 1, 1)
 		appendAssembly(cg.currInstrs(), "BLVS p_throw_overflow_error", 1, 1)
-		appendAssembly(cg.currInstrs(), "MOV r0, r4", 1, 1)
+		//	appendAssembly(cg.currInstrs(), "MOV r0, r4", 1, 1)
 		cg.cgVisitBinopExprHelper("p_throw_overflow_error")
 	case SUB:
 		appendAssembly(cg.currInstrs(), "SUBS r4, r4, r5", 1, 1)
