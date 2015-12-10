@@ -167,7 +167,7 @@ func getParamOffset(ident Ident, paramList *[]Param) (int, Type) {
 
 	for _, param := range *paramList {
 		if ident == param.Ident {
-			return -accOffset - sizeOf(param.ParamType), param.ParamType
+			return -accOffset, param.ParamType //- sizeOf(param.ParamType)
 		}
 
 		accOffset += sizeOf(param.ParamType)
