@@ -602,7 +602,7 @@ func (cg *CodeGenerator) cgVisitProgram(node *Program) {
 	functionList = node.FunctionList
 
 	// .text
-	appendAssembly(cg.currInstrs(), ".text", 0, 2)
+	appendAssembly(cg.funcInstrs, ".text", 0, 2)
 
 	// .global main
 	appendAssembly(cg.funcInstrs, ".global main", 0, 1)
