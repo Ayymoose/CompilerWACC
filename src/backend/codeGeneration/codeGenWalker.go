@@ -130,11 +130,26 @@ func (cg *CodeGenerator) arrayCheckBounds(array []Evaluation, reg1 string, reg2 
 	// Get offset of
 	appendAssembly(cg.currInstrs(), "ADD "+reg1+", "+reg1+", #4", 1, 1)
 	appendAssembly(cg.currInstrs(), "ADD "+reg1+", "+reg1+", "+reg2+", LSL #2", 1, 1)
-	appendAssembly(cg.currInstrs(), "LDR "+reg1+", ["+reg1+"]", 1, 1)
+
+	var t1 = cg.eval(array[0])
+
+	switch t1.(type) {
+	case ConstType:
+
+		switch t1.(ConstType) {
+		case Bool, Char:
+			appendAssembly(cg.currInstrs(), "LDRSB "+reg1+", ["+reg1+"]", 1, 1)
+		case Int, String, Pair:
+			appendAssembly(cg.currInstrs(), "LDR "+reg1+", ["+reg1+"]", 1, 1)
+		}
+
+	}
 
 	//Load the second index if there is one
 	if len(array) > 1 {
 		cg.evalRHS(array[1], reg2)
+
+		var t2 = cg.eval(array[0])
 
 		appendAssembly(cg.currInstrs(), "MOV r0, "+reg2, 1, 1)
 		appendAssembly(cg.currInstrs(), "MOV r1, "+reg1, 1, 1)
@@ -143,7 +158,18 @@ func (cg *CodeGenerator) arrayCheckBounds(array []Evaluation, reg1 string, reg2 
 		// Get offset of
 		appendAssembly(cg.currInstrs(), "ADD "+reg1+", "+reg1+", #4", 1, 1)
 		appendAssembly(cg.currInstrs(), "ADD "+reg1+", "+reg1+", "+reg2+", LSL #2", 1, 1)
-		appendAssembly(cg.currInstrs(), "LDR "+reg1+", ["+reg1+"]", 1, 1)
+
+		switch t2.(type) {
+		case ConstType:
+
+			switch t1.(ConstType) {
+			case Bool, Char:
+				appendAssembly(cg.currInstrs(), "LDRSB "+reg1+", ["+reg1+"]", 1, 1)
+			case Int, String, Pair:
+				appendAssembly(cg.currInstrs(), "LDR "+reg1+", ["+reg1+"]", 1, 1)
+			}
+
+		}
 
 	}
 
@@ -466,9 +492,10 @@ func (cg *CodeGenerator) evalArrayLiter(typeNode Type, rhs Evaluation, srcReg st
 
 	switch rhs.(type) {
 	case ArrayLiter:
+
 		//Calculate the amount of storage space required for the array
-		// = ((arrayLength(array) * sizeOf(arrayType)) + ADDRESS_SIZE
-		var arrayStorage = (len(rhs.(ArrayLiter).Exprs) * sizeOf(typeNode)) + ADDRESS_SIZE
+		// = ((arrayLength(array) * sizeOf(arrayType)) + INT_SIZE
+		var arrayStorage = (len(rhs.(ArrayLiter).Exprs) * sizeOf(typeNode.(ArrayType).Type)) + INT_SIZE
 
 		//Allocate memory for the array
 		appendAssembly(cg.currInstrs(), "LDR r0, ="+strconv.Itoa(arrayStorage), 1, 1)
@@ -657,9 +684,7 @@ func (cg *CodeGenerator) cgVisitDeclareStat(node Declare) {
 	switch node.DecType.(type) {
 
 	case ConstType:
-
 		cg.evalRHS(rhs, "r4")
-
 		switch node.DecType.(ConstType) {
 		case Bool:
 			// Using STRB, store it on the stack
@@ -678,6 +703,7 @@ func (cg *CodeGenerator) cgVisitDeclareStat(node Declare) {
 		}
 
 	case PairType:
+
 		switch rhs.(type) {
 		case NewPair:
 			cg.evalPair(node.Lhs, rhs.(NewPair).FstExpr, rhs.(NewPair).SndExpr, "r5", "r4")
@@ -695,16 +721,19 @@ func (cg *CodeGenerator) cgVisitDeclareStat(node Declare) {
 			cg.evalRHS(rhs.(Call), "r4")
 			appendAssembly(cg.currInstrs(), "STR r4, [sp, #"+cg.subCurrP(sizeOf(cg.eval(rhs.(Call))))+"]", 1, 1)
 		case PairElem:
-			fmt.Println("pair elem not done")
-		default:
-			appendAssembly(cg.currInstrs(), "Unknown type 1", 1, 1)
+			var offset, _ = cg.getIdentOffset(rhs.(PairElem).Expr.(Ident))
+			cg.evalPairElem(rhs.(PairElem), "r4")
+			appendAssembly(cg.currInstrs(), "STR r4, [sp, #"+strconv.Itoa(offset)+"]", 1, 1)
+		case ArrayElem:
+			//TODO: Not sure if unfinished
+			cg.evalArrayElem(rhs.(ArrayElem), "r4", "r5")
 		}
 
 	case ArrayType:
 		// Evalute an array
 		cg.evalArrayLiter(node.DecType, rhs, "r5", "r4")
 	default:
-		appendAssembly(cg.currInstrs(), "Unknown type 2", 1, 1)
+		fmt.Println("Unknown type 2")
 	}
 
 	// Saves Idents offset in the symbol tables offset map
@@ -714,7 +743,7 @@ func (cg *CodeGenerator) cgVisitDeclareStat(node Declare) {
 // Visit Assignment node
 func (cg *CodeGenerator) cgVisitAssignmentStat(node Assignment) {
 
-	//	cg.debug("----- DEBUG - cgVisitAssignmentStat start -----")
+	cg.debug("----- DEBUG - cgVisitAssignmentStat start -----")
 
 	var rhs = node.Rhs
 	var lhs = node.Lhs
@@ -728,7 +757,7 @@ func (cg *CodeGenerator) cgVisitAssignmentStat(node Assignment) {
 
 	case Ident:
 
-		//	cg.debug("----- DEBUG - cgVisitAssignmentStat - Ident start -----")
+		cg.debug("----- DEBUG - cgVisitAssignmentStat - Ident start -----")
 
 		ident := lhs.(Ident)
 		typeIdent := cg.eval(ident)
@@ -759,11 +788,11 @@ func (cg *CodeGenerator) cgVisitAssignmentStat(node Assignment) {
 			}
 		}
 
-	//	cg.debug("----- DEBUG - cgVisitAssignmentStat - Ident end -----")
+		cg.debug("----- DEBUG - cgVisitAssignmentStat - Ident end -----")
 
 	case ArrayElem:
 
-		//	cg.debug("----- DEBUG - cgVisitAssignmentStat - ArrayElem start -----")
+		cg.debug("----- DEBUG - cgVisitAssignmentStat - ArrayElem start -----")
 
 		var offset, _ = cg.getIdentOffset(lhs.(ArrayElem).Ident)
 
@@ -800,11 +829,11 @@ func (cg *CodeGenerator) cgVisitAssignmentStat(node Assignment) {
 			appendAssembly(cg.currInstrs(), "Type not added", 1, 1)
 		}
 
-	//	cg.debug("----- DEBUG - cgVisitAssignmentStat - ArrayElem end -----")
+		cg.debug("----- DEBUG - cgVisitAssignmentStat - ArrayElem end -----")
 
 	case PairElem:
 
-		//	cg.debug("----- DEBUG - cgVisitAssignmentStat - PairElem start -----")
+		cg.debug("----- DEBUG - cgVisitAssignmentStat - PairElem start -----")
 
 		// Load the address of the pair into a register
 		var offset, _ = cg.getIdentOffset(lhs.(PairElem).Expr.(Ident))
@@ -824,13 +853,13 @@ func (cg *CodeGenerator) cgVisitAssignmentStat(node Assignment) {
 		// Store the value into the pair
 		appendAssembly(cg.currInstrs(), "STR r4, [r5]", 1, 1)
 
-	//	cg.debug("----- DEBUG - cgVisitAssignmentStat - PairElem end -----")
+		cg.debug("----- DEBUG - cgVisitAssignmentStat - PairElem end -----")
 
 	default:
 		fmt.Println("its neither")
 	}
 
-	//	cg.debug("----- DEBUG - cgVisitAssignmentStat end -----")
+	cg.debug("----- DEBUG - cgVisitAssignmentStat end -----")
 }
 
 // Visit Read node
