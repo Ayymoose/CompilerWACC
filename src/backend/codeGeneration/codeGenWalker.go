@@ -30,7 +30,7 @@ const (
 	TRUE_MSG       = "\"true\\0\""
 	FALSE_MSG      = "\"false\\0\""
 	READ_INT       = "\"%d\\0\""
-	READ_CHAR      = "\"%c\\0\""
+	READ_CHAR      = "\" %c\\0\""
 	POINTER_FORMAT = "\"%p\\0\""
 )
 
@@ -587,7 +587,7 @@ func (cg *CodeGenerator) cgVisitProgram(node *Program) {
 	functionList = node.FunctionList
 
 	// .text
-	appendAssembly(cg.currInstrs(), ".text", 0, 2)
+	appendAssembly(cg.funcInstrs, ".text", 0, 2)
 
 	// .global main
 	appendAssembly(cg.funcInstrs, ".global main", 0, 1)
@@ -690,6 +690,7 @@ func (cg *CodeGenerator) cgVisitDeclareStat(node Declare) {
 			cg.evalRHS(rhs.(Ident), "r4")
 			appendAssembly(cg.currInstrs(), "STR r4, [sp, #"+cg.subCurrP(ADDRESS_SIZE)+"]", 1, 1)
 		case PairLiter:
+
 			//Can only be Null
 			appendAssembly(cg.currInstrs(), "LDR r4, =0", 1, 1)
 			appendAssembly(cg.currInstrs(), "STR r4, [sp, #"+cg.subCurrP(ADDRESS_SIZE)+"]", 1, 1)
@@ -1049,9 +1050,8 @@ func (cg *CodeGenerator) cgVisitScopeStat(node Scope) {
 func (cg *CodeGenerator) cgVisitCallStat(ident Ident, paramList []Evaluation, srcReg string) {
 	for _, function := range functionList {
 		if function.Ident == ident {
-
-			for _, param := range paramList {
-				cg.cgVisitParameter(param)
+			for i := len(paramList) - 1; i >= 0; i-- {
+				cg.cgVisitParameter(paramList[i])
 			}
 
 			appendAssembly(cg.currInstrs(), "BL f_"+string(function.Ident), 1, 1)
