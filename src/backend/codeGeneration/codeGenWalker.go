@@ -274,7 +274,7 @@ func (cg *CodeGenerator) debug(message string) {
 // Evalutes the RHS of an expression
 func (cg *CodeGenerator) evalRHS(t Evaluation, srcReg string) {
 
-	cg.debug("----- DEBUG - evalRHS() start -----")
+	//	cg.debug("----- DEBUG - evalRHS() start -----")
 
 	switch t.(type) {
 	// Literals
@@ -344,7 +344,7 @@ func (cg *CodeGenerator) evalRHS(t Evaluation, srcReg string) {
 		fmt.Println("ERROR: Expression can not be evaluated")
 	}
 
-	cg.debug("----- DEBUG - evalRHS() end -----")
+	//	cg.debug("----- DEBUG - evalRHS() end -----")
 }
 
 // Evalute a pair element
@@ -686,7 +686,8 @@ func (cg *CodeGenerator) cgVisitDeclareStat(node Declare) {
 			cg.evalPair(node.Lhs, rhs.(NewPair).FstExpr, rhs.(NewPair).SndExpr, "r5", "r4")
 		case Ident:
 			//TODO: UNFINISHED
-			cg.evalRHS(rhs.(Ident), "r5")
+			cg.evalRHS(rhs.(Ident), "r4")
+			appendAssembly(cg.currInstrs(), "STR r4, [sp, #"+cg.subCurrP(ADDRESS_SIZE)+"]", 1, 1)
 		case PairLiter:
 			//Can only be Null
 			appendAssembly(cg.currInstrs(), "LDR r4, =0", 1, 1)
@@ -714,7 +715,7 @@ func (cg *CodeGenerator) cgVisitDeclareStat(node Declare) {
 // Visit Assignment node
 func (cg *CodeGenerator) cgVisitAssignmentStat(node Assignment) {
 
-	cg.debug("----- DEBUG - cgVisitAssignmentStat start -----")
+	//	cg.debug("----- DEBUG - cgVisitAssignmentStat start -----")
 
 	var rhs = node.Rhs
 	var lhs = node.Lhs
@@ -728,7 +729,7 @@ func (cg *CodeGenerator) cgVisitAssignmentStat(node Assignment) {
 
 	case Ident:
 
-		cg.debug("----- DEBUG - cgVisitAssignmentStat - Ident start -----")
+		//	cg.debug("----- DEBUG - cgVisitAssignmentStat - Ident start -----")
 
 		ident := lhs.(Ident)
 		typeIdent := cg.eval(ident)
@@ -758,11 +759,11 @@ func (cg *CodeGenerator) cgVisitAssignmentStat(node Assignment) {
 			}
 		}
 
-		cg.debug("----- DEBUG - cgVisitAssignmentStat - Ident end -----")
+	//	cg.debug("----- DEBUG - cgVisitAssignmentStat - Ident end -----")
 
 	case ArrayElem:
 
-		cg.debug("----- DEBUG - cgVisitAssignmentStat - ArrayElem start -----")
+		//	cg.debug("----- DEBUG - cgVisitAssignmentStat - ArrayElem start -----")
 
 		var offset, _ = cg.getIdentOffset(lhs.(ArrayElem).Ident)
 
@@ -799,11 +800,11 @@ func (cg *CodeGenerator) cgVisitAssignmentStat(node Assignment) {
 			appendAssembly(cg.currInstrs(), "Type not added", 1, 1)
 		}
 
-		cg.debug("----- DEBUG - cgVisitAssignmentStat - ArrayElem end -----")
+	//	cg.debug("----- DEBUG - cgVisitAssignmentStat - ArrayElem end -----")
 
 	case PairElem:
 
-		cg.debug("----- DEBUG - cgVisitAssignmentStat - PairElem start -----")
+		//	cg.debug("----- DEBUG - cgVisitAssignmentStat - PairElem start -----")
 
 		// Load the address of the pair into a register
 		var offset, _ = cg.getIdentOffset(lhs.(PairElem).Expr.(Ident))
@@ -823,13 +824,13 @@ func (cg *CodeGenerator) cgVisitAssignmentStat(node Assignment) {
 		// Store the value into the pair
 		appendAssembly(cg.currInstrs(), "STR r4, [r5]", 1, 1)
 
-		cg.debug("----- DEBUG - cgVisitAssignmentStat - PairElem end -----")
+	//	cg.debug("----- DEBUG - cgVisitAssignmentStat - PairElem end -----")
 
 	default:
 		fmt.Println("its neither")
 	}
 
-	cg.debug("----- DEBUG - cgVisitAssignmentStat end -----")
+	//	cg.debug("----- DEBUG - cgVisitAssignmentStat end -----")
 }
 
 // Visit Read node
@@ -859,7 +860,11 @@ func (cg *CodeGenerator) cgVisitReadStat(node Read) {
 // Visit Free node
 func (cg *CodeGenerator) cgVisitFreeStat(node Free) {
 	//testoffset, _ := cg.getIdentOffset(node.Expr.(PairElem).Expr.(Ident))
-	appendAssembly(cg.currInstrs(), "LDR r4, [sp]", 1, 1)
+	// HACK
+	pointer, _ := strconv.Atoi(cg.subCurrP(ADDRESS_SIZE))
+	val := strconv.Itoa(8 + pointer)
+	appendAssembly(cg.currInstrs(), "LDR r4, [sp, #"+val+"]", 1, 1)
+	// HACK
 	appendAssembly(cg.currInstrs(), "MOV r0, r4", 1, 1)
 	appendAssembly(cg.currInstrs(), "BL p_free_pair", 1, 1)
 	cg.cgVisitFreeStatFuncHelper("p_free_pair")
@@ -881,7 +886,7 @@ func (cg *CodeGenerator) cgVisitExitStat(node Exit) {
 // Visit Print node
 func (cg *CodeGenerator) cgVisitPrintStat(node Print) {
 
-	cg.debug("----- DEBUG - printStat() start -----")
+	//cg.debug("----- DEBUG - printStat() start -----")
 
 	// Get value of expr into dstReg
 	cg.evalRHS(node.Expr, "r0")
@@ -929,7 +934,7 @@ func (cg *CodeGenerator) cgVisitPrintStat(node Print) {
 		//	typeOf(expr)
 	}
 
-	cg.debug("----- DEBUG - printStat() end -----")
+	//cg.debug("----- DEBUG - printStat() end -----")
 }
 
 // Visit Println node
