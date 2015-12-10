@@ -30,7 +30,7 @@ const (
 	TRUE_MSG       = "\"true\\0\""
 	FALSE_MSG      = "\"false\\0\""
 	READ_INT       = "\"%d\\0\""
-	READ_CHAR      = "\"%c\\0\""
+	READ_CHAR      = "\" %c\\0\""
 	POINTER_FORMAT = "\"%p\\0\""
 )
 
