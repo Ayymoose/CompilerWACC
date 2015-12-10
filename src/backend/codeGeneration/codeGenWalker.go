@@ -924,7 +924,7 @@ func (cg *CodeGenerator) cgVisitFreeStat(node Free) {
 		offset, _ = cg.getIdentOffset(node.Expr.(ArrayElem).Ident)
 	}
 
-	appendAssembly(cg.currInstrs(), "LDR r4, [sp"+strconv.Itoa(offset)+"]", 1, 1)
+	appendAssembly(cg.currInstrs(), "LDR r4, [sp #"+strconv.Itoa(offset)+"]", 1, 1)
 	appendAssembly(cg.currInstrs(), "MOV r0, r4", 1, 1)
 	appendAssembly(cg.currInstrs(), "BL p_free_pair", 1, 1)
 	cg.cgVisitFreeStatFuncHelper("p_free_pair")
