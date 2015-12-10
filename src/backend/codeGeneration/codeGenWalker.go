@@ -476,17 +476,6 @@ func (cg *CodeGenerator) evalPair(ident Evaluation, fst Evaluation, snd Evaluati
 	//Store the address of allocated memory block of the pair on the stack
 	appendAssembly(cg.currInstrs(), "STR r0, ["+reg2+", #4]", 1, 1)
 
-	/*
-		//Store the address of the pair on the stack
-		switch ident.(type) {
-		case Ident:
-			//Store the address of the address that contains pointers to the first and second elements
-			var offset, _ = cg.getIdentOffset(ident.(Ident))
-			appendAssembly(cg.currInstrs(), "STR "+reg2+", [sp, #"+strconv.Itoa(offset)+"]", 1, 1)
-			//default:
-			//	fmt.Println("oh no")
-		}*/
-
 }
 
 // Evaluates array literals
