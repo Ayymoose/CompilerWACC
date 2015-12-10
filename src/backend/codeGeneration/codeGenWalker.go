@@ -861,10 +861,11 @@ func (cg *CodeGenerator) cgVisitReadStat(node Read) {
 func (cg *CodeGenerator) cgVisitFreeStat(node Free) {
 	//testoffset, _ := cg.getIdentOffset(node.Expr.(PairElem).Expr.(Ident))
 	// HACK
-	pointer, _ := strconv.Atoi(cg.subCurrP(ADDRESS_SIZE))
-	val := strconv.Itoa(8 + pointer)
-	appendAssembly(cg.currInstrs(), "LDR r4, [sp, #"+val+"]", 1, 1)
+	//pointer, _ := strconv.Atoi(cg.subCurrP(ADDRESS_SIZE))
+	//val := strconv.Itoa(8 + pointer)
+	//	appendAssembly(cg.currInstrs(), "LDR r4, [sp, #"+val+"]", 1, 1)
 	// HACK
+	appendAssembly(cg.currInstrs(), "LDR r4, [sp]", 1, 1)
 	appendAssembly(cg.currInstrs(), "MOV r0, r4", 1, 1)
 	appendAssembly(cg.currInstrs(), "BL p_free_pair", 1, 1)
 	cg.cgVisitFreeStatFuncHelper("p_free_pair")
