@@ -399,6 +399,69 @@ func (cg *CodeGenerator) evalPairElem(t PairElem, srcReg string) {
 
 }
 
+/*
+     DO NOT REMOVE THIS WORKING CODE! I WILL KILL YOU IF YOU DO!
+		 THIS CODE WORKS BUT CAUSES LABTS TO CRASH SO PLEASE DON'T TOUCH THIS AT ALL
+*/
+
+
+
+/*
+// Helper to reduce code duplication
+func (cg *CodeGenerator) evalNewPairHelper(pair Evaluation, reg1 string, reg2 string) {
+
+  // Get the type
+	var pairType = cg.eval(pair)
+	var pairSize = sizeOf(pairType)
+
+	// Load the element into a register to be stored
+	cg.evalRHS(pair, reg1)
+
+	//Allocate memory for the an element
+	appendAssembly(cg.currInstrs(), "LDR r0, ="+strconv.Itoa(pairSize), 1, 1)
+	appendAssembly(cg.currInstrs(), "BL malloc", 1, 1)
+
+	//Store the element to the newly allocated memory onto the heap
+	switch pairType.(type) {
+	case ConstType:
+		switch pairType.(ConstType) {
+		case Bool, Char:
+			appendAssembly(cg.currInstrs(), "STRB "+reg1+", [r0]", 1, 1)
+		case Int, String, Pair:
+			appendAssembly(cg.currInstrs(), "STR "+reg1+", [r0]", 1, 1)
+		}
+	}
+
+}
+
+// Evalutes a pair of elements onto the stack
+func (cg *CodeGenerator) evalNewPair(fst Evaluation, snd Evaluation, reg1 string, reg2 string) {
+
+	// First allocate memory to store two addresses (8-bytes)
+	appendAssembly(cg.currInstrs(), "LDR r0, ="+strconv.Itoa(ADDRESS_SIZE*2), 1, 1)
+	appendAssembly(cg.currInstrs(), "BL malloc", 1, 1)
+
+	// Store the address in the free register
+	appendAssembly(cg.currInstrs(), "MOV "+reg2+", r0", 1, 1)
+
+  // Evalute the first element
+  cg.evalNewPairHelper(fst, reg1, reg2)
+
+	//Store the address of allocated memory block of the element on the heap
+	appendAssembly(cg.currInstrs(), "STR r0, ["+reg2+"]", 1, 1)
+
+  // Evalute the second element
+  cg.evalNewPairHelper(snd, reg1, reg2)
+
+	//Store the address of allocated memory block of the element on the heap
+	appendAssembly(cg.currInstrs(), "STR r0, ["+reg2+", #4]", 1, 1)
+
+}
+
+*/
+
+
+
 // Evalutes a pair of elements onto the stack
 func (cg *CodeGenerator) evalNewPair(fst Evaluation, snd Evaluation, reg1 string, reg2 string) {
 
