@@ -119,7 +119,6 @@ func (cg *CodeGenerator) arrayCheckBounds(array []Evaluation, reg1 string, reg2 
 	// Set a register to point to the array
 	appendAssembly(cg.currInstrs(), "LDR "+reg1+", ["+reg1+"]", 1, 1)
 
-
 	// reg1 = Address of the array
 	// reg2 = Index
 
@@ -148,7 +147,6 @@ func (cg *CodeGenerator) arrayCheckBounds(array []Evaluation, reg1 string, reg2 
 	//Load the second index if there is one
 	if len(array) > 1 {
 
-
 		cg.evalRHS(array[1], reg2)
 
 		var t2 = cg.eval(array[0])
@@ -172,9 +170,6 @@ func (cg *CodeGenerator) arrayCheckBounds(array []Evaluation, reg1 string, reg2 
 			}
 
 		}
-
-
-
 
 	}
 
@@ -344,7 +339,7 @@ func (cg *CodeGenerator) evalRHS(t Evaluation, srcReg string) {
 			appendAssembly(cg.currInstrs(), "LDR "+srcReg+", [sp, #"+strconv.Itoa(offset)+"]", 1, 1)
 			appendAssembly(cg.currInstrs(), "MOV r0, r4", 1, 1)
 
-		cg.debug("----- DEBUG - evalRHS() Ident/ArrayType end -----")
+			cg.debug("----- DEBUG - evalRHS() Ident/ArrayType end -----")
 
 		case PairType:
 			appendAssembly(cg.currInstrs(), "LDR "+srcReg+", [sp, #"+strconv.Itoa(offset)+"]", 1, 1)
@@ -413,8 +408,6 @@ func (cg *CodeGenerator) evalPairElem(t PairElem, srcReg string) {
 		 THIS CODE WORKS BUT CAUSES LABTS TO CRASH SO PLEASE DON'T TOUCH THIS AT ALL
 */
 
-
-
 /*
 // Helper to reduce code duplication
 func (cg *CodeGenerator) evalNewPairHelper(pair Evaluation, reg1 string, reg2 string) {
@@ -468,8 +461,6 @@ func (cg *CodeGenerator) evalNewPair(fst Evaluation, snd Evaluation, reg1 string
 }
 
 */
-
-
 
 // Evalutes a pair of elements onto the stack
 func (cg *CodeGenerator) evalNewPair(fst Evaluation, snd Evaluation, reg1 string, reg2 string) {
@@ -538,7 +529,7 @@ func (cg *CodeGenerator) evalNewPair(fst Evaluation, snd Evaluation, reg1 string
 // Evaluates array literals
 func (cg *CodeGenerator) evalArrayLiter(typeNode Type, rhs Evaluation, srcReg string, dstReg string) {
 
-  cg.debug("----- DEBUG - evalArrayLiter() start -----")
+	cg.debug("----- DEBUG - evalArrayLiter() start -----")
 
 	switch rhs.(type) {
 	case ArrayLiter:
@@ -559,14 +550,14 @@ func (cg *CodeGenerator) evalArrayLiter(typeNode Type, rhs Evaluation, srcReg st
 		fmt.Println("RHS Type not implemented")
 	}
 
-  cg.debug("----- DEBUG - evalArrayLiter() end -----")
+	cg.debug("----- DEBUG - evalArrayLiter() end -----")
 
 }
 
 // Evalutes an array (where t is the type of the array)
 func (cg *CodeGenerator) evalArray(array []Evaluation, srcReg string, dstReg string, t Type) {
 
-  cg.debug("----- DEBUG - evalArray() start -----")
+	cg.debug("----- DEBUG - evalArray() start -----")
 
 	var arraySize = len(array)
 	// Loop through the array pushing it onto the stack
@@ -601,7 +592,7 @@ func (cg *CodeGenerator) evalArray(array []Evaluation, srcReg string, dstReg str
 
 	appendAssembly(cg.currInstrs(), "STR "+srcReg+", ["+dstReg+"]", 1, 1)
 
-  cg.debug("----- DEBUG - evalArray() end -----")
+	cg.debug("----- DEBUG - evalArray() end -----")
 
 }
 
@@ -1211,7 +1202,7 @@ func (cg *CodeGenerator) cgVisitParameter(node Evaluation) {
 		appendAssembly(cg.currInstrs(), "STR r4, [sp, #-"+strconv.Itoa(INT_SIZE)+"]!", 1, 1)
 	case String:
 		cg.evalRHS(node, "r4")
-		appendAssembly(cg.currInstrs(), "STR r4, [sp, #"+strconv.Itoa(STRING_SIZE)+"]!", 1, 1)
+		appendAssembly(cg.currInstrs(), "STR r4, [sp, #-"+strconv.Itoa(STRING_SIZE)+"]!", 1, 1)
 	case Pair:
 		cg.evalRHS(node, "r4")
 		appendAssembly(cg.currInstrs(), "STR r4, [sp, #-"+strconv.Itoa(PAIR_SIZE)+"]!", 1, 1)
