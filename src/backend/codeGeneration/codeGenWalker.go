@@ -329,8 +329,10 @@ func (cg *CodeGenerator) evalRHS(t Evaluation, srcReg string) {
 		//PAIR-LITER NOT DONE
 		appendAssembly(cg.currInstrs(), "LDR "+srcReg+", =0", 1, 1)
 	case Ident:
-		var offset, resType = cg.getIdentOffset(t.(Ident))
 
+		cg.debug("----- DEBUG - evalRHS() Ident/ArrayType start -----")
+
+		var offset, resType = cg.getIdentOffset(t.(Ident))
 		switch resType.(type) {
 		case ArrayType:
 
@@ -341,6 +343,8 @@ func (cg *CodeGenerator) evalRHS(t Evaluation, srcReg string) {
 
 			appendAssembly(cg.currInstrs(), "LDR "+srcReg+", [sp, #"+strconv.Itoa(offset)+"]", 1, 1)
 			appendAssembly(cg.currInstrs(), "MOV r0, r4", 1, 1)
+
+		cg.debug("----- DEBUG - evalRHS() Ident/ArrayType end -----")
 
 		case PairType:
 			appendAssembly(cg.currInstrs(), "LDR "+srcReg+", [sp, #"+strconv.Itoa(offset)+"]", 1, 1)
@@ -534,6 +538,8 @@ func (cg *CodeGenerator) evalNewPair(fst Evaluation, snd Evaluation, reg1 string
 // Evaluates array literals
 func (cg *CodeGenerator) evalArrayLiter(typeNode Type, rhs Evaluation, srcReg string, dstReg string) {
 
+  cg.debug("----- DEBUG - evalArrayLiter() start -----")
+
 	switch rhs.(type) {
 	case ArrayLiter:
 
@@ -553,10 +559,14 @@ func (cg *CodeGenerator) evalArrayLiter(typeNode Type, rhs Evaluation, srcReg st
 		fmt.Println("RHS Type not implemented")
 	}
 
+  cg.debug("----- DEBUG - evalArrayLiter() end -----")
+
 }
 
 // Evalutes an array (where t is the type of the array)
 func (cg *CodeGenerator) evalArray(array []Evaluation, srcReg string, dstReg string, t Type) {
+
+  cg.debug("----- DEBUG - evalArray() start -----")
 
 	var arraySize = len(array)
 	// Loop through the array pushing it onto the stack
@@ -590,6 +600,8 @@ func (cg *CodeGenerator) evalArray(array []Evaluation, srcReg string, dstReg str
 	appendAssembly(cg.currInstrs(), "LDR "+srcReg+", ="+strconv.Itoa(arraySize), 1, 1)
 
 	appendAssembly(cg.currInstrs(), "STR "+srcReg+", ["+dstReg+"]", 1, 1)
+
+  cg.debug("----- DEBUG - evalArray() end -----")
 
 }
 
