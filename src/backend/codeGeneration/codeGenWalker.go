@@ -2,7 +2,6 @@ package codeGeneration
 
 import (
 	. "ast"
-	. "backend/filewriter"
 	"fmt"
 	"strconv"
 )
@@ -120,6 +119,7 @@ func (cg *CodeGenerator) arrayCheckBounds(array []Evaluation, reg1 string, reg2 
 	// Set a register to point to the array
 	appendAssembly(cg.currInstrs(), "LDR "+reg1+", ["+reg1+"]", 1, 1)
 
+
 	// reg1 = Address of the array
 	// reg2 = Index
 
@@ -147,6 +147,8 @@ func (cg *CodeGenerator) arrayCheckBounds(array []Evaluation, reg1 string, reg2 
 
 	//Load the second index if there is one
 	if len(array) > 1 {
+
+
 		cg.evalRHS(array[1], reg2)
 
 		var t2 = cg.eval(array[0])
@@ -170,6 +172,9 @@ func (cg *CodeGenerator) arrayCheckBounds(array []Evaluation, reg1 string, reg2 
 			}
 
 		}
+
+
+
 
 	}
 
@@ -1347,8 +1352,4 @@ func (cg *CodeGenerator) cgVisitBinopExprHelper(funcName string) {
 		}
 		cg.throwRunTimeError()
 	}
-}
-
-func (cg *CodeGenerator) cgCreateMsgs(instrs *ARMList) map[string]string {
-	return nil
 }
