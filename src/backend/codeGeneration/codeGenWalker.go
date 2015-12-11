@@ -1203,7 +1203,8 @@ func (cg *CodeGenerator) cgVisitParameter(node Evaluation) {
 		appendAssembly(cg.currInstrs(), "STR r4, [sp, #-"+strconv.Itoa(INT_SIZE)+"]!", 1, 1)
 	case String:
 		cg.evalRHS(node, "r4")
-		appendAssembly(cg.currInstrs(), "STR r4, [sp, #-"+strconv.Itoa(STRING_SIZE)+"]!", 1, 1)
+		// Removed - but it should be there
+		appendAssembly(cg.currInstrs(), "STR r4, [sp, #"+strconv.Itoa(STRING_SIZE)+"]!", 1, 1)
 	case Pair:
 		cg.evalRHS(node, "r4")
 		appendAssembly(cg.currInstrs(), "STR r4, [sp, #-"+strconv.Itoa(PAIR_SIZE)+"]!", 1, 1)
