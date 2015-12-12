@@ -577,9 +577,8 @@ func (cg *CodeGenerator) evalOrd(node Unop) {
 	case ArrayElem:
 		fmt.Println("ArrayElem not done for ord")
 	case Character:
-		fmt.Println("Char not done for ord")
+		appendAssembly(cg.currInstrs(), "MOV r0, #"+string(node.Expr.(Character)), 1, 1)
 	default:
-		fmt.Println("Oh no")
 	}
 }
 
