@@ -195,7 +195,7 @@ func (cg *CodeGenerator) getMsgLabel(ident Ident, strValue string) string {
 	if ident == "" {
 		for i, message := range cg.messages {
 			if strValue == message {
-				return "=msg_" + strconv.Itoa(i-1)
+				return "=msg_" + strconv.Itoa(i)
 			}
 		}
 		newIndex := len(cg.messages)
