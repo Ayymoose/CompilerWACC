@@ -45,7 +45,7 @@ const (
 // Function global variable
 var functionList []*Function
 
-var DEBUG = false
+var DEBUG = !false
 
 // HELPER FUNCTIONS
 // cgVisitReadStat helper function
@@ -321,15 +321,17 @@ func (cg *CodeGenerator) evalRHS(t Evaluation, srcReg string) {
 		appendAssembly(cg.currInstrs(), "MOV r0, r4", 1, 1)
 
 	case PairLiter:
+		cg.debug("----- DEBUG - evalRHS() PairLiter start -----")
 		//PAIR-LITER NOT DONE
 		appendAssembly(cg.currInstrs(), "LDR "+srcReg+", =0", 1, 1)
+		cg.debug("----- DEBUG - evalRHS() PairLiter end -----")
 	case Ident:
-
-		cg.debug("----- DEBUG - evalRHS() Ident/ArrayType start -----")
 
 		var offset, resType = cg.getIdentOffset(t.(Ident))
 		switch resType.(type) {
 		case ArrayType:
+
+			cg.debug("----- DEBUG - evalRHS() Ident/ArrayType start -----")
 
 			//HACK
 			if srcReg == "r0" {
@@ -342,7 +344,9 @@ func (cg *CodeGenerator) evalRHS(t Evaluation, srcReg string) {
 			cg.debug("----- DEBUG - evalRHS() Ident/ArrayType end -----")
 
 		case PairType:
+			cg.debug("----- DEBUG - evalRHS() Ident/PairType start -----")
 			appendAssembly(cg.currInstrs(), "LDR "+srcReg+", [sp, #"+strconv.Itoa(offset)+"]", 1, 1)
+			cg.debug("----- DEBUG - evalRHS() Ident/PairType start -----")
 		case ConstType:
 
 			switch resType.(ConstType) {
@@ -380,6 +384,8 @@ func (cg *CodeGenerator) evalRHS(t Evaluation, srcReg string) {
 // Evalute a pair element
 func (cg *CodeGenerator) evalPairElem(t PairElem, srcReg string) {
 
+	cg.debug("----- DEBUG - evalPairElem() start -----")
+
 	//Load the address of the pair from the stack
 	var offset, _ = cg.getIdentOffset(t.Expr.(Ident))
 	appendAssembly(cg.currInstrs(), "LDR "+srcReg+", [sp, #"+strconv.Itoa(offset)+"]", 1, 1)
@@ -401,12 +407,8 @@ func (cg *CodeGenerator) evalPairElem(t PairElem, srcReg string) {
 	//Double deference
 	appendAssembly(cg.currInstrs(), "LDR "+srcReg+", ["+srcReg+"]", 1, 1)
 
+	cg.debug("----- DEBUG - evalPairElem() end -----")
 }
-
-/*
-     DO NOT REMOVE THIS WORKING CODE! I WILL KILL YOU IF YOU DO!
-		 THIS CODE WORKS BUT CAUSES LABTS TO CRASH SO PLEASE DON'T TOUCH THIS AT ALL
-*/
 
 // Helper to reduce code duplication
 func (cg *CodeGenerator) evalNewPairHelper(pair Evaluation, reg1 string, reg2 string) {
@@ -458,75 +460,6 @@ func (cg *CodeGenerator) evalNewPair(fst Evaluation, snd Evaluation, reg1 string
 	appendAssembly(cg.currInstrs(), "STR r0, ["+reg2+", #4]", 1, 1)
 
 }
-
-/* OLD EVALNEWPAIR
-// Evalutes a pair of elements onto the stack
-func (cg *CodeGenerator) evalNewPair(fst Evaluation, snd Evaluation, reg1 string, reg2 string) {
-
-	// First allocate memory to store two addresses (8-bytes)
-	appendAssembly(cg.currInstrs(), "LDR r0, ="+strconv.Itoa(ADDRESS_SIZE*2), 1, 1)
-	appendAssembly(cg.currInstrs(), "BL malloc", 1, 1)
-
-	// Store the address in the free register
-	appendAssembly(cg.currInstrs(), "MOV "+reg2+", r0", 1, 1)
-
-	//Get pair sizes
-	var typeFst, typeSnd = cg.eval(fst), cg.eval(snd)
-	var fstSize, sndSize = sizeOf(typeFst), sizeOf(typeSnd)
-
-	// Load the first element into a register to be stored
-	cg.evalRHS(fst, reg1)
-
-	//Allocate memory for the first element
-	appendAssembly(cg.currInstrs(), "LDR r0, ="+strconv.Itoa(fstSize), 1, 1)
-	appendAssembly(cg.currInstrs(), "BL malloc", 1, 1)
-
-	//Store the first element in the register
-	appendAssembly(cg.currInstrs(), "STR "+reg1+", [r0]", 1, 1)
-
-	appendAssembly(cg.currInstrs(), "STR r0, ["+reg2+"]", 1, 1)
-
-	switch typeFst.(type) {
-	case ConstType:
-		switch typeFst.(ConstType) {
-		case Bool, Char:
-			//Store the first element to the newly allocated memory onto the stack
-			appendAssembly(cg.currInstrs(), "STRB "+reg1+", [r0]", 1, 1)
-		case Int, String:
-			//Store the address of allocated memory block of the pair on the stack
-			appendAssembly(cg.currInstrs(), "STR r0, ["+reg2+"]", 1, 1)
-		}
-	default:
-		appendAssembly(cg.currInstrs(), "STR "+reg1+", [r0]", 1, 1)
-	}
-
-	//Load the second element into a register to be stored
-	cg.evalRHS(snd, reg1)
-
-	//Allocate memory for the second element
-	appendAssembly(cg.currInstrs(), "LDR r0, ="+strconv.Itoa(sndSize), 1, 1)
-	appendAssembly(cg.currInstrs(), "BL malloc", 1, 1)
-
-	switch typeSnd.(type) {
-	case ConstType:
-		switch typeSnd.(ConstType) {
-		case Bool, Char:
-			//Store the second element to the newly allocated memory onto the stack
-			appendAssembly(cg.currInstrs(), "STRB "+reg1+", [r0]", 1, 1)
-		case Int, String:
-			//Store the second element to the newly allocated memory onto the stack
-			appendAssembly(cg.currInstrs(), "STR "+reg1+", [r0]", 1, 1)
-		}
-	default:
-		appendAssembly(cg.currInstrs(), "STR "+reg1+", [r0]", 1, 1)
-	}
-
-	//Store the address of allocated memory block of the pair on the stack
-	appendAssembly(cg.currInstrs(), "STR r0, ["+reg2+", #4]", 1, 1)
-
-}
-
-*/
 
 // Evaluates array literals
 func (cg *CodeGenerator) evalArrayLiter(typeNode Type, rhs Evaluation, srcReg string, dstReg string) {
