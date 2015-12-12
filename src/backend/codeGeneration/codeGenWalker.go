@@ -1196,28 +1196,28 @@ func (cg *CodeGenerator) cgVisitParameter(node Evaluation) {
 	switch resType {
 	case Bool:
 		cg.evalRHS(node, "r4")
-		appendAssembly(cg.currInstrs(), "STRB r4, [sp, #-"+strconv.Itoa(BOOL_SIZE)+"]!", 1, 1)
+		appendAssembly(cg.currInstrs(), "STRB r4, [sp, #"+strconv.Itoa(-BOOL_SIZE)+"]!", 1, 1)
 	case Char:
 		cg.evalRHS(node, "r4")
-		appendAssembly(cg.currInstrs(), "STRB r4, [sp, #-"+strconv.Itoa(CHAR_SIZE)+"]!", 1, 1)
+		appendAssembly(cg.currInstrs(), "STRB r4, [sp, #"+strconv.Itoa(-CHAR_SIZE)+"]!", 1, 1)
 	case Int:
 		cg.evalRHS(node, "r4")
-		appendAssembly(cg.currInstrs(), "STR r4, [sp, #-"+strconv.Itoa(INT_SIZE)+"]!", 1, 1)
+		appendAssembly(cg.currInstrs(), "STR r4, [sp, #"+strconv.Itoa(-INT_SIZE)+"]!", 1, 1)
 	case String:
 		cg.evalRHS(node, "r4")
 		// Removed - but it should be there
-		appendAssembly(cg.currInstrs(), "STR r4, [sp, #"+strconv.Itoa(STRING_SIZE)+"]!", 1, 1)
+		appendAssembly(cg.currInstrs(), "STR r4, [sp, #"+strconv.Itoa(-STRING_SIZE)+"]!", 1, 1)
 	case Pair:
 		cg.evalRHS(node, "r4")
-		appendAssembly(cg.currInstrs(), "STR r4, [sp, #-"+strconv.Itoa(PAIR_SIZE)+"]!", 1, 1)
+		appendAssembly(cg.currInstrs(), "STR r4, [sp, #"+strconv.Itoa(-PAIR_SIZE)+"]!", 1, 1)
 	default:
 		switch resType.(type) {
 		case PairType:
 			cg.evalRHS(node, "r4")
-			appendAssembly(cg.currInstrs(), "STR r4, [sp, #-"+strconv.Itoa(PAIR_SIZE)+"]!", 1, 1)
+			appendAssembly(cg.currInstrs(), "STR r4, [sp, #"+strconv.Itoa(-PAIR_SIZE)+"]!", 1, 1)
 		case ArrayType:
 			cg.evalRHS(node, "r4")
-			appendAssembly(cg.currInstrs(), "STR r4, [sp, #-"+strconv.Itoa(ARRAY_SIZE)+"]!", 1, 1)
+			appendAssembly(cg.currInstrs(), "STR r4, [sp, #"+strconv.Itoa(-ARRAY_SIZE)+"]!", 1, 1)
 		}
 	}
 }
