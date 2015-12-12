@@ -670,27 +670,19 @@ func (cg *CodeGenerator) cgVisitDeclareStat(node Declare) {
 	switch node.DecType.(type) {
 
 	case ConstType:
+		cg.evalRHS(rhs, "r4")
 		switch node.DecType.(ConstType) {
 		case Bool:
-			cg.evalRHS(rhs, "r4")
 			// Using STRB, store it on the stack
 			appendAssembly(cg.currInstrs(), "STRB r4, [sp, #"+cg.subCurrP(BOOL_SIZE)+"]", 1, 1)
 		case Char:
-			cg.evalRHS(rhs, "r4")
 			// Using STRB, store it on the stack
 			appendAssembly(cg.currInstrs(), "STRB r4, [sp, #"+cg.subCurrP(CHAR_SIZE)+"]", 1, 1)
 		case Int:
-			cg.evalRHS(rhs, "r4")
 			// Store the value of declaration to stack
 			appendAssembly(cg.currInstrs(), "STR r4, [sp, #"+cg.subCurrP(INT_SIZE)+"]", 1, 1)
 		case String:
 			// Store the address onto the stack
-			switch rhs.(type) {
-			case Str:
-				appendAssembly(cg.currInstrs(), "LDR r4, "+cg.getMsgLabel(node.Lhs, string(rhs.(Str))), 1, 1)
-			default:
-				cg.evalRHS(rhs, "r4")
-			}
 			appendAssembly(cg.currInstrs(), "STR r4, [sp, #"+cg.subCurrP(STRING_SIZE)+"]", 1, 1)
 
 		}
@@ -717,7 +709,9 @@ func (cg *CodeGenerator) cgVisitDeclareStat(node Declare) {
 		case PairElem:
 			cg.evalPairElem(rhs.(PairElem), "r4")
 			appendAssembly(cg.currInstrs(), "STR r4, [sp, #"+cg.subCurrP(ADDRESS_SIZE)+"]", 1, 1)
-
+		case ArrayElem:
+			cg.evalArrayElem(rhs.(ArrayElem), "r4", "r5")
+			appendAssembly(cg.currInstrs(), "STR r4, [sp, #"+cg.subCurrP(ADDRESS_SIZE)+"]", 1, 1)
 		}
 
 	case ArrayType:
@@ -727,6 +721,7 @@ func (cg *CodeGenerator) cgVisitDeclareStat(node Declare) {
 			cg.evalArrayLiter(node.DecType, rhs, "r5", "r4")
 		case Ident:
 			cg.evalRHS(rhs.(Ident), "r4")
+
 		}
 
 		// Now store the address of the array onto the stack
