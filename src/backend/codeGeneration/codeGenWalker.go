@@ -366,6 +366,7 @@ func (cg *CodeGenerator) evalRHS(t Evaluation, srcReg string) {
 		cg.evalArrayElem(t, srcReg, "r5")
 	case Unop:
 		cg.cgVisitUnopExpr(t.(Unop))
+		appendAssembly(cg.currInstrs(), "MOV "+srcReg+", r0", 1, 1)
 	case Binop:
 		cg.cgVisitBinopExpr(t.(Binop))
 		appendAssembly(cg.currInstrs(), "MOV "+srcReg+", r0", 1, 1)
