@@ -16,7 +16,7 @@ type CodeGenerator struct {
 	instrs            *ARMList          // List of assembly instructions for the program
 	msgInstrs         *ARMList          // List of assembly instructions to create msg labels
 	symTable          *SymbolTable      // Used to map variable identifiers to their types
-	funcSymTable      *SymbolTable      // Used to map function variable indentifier to ther types
+	funcSymTables     []*SymbolTable    // Used to map function variable indentifier to ther types
 	funcInstrs        *ARMList          // List of assembly instructions that define functions and their labels
 	progFuncInstrs    *ARMList          // List of assembly instructions that define program generated functions e.g. p_print_string
 	progFuncNames     *[]string         // List of program defined function names. Used to avoid program redefinitions
@@ -45,7 +45,7 @@ func ConstructCodeGenerator(cRoot *Program, cInstrs *ARMList, cSymTable *SymbolT
 func (cg *CodeGenerator) eval(e Evaluation) Type {
 	var eType Type
 	if cg.currStack.isFunc {
-		eType, _ = e.Eval(cg.root.FunctionList, cg.funcSymTable)
+		eType, _ = e.Eval(cg.root.FunctionList, cg.getFuncSymTable())
 	} else {
 		eType, _ = e.Eval(cg.root.FunctionList, cg.symTable)
 	}
@@ -80,10 +80,21 @@ func (cg *CodeGenerator) setNewScope(varSpaceSize int) {
 
 	cg.currStack = newScope
 	if cg.currStack.isFunc {
-		cg.funcSymTable = cg.funcSymTable.GetFrontChild()
+		table := cg.getFuncSymTable()
+		*table = *cg.getFuncSymTable().GetFrontChild()
+
 	} else {
 		cg.symTable = cg.symTable.GetFrontChild()
 	}
+}
+
+// returns current function symbol table
+func (cg *CodeGenerator) getFuncSymTable() *SymbolTable {
+	if len(cg.funcSymTables) == 0 {
+		return nil
+	}
+
+	return cg.funcSymTables[len(cg.funcSymTables)-1]
 }
 
 // Creates new scope data for a new function scope. Sets isFunc to true which
@@ -98,20 +109,21 @@ func (cg *CodeGenerator) setNewFuncScope(varSpaceSize int, paramList *[]Param, f
 
 	cg.currStack = newScope
 
-	cg.funcSymTable = funcSymTable
+	cg.funcSymTables = append(cg.funcSymTables, funcSymTable)
 }
 
 // Removes current scope and replaces it with the parent scope
 func (cg *CodeGenerator) removeCurrScope() {
 	cg.currStack = cg.currStack.parentScope
 	if cg.currStack.isFunc {
-		cg.funcSymTable = cg.funcSymTable.Parent
+		table := cg.getFuncSymTable()
+		*table = *table.Parent
 	} else {
 		cg.symTable = cg.symTable.Parent
 	}
 	if cg.currStack.isFunc {
-		if cg.funcSymTable != nil {
-			cg.funcSymTable.RemoveChild()
+		if cg.getFuncSymTable() != nil {
+			cg.getFuncSymTable().RemoveChild()
 		}
 	} else {
 		if cg.symTable != nil {
@@ -123,6 +135,7 @@ func (cg *CodeGenerator) removeCurrScope() {
 // Removes current function scope
 func (cg *CodeGenerator) removeFuncScope() {
 	cg.currStack = cg.currStack.parentScope
+	cg.funcSymTables = cg.funcSymTables[:len(cg.funcSymTables)]
 }
 
 // Used to add extra offset to the current scope when intermediate values are stored on the stack
@@ -147,7 +160,7 @@ func (cg *CodeGenerator) currInstrs() *ARMList {
 // Returns cg.funcSymbolTable iff the current scope is a function scope. cg.symbolTable otherwise
 func (cg *CodeGenerator) currSymTable() *SymbolTable {
 	if cg.currStack.isFunc {
-		return cg.funcSymTable
+		return cg.getFuncSymTable()
 	} else {
 		return cg.symTable
 	}
