@@ -408,11 +408,10 @@ func (cg *CodeGenerator) evalPairElem(t PairElem, srcReg string) {
 		 THIS CODE WORKS BUT CAUSES LABTS TO CRASH SO PLEASE DON'T TOUCH THIS AT ALL
 */
 
-/*
 // Helper to reduce code duplication
 func (cg *CodeGenerator) evalNewPairHelper(pair Evaluation, reg1 string, reg2 string) {
 
-  // Get the type
+	// Get the type
 	var pairType = cg.eval(pair)
 	var pairSize = sizeOf(pairType)
 
@@ -446,22 +445,21 @@ func (cg *CodeGenerator) evalNewPair(fst Evaluation, snd Evaluation, reg1 string
 	// Store the address in the free register
 	appendAssembly(cg.currInstrs(), "MOV "+reg2+", r0", 1, 1)
 
-  // Evalute the first element
-  cg.evalNewPairHelper(fst, reg1, reg2)
+	// Evalute the first element
+	cg.evalNewPairHelper(fst, reg1, reg2)
 
 	//Store the address of allocated memory block of the element on the heap
 	appendAssembly(cg.currInstrs(), "STR r0, ["+reg2+"]", 1, 1)
 
-  // Evalute the second element
-  cg.evalNewPairHelper(snd, reg1, reg2)
+	// Evalute the second element
+	cg.evalNewPairHelper(snd, reg1, reg2)
 
 	//Store the address of allocated memory block of the element on the heap
 	appendAssembly(cg.currInstrs(), "STR r0, ["+reg2+", #4]", 1, 1)
 
 }
 
-*/
-
+/* OLD EVALNEWPAIR
 // Evalutes a pair of elements onto the stack
 func (cg *CodeGenerator) evalNewPair(fst Evaluation, snd Evaluation, reg1 string, reg2 string) {
 
@@ -485,6 +483,8 @@ func (cg *CodeGenerator) evalNewPair(fst Evaluation, snd Evaluation, reg1 string
 
 	//Store the first element in the register
 	appendAssembly(cg.currInstrs(), "STR "+reg1+", [r0]", 1, 1)
+
+	appendAssembly(cg.currInstrs(), "STR r0, ["+reg2+"]", 1, 1)
 
 	switch typeFst.(type) {
 	case ConstType:
@@ -525,6 +525,8 @@ func (cg *CodeGenerator) evalNewPair(fst Evaluation, snd Evaluation, reg1 string
 	appendAssembly(cg.currInstrs(), "STR r0, ["+reg2+", #4]", 1, 1)
 
 }
+
+*/
 
 // Evaluates array literals
 func (cg *CodeGenerator) evalArrayLiter(typeNode Type, rhs Evaluation, srcReg string, dstReg string) {
