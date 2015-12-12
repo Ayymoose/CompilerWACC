@@ -1,6 +1,6 @@
 DECLARE: --------------------------------------------------------
 
-ASSIGNMENT: IN PROGRESS ---
+ASSIGNMENT: COMPLETE --------------------------------------------
 
 READ: COMPLETE --------------------------------------------
 
@@ -25,7 +25,3 @@ SCOPE: COMPLETE -----------------------------------------
 UNOP: COMPLETE -----------------------------------------
 
 BINOP: COMPLETE -------------------------------------------
-
--functions HENRYK binop - and NANA PARAM SHIT
-
--EVALNEWPAIR AND EVALPAIRELEM AND EVAL ARRAYELEM

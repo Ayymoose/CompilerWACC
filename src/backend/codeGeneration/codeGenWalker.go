@@ -974,6 +974,16 @@ func (cg *CodeGenerator) cgVisitPrintStat(node Print) {
 			cg.cgVisitPrintStatFuncHelper("p_print_reference")
 		}
 	case PairType, ArrayType:
+		switch exprType.(type) {
+		case ArrayType:
+			if exprType.(ArrayType).Type == Char {
+				// BL p_print_string
+				appendAssembly(cg.currInstrs(), "BL p_print_string", 1, 1)
+				// Define relevant print function definition (iff it hasnt been defined)
+				cg.cgVisitPrintStatFuncHelper("p_print_string")
+				return
+			}
+		}
 
 		// BL p_print_reference
 		appendAssembly(cg.currInstrs(), "BL p_print_reference", 1, 1)
