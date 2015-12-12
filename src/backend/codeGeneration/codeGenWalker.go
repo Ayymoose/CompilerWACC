@@ -717,9 +717,7 @@ func (cg *CodeGenerator) cgVisitDeclareStat(node Declare) {
 		case PairElem:
 			cg.evalPairElem(rhs.(PairElem), "r4")
 			appendAssembly(cg.currInstrs(), "STR r4, [sp, #"+cg.subCurrP(ADDRESS_SIZE)+"]", 1, 1)
-		case ArrayElem:
-			cg.evalArrayElem(rhs.(ArrayElem), "r4", "r5")
-			appendAssembly(cg.currInstrs(), "STR r4, [sp, #"+cg.subCurrP(ADDRESS_SIZE)+"]", 1, 1)
+
 		}
 
 	case ArrayType:
