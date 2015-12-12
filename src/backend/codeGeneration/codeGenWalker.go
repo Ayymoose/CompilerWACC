@@ -45,7 +45,7 @@ const (
 // Function global variable
 var functionList []*Function
 
-var DEBUG = !false
+var DEBUG = false
 
 // HELPER FUNCTIONS
 // cgVisitReadStat helper function
@@ -433,6 +433,8 @@ func (cg *CodeGenerator) evalNewPairHelper(pair Evaluation, reg1 string, reg2 st
 		case Int, String, Pair:
 			appendAssembly(cg.currInstrs(), "STR "+reg1+", [r0]", 1, 1)
 		}
+	case PairType:
+		appendAssembly(cg.currInstrs(), "STR "+reg1+", [r0]", 1, 1)
 	}
 
 }
