@@ -520,6 +520,8 @@ func (cg *CodeGenerator) evalArray(array []Evaluation, srcReg string, dstReg str
 				case ArrayType:
 					appendAssembly(cg.currInstrs(), "LDR "+srcReg+", [sp, #"+strconv.Itoa(offset)+"]", 1, 1)
 					appendAssembly(cg.currInstrs(), "STR "+srcReg+", [r4, #"+strconv.Itoa(ARRAY_SIZE+sizeOf(t)*i)+"]", 1, 1)
+				case PairType:
+					appendAssembly(cg.currInstrs(), "STR "+srcReg+", [r4, #"+strconv.Itoa(PAIR_SIZE+sizeOf(t)*i)+"]", 1, 1)
 				}
 			}
 		}
