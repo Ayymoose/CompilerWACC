@@ -670,7 +670,6 @@ func (cg *CodeGenerator) cgVisitDeclareStat(node Declare) {
 	switch node.DecType.(type) {
 
 	case ConstType:
-		cg.evalRHS(rhs, "r4")
 		switch node.DecType.(ConstType) {
 		case Bool:
 			cg.evalRHS(rhs, "r4")
@@ -695,6 +694,7 @@ func (cg *CodeGenerator) cgVisitDeclareStat(node Declare) {
 			appendAssembly(cg.currInstrs(), "STR r4, [sp, #"+cg.subCurrP(STRING_SIZE)+"]", 1, 1)
 
 		}
+
 	case PairType:
 
 		switch rhs.(type) {
@@ -727,7 +727,6 @@ func (cg *CodeGenerator) cgVisitDeclareStat(node Declare) {
 			cg.evalArrayLiter(node.DecType, rhs, "r5", "r4")
 		case Ident:
 			cg.evalRHS(rhs.(Ident), "r4")
-
 		}
 
 		// Now store the address of the array onto the stack
