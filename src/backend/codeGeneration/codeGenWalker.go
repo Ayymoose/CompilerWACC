@@ -745,8 +745,7 @@ func (cg *CodeGenerator) cgVisitDeclareStat(node Declare) {
 		case String:
 			// Store the address onto the stack
 			appendAssembly(cg.currInstrs(), "STR r4, [sp, #"+cg.subCurrP(STRING_SIZE)+"]", 1, 1)
-		case Pair:
-			fmt.Println("Pair not implemented")
+
 		}
 
 	case PairType:
@@ -772,20 +771,23 @@ func (cg *CodeGenerator) cgVisitDeclareStat(node Declare) {
 			var offset, _ = cg.getIdentOffset(rhs.(PairElem).Expr.(Ident))
 			cg.evalPairElem(rhs.(PairElem), "r4")
 			appendAssembly(cg.currInstrs(), "STR r4, [sp, #"+strconv.Itoa(offset)+"]", 1, 1)
-		case ArrayElem:
-			//TODO: Not sure if unfinished
-			cg.evalArrayElem(rhs.(ArrayElem), "r4", "r5")
+
 		}
 
 	case ArrayType:
-		// Evalute an array
-		cg.evalArrayLiter(node.DecType, rhs, "r5", "r4")
+		switch rhs.(type) {
+		case ArrayLiter:
+			// Evalute an array
+			cg.evalArrayLiter(node.DecType, rhs, "r5", "r4")
+		case Ident:
+			cg.evalRHS(rhs.(Ident), "r4")
+		}
 
 		// Now store the address of the array onto the stack
-		appendAssembly(cg.currInstrs(), "STR r4, [sp, #"+cg.subCurrP(INT_SIZE)+"]", 1, 1)
+		appendAssembly(cg.currInstrs(), "STR r4, [sp, #"+cg.subCurrP(ADDRESS_SIZE)+"]", 1, 1)
 
 	default:
-		fmt.Println("Unknown type 2")
+		fmt.Println("Error: Unknown type")
 	}
 
 	// Saves Idents offset in the symbol tables offset map
