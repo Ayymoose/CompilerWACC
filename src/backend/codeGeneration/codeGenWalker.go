@@ -738,9 +738,6 @@ func (cg *CodeGenerator) cgVisitAssignmentStat(node Assignment) {
 	var rhs = node.Rhs
 	var lhs = node.Lhs
 
-	//Evaluate the rhs first
-	cg.evalRHS(rhs, "r4")
-
 	// lhs can be
 	// IDENT , ARRAY-ELEM , PAIR-ELEM
 	switch lhs.(type) {
@@ -759,16 +756,25 @@ func (cg *CodeGenerator) cgVisitAssignmentStat(node Assignment) {
 			case PairLiter:
 				//Store null in the pair
 				var offset, _ = cg.getIdentOffset(lhs.(Ident))
+				cg.evalRHS(rhs, "r4")
 				appendAssembly(cg.currInstrs(), "STR r4, [sp, #"+strconv.Itoa(offset)+"]", 1, 1)
 			case Ident:
-				//Complete
+				var offset, _ = cg.getIdentOffset(lhs.(Ident))
+				cg.evalRHS(rhs, "r4")
+				appendAssembly(cg.currInstrs(), "STR r4, [sp, #"+strconv.Itoa(offset)+"]", 1, 1)
 			case NewPair:
 				var offset, _ = cg.getIdentOffset(lhs.(Ident))
 				cg.evalNewPair(rhs.(NewPair).FstExpr, rhs.(NewPair).SndExpr, "r5", "r4")
 				appendAssembly(cg.currInstrs(), "STR r4, [sp, #"+strconv.Itoa(offset)+"]", 1, 1)
+			case PairElem:
+				cg.evalRHS(rhs, "r4")
+				var offset, _ = cg.getIdentOffset(lhs.(Ident))
+				appendAssembly(cg.currInstrs(), "STR r4, [sp, #"+strconv.Itoa(offset)+"]", 1, 1)
 			}
 
 		case ConstType:
+			cg.evalRHS(rhs, "r4")
+
 			offset, _ := cg.getIdentOffset(ident)
 			switch typeIdent.(ConstType) {
 			case Bool, Char:
@@ -783,6 +789,7 @@ func (cg *CodeGenerator) cgVisitAssignmentStat(node Assignment) {
 		cg.debug("----- DEBUG - cgVisitAssignmentStat - Ident end -----")
 
 	case ArrayElem:
+		cg.evalRHS(rhs, "r4")
 
 		cg.debug("----- DEBUG - cgVisitAssignmentStat - ArrayElem start -----")
 
@@ -824,6 +831,7 @@ func (cg *CodeGenerator) cgVisitAssignmentStat(node Assignment) {
 		cg.debug("----- DEBUG - cgVisitAssignmentStat - ArrayElem end -----")
 
 	case PairElem:
+		cg.evalRHS(rhs, "r4")
 
 		cg.debug("----- DEBUG - cgVisitAssignmentStat - PairElem start -----")
 
