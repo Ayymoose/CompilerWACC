@@ -1086,8 +1086,11 @@ func (cg *CodeGenerator) cgVisitScopeStat(node Scope) {
 func (cg *CodeGenerator) cgVisitCallStat(ident Ident, paramList []Evaluation, srcReg string) {
 	for _, function := range functionList {
 		if function.Ident == ident {
-			for _, param := range paramList {
+			/*for _, param := range paramList {
 				cg.cgVisitParameter(param)
+			}*/
+			for i := len(paramList) - 1; i >= 0; i-- {
+				cg.cgVisitParameter(paramList[i])
 			}
 
 			appendAssembly(cg.currInstrs(), "BL f_"+string(function.Ident), 1, 1)
