@@ -7,5 +7,5 @@
 
 begin
  int a = 9;
- a = a + 10
+ a**
 end
