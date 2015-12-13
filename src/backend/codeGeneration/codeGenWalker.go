@@ -676,26 +676,32 @@ func (cg *CodeGenerator) cgVisitAssignmentStat(node Assignment) {
 
 		switch typeIdent.(type) {
 		case PairType:
+			var offset, _ = cg.getIdentOffset(lhs.(Ident))
+			cg.evalRHS(rhs, "r4")
 
 			switch rhs.(type) {
-			case PairLiter:
+
+			//case PairLiter,Ident,PairElem:
 				//Store null in the pair
-				var offset, _ = cg.getIdentOffset(lhs.(Ident))
-				cg.evalRHS(rhs, "r4")
-				appendAssembly(cg.currInstrs(), "STR r4, [sp, #"+strconv.Itoa(offset)+"]", 1, 1)
-			case Ident:
-				var offset, _ = cg.getIdentOffset(lhs.(Ident))
-				cg.evalRHS(rhs, "r4")
-				appendAssembly(cg.currInstrs(), "STR r4, [sp, #"+strconv.Itoa(offset)+"]", 1, 1)
+				//appendAssembly(cg.currInstrs(), "STR r4, [sp, #"+strconv.Itoa(offset)+"]", 1, 1)
+			//case Ident:
+				//var offset, _ = cg.getIdentOffset(lhs.(Ident))
+				//cg.evalRHS(rhs, "r4")
+				//appendAssembly(cg.currInstrs(), "STR r4, [sp, #"+strconv.Itoa(offset)+"]", 1, 1)
+			//case PairElem:
+				//cg.evalRHS(rhs, "r4")
+				//var offset, _ = cg.getIdentOffset(lhs.(Ident))
+				//appendAssembly(cg.currInstrs(), "STR r4, [sp, #"+strconv.Itoa(offset)+"]", 1, 1)
+
 			case NewPair:
-				var offset, _ = cg.getIdentOffset(lhs.(Ident))
+				//var offset, _ = cg.getIdentOffset(lhs.(Ident))
 				cg.evalNewPair(rhs.(NewPair).FstExpr, rhs.(NewPair).SndExpr, "r5", "r4")
-				appendAssembly(cg.currInstrs(), "STR r4, [sp, #"+strconv.Itoa(offset)+"]", 1, 1)
-			case PairElem:
-				cg.evalRHS(rhs, "r4")
-				var offset, _ = cg.getIdentOffset(lhs.(Ident))
-				appendAssembly(cg.currInstrs(), "STR r4, [sp, #"+strconv.Itoa(offset)+"]", 1, 1)
+			//	appendAssembly(cg.currInstrs(), "STR r4, [sp, #"+strconv.Itoa(offset)+"]", 1, 1)
+			
+
 			}
+
+			appendAssembly(cg.currInstrs(), "STR r4, [sp, #"+strconv.Itoa(offset)+"]", 1, 1)
 
 		case ConstType:
 			cg.evalRHS(rhs, "r4")
@@ -834,9 +840,9 @@ func (cg *CodeGenerator) cgVisitReturnStat(node Return) {
 	funcVarUsed := funcVarSize(cg.currStack)
 
 	if funcVarUsed > 0 {
-		appendAssembly(cg.currInstrs(), "ADD sp, sp, #"+strconv.Itoa(funcVarUsed), 1, 1)
+			cg.removeStackSpace(funcVarUsed)
+	//	appendAssembly(cg.currInstrs(), "ADD sp, sp, #"+strconv.Itoa(funcVarUsed), 1, 1)
 	}
-	//cg.removeAllFuncScopes()
 	appendAssembly(cg.currInstrs(), "POP {pc}", 1, 1)
 }
 
@@ -886,8 +892,10 @@ func (cg *CodeGenerator) cgVisitPrintStat(node Print) {
 			cg.cgVisitPrintStatFuncHelper("p_print_reference")
 		}
 	case PairType, ArrayType:
+
 		switch exprType.(type) {
 		case ArrayType:
+
 			if exprType.(ArrayType).Type == Char {
 				// BL p_print_string
 				appendAssembly(cg.currInstrs(), "BL p_print_string", 1, 1)
@@ -977,9 +985,6 @@ func (cg *CodeGenerator) cgVisitScopeStat(node Scope) {
 func (cg *CodeGenerator) cgVisitCallStat(ident Ident, paramList []Evaluation, srcReg string) {
 	for _, function := range functionList {
 		if function.Ident == ident {
-			/*for _, param := range paramList {
-				cg.cgVisitParameter(param)
-			}*/
 			for i := len(paramList) - 1; i >= 0; i-- {
 				cg.cgVisitParameter(paramList[i])
 			}
@@ -1019,7 +1024,8 @@ func (cg *CodeGenerator) cgVisitFunction(node Function) {
 	appendAssembly(cg.currInstrs(), "PUSH {lr}", 1, 1)
 
 	if varSpaceSize > 0 {
-		appendAssembly(cg.currInstrs(), "SUB sp, sp, #"+strconv.Itoa(varSpaceSize), 1, 1)
+		cg.createStackSpace(varSpaceSize)
+		//appendAssembly(cg.currInstrs(), "SUB sp, sp, #"+strconv.Itoa(varSpaceSize), 1, 1)
 	}
 
 	// traverse all statements by switching on statement type
