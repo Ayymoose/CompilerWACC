@@ -80,8 +80,7 @@ func (cg *CodeGenerator) setNewScope(varSpaceSize int) {
 
 	cg.currStack = newScope
 	if cg.currStack.isFunc {
-		table := cg.getFuncSymTable()
-		*table = *cg.getFuncSymTable().GetFrontChild()
+		cg.funcSymTables[len(cg.funcSymTables)-1] = cg.funcSymTables[len(cg.funcSymTables)-1].GetFrontChild()
 
 	} else {
 		cg.symTable = cg.symTable.GetFrontChild()
