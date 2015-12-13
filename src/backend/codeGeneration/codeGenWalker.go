@@ -1099,14 +1099,18 @@ func (cg *CodeGenerator) cgVisitFunction(node Function) {
 		return
 	}
 
+	varSpaceSize := GetScopeVarSize(node.StatList)
+	cg.setNewFuncScope(varSpaceSize, &node.ParameterTypes, node.SymbolTable)
+
 	// f_funcName:
 	appendAssembly(cg.currInstrs(), "f_"+string(node.Ident)+":", 0, 1)
 
 	// push {lr} to save the caller address
 	appendAssembly(cg.currInstrs(), "PUSH {lr}", 1, 1)
 
-	varSpaceSize := GetScopeVarSize(node.StatList)
-	cg.setNewFuncScope(varSpaceSize, &node.ParameterTypes, node.SymbolTable)
+	if varSpaceSize > 0 {
+		appendAssembly(cg.currInstrs(), "SUB sp, sp, #"+strconv.Itoa(varSpaceSize), 1, 1)
+	}
 
 	// traverse all statements by switching on statement type
 	// BUT NEED TO KNOW THAT WE NEED TO ADD THIS TO DUNCTION MESSGES??

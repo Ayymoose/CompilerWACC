@@ -103,10 +103,6 @@ func (cg *CodeGenerator) getFuncSymTable() *SymbolTable {
 // Creates new scope data for a new function scope. Sets isFunc to true which
 // set the code generator into function mode (So statements evaluate for functions not main)
 func (cg *CodeGenerator) setNewFuncScope(varSpaceSize int, paramList *[]Param, funcSymTable *SymbolTable) {
-	if varSpaceSize > 0 {
-		appendAssembly(cg.currInstrs(), "SUB sp, sp, #"+strconv.Itoa(varSpaceSize), 1, 1)
-	}
-
 	newScope := &scopeData{}
 	newScope.currP = varSpaceSize
 	newScope.size = varSpaceSize
