@@ -648,18 +648,21 @@ func (cg *CodeGenerator) cgVisitDeclareStat(node Declare) {
 
 	case ConstType:
 		switch node.DecType.(ConstType) {
-		case Bool:
+
+		case Bool,Char:
 			cg.evalRHS(rhs, "r4")
 			// Using STRB, store it on the stack
-			appendAssembly(cg.currInstrs(), "STRB r4, [sp, #"+cg.subCurrP(BOOL_SIZE)+"]", 1, 1)
-		case Char:
+			appendAssembly(cg.currInstrs(), "STRB r4, [sp, #"+cg.subCurrP(sizeOf(node.DecType.(ConstType)))+"]", 1, 1)
+		/*case Char:
 			cg.evalRHS(rhs, "r4")
 			// Using STRB, store it on the stack
-			appendAssembly(cg.currInstrs(), "STRB r4, [sp, #"+cg.subCurrP(CHAR_SIZE)+"]", 1, 1)
+			appendAssembly(cg.currInstrs(), "STRB r4, [sp, #"+cg.subCurrP(CHAR_SIZE)+"]", 1, 1)*/
+
 		case Int:
 			cg.evalRHS(rhs, "r4")
 			// Store the value of declaration to stack
 			appendAssembly(cg.currInstrs(), "STR r4, [sp, #"+cg.subCurrP(INT_SIZE)+"]", 1, 1)
+
 		case String:
 			// Store the address onto the stack
 			switch rhs.(type) {
@@ -857,7 +860,6 @@ func (cg *CodeGenerator) cgVisitReadStatHelper() {
 
 // Visit Read node
 func (cg *CodeGenerator) cgVisitReadStat(node Read) {
-
 	switch node.AssignLHS.(type) {
 	case Ident:
 		constType := cg.eval(node.AssignLHS.(Ident))
@@ -876,28 +878,12 @@ func (cg *CodeGenerator) cgVisitReadStat(node Read) {
 	case PairElem:
 		cg.cgVisitReadStatHelper()
 		switch node.AssignLHS.(PairElem).Fsnd {
-
-
 		case Fst:
-			/*appendAssembly(cg.currInstrs(), "LDR r4, [sp]", 1, 1)
-			appendAssembly(cg.currInstrs(), "MOV r0, r4", 1, 1)
-			appendAssembly(cg.currInstrs(), "BL p_check_null_pointer", 1, 1)
-			cg.dereferenceNullPointer()*/
-
 			appendAssembly(cg.currInstrs(), "LDR r4, [r4]", 1, 1)
-			//appendAssembly(cg.currInstrs(), "MOV r0, r4", 1, 1)
 		case Snd:
-			/*appendAssembly(cg.currInstrs(), "LDR r4, [sp]", 1, 1)
-			appendAssembly(cg.currInstrs(), "MOV r0, r4", 1, 1)
-			appendAssembly(cg.currInstrs(), "BL p_check_null_pointer", 1, 1)
-			cg.dereferenceNullPointer()*/
-
 			appendAssembly(cg.currInstrs(), "LDR r4, [r4, #4]", 1, 1)
-			//appendAssembly(cg.currInstrs(), "MOV r0, r4", 1, 1)
 		}
-
     appendAssembly(cg.currInstrs(), "MOV r0, r4", 1, 1)
-
 		switch cg.eval(node.AssignLHS.(PairElem)) {
 		case Char:
 			appendAssembly(cg.currInstrs(), "BL p_read_char", 1, 1)
@@ -1142,32 +1128,36 @@ func (cg *CodeGenerator) cgVisitFunction(node Function) {
 
 func (cg *CodeGenerator) cgVisitParameter(node Evaluation) {
 	resType := cg.eval(node)
+	cg.evalRHS(node, "r4")
+
 	switch resType {
-	case Bool:
-		cg.evalRHS(node, "r4")
-		appendAssembly(cg.currInstrs(), "STRB r4, [sp, #"+strconv.Itoa(-BOOL_SIZE)+"]!", 1, 1)
-	case Char:
-		cg.evalRHS(node, "r4")
-		appendAssembly(cg.currInstrs(), "STRB r4, [sp, #"+strconv.Itoa(-CHAR_SIZE)+"]!", 1, 1)
-	case Int:
-		cg.evalRHS(node, "r4")
-		appendAssembly(cg.currInstrs(), "STR r4, [sp, #"+strconv.Itoa(-INT_SIZE)+"]!", 1, 1)
-	case String:
-		cg.evalRHS(node, "r4")
+	case Bool,Char:
+		//cg.evalRHS(node, "r4")
+		appendAssembly(cg.currInstrs(), "STRB r4, [sp, #"+strconv.Itoa(-sizeOf(resType))+"]!", 1, 1)
+	//case Char:
+		//cg.evalRHS(node, "r4")
+		//appendAssembly(cg.currInstrs(), "STRB r4, [sp, #"+strconv.Itoa(-CHAR_SIZE)+"]!", 1, 1)
+	case Int,String,Pair:
+		//cg.evalRHS(node, "r4")
+		appendAssembly(cg.currInstrs(), "STR r4, [sp, #"+strconv.Itoa(-sizeOf(resType))+"]!", 1, 1)
+	//case String:
+		//cg.evalRHS(node, "r4")
 		// Removed - but it should be there
-		appendAssembly(cg.currInstrs(), "STR r4, [sp, #"+strconv.Itoa(-STRING_SIZE)+"]!", 1, 1)
-	case Pair:
-		cg.evalRHS(node, "r4")
-		appendAssembly(cg.currInstrs(), "STR r4, [sp, #"+strconv.Itoa(-PAIR_SIZE)+"]!", 1, 1)
+	//	appendAssembly(cg.currInstrs(), "STR r4, [sp, #"+strconv.Itoa(-STRING_SIZE)+"]!", 1, 1)
+	//case Pair:
+		//cg.evalRHS(node, "r4")
+	//	appendAssembly(cg.currInstrs(), "STR r4, [sp, #"+strconv.Itoa(-PAIR_SIZE)+"]!", 1, 1)
 	default:
+
 		switch resType.(type) {
 		case PairType:
-			cg.evalRHS(node, "r4")
+			//cg.evalRHS(node, "r4")
 			appendAssembly(cg.currInstrs(), "STR r4, [sp, #"+strconv.Itoa(-PAIR_SIZE)+"]!", 1, 1)
 		case ArrayType:
-			cg.evalRHS(node, "r4")
+			//cg.evalRHS(node, "r4")
 			appendAssembly(cg.currInstrs(), "STR r4, [sp, #"+strconv.Itoa(-ARRAY_SIZE)+"]!", 1, 1)
 		}
+
 	}
 }
 
