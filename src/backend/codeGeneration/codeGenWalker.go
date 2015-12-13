@@ -110,6 +110,17 @@ func (cg *CodeGenerator) checkArrayBounds() {
 	cg.throwRunTimeError()
 }
 
+func (cg CodeGenerator) f(t Type, reg1 string, reg2 string) {
+	switch t {
+		case Bool,Char:
+			appendAssembly(cg.currInstrs(), "ADD "+reg1+", "+reg1+", "+reg2, 1, 1)
+			appendAssembly(cg.currInstrs(), "LDRSB "+reg1+", ["+reg1+"]", 1, 1)
+		default:
+			appendAssembly(cg.currInstrs(), "ADD "+reg1+", "+reg1+", "+reg2+", LSL #2", 1, 1)
+			appendAssembly(cg.currInstrs(), "LDR "+reg1+", ["+reg1+"]", 1, 1)
+	}
+}
+
 // Checks the bounds of an array
 func (cg *CodeGenerator) arrayCheckBounds(array []Evaluation, ident Ident, reg1 string, reg2 string) {
 
@@ -132,24 +143,26 @@ func (cg *CodeGenerator) arrayCheckBounds(array []Evaluation, ident Ident, reg1 
   var t1 = cg.eval(ident)
 	switch t1.(type)  {
 	case ArrayType:
-		switch t1.(ArrayType).Type {
+    cg.f(t1.(ArrayType).Type,reg1,reg2)
+		/*switch t1.(ArrayType).Type {
 		case Bool,Char:
 			appendAssembly(cg.currInstrs(), "ADD "+reg1+", "+reg1+", "+reg2, 1, 1)
 			appendAssembly(cg.currInstrs(), "LDRSB "+reg1+", ["+reg1+"]", 1, 1)
 		default:
 			appendAssembly(cg.currInstrs(), "ADD "+reg1+", "+reg1+", "+reg2+", LSL #2", 1, 1)
 			appendAssembly(cg.currInstrs(), "LDR "+reg1+", ["+reg1+"]", 1, 1)
-		}
+		}*/
 
 	case ConstType:
-		switch t1.(ConstType) {
+		cg.f(t1.(ConstType),reg1,reg2)
+		/*switch t1.(ConstType) {
 			case Bool, Char:
 				appendAssembly(cg.currInstrs(), "ADD "+reg1+", "+reg1+", "+reg2, 1, 1)
 				appendAssembly(cg.currInstrs(), "LDRSB "+reg1+", ["+reg1+"]", 1, 1)
 			default:
 				appendAssembly(cg.currInstrs(), "ADD "+reg1+", "+reg1+", "+reg2+", LSL #2", 1, 1)
 				appendAssembly(cg.currInstrs(), "LDR "+reg1+", ["+reg1+"]", 1, 1)
-		}
+		}*/
 
 	}
 
