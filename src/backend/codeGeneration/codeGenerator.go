@@ -306,7 +306,7 @@ func (cg *CodeGenerator) getNewLabel() string {
 
 func (cg *CodeGenerator) isFunctionDefined(ident Ident) bool {
 	for _, def := range cg.functionDefs {
-		if ident == def {
+		if string(ident) == string(def) {
 			return true
 		}
 	}
