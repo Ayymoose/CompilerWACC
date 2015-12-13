@@ -899,7 +899,7 @@ func (cg *CodeGenerator) cgVisitReturnStat(node Return) {
 	if funcVarUsed > 0 {
 		appendAssembly(cg.currInstrs(), "ADD sp, sp, #"+strconv.Itoa(funcVarUsed), 1, 1)
 	}
-	cg.removeAllFuncScopes()
+	//cg.removeAllFuncScopes()
 	appendAssembly(cg.currInstrs(), "POP {pc}", 1, 1)
 }
 
