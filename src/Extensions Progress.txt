@@ -16,7 +16,7 @@ BNF UPDATE
 
 <stat> := ... | 'for' <expr> 'from' <expr> 'to' <expr> 'do' <stat> 'done'
 
-<type> ::= ... | 'class'
+<type> ::= ... | <class-ident>
 
 <class-ident> := ('A'-'Z')('_'|'a'-'z'|'A'-'Z'|'0'-'9')*
 
@@ -26,4 +26,4 @@ BNF UPDATE
 
 <field-list> := <param-list>
 
-<class> := 'class' <class-ident> 'open' <field-list>* <func>* 'close' 
+<class> := 'class' <class-ident> 'open' <field-list>* <func>* 'close'
