@@ -644,7 +644,7 @@ func (cg *CodeGenerator) cgVisitDeclareStat(node Declare) {
 	switch node.DecType.(type) {
 	case ConstType:
 		switch node.DecType.(ConstType) {
-		case Bool,Char:
+		case Bool, Char:
 			cg.evalRHS(rhs, "r4")
 			// Using STRB, store it on the stack
 			appendAssembly(cg.currInstrs(), "STRB r4, [sp, #"+cg.subCurrP(sizeOf(node.DecType.(ConstType)))+"]", 1, 1)
@@ -899,7 +899,7 @@ func (cg *CodeGenerator) cgVisitReturnStat(node Return) {
 	if funcVarUsed > 0 {
 		appendAssembly(cg.currInstrs(), "ADD sp, sp, #"+strconv.Itoa(funcVarUsed), 1, 1)
 	}
-	//cg.removeAllFuncScopes()*/
+	cg.removeAllFuncScopes()
 	appendAssembly(cg.currInstrs(), "POP {pc}", 1, 1)
 }
 
@@ -1118,9 +1118,9 @@ func (cg *CodeGenerator) cgVisitParameter(node Evaluation) {
 	resType := cg.eval(node)
 	cg.evalRHS(node, "r4")
 	switch resType {
-	case Bool,Char:
+	case Bool, Char:
 		appendAssembly(cg.currInstrs(), "STRB r4, [sp, #"+strconv.Itoa(-sizeOf(resType))+"]!", 1, 1)
-	case Int,String,Pair:
+	case Int, String, Pair:
 		appendAssembly(cg.currInstrs(), "STR r4, [sp, #"+strconv.Itoa(-sizeOf(resType))+"]!", 1, 1)
 	default:
 		switch resType.(type) {

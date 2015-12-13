@@ -148,14 +148,9 @@ func (cg *CodeGenerator) removeFuncScope() {
 }
 
 func (cg *CodeGenerator) removeAllFuncScopes() {
-	for cg.currStack.parentScope != nil && cg.currStack.parentScope.isFunc {
-		cg.removeCurrScope()
+	for !cg.currStack.parentScope.isFunc {
+		cg.currStack = cg.currStack.parentScope
 	}
-	// add sp, sp, #n to remove variable space
-	if cg.currStack.size > 0 {
-		appendAssembly(cg.currInstrs(), "ADD sp, sp, #"+strconv.Itoa(cg.currStack.size), 1, 1)
-	}
-
 	cg.removeFuncScope()
 }
 
