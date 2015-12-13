@@ -1,29 +1,34 @@
-SIDE CONDITIONS: COMPLETE/UNTESTED - HENRYK
+SIDE CONDITIONS: COMPLETE/UNTESTED - HENRYK/AYMAN
 -    += -= /= *= %= -- ++
 
 REMOVED MULTIPLE NON VAR STRING: COMPLETE/UNTESTED - NANA
 
 NO CALL NO FUNCTION DEF: COMPLETE/UNTESTED - NANA
 
-FOR LOOP: NOT COMPLETE - HENRYK
+FOR LOOP: NOT COMPLETE - HENRYK/OLI
 
-CLASSES: NOT COMPLETE - FRONTEND AND NANA
+ALLOW FUNCTION CALLS OUTSIDE OF ASSIGNMENT: HENRYK/OLI
+
+CLASSES: NOT COMPLETE - FRONTEND AND NANA/AYMAN/HENRYK
 
 
 ----
 BNF UPDATE
-<side effect> HENRY PLEASE DO THIS
+<side effect> HENRYK PLEASE DO THIS
 
 <stat> := ... | 'for' <expr> 'from' <expr> 'to' <expr> 'do' <stat> 'done'
+              | 'call' <ident> '(' <arg-list>? ')'
+              | 'call' <class-ident>'.'<ident> '(' <arg-list>? ')'
 
 <type> ::= ... | <class-ident>
 
 <class-ident> := ('A'-'Z')('_'|'a'-'z'|'A'-'Z'|'0'-'9')*
 
-<assign-rhs> := 'new' <class-ident>'('<arg-list>?')'
+<assign-rhs> := ... |'new' <class-ident>'('<arg-list>?')'
+                    | 'call' <class-ident>'.'<ident> '(' <arg-list>? ')'
 
 <field> := <param>
 
-<field-list> := <param-list>
+<field-list> := <field>(',' <field>)*
 
 <class> := 'class' <class-ident> 'open' <field-list>* <func>* 'close'
