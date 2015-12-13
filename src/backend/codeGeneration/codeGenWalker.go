@@ -1054,7 +1054,7 @@ func (cg *CodeGenerator) cgVisitCallStat(ident Ident, paramList []Evaluation, sr
 			appendAssembly(cg.currInstrs(), "BL f_"+string(function.Ident), 1, 1)
 
 			offset := cg.cgGetParamSize(paramList)
-			cg.subExtraOffset(offset)
+			//cg.subExtraOffset(offset)
 			appendAssembly(cg.currInstrs(), "ADD sp, sp, #"+strconv.Itoa(offset), 1, 1)
 
 			appendAssembly(cg.currInstrs(), "MOV r4, r0", 1, 1)
@@ -1115,10 +1115,10 @@ func (cg *CodeGenerator) cgVisitParameter(node Evaluation) {
 	cg.evalRHS(node, "r4")
 	switch resType {
 	case Bool, Char:
-		appendAssembly(cg.currInstrs(), "STRB r4, [sp, #"+strconv.Itoa(-varSize)+"]!", 1, 1)
+		appendAssembly(cg.currInstrs(), "STRB r4, [sp, #-"+strconv.Itoa(varSize)+"]!", 1, 1)
 		cg.addExtraOffset(varSize)
 	case Int, String, Pair:
-		appendAssembly(cg.currInstrs(), "STR r4, [sp, #"+strconv.Itoa(-varSize)+"]!", 1, 1)
+		appendAssembly(cg.currInstrs(), "STR r4, [sp, #-"+strconv.Itoa(varSize)+"]!", 1, 1)
 		cg.addExtraOffset(varSize)
 	default:
 		switch resType.(type) {
