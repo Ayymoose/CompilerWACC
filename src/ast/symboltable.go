@@ -64,6 +64,9 @@ func (symbolTable *SymbolTable) isDefined(key Ident) bool {
 	if symbolTable.contains(key) {
 		return true
 	} else {
+		if symbolTable.Parent == nil {
+			return false
+		}
 		return symbolTable.Parent.isDefined(key)
 	}
 }
