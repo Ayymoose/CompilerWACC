@@ -111,59 +111,57 @@ func (cg *CodeGenerator) checkArrayBounds() {
 }
 
 // Helper function to check the index of the array and remove duplication
-func (cg CodeGenerator) arrayCheckIndex(reg1 string, reg2 string) {
-	// reg1 = Address of the array
-	// reg2 = Index
-	appendAssembly(cg.currInstrs(), "MOV r0, "+reg2, 1, 1)
+func (cg CodeGenerator) arrayCheckIndex() {
+	appendAssembly(cg.currInstrs(), "MOV r0, r5", 1, 1)
 	appendAssembly(cg.currInstrs(), "MOV r1, r4", 1, 1)
 	appendAssembly(cg.currInstrs(), "BL p_check_array_bounds", 1, 1)
 	appendAssembly(cg.currInstrs(), "ADD r4, r4, #4", 1, 1)
 }
 
 // Helper function to remove code duplication (BETTER NAME?)
-func (cg CodeGenerator) arrayCheckBoundsHelper(t Type, reg1 string, reg2 string) {
+func (cg CodeGenerator) arrayCheckBoundsHelper(t Type) {
 	switch t {
 	case Bool, Char:
-		appendAssembly(cg.currInstrs(), "ADD r4, r4, "+reg2, 1, 1)
+		appendAssembly(cg.currInstrs(), "ADD r4, r4, r5", 1, 1)
 		appendAssembly(cg.currInstrs(), "LDRSB r4, [r4]", 1, 1)
 	default:
-		appendAssembly(cg.currInstrs(), "ADD r4, r4, "+reg2+", LSL #2", 1, 1)
+		appendAssembly(cg.currInstrs(), "ADD r4, r4, r5, LSL #2", 1, 1)
 		appendAssembly(cg.currInstrs(), "LDR r4, [r4]", 1, 1)
 	}
 }
 
 // Checks the bounds of an array
-func (cg *CodeGenerator) arrayCheckBounds(array []Evaluation, ident Ident, reg1 string, reg2 string) {
+func (cg *CodeGenerator) arrayCheckBounds(array []Evaluation, ident Ident) {
 
 	// Load the first index
-	cg.evalRHS(array[0], reg2)
+	cg.evalRHS(array[0], "r5")
 
 	// Set a register to point to the array
 	appendAssembly(cg.currInstrs(), "LDR r4, [r4]", 1, 1)
 
 	//Check the index of the array
-	cg.arrayCheckIndex(reg1, reg2)
+	cg.arrayCheckIndex()
 
 	// Point to the correct index
 	var t = cg.eval(ident)
 	switch t.(type) {
 	case ArrayType:
-		cg.arrayCheckBoundsHelper(t.(ArrayType).Type, reg1, reg2)
+		cg.arrayCheckBoundsHelper(t.(ArrayType).Type)
 	case ConstType:
-		cg.arrayCheckBoundsHelper(t.(ConstType), reg1, reg2)
+		cg.arrayCheckBoundsHelper(t.(ConstType))
 	}
 
 	// Load the second index if there is one
 	if len(array) > 1 {
 
 		// Load the second index
-		cg.evalRHS(array[1], reg2)
+		cg.evalRHS(array[1], "r5")
 
 		// Check the index of the array
-		cg.arrayCheckIndex(reg1, reg2)
+		cg.arrayCheckIndex()
 
 		// Point to the correct index
-		cg.arrayCheckBoundsHelper(cg.eval(ident).(ArrayType).Type.(ArrayType).Type, reg1, reg2)
+		cg.arrayCheckBoundsHelper(cg.eval(ident).(ArrayType).Type.(ArrayType).Type)
 
 	}
 
@@ -322,7 +320,7 @@ func (cg *CodeGenerator) evalRHS(t Evaluation, srcReg string) {
 		}
 
 	case ArrayElem:
-		cg.evalArrayElem(t, srcReg, "r5")
+		cg.evalArrayElem(t)
 	case Unop:
 		cg.cgVisitUnopExpr(t.(Unop))
 		appendAssembly(cg.currInstrs(), "MOV "+srcReg+", r0", 1, 1)
@@ -471,24 +469,19 @@ func (cg *CodeGenerator) evalArray(array []Evaluation, srcReg string, dstReg str
 }
 
 // Evalutes array elements
-func (cg *CodeGenerator) evalArrayElem(t Evaluation, reg1 string, reg2 string) {
+func (cg *CodeGenerator) evalArrayElem(t Evaluation) {
 
 	// Define error labels and formatting
 	cg.getMsgLabel("", ARRAY_INDEX_NEGATIVE)
 	cg.getMsgLabel("", ARRAY_INDEX_LARGE)
 	cg.getMsgLabel("", STRING_FORMAT)
 
-/*	// HACK
-	if reg1 == "r0" {
-		reg1 = "r4"
-	}*/
-
 	// Store the address at the next space in the stack
 	var offset, _ = cg.getIdentOffset(t.(ArrayElem).Ident)
 	appendAssembly(cg.currInstrs(), "ADD r4, sp, #"+strconv.Itoa(offset), 1, 1)
 
 	//Check the bounds of the array
-	cg.arrayCheckBounds(t.(ArrayElem).Exprs, t.(ArrayElem).Ident, reg1, reg2)
+	cg.arrayCheckBounds(t.(ArrayElem).Exprs, t.(ArrayElem).Ident)
 
 	// Add message labels
 	cg.checkArrayBounds()
@@ -642,7 +635,7 @@ func (cg *CodeGenerator) cgVisitDeclareStat(node Declare) {
 			cg.evalPairElem(rhs.(PairElem), "r4")
 			appendAssembly(cg.currInstrs(), "STR r4, [sp, #"+cg.subCurrP(ADDRESS_SIZE)+"]", 1, 1)
 		case ArrayElem:
-			cg.evalArrayElem(rhs.(ArrayElem), "r4", "r5")
+			cg.evalArrayElem(rhs.(ArrayElem))
 			appendAssembly(cg.currInstrs(), "STR r4, [sp, #"+cg.subCurrP(ADDRESS_SIZE)+"]", 1, 1)
 		}
 
