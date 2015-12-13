@@ -284,18 +284,10 @@ func (cg *CodeGenerator) removeStackSpace(stackSize int) {
 	}
 }
 
-func (cg *CodeGenerator) debug(message string) {
-	if DEBUG == true {
-		appendAssembly(cg.currInstrs(), "# "+message, 0, 1)
-	}
-}
-
 // EVALUATION FUNCTIONS
 
 // Evalutes the RHS of an expression
 func (cg *CodeGenerator) evalRHS(t Evaluation, srcReg string) {
-
-	cg.debug("----- DEBUG - evalRHS() start -----")
 
 	switch t.(type) {
 	// Literals
@@ -317,16 +309,12 @@ func (cg *CodeGenerator) evalRHS(t Evaluation, srcReg string) {
 		appendAssembly(cg.currInstrs(), "MOV r0, r4", 1, 1)
 
 	case PairLiter:
-		cg.debug("----- DEBUG - evalRHS() PairLiter start -----")
 		appendAssembly(cg.currInstrs(), "LDR "+srcReg+", =0", 1, 1)
-		cg.debug("----- DEBUG - evalRHS() PairLiter end -----")
 	case Ident:
 
 		var offset, resType = cg.getIdentOffset(t.(Ident))
 		switch resType.(type) {
 		case ArrayType:
-			cg.debug("----- DEBUG - evalRHS() Ident/ArrayType start -----")
-
 			//HACK
 			if srcReg == "r0" {
 				srcReg = "r4"
@@ -334,12 +322,8 @@ func (cg *CodeGenerator) evalRHS(t Evaluation, srcReg string) {
 
 			appendAssembly(cg.currInstrs(), "LDR "+srcReg+", [sp, #"+strconv.Itoa(offset)+"]", 1, 1)
 			appendAssembly(cg.currInstrs(), "MOV r0, r4", 1, 1)
-
-			cg.debug("----- DEBUG - evalRHS() Ident/ArrayType end -----")
 		case PairType:
-			cg.debug("----- DEBUG - evalRHS() Ident/PairType start -----")
 			appendAssembly(cg.currInstrs(), "LDR "+srcReg+", [sp, #"+strconv.Itoa(offset)+"]", 1, 1)
-			cg.debug("----- DEBUG - evalRHS() Ident/PairType start -----")
 		case ConstType:
 
 			switch resType.(ConstType) {
@@ -368,13 +352,10 @@ func (cg *CodeGenerator) evalRHS(t Evaluation, srcReg string) {
 		fmt.Println("ERROR: Expression can not be evaluated")
 	}
 
-	cg.debug("----- DEBUG - evalRHS() end -----")
 }
 
 // Evalute a pair element
 func (cg *CodeGenerator) evalPairElem(t PairElem, srcReg string) {
-
-	cg.debug("----- DEBUG - evalPairElem() start -----")
 
 	//Load the address of the pair from the stack
 	var offset, _ = cg.getIdentOffset(t.Expr.(Ident))
@@ -397,7 +378,6 @@ func (cg *CodeGenerator) evalPairElem(t PairElem, srcReg string) {
 	//Double deference
 	appendAssembly(cg.currInstrs(), "LDR "+srcReg+", ["+srcReg+"]", 1, 1)
 
-	cg.debug("----- DEBUG - evalPairElem() end -----")
 }
 
 // Helper to reduce code duplication
@@ -456,8 +436,6 @@ func (cg *CodeGenerator) evalNewPair(fst Evaluation, snd Evaluation, reg1 string
 // Evaluates array literals
 func (cg *CodeGenerator) evalArrayLiter(typeNode Type, rhs Evaluation, srcReg string, dstReg string) {
 
-	cg.debug("----- DEBUG - evalArrayLiter() start -----")
-
 	//Calculate the amount of storage space required for the array
 	// = ((arrayLength(array) * sizeOf(arrayType)) + INT_SIZE
 	var arrayStorage = (len(rhs.(ArrayLiter).Exprs) * sizeOf(typeNode.(ArrayType).Type)) + INT_SIZE
@@ -471,14 +449,10 @@ func (cg *CodeGenerator) evalArrayLiter(typeNode Type, rhs Evaluation, srcReg st
 	//Start loading each element in the array onto the stack
 	cg.evalArray(rhs.(ArrayLiter).Exprs, srcReg, dstReg, typeNode)
 
-	cg.debug("----- DEBUG - evalArrayLiter() end -----")
-
 }
 
 // Evalutes an array (where t is the type of the array)
 func (cg *CodeGenerator) evalArray(array []Evaluation, srcReg string, dstReg string, t Type) {
-
-	cg.debug("----- DEBUG - evalArray() start -----")
 
 	var arraySize = len(array)
 	// Loop through the array pushing it onto the stack
@@ -509,8 +483,6 @@ func (cg *CodeGenerator) evalArray(array []Evaluation, srcReg string, dstReg str
 
 	appendAssembly(cg.currInstrs(), "STR "+srcReg+", ["+dstReg+"]", 1, 1)
 
-	cg.debug("----- DEBUG - evalArray() end -----")
-
 }
 
 // Evalutes array elements
@@ -526,8 +498,6 @@ func (cg *CodeGenerator) evalArrayElem(t Evaluation, reg1 string, reg2 string) {
 		reg1 = "r4"
 	}
 
-	cg.debug("----- DEBUG - evalArrayElem() start -----")
-
 	// Store the address at the next space in the stack
 	var offset, _ = cg.getIdentOffset(t.(ArrayElem).Ident)
 	appendAssembly(cg.currInstrs(), "ADD "+reg1+", sp, #"+strconv.Itoa(offset), 1, 1)
@@ -539,7 +509,6 @@ func (cg *CodeGenerator) evalArrayElem(t Evaluation, reg1 string, reg2 string) {
 	cg.checkArrayBounds()
 	cg.cgVisitPrintStatFuncHelper("p_print_string")
 
-	cg.debug("----- DEBUG - evalArrayElem() end -----")
 }
 
 // Evalutes a ord
@@ -715,8 +684,6 @@ func (cg *CodeGenerator) cgVisitDeclareStat(node Declare) {
 // Visit Assignment node
 func (cg *CodeGenerator) cgVisitAssignmentStat(node Assignment) {
 
-	cg.debug("----- DEBUG - cgVisitAssignmentStat start -----")
-
 	var rhs = node.Rhs
 	var lhs = node.Lhs
 
@@ -725,8 +692,6 @@ func (cg *CodeGenerator) cgVisitAssignmentStat(node Assignment) {
 	switch lhs.(type) {
 
 	case Ident:
-
-		cg.debug("----- DEBUG - cgVisitAssignmentStat - Ident start -----")
 
 		ident := lhs.(Ident)
 		typeIdent := cg.eval(ident)
@@ -768,12 +733,8 @@ func (cg *CodeGenerator) cgVisitAssignmentStat(node Assignment) {
 			}
 		}
 
-		cg.debug("----- DEBUG - cgVisitAssignmentStat - Ident end -----")
-
 	case ArrayElem:
 		cg.evalRHS(rhs, "r4")
-
-		cg.debug("----- DEBUG - cgVisitAssignmentStat - ArrayElem start -----")
 
 		var offset, _ = cg.getIdentOffset(lhs.(ArrayElem).Ident)
 
@@ -810,12 +771,8 @@ func (cg *CodeGenerator) cgVisitAssignmentStat(node Assignment) {
 			appendAssembly(cg.currInstrs(), "Type not added", 1, 1)
 		}
 
-		cg.debug("----- DEBUG - cgVisitAssignmentStat - ArrayElem end -----")
-
 	case PairElem:
 		cg.evalRHS(rhs, "r4")
-
-		cg.debug("----- DEBUG - cgVisitAssignmentStat - PairElem start -----")
 
 		// Load the address of the pair into a register
 		var offset, _ = cg.getIdentOffset(lhs.(PairElem).Expr.(Ident))
@@ -835,13 +792,10 @@ func (cg *CodeGenerator) cgVisitAssignmentStat(node Assignment) {
 		// Store the value into the pair
 		appendAssembly(cg.currInstrs(), "STR r4, [r5]", 1, 1)
 
-		cg.debug("----- DEBUG - cgVisitAssignmentStat - PairElem end -----")
-
 	default:
 		fmt.Println("its neither")
 	}
 
-	cg.debug("----- DEBUG - cgVisitAssignmentStat end -----")
 }
 
 // Helper to remove duplication (BETTER NAME?)
@@ -919,8 +873,6 @@ func (cg *CodeGenerator) cgVisitExitStat(node Exit) {
 // Visit Print node
 func (cg *CodeGenerator) cgVisitPrintStat(node Print) {
 
-	cg.debug("----- DEBUG - printStat() start -----")
-
 	// Get value of expr into dstReg
 	cg.evalRHS(node.Expr, "r0")
 	exprType := cg.eval(node.Expr)
@@ -976,19 +928,17 @@ func (cg *CodeGenerator) cgVisitPrintStat(node Print) {
 		appendAssembly(cg.currInstrs(), "Error: type not implemented", 1, 1)
 	}
 
-	cg.debug("----- DEBUG - printStat() end -----")
 }
 
 // Visit Println node
 func (cg *CodeGenerator) cgVisitPrintlnStat(node Println) {
-	cg.debug("----- DEBUG - PrintLnStat() start -----")
 
 	cg.cgVisitPrintStat(Print{Expr: node.Expr})
 	// BL p_print_ln
 	appendAssembly(cg.currInstrs(), "BL p_print_ln", 1, 1)
 	// Define relevant print function definition (iff it hasnt been defined)
 	cg.cgVisitPrintStatFuncHelper("p_print_ln")
-	cg.debug("----- DEBUG - printLnStat() end -----")
+
 }
 
 // Visit If node
