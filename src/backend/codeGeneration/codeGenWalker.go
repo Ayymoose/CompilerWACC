@@ -532,11 +532,8 @@ func (cg *CodeGenerator) evalArrayElem(t Evaluation, reg1 string, reg2 string) {
 	var offset, _ = cg.getIdentOffset(t.(ArrayElem).Ident)
 	appendAssembly(cg.currInstrs(), "ADD "+reg1+", sp, #"+strconv.Itoa(offset), 1, 1)
 
-	//Check the array
-	var array = t.(ArrayElem).Exprs
-
 	//Check the bounds of the array
-	cg.arrayCheckBounds(array, t.(ArrayElem).Ident, reg1, reg2)
+	cg.arrayCheckBounds(t.(ArrayElem).Exprs, t.(ArrayElem).Ident, reg1, reg2)
 
 	// Add message labels
 	cg.checkArrayBounds()
@@ -645,24 +642,16 @@ func (cg *CodeGenerator) cgVisitDeclareStat(node Declare) {
 	rhs := node.Rhs
 
 	switch node.DecType.(type) {
-
 	case ConstType:
 		switch node.DecType.(ConstType) {
-
 		case Bool,Char:
 			cg.evalRHS(rhs, "r4")
 			// Using STRB, store it on the stack
 			appendAssembly(cg.currInstrs(), "STRB r4, [sp, #"+cg.subCurrP(sizeOf(node.DecType.(ConstType)))+"]", 1, 1)
-		/*case Char:
-			cg.evalRHS(rhs, "r4")
-			// Using STRB, store it on the stack
-			appendAssembly(cg.currInstrs(), "STRB r4, [sp, #"+cg.subCurrP(CHAR_SIZE)+"]", 1, 1)*/
-
 		case Int:
 			cg.evalRHS(rhs, "r4")
 			// Store the value of declaration to stack
 			appendAssembly(cg.currInstrs(), "STR r4, [sp, #"+cg.subCurrP(INT_SIZE)+"]", 1, 1)
-
 		case String:
 			// Store the address onto the stack
 			switch rhs.(type) {
@@ -1123,35 +1112,18 @@ func (cg *CodeGenerator) cgVisitFunction(node Function) {
 func (cg *CodeGenerator) cgVisitParameter(node Evaluation) {
 	resType := cg.eval(node)
 	cg.evalRHS(node, "r4")
-
 	switch resType {
 	case Bool,Char:
-		//cg.evalRHS(node, "r4")
 		appendAssembly(cg.currInstrs(), "STRB r4, [sp, #"+strconv.Itoa(-sizeOf(resType))+"]!", 1, 1)
-	//case Char:
-		//cg.evalRHS(node, "r4")
-		//appendAssembly(cg.currInstrs(), "STRB r4, [sp, #"+strconv.Itoa(-CHAR_SIZE)+"]!", 1, 1)
 	case Int,String,Pair:
-		//cg.evalRHS(node, "r4")
 		appendAssembly(cg.currInstrs(), "STR r4, [sp, #"+strconv.Itoa(-sizeOf(resType))+"]!", 1, 1)
-	//case String:
-		//cg.evalRHS(node, "r4")
-		// Removed - but it should be there
-	//	appendAssembly(cg.currInstrs(), "STR r4, [sp, #"+strconv.Itoa(-STRING_SIZE)+"]!", 1, 1)
-	//case Pair:
-		//cg.evalRHS(node, "r4")
-	//	appendAssembly(cg.currInstrs(), "STR r4, [sp, #"+strconv.Itoa(-PAIR_SIZE)+"]!", 1, 1)
 	default:
-
 		switch resType.(type) {
 		case PairType:
-			//cg.evalRHS(node, "r4")
 			appendAssembly(cg.currInstrs(), "STR r4, [sp, #"+strconv.Itoa(-PAIR_SIZE)+"]!", 1, 1)
 		case ArrayType:
-			//cg.evalRHS(node, "r4")
 			appendAssembly(cg.currInstrs(), "STR r4, [sp, #"+strconv.Itoa(-ARRAY_SIZE)+"]!", 1, 1)
 		}
-
 	}
 }
 
