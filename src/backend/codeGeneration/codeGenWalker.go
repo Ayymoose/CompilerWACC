@@ -1054,6 +1054,7 @@ func (cg *CodeGenerator) cgVisitCallStat(ident Ident, paramList []Evaluation, sr
 			appendAssembly(cg.currInstrs(), "BL f_"+string(function.Ident), 1, 1)
 
 			offset := cg.cgGetParamSize(paramList)
+			cg.subExtraOffset(offset)
 			appendAssembly(cg.currInstrs(), "ADD sp, sp, #"+strconv.Itoa(offset), 1, 1)
 
 			appendAssembly(cg.currInstrs(), "MOV r4, r0", 1, 1)
@@ -1100,12 +1101,6 @@ func (cg *CodeGenerator) cgVisitFunction(node Function) {
 		cg.cgEvalStat(stat)
 	}
 
-	// add sp, sp, #n to remove variable space
-	if cg.currStack.size > 0 {
-		appendAssembly(cg.currInstrs(), "ADD sp, sp, #"+strconv.Itoa(cg.currStack.size), 1, 1)
-	}
-
-	appendAssembly(cg.currInstrs(), "POP {pc}", 1, 1)
 	appendAssembly(cg.currInstrs(), ".ltorg", 1, 2)
 
 	cg.removeFuncScope()
@@ -1116,12 +1111,15 @@ func (cg *CodeGenerator) cgVisitFunction(node Function) {
 
 func (cg *CodeGenerator) cgVisitParameter(node Evaluation) {
 	resType := cg.eval(node)
+	varSize := sizeOf(resType)
 	cg.evalRHS(node, "r4")
 	switch resType {
 	case Bool, Char:
-		appendAssembly(cg.currInstrs(), "STRB r4, [sp, #"+strconv.Itoa(-sizeOf(resType))+"]!", 1, 1)
+		appendAssembly(cg.currInstrs(), "STRB r4, [sp, #"+strconv.Itoa(-varSize)+"]!", 1, 1)
+		cg.addExtraOffset(varSize)
 	case Int, String, Pair:
-		appendAssembly(cg.currInstrs(), "STR r4, [sp, #"+strconv.Itoa(-sizeOf(resType))+"]!", 1, 1)
+		appendAssembly(cg.currInstrs(), "STR r4, [sp, #"+strconv.Itoa(-varSize)+"]!", 1, 1)
+		cg.addExtraOffset(varSize)
 	default:
 		switch resType.(type) {
 		case PairType:
