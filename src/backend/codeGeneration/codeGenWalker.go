@@ -298,16 +298,7 @@ func (cg *CodeGenerator) evalRHS(t Evaluation, srcReg string) {
 	case Character:
 		appendAssembly(cg.currInstrs(), "MOV "+srcReg+", #"+string(t.(Character)), 1, 1)
 	case Str:
-
-		//HACK
-		if srcReg == "r0" {
-			srcReg = "r4"
-		}
 		appendAssembly(cg.currInstrs(), "LDR "+srcReg+", "+cg.getMsgLabel("", string(t.(Str))), 1, 1)
-
-		// What is this MOV for again ?
-		appendAssembly(cg.currInstrs(), "MOV r0, r4", 1, 1)
-
 	case PairLiter:
 		appendAssembly(cg.currInstrs(), "LDR "+srcReg+", =0", 1, 1)
 	case Ident:
