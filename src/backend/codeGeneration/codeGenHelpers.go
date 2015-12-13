@@ -50,10 +50,12 @@ func sizeOf(t Type) int {
 		case Pair:
 			size = PAIR_SIZE
 		}
-	case PairType:
+  default: //PairType + ArrayType
+		size = ADDRESS_SIZE
+/*	case PairType:
 		size = ADDRESS_SIZE
 	case ArrayType:
-		size = ADDRESS_SIZE
+		size = ADDRESS_SIZE*/
 	}
 	return size
 }
@@ -157,7 +159,6 @@ func isParamInList(ident Ident, paramList *[]Param) bool {
 			return true
 		}
 	}
-
 	return false
 }
 

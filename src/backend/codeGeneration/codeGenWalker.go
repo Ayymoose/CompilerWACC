@@ -765,7 +765,8 @@ func (cg *CodeGenerator) cgVisitReadStat(node Read) {
 
 // Visit Free node
 func (cg *CodeGenerator) cgVisitFreeStat(node Free) {
-	cg.evalRHS(node.Expr, "r0")
+	cg.evalRHS(node.Expr, "r4")
+	appendAssembly(cg.currInstrs(), "MOV r0, r4", 1, 1)
 	appendAssembly(cg.currInstrs(), "BL p_free_pair", 1, 1)
 	cg.cgVisitFreeStatFuncHelper("p_free_pair")
 }
