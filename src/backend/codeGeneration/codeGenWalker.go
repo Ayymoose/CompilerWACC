@@ -566,6 +566,8 @@ func (cg *CodeGenerator) cgVisitProgram(node *Program) {
 	cg.currStack.currP = cg.currStack.size
 	cg.currStack.isFunc = false
 
+	functionList = node.FunctionList
+
 	// .text
 	appendAssembly(cg.funcInstrs, ".text", 0, 2)
 
@@ -603,7 +605,6 @@ func (cg *CodeGenerator) cgVisitProgram(node *Program) {
 	appendAssembly(cg.currInstrs(), ".ltorg", 1, 1)
 
 	// Adds functions that were called
-	functionList = node.FunctionList
 	for _, function := range functionList {
 		if cg.isFunctionDefined(function.Ident) {
 			cg.cgVisitFunction(*function)
@@ -1063,8 +1064,8 @@ func (cg *CodeGenerator) cgVisitCallStat(ident Ident, paramList []Evaluation, sr
 
 			appendAssembly(cg.currInstrs(), "MOV "+srcReg+", r0", 1, 1)
 
-			if !cg.isFunctionDefined(ident) {
-				cg.addFunctionDef(ident)
+			if !cg.isFunctionDefined(function.Ident) {
+				cg.addFunctionDef(function.Ident)
 			}
 			break
 		}
