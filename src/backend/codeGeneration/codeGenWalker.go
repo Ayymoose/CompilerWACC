@@ -136,9 +136,6 @@ func (cg *CodeGenerator) arrayCheckBounds(array []Evaluation, ident Ident, reg1 
 		case Bool,Char:
 			appendAssembly(cg.currInstrs(), "ADD "+reg1+", "+reg1+", "+reg2, 1, 1)
 			appendAssembly(cg.currInstrs(), "LDRSB "+reg1+", ["+reg1+"]", 1, 1)
-		case Int,String,Pair:
-			appendAssembly(cg.currInstrs(), "ADD "+reg1+", "+reg1+", "+reg2+", LSL #2", 1, 1)
-			appendAssembly(cg.currInstrs(), "LDR "+reg1+", ["+reg1+"]", 1, 1)
 		default:
 			appendAssembly(cg.currInstrs(), "ADD "+reg1+", "+reg1+", "+reg2+", LSL #2", 1, 1)
 			appendAssembly(cg.currInstrs(), "LDR "+reg1+", ["+reg1+"]", 1, 1)
@@ -149,7 +146,7 @@ func (cg *CodeGenerator) arrayCheckBounds(array []Evaluation, ident Ident, reg1 
 			case Bool, Char:
 				appendAssembly(cg.currInstrs(), "ADD "+reg1+", "+reg1+", "+reg2, 1, 1)
 				appendAssembly(cg.currInstrs(), "LDRSB "+reg1+", ["+reg1+"]", 1, 1)
-			case Int, String, Pair:
+			default:
 				appendAssembly(cg.currInstrs(), "ADD "+reg1+", "+reg1+", "+reg2+", LSL #2", 1, 1)
 				appendAssembly(cg.currInstrs(), "LDR "+reg1+", ["+reg1+"]", 1, 1)
 		}
@@ -172,7 +169,7 @@ func (cg *CodeGenerator) arrayCheckBounds(array []Evaluation, ident Ident, reg1 
 			case Bool, Char:
 				appendAssembly(cg.currInstrs(), "ADD "+reg1+", "+reg1+", "+reg2, 1, 1)
 				appendAssembly(cg.currInstrs(), "LDRSB "+reg1+", ["+reg1+"]", 1, 1)
-			case Int, String, Pair:
+			default:
 				appendAssembly(cg.currInstrs(), "ADD "+reg1+", "+reg1+", "+reg2+", LSL #2", 1, 1)
 				appendAssembly(cg.currInstrs(), "LDR "+reg1+", ["+reg1+"]", 1, 1)
 		}
