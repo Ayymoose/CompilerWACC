@@ -125,8 +125,7 @@ func (cg *CodeGenerator) removeCurrScope() {
 
 	cg.currStack = cg.currStack.parentScope
 	if cg.currStack.isFunc {
-		table := cg.getFuncSymTable()
-		*table = *table.Parent
+		cg.funcSymTables[len(cg.funcSymTables)-1] = cg.funcSymTables[len(cg.funcSymTables)-1].Parent
 	} else {
 		cg.symTable = cg.symTable.Parent
 	}
