@@ -424,9 +424,6 @@ func (cg *CodeGenerator) evalNewPairHelper(pair Evaluation, reg1 string, reg2 st
 			appendAssembly(cg.currInstrs(), "STR "+reg1+", [r0]", 1, 1)
 		}
 	default:
-	//case PairType:
-	//	appendAssembly(cg.currInstrs(), "STR "+reg1+", [r0]", 1, 1)
-	//case ArrayType:
 		appendAssembly(cg.currInstrs(), "STR "+reg1+", [r0]", 1, 1)
 	}
 
@@ -461,24 +458,18 @@ func (cg *CodeGenerator) evalArrayLiter(typeNode Type, rhs Evaluation, srcReg st
 
 	cg.debug("----- DEBUG - evalArrayLiter() start -----")
 
-	//switch rhs.(type) {
-	//case ArrayLiter:
+	//Calculate the amount of storage space required for the array
+	// = ((arrayLength(array) * sizeOf(arrayType)) + INT_SIZE
+	var arrayStorage = (len(rhs.(ArrayLiter).Exprs) * sizeOf(typeNode.(ArrayType).Type)) + INT_SIZE
 
-		//Calculate the amount of storage space required for the array
-		// = ((arrayLength(array) * sizeOf(arrayType)) + INT_SIZE
-		var arrayStorage = (len(rhs.(ArrayLiter).Exprs) * sizeOf(typeNode.(ArrayType).Type)) + INT_SIZE
+	//Allocate memory for the array
+	appendAssembly(cg.currInstrs(), "LDR r0, ="+strconv.Itoa(arrayStorage), 1, 1)
+	appendAssembly(cg.currInstrs(), "BL malloc", 1, 1)
 
-		//Allocate memory for the array
-		appendAssembly(cg.currInstrs(), "LDR r0, ="+strconv.Itoa(arrayStorage), 1, 1)
-		appendAssembly(cg.currInstrs(), "BL malloc", 1, 1)
+	appendAssembly(cg.currInstrs(), "MOV "+dstReg+", r0", 1, 1)
 
-		appendAssembly(cg.currInstrs(), "MOV "+dstReg+", r0", 1, 1)
-
-		//Start loading each element in the array onto the stack
-		cg.evalArray(rhs.(ArrayLiter).Exprs, srcReg, dstReg, typeNode)
-	//default:
-	//	fmt.Println("RHS Type not implemented")
-	//}
+	//Start loading each element in the array onto the stack
+	cg.evalArray(rhs.(ArrayLiter).Exprs, srcReg, dstReg, typeNode)
 
 	cg.debug("----- DEBUG - evalArrayLiter() end -----")
 
@@ -499,15 +490,9 @@ func (cg *CodeGenerator) evalArray(array []Evaluation, srcReg string, dstReg str
 			switch t.(ArrayType).Type {
 			case Int,String:
 				appendAssembly(cg.currInstrs(), "STR "+srcReg+", ["+dstReg+", #"+strconv.Itoa(ARRAY_SIZE+sizeOf(t.(ArrayType).Type)*i)+"]", 1, 1)
-			//case :
-			//	appendAssembly(cg.currInstrs(), "STR "+srcReg+", ["+dstReg+", #"+strconv.Itoa(ARRAY_SIZE+STRING_SIZE*i)+"]", 1, 1)
 		case Bool,Char:
 				appendAssembly(cg.currInstrs(), "STRB "+srcReg+", ["+dstReg+", #"+strconv.Itoa(ARRAY_SIZE+sizeOf(t.(ArrayType).Type)*i)+"]", 1, 1)
-			//case Char:
-				//appendAssembly(cg.currInstrs(), "STRB "+srcReg+", ["+dstReg+", #"+strconv.Itoa(ARRAY_SIZE+CHAR_SIZE*i)+"]", 1, 1)
 			default:
-				//Must be an array type
-				//Loop through the array
 				var offset, _ = cg.getIdentOffset(array[i].(Ident))
 				switch t.(ArrayType).Type.(type) {
 				case ArrayType:
@@ -862,6 +847,14 @@ func (cg *CodeGenerator) cgVisitAssignmentStat(node Assignment) {
 	cg.debug("----- DEBUG - cgVisitAssignmentStat end -----")
 }
 
+// Helper to remove duplication (BETTER NAME?)
+func (cg *CodeGenerator) cgVisitReadStatHelper() {
+	appendAssembly(cg.currInstrs(), "LDR r4, [sp]", 1, 1)
+	appendAssembly(cg.currInstrs(), "MOV r0, r4", 1, 1)
+	appendAssembly(cg.currInstrs(), "BL p_check_null_pointer", 1, 1)
+	cg.dereferenceNullPointer()
+}
+
 // Visit Read node
 func (cg *CodeGenerator) cgVisitReadStat(node Read) {
 
@@ -882,21 +875,28 @@ func (cg *CodeGenerator) cgVisitReadStat(node Read) {
 		//Complete
 	case PairElem:
 		switch node.AssignLHS.(PairElem).Fsnd {
+     cg.cgVisitReadStatHelper()
+
 		case Fst:
-			appendAssembly(cg.currInstrs(), "LDR r4, [sp]", 1, 1)
+			/*appendAssembly(cg.currInstrs(), "LDR r4, [sp]", 1, 1)
 			appendAssembly(cg.currInstrs(), "MOV r0, r4", 1, 1)
 			appendAssembly(cg.currInstrs(), "BL p_check_null_pointer", 1, 1)
-			cg.dereferenceNullPointer()
+			cg.dereferenceNullPointer()*/
+
 			appendAssembly(cg.currInstrs(), "LDR r4, [r4]", 1, 1)
-			appendAssembly(cg.currInstrs(), "MOV r0, r4", 1, 1)
+			//appendAssembly(cg.currInstrs(), "MOV r0, r4", 1, 1)
 		case Snd:
-			appendAssembly(cg.currInstrs(), "LDR r4, [sp]", 1, 1)
+			/*appendAssembly(cg.currInstrs(), "LDR r4, [sp]", 1, 1)
 			appendAssembly(cg.currInstrs(), "MOV r0, r4", 1, 1)
 			appendAssembly(cg.currInstrs(), "BL p_check_null_pointer", 1, 1)
-			cg.dereferenceNullPointer()
+			cg.dereferenceNullPointer()*/
+
 			appendAssembly(cg.currInstrs(), "LDR r4, [r4, #4]", 1, 1)
-			appendAssembly(cg.currInstrs(), "MOV r0, r4", 1, 1)
+			//appendAssembly(cg.currInstrs(), "MOV r0, r4", 1, 1)
 		}
+
+    appendAssembly(cg.currInstrs(), "MOV r0, r4", 1, 1)
+
 		switch cg.eval(node.AssignLHS.(PairElem)) {
 		case Char:
 			appendAssembly(cg.currInstrs(), "BL p_read_char", 1, 1)
@@ -910,12 +910,6 @@ func (cg *CodeGenerator) cgVisitReadStat(node Read) {
 
 // Visit Free node
 func (cg *CodeGenerator) cgVisitFreeStat(node Free) {
-	//testoffset, _ := cg.getIdentOffset(node.Expr.(PairElem).Expr.(Ident))
-	// HACK
-	//pointer, _ := strconv.Atoi(cg.subCurrP(ADDRESS_SIZE))
-	//val := strconv.Itoa(8 + pointer)
-	//	appendAssembly(cg.currInstrs(), "LDR r4, [sp, #"+val+"]", 1, 1)
-	// HACK
 	cg.evalRHS(node.Expr, "r0")
 	appendAssembly(cg.currInstrs(), "BL p_free_pair", 1, 1)
 	cg.cgVisitFreeStatFuncHelper("p_free_pair")
@@ -992,7 +986,6 @@ func (cg *CodeGenerator) cgVisitPrintStat(node Print) {
 
 	default:
 		appendAssembly(cg.currInstrs(), "Error: type not implemented", 1, 1)
-		//	typeOf(expr)
 	}
 
 	cg.debug("----- DEBUG - printStat() end -----")
