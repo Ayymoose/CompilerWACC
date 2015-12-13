@@ -894,8 +894,13 @@ func (cg *CodeGenerator) cgVisitFreeStat(node Free) {
 // Visit Return node
 func (cg *CodeGenerator) cgVisitReturnStat(node Return) {
 	cg.evalRHS(node.Expr, "r0")
-	//cg.removeAllFuncScopes()
-	//appendAssembly(cg.currInstrs(), "POP {pc}", 1, 1)
+	funcVarUsed := funcVarSize(cg.currStack)
+
+	if funcVarUsed > 0 {
+		appendAssembly(cg.currInstrs(), "ADD sp, sp, #"+strconv.Itoa(funcVarUsed), 1, 1)
+	}
+	//cg.removeAllFuncScopes()*/
+	appendAssembly(cg.currInstrs(), "POP {pc}", 1, 1)
 }
 
 // Visit Exit node

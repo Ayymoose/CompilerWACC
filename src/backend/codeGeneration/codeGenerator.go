@@ -109,6 +109,7 @@ func (cg *CodeGenerator) setNewFuncScope(varSpaceSize int, paramList *[]Param, f
 	newScope.parentScope = cg.currStack
 	newScope.isFunc = true
 	newScope.paramList = paramList
+	newScope.identMsgLabelMap = make(map[Ident]string)
 
 	cg.currStack = newScope
 
