@@ -918,8 +918,8 @@ func (cg *CodeGenerator) cgVisitFreeStat(node Free) {
 // Visit Return node
 func (cg *CodeGenerator) cgVisitReturnStat(node Return) {
 	cg.evalRHS(node.Expr, "r0")
-	/*cg.removeAllFuncScopes()
-	appendAssembly(cg.currInstrs(), "POP {pc}", 1, 1)*/
+	cg.removeAllFuncScopes()
+	appendAssembly(cg.currInstrs(), "POP {pc}", 1, 1)
 }
 
 // Visit Exit node
@@ -1119,10 +1119,15 @@ func (cg *CodeGenerator) cgVisitFunction(node Function) {
 		cg.cgEvalStat(stat)
 	}
 
-	cg.removeFuncScope()
+	// add sp, sp, #n to remove variable space
+	if cg.currStack.size > 0 {
+		appendAssembly(cg.currInstrs(), "ADD sp, sp, #"+strconv.Itoa(cg.currStack.size), 1, 1)
+	}
 
 	appendAssembly(cg.currInstrs(), "POP {pc}", 1, 1)
 	appendAssembly(cg.currInstrs(), ".ltorg", 1, 2)
+
+	cg.removeFuncScope()
 
 }
 
