@@ -115,20 +115,20 @@ func (cg CodeGenerator) arrayCheckIndex(reg1 string, reg2 string) {
 	// reg1 = Address of the array
 	// reg2 = Index
 	appendAssembly(cg.currInstrs(), "MOV r0, "+reg2, 1, 1)
-	appendAssembly(cg.currInstrs(), "MOV r1, "+reg1, 1, 1)
+	appendAssembly(cg.currInstrs(), "MOV r1, r4", 1, 1)
 	appendAssembly(cg.currInstrs(), "BL p_check_array_bounds", 1, 1)
-	appendAssembly(cg.currInstrs(), "ADD "+reg1+", "+reg1+", #4", 1, 1)
+	appendAssembly(cg.currInstrs(), "ADD r4, r4, #4", 1, 1)
 }
 
 // Helper function to remove code duplication (BETTER NAME?)
 func (cg CodeGenerator) arrayCheckBoundsHelper(t Type, reg1 string, reg2 string) {
 	switch t {
 	case Bool, Char:
-		appendAssembly(cg.currInstrs(), "ADD "+reg1+", "+reg1+", "+reg2, 1, 1)
-		appendAssembly(cg.currInstrs(), "LDRSB "+reg1+", ["+reg1+"]", 1, 1)
+		appendAssembly(cg.currInstrs(), "ADD r4, r4, "+reg2, 1, 1)
+		appendAssembly(cg.currInstrs(), "LDRSB r4, [r4]", 1, 1)
 	default:
-		appendAssembly(cg.currInstrs(), "ADD "+reg1+", "+reg1+", "+reg2+", LSL #2", 1, 1)
-		appendAssembly(cg.currInstrs(), "LDR "+reg1+", ["+reg1+"]", 1, 1)
+		appendAssembly(cg.currInstrs(), "ADD r4, r4, "+reg2+", LSL #2", 1, 1)
+		appendAssembly(cg.currInstrs(), "LDR r4, [r4]", 1, 1)
 	}
 }
 
@@ -139,7 +139,7 @@ func (cg *CodeGenerator) arrayCheckBounds(array []Evaluation, ident Ident, reg1 
 	cg.evalRHS(array[0], reg2)
 
 	// Set a register to point to the array
-	appendAssembly(cg.currInstrs(), "LDR "+reg1+", ["+reg1+"]", 1, 1)
+	appendAssembly(cg.currInstrs(), "LDR r4, [r4]", 1, 1)
 
 	//Check the index of the array
 	cg.arrayCheckIndex(reg1, reg2)
@@ -168,7 +168,7 @@ func (cg *CodeGenerator) arrayCheckBounds(array []Evaluation, ident Ident, reg1 
 	}
 
 	// Forgot what this MOV is for...
-	appendAssembly(cg.currInstrs(), "MOV r0, "+reg1, 1, 1)
+	appendAssembly(cg.currInstrs(), "MOV r0, r4", 1, 1)
 
 }
 
@@ -478,14 +478,14 @@ func (cg *CodeGenerator) evalArrayElem(t Evaluation, reg1 string, reg2 string) {
 	cg.getMsgLabel("", ARRAY_INDEX_LARGE)
 	cg.getMsgLabel("", STRING_FORMAT)
 
-	// HACK
+/*	// HACK
 	if reg1 == "r0" {
 		reg1 = "r4"
-	}
+	}*/
 
 	// Store the address at the next space in the stack
 	var offset, _ = cg.getIdentOffset(t.(ArrayElem).Ident)
-	appendAssembly(cg.currInstrs(), "ADD "+reg1+", sp, #"+strconv.Itoa(offset), 1, 1)
+	appendAssembly(cg.currInstrs(), "ADD r4, sp, #"+strconv.Itoa(offset), 1, 1)
 
 	//Check the bounds of the array
 	cg.arrayCheckBounds(t.(ArrayElem).Exprs, t.(ArrayElem).Ident, reg1, reg2)
