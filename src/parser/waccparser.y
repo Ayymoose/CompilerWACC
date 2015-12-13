@@ -55,7 +55,7 @@ pairelemtype   Type
 %token NULL
 %token OPENSQUARE OPENROUND CLOSESQUARE CLOSEROUND
 %token ASSIGNMENT
-%token PLUSASSIGNMENT
+//%token PLUSASSIGNMENT
 %token COMMA SEMICOLON
 %token ERROR
 
@@ -138,7 +138,7 @@ statement : SKIP                                        { $$ = Skip{Pos : $<pos>
           | typeDef IDENTIFIER ASSIGNMENT assignrhs     { $$ = Declare{DecType : $1, Lhs : $2, Rhs : $4, Pos : $<pos>1 ,FileText :&parserlex.(*Lexer).input } }
           | assignlhs ASSIGNMENT assignrhs              { $$ = Assignment{Lhs : $1, Rhs : $3, Pos : $<pos>1 ,FileText :&parserlex.(*Lexer).input} }
 
-          | IDENTIFIER PLUSASSIGNMENT expr { $$ = Binop{Left : $1, Binary : PLUS, Right : $3, Pos : $<pos>1, FileText :&parserlex.(*Lexer).input  } }
+          | IDENTIFIER PLUS ASSIGNMENT expr { $$ = Binop{Left : $1, Binary : PLUS, Right : $4, Pos : $<pos>1, FileText :&parserlex.(*Lexer).input  } }
 
 
 

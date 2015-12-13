@@ -6,8 +6,6 @@
 # Program:
 
 begin
-  char doSomething(string f) is
-    return 'g'
-  end
-  char answer = call doSomething("hello") 
+ int a = 9;
+ a += 10
 end

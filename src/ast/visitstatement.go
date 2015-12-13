@@ -147,10 +147,11 @@ func (root *Program) SemanticCheck() errorSlice {
 	return nil
 }
 
+/*
 func (node Binop) visitStatement(functionTable []*Function, symbolTable *SymbolTable) errorSlice {
 	return nil
 }
-
+*/
 func (node Skip) visitStatement(functionTable []*Function, symbolTable *SymbolTable) errorSlice {
 	return nil
 }
