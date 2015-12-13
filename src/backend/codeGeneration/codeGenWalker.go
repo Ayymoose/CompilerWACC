@@ -478,11 +478,6 @@ func (cg *CodeGenerator) evalArrayElem(t Evaluation, reg1 string, reg2 string) {
 	cg.getMsgLabel("", ARRAY_INDEX_LARGE)
 	cg.getMsgLabel("", STRING_FORMAT)
 
-	// HACK
-	if reg1 == "r0" {
-		reg1 = "r4"
-	}
-
 	// Store the address at the next space in the stack
 	var offset, _ = cg.getIdentOffset(t.(ArrayElem).Ident)
 	appendAssembly(cg.currInstrs(), "ADD "+reg1+", sp, #"+strconv.Itoa(offset), 1, 1)
