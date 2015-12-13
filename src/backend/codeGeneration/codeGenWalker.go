@@ -1054,7 +1054,7 @@ func (cg *CodeGenerator) cgVisitCallStat(ident Ident, paramList []Evaluation, sr
 			appendAssembly(cg.currInstrs(), "BL f_"+string(function.Ident), 1, 1)
 
 			offset := cg.cgGetParamSize(paramList)
-			//cg.subExtraOffset(offset)
+			cg.subExtraOffset(offset)
 			appendAssembly(cg.currInstrs(), "ADD sp, sp, #"+strconv.Itoa(offset), 1, 1)
 
 			appendAssembly(cg.currInstrs(), "MOV r4, r0", 1, 1)
