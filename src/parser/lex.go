@@ -95,8 +95,8 @@ var TokenKeywordStrings = map[string]int{
 
 // TokenStrings map
 var TokenStrings = map[string]int{
-	",": COMMA,
-	";": SEMICOLON,
+	",":  COMMA,
+	";":  SEMICOLON,
 	"%":  MOD,
 	"*":  MUL,
 	"/":  DIV,
@@ -106,6 +106,11 @@ var TokenStrings = map[string]int{
 	"<=": LTE,
 	">":  GT,
 	"<":  LT,
+	"+=": PLUSASSIGNMENT,
+	/*	"-=": SUBEQ,
+		"/=": DIVEQ,
+		"*=": MULEQ,
+		"%=": MODEQ,*/
 	"==": EQ,
 	"!=": NEQ,
 	"!":  NOT,
@@ -164,7 +169,7 @@ func lexText(l *Lexer) stateFn {
 			break
 		}
 	}
-	//Correclty reached eof
+	// Correctly reached eof
 	return nil
 }
 
@@ -389,8 +394,6 @@ func (l *Lexer) Error(e string) {
 func (l *Lexer) Lex(lval *parserSymType) int {
 	token := l.NextItem()
 	position := token.Pos
-	//	linenum, _ := l.TokenLocation(token)
-	//	fmt.Println(token, token.Typ)
 	switch token.Typ {
 	case STRINGCONST:
 		*lval = parserSymType{stringconst: Str(token.Lexeme), pos: position}

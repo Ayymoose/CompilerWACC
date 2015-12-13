@@ -1,46 +1,43 @@
-
 //line waccparser.y:2
 package parser
-import __yyfmt__ "fmt"
-//line waccparser.y:2
 
+import __yyfmt__ "fmt"
+
+//line waccparser.y:2
 import (
-. "ast"
+	. "ast"
 )
 
-
 //line waccparser.y:10
-type parserSymType struct{
-	yys int
-str string
-stringconst Str
-number int
-pos int
-integer Integer
-ident Ident
-character Character
-boolean Boolean
+type parserSymType struct {
+	yys         int
+	str         string
+	stringconst Str
+	number      int
+	pos         int
+	integer     Integer
+	ident       Ident
+	character   Character
+	boolean     Boolean
 
-functions []*Function
-function *Function
-stmt  Statement
-stmts []Statement
-assignrhs Evaluation
-assignlhs Evaluation
-expr  Evaluation
-exprs []Evaluation
-params  []Param
-param Param
-bracketed []Evaluation
-pairliter Evaluation
-arrayliter ArrayLiter
-pairelem  PairElem
-arrayelem ArrayElem
-typedefinition Type
-pairelemtype Type
+	functions      []*Function
+	function       *Function
+	stmt           Statement
+	stmts          []Statement
+	assignrhs      Evaluation
+	assignlhs      Evaluation
+	expr           Evaluation
+	exprs          []Evaluation
+	params         []Param
+	param          Param
+	bracketed      []Evaluation
+	pairliter      Evaluation
+	arrayliter     ArrayLiter
+	pairelem       PairElem
+	arrayelem      ArrayElem
+	typedefinition Type
+	pairelemtype   Type
 }
-
-
 
 var parserToknames = []string{
 	"BEGIN",
@@ -97,6 +94,7 @@ var parserToknames = []string{
 	"CLOSESQUARE",
 	"CLOSEROUND",
 	"ASSIGNMENT",
+	"PLUSASSIGNMENT",
 	"COMMA",
 	"SEMICOLON",
 	"ERROR",
@@ -111,166 +109,166 @@ const parserEofCode = 1
 const parserErrCode = 2
 const parserMaxDepth = 200
 
-//line waccparser.y:234
-
+//line waccparser.y:241
 
 //line yacctab:1
 var parserExca = []int{
 	-1, 1,
 	1, -1,
 	-2, 0,
-	-1, 111,
-	53, 77,
-	-2, 74,
-	-1, 112,
+	-1, 114,
 	53, 78,
 	-2, 75,
+	-1, 115,
+	53, 79,
+	-2, 76,
 }
 
-const parserNprod = 85
+const parserNprod = 86
 const parserPrivate = 57344
 
 var parserTokenNames []string
 var parserStates []string
 
-const parserLast = 435
+const parserLast = 412
 
 var parserAct = []int{
 
-	78, 4, 117, 122, 63, 25, 121, 77, 7, 31,
-	32, 21, 39, 56, 57, 58, 59, 60, 61, 110,
-	62, 36, 36, 47, 65, 167, 36, 24, 20, 152,
-	146, 107, 71, 72, 24, 35, 66, 151, 166, 67,
-	150, 142, 24, 80, 168, 144, 163, 145, 23, 97,
-	98, 99, 100, 101, 102, 103, 149, 106, 24, 150,
-	74, 33, 75, 75, 37, 148, 162, 34, 34, 76,
-	109, 70, 120, 36, 156, 114, 108, 69, 64, 118,
-	34, 80, 112, 119, 123, 124, 125, 126, 127, 128,
-	129, 130, 131, 132, 133, 134, 135, 136, 34, 111,
-	34, 81, 82, 31, 32, 6, 138, 139, 143, 140,
-	48, 34, 49, 50, 51, 34, 9, 2, 53, 52,
-	22, 147, 45, 90, 92, 89, 91, 38, 24, 24,
-	41, 42, 55, 83, 54, 26, 27, 28, 29, 30,
-	73, 44, 46, 40, 43, 155, 68, 114, 157, 123,
-	118, 160, 159, 161, 112, 79, 116, 5, 164, 165,
-	3, 1, 154, 0, 0, 0, 115, 24, 0, 0,
-	0, 111, 0, 0, 0, 24, 19, 0, 18, 0,
-	24, 8, 10, 11, 12, 13, 14, 15, 16, 0,
-	0, 0, 17, 0, 0, 0, 0, 31, 32, 26,
-	27, 28, 29, 30, 0, 0, 48, 0, 49, 50,
-	51, 0, 0, 0, 53, 52, 26, 27, 28, 29,
-	30, 26, 27, 28, 29, 113, 41, 42, 55, 0,
-	54, 0, 0, 0, 0, 0, 23, 44, 46, 40,
-	43, 86, 88, 87, 84, 85, 95, 96, 90, 92,
-	89, 91, 93, 94, 0, 0, 0, 0, 0, 0,
-	0, 0, 0, 0, 158, 86, 88, 87, 84, 85,
-	95, 96, 90, 92, 89, 91, 93, 94, 0, 0,
-	0, 0, 0, 0, 0, 0, 169, 86, 88, 87,
-	84, 85, 95, 96, 90, 92, 89, 91, 93, 94,
-	0, 0, 0, 0, 0, 0, 0, 0, 137, 86,
-	88, 87, 84, 85, 95, 96, 90, 92, 89, 91,
-	93, 94, 0, 0, 0, 0, 0, 0, 0, 153,
-	86, 88, 87, 84, 85, 95, 96, 90, 92, 89,
-	91, 93, 94, 105, 0, 0, 86, 88, 87, 0,
-	141, 0, 104, 90, 92, 89, 91, 0, 0, 86,
-	88, 87, 84, 85, 95, 96, 90, 92, 89, 91,
-	93, 94, 86, 88, 87, 84, 85, 95, 96, 90,
-	92, 89, 91, 93, 94, 86, 88, 87, 84, 85,
-	95, 96, 90, 92, 89, 91, 93, 94, 86, 88,
-	87, 84, 85, 95, 0, 90, 92, 89, 91, 93,
-	94, 86, 88, 87, 84, 85, 0, 0, 90, 92,
-	89, 91, 93, 94, 86, 88, 87, 84, 85, 0,
-	0, 90, 92, 89, 91,
+	80, 4, 120, 22, 21, 79, 125, 67, 51, 25,
+	124, 7, 24, 43, 60, 61, 62, 63, 64, 65,
+	24, 66, 169, 113, 171, 153, 36, 36, 24, 145,
+	36, 155, 73, 74, 31, 32, 149, 112, 170, 86,
+	35, 88, 156, 24, 77, 37, 152, 82, 166, 111,
+	153, 33, 165, 102, 103, 104, 105, 106, 107, 108,
+	78, 91, 93, 92, 89, 90, 100, 101, 95, 97,
+	94, 96, 98, 99, 42, 34, 115, 114, 151, 34,
+	117, 34, 34, 122, 121, 161, 126, 82, 127, 72,
+	129, 130, 131, 132, 133, 134, 135, 136, 137, 138,
+	139, 140, 141, 34, 34, 52, 34, 53, 54, 55,
+	40, 143, 144, 57, 56, 38, 123, 36, 24, 24,
+	69, 40, 87, 159, 150, 45, 46, 59, 147, 58,
+	76, 148, 70, 77, 146, 71, 2, 48, 50, 44,
+	47, 6, 23, 26, 27, 28, 29, 30, 158, 115,
+	114, 160, 126, 117, 163, 24, 121, 164, 162, 49,
+	39, 167, 168, 81, 24, 9, 119, 5, 24, 157,
+	83, 84, 31, 32, 118, 68, 75, 41, 3, 52,
+	1, 53, 54, 55, 0, 0, 0, 57, 56, 95,
+	97, 94, 96, 26, 27, 28, 29, 30, 0, 45,
+	46, 59, 85, 58, 26, 27, 28, 29, 116, 0,
+	0, 48, 50, 44, 47, 20, 0, 19, 0, 0,
+	8, 11, 12, 13, 14, 15, 16, 17, 0, 0,
+	0, 18, 0, 0, 0, 0, 31, 32, 26, 27,
+	28, 29, 30, 91, 93, 92, 89, 90, 100, 101,
+	95, 97, 94, 96, 98, 99, 0, 0, 91, 93,
+	92, 89, 90, 100, 172, 95, 97, 94, 96, 98,
+	99, 0, 0, 0, 0, 0, 10, 91, 93, 92,
+	89, 90, 100, 101, 95, 97, 94, 96, 98, 99,
+	0, 0, 0, 0, 0, 0, 0, 0, 142, 91,
+	93, 92, 89, 90, 100, 101, 95, 97, 94, 96,
+	98, 99, 0, 0, 0, 0, 0, 0, 0, 154,
+	91, 93, 92, 89, 90, 100, 101, 95, 97, 94,
+	96, 98, 99, 110, 0, 0, 91, 93, 92, 0,
+	128, 0, 109, 95, 97, 94, 96, 0, 0, 91,
+	93, 92, 89, 90, 100, 101, 95, 97, 94, 96,
+	98, 99, 91, 93, 92, 89, 90, 100, 101, 95,
+	97, 94, 96, 98, 99, 91, 93, 92, 89, 90,
+	100, 101, 95, 97, 94, 96, 98, 99, 91, 93,
+	92, 89, 90, 0, 0, 95, 97, 94, 96, 98,
+	99, 91, 93, 92, 89, 90, 0, 0, 95, 97,
+	94, 96,
 }
 var parserPact = []int{
 
-	113, -1000, -1000, 174, 56, -1000, -1000, -27, -1000, 7,
-	-14, 176, 176, 176, 176, 176, 176, 176, 174, 19,
-	-1000, -1000, -1000, 24, -1000, -1000, -1000, -1000, -1000, -1000,
-	17, 176, 176, -1000, 174, 6, 14, 80, -1000, 350,
-	-1000, -1000, -1000, -1000, -1000, -1000, 24, -1000, 176, 176,
-	176, 176, 176, 176, 176, -1000, 350, 350, 350, 350,
-	337, 324, 52, -31, -1000, -1000, -1000, -1000, 23, 176,
-	196, 350, 350, -1000, 110, 80, -1000, -1000, 350, -1000,
-	-1000, 18, -56, 176, 176, 176, 176, 176, 176, 176,
-	176, 176, 176, 176, 176, 176, 176, -1000, -1000, -1000,
-	-1000, 311, 311, 252, 174, 174, -1000, 5, 176, 295,
-	-17, -1000, -1000, 17, 20, 102, -11, -1000, -32, -1000,
-	176, 11, 1, 350, 311, 311, 81, 81, 81, -1000,
-	-1000, -1000, -1000, 389, 389, 376, 363, -1000, 21, 9,
-	274, -1000, 196, 174, 68, 191, -1000, 206, 176, -1000,
-	176, 174, -1000, -1000, 10, 41, 174, -1000, 176, -18,
-	350, 8, -1000, -1000, 39, 230, -1000, -1000, -1000, -1000,
+	132, -1000, -1000, 213, 46, -1000, -1000, -23, -1000, -12,
+	57, 11, 75, 75, 75, 75, 75, 75, 75, 213,
+	115, -1000, -1000, -1000, -1000, -1000, -1000, -1000, -1000, -1000,
+	35, 75, 75, -1000, 213, 76, 5, 149, 75, 69,
+	75, -1000, 68, 340, -1000, -1000, -1000, -1000, -1000, -1000,
+	68, -1000, 75, 75, 75, 75, 75, 75, 75, -1000,
+	340, 340, 340, 340, 327, 314, 44, -26, -1000, -1000,
+	-1000, -1000, 179, 340, 340, -1000, 118, 149, -1000, -1000,
+	340, -1000, -1000, 62, -53, 75, 340, 75, 285, 75,
+	75, 75, 75, 75, 75, 75, 75, 75, 75, 75,
+	75, 75, -1000, -1000, -1000, -1000, 301, 301, 242, 213,
+	213, -1000, -13, -30, -1000, -1000, 35, 64, 128, 72,
+	-1000, -27, -1000, 75, 24, -9, 340, 264, -1000, 301,
+	301, 147, 147, 147, -1000, -1000, -1000, -1000, 366, 366,
+	353, 223, -1000, 15, 22, 179, 213, 117, 168, -1000,
+	26, 75, -1000, 75, -1000, 213, -1000, -4, 43, 213,
+	-1000, 75, -34, 340, 21, -1000, -1000, 19, 208, -1000,
+	-1000, -1000, -1000,
 }
 var parserPgo = []int{
 
-	0, 161, 160, 157, 105, 1, 7, 116, 0, 3,
-	156, 2, 5, 155, 23, 146, 122, 28, 4, 11,
-	120, 19,
+	0, 180, 178, 167, 141, 1, 5, 165, 0, 6,
+	166, 2, 9, 163, 8, 160, 159, 4, 7, 3,
+	142, 23,
 }
 var parserR1 = []int{
 
 	0, 1, 2, 2, 3, 3, 10, 10, 11, 7,
 	7, 7, 6, 6, 6, 6, 6, 5, 5, 4,
 	4, 4, 4, 4, 4, 4, 4, 4, 4, 4,
-	4, 4, 4, 4, 4, 8, 8, 8, 8, 8,
+	4, 4, 4, 4, 4, 4, 8, 8, 8, 8,
 	8, 8, 8, 8, 8, 8, 8, 8, 8, 8,
 	8, 8, 8, 8, 8, 8, 8, 8, 8, 8,
-	8, 8, 8, 13, 9, 9, 9, 14, 15, 15,
-	16, 12, 12, 20, 21, 21, 21, 18, 18, 18,
-	17, 17, 17, 17, 19,
+	8, 8, 8, 8, 13, 9, 9, 9, 14, 15,
+	15, 16, 12, 12, 20, 21, 21, 21, 18, 18,
+	18, 17, 17, 17, 17, 19,
 }
 var parserR2 = []int{
 
 	0, 4, 2, 0, 7, 8, 3, 1, 2, 1,
 	1, 1, 1, 1, 1, 6, 5, 3, 1, 1,
-	4, 3, 2, 2, 2, 2, 2, 2, 7, 5,
-	3, 2, 2, 2, 2, 1, 1, 1, 1, 1,
-	1, 1, 1, 2, 2, 2, 2, 2, 2, 3,
+	4, 3, 3, 2, 2, 2, 2, 2, 2, 7,
+	5, 3, 2, 2, 2, 2, 1, 1, 1, 1,
+	1, 1, 1, 1, 2, 2, 2, 2, 2, 2,
 	3, 3, 3, 3, 3, 3, 3, 3, 3, 3,
-	3, 3, 3, 3, 3, 1, 0, 2, 4, 3,
-	1, 2, 2, 6, 1, 1, 1, 1, 1, 1,
-	1, 1, 1, 1, 3,
+	3, 3, 3, 3, 3, 3, 1, 0, 2, 4,
+	3, 1, 2, 2, 6, 1, 1, 1, 1, 1,
+	1, 1, 1, 1, 1, 3,
 }
 var parserChk = []int{
 
 	-1000, -1, 4, -2, -5, -3, -4, -18, 7, -7,
-	8, 9, 10, 11, 12, 13, 14, 18, 4, 2,
-	-17, -19, -20, 62, -14, -12, 25, 26, 27, 28,
-	29, 23, 24, 5, 59, 62, 53, 57, -7, -8,
-	63, 50, 51, 64, 61, -16, 62, -14, 30, 32,
-	33, 34, 39, 38, 54, 52, -8, -8, -8, -8,
-	-8, -8, -5, -18, 59, 5, 17, 20, -15, 53,
-	54, -8, -8, -4, 54, 57, 55, -6, -8, -13,
-	-12, 21, 22, 53, 38, 39, 35, 37, 36, 44,
-	42, 45, 43, 46, 47, 40, 41, -8, -8, -8,
-	-8, -8, -8, -8, 15, 19, 5, 62, 53, -8,
-	-21, -17, -19, 29, -18, 56, -10, -11, -18, -6,
-	54, 62, -9, -8, -8, -8, -8, -8, -8, -8,
-	-8, -8, -8, -8, -8, -8, -8, 56, -5, -5,
-	-8, 55, 58, 6, 56, 58, 62, -8, 54, 55,
-	58, 16, 20, 55, -21, -5, 6, -11, 58, -9,
-	-8, -5, 56, 5, -5, -8, 56, 17, 5, 56,
+	63, 8, 9, 10, 11, 12, 13, 14, 18, 4,
+	2, -17, -19, -20, -14, -12, 25, 26, 27, 28,
+	29, 23, 24, 5, 60, 63, 53, 57, 58, -15,
+	53, -7, 63, -8, 64, 50, 51, 65, 62, -16,
+	63, -14, 30, 32, 33, 34, 39, 38, 54, 52,
+	-8, -8, -8, -8, -8, -8, -5, -18, 60, 5,
+	17, 20, 54, -8, -8, -4, 54, 57, 55, -6,
+	-8, -13, -12, 21, 22, 53, -8, 53, -8, 38,
+	39, 35, 37, 36, 44, 42, 45, 43, 46, 47,
+	40, 41, -8, -8, -8, -8, -8, -8, -8, 15,
+	19, 5, 63, -21, -17, -19, 29, -18, 56, -10,
+	-11, -18, -6, 54, 63, -9, -8, -8, 55, -8,
+	-8, -8, -8, -8, -8, -8, -8, -8, -8, -8,
+	-8, -8, 56, -5, -5, 59, 6, 56, 59, 63,
+	-8, 54, 55, 59, 55, 16, 20, -21, -5, 6,
+	-11, 59, -9, -8, -5, 56, 5, -5, -8, 56,
+	17, 5, 56,
 }
 var parserDef = []int{
 
 	0, -2, 3, 0, 0, 2, 18, 0, 19, 0,
+	9, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+	0, 78, 79, 80, 10, 11, 81, 82, 83, 84,
+	0, 0, 0, 1, 0, 0, 0, 0, 0, 68,
+	0, 23, 9, 24, 36, 37, 38, 39, 40, 41,
+	42, 43, 0, 0, 0, 0, 0, 0, 0, 71,
+	25, 26, 27, 28, 0, 0, 0, 0, 32, 33,
+	34, 35, 0, 72, 73, 17, 0, 0, 85, 21,
+	12, 13, 14, 0, 0, 67, 22, 0, 0, 0,
 	0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-	77, 78, 79, 9, 10, 11, 80, 81, 82, 83,
-	0, 0, 0, 1, 0, 0, 0, 0, 22, 23,
-	35, 36, 37, 38, 39, 40, 41, 42, 0, 0,
-	0, 0, 0, 0, 0, 70, 24, 25, 26, 27,
-	0, 0, 0, 0, 31, 32, 33, 34, 67, 0,
-	0, 71, 72, 17, 0, 0, 84, 21, 12, 13,
-	14, 0, 0, 66, 0, 0, 0, 0, 0, 0,
-	0, 0, 0, 0, 0, 0, 0, 43, 44, 45,
-	46, 47, 48, 0, 0, 0, 30, 0, 0, 0,
-	0, -2, -2, 76, 0, 0, 0, 7, 0, 20,
-	0, 0, 0, 65, 49, 50, 51, 52, 53, 54,
-	55, 56, 57, 58, 59, 60, 61, 62, 0, 0,
-	0, 69, 0, 0, 0, 0, 8, 0, 66, 63,
-	0, 0, 29, 68, 0, 0, 0, 6, 0, 0,
-	64, 0, 73, 4, 0, 0, 16, 28, 5, 15,
+	0, 0, 44, 45, 46, 47, 48, 49, 0, 0,
+	0, 31, 0, 0, -2, -2, 77, 0, 0, 0,
+	7, 0, 20, 0, 0, 0, 66, 0, 70, 50,
+	51, 52, 53, 54, 55, 56, 57, 58, 59, 60,
+	61, 62, 63, 0, 0, 0, 0, 0, 0, 8,
+	0, 67, 64, 0, 69, 0, 30, 0, 0, 0,
+	6, 0, 0, 65, 0, 74, 4, 0, 0, 16,
+	29, 5, 15,
 }
 var parserTok1 = []int{
 
@@ -284,7 +282,7 @@ var parserTok2 = []int{
 	32, 33, 34, 35, 36, 37, 38, 39, 40, 41,
 	42, 43, 44, 45, 46, 47, 48, 49, 50, 51,
 	52, 53, 54, 55, 56, 57, 58, 59, 60, 61,
-	62, 63, 64,
+	62, 63, 64, 65,
 }
 var parserTok3 = []int{
 	0,
@@ -516,278 +514,440 @@ parserdefault:
 	switch parsernt {
 
 	case 1:
-		//line waccparser.y:97
+		//line waccparser.y:98
 		{
-	                                          parserlex.(*Lexer).prog = &Program{FunctionList : parserS[parserpt-2].functions , StatList : parserS[parserpt-1].stmts , SymbolTable : NewInstance(), FileText :&parserlex.(*Lexer).input}
-	                                         }
+			parserlex.(*Lexer).prog = &Program{FunctionList: parserS[parserpt-2].functions, StatList: parserS[parserpt-1].stmts, SymbolTable: NewInstance(), FileText: &parserlex.(*Lexer).input}
+		}
 	case 2:
-		//line waccparser.y:101
-		{ parserVAL.functions = append(parserS[parserpt-1].functions, parserS[parserpt-0].function)}
-	case 3:
 		//line waccparser.y:102
-		{ parserVAL.functions = []*Function{} }
+		{
+			parserVAL.functions = append(parserS[parserpt-1].functions, parserS[parserpt-0].function)
+		}
+	case 3:
+		//line waccparser.y:103
+		{
+			parserVAL.functions = []*Function{}
+		}
 	case 4:
-		//line waccparser.y:105
-		{ if !checkStats(parserS[parserpt-1].stmts) {
-	          	parserlex.Error("Missing return statement")
-	           }
-	             parserVAL.function = &Function{Ident : parserS[parserpt-5].ident, ReturnType : parserS[parserpt-6].typedefinition, StatList : parserS[parserpt-1].stmts, SymbolTable: NewInstance(), FileText :&parserlex.(*Lexer).input}
-	           }
+		//line waccparser.y:106
+		{
+			if !checkStats(parserS[parserpt-1].stmts) {
+				parserlex.Error("Missing return statement")
+			}
+			parserVAL.function = &Function{Ident: parserS[parserpt-5].ident, ReturnType: parserS[parserpt-6].typedefinition, StatList: parserS[parserpt-1].stmts, SymbolTable: NewInstance(), FileText: &parserlex.(*Lexer).input}
+		}
 	case 5:
-		//line waccparser.y:111
-		{ if !checkStats(parserS[parserpt-1].stmts) {
-	            	parserlex.Error("Missing return statement")
-	            }
-	             parserVAL.function = &Function{Ident : parserS[parserpt-6].ident, ReturnType : parserS[parserpt-7].typedefinition, StatList : parserS[parserpt-1].stmts, ParameterTypes : parserS[parserpt-4].params, SymbolTable: NewInstance(), FileText :&parserlex.(*Lexer).input}
-	           }
+		//line waccparser.y:112
+		{
+			if !checkStats(parserS[parserpt-1].stmts) {
+				parserlex.Error("Missing return statement")
+			}
+			parserVAL.function = &Function{Ident: parserS[parserpt-6].ident, ReturnType: parserS[parserpt-7].typedefinition, StatList: parserS[parserpt-1].stmts, ParameterTypes: parserS[parserpt-4].params, SymbolTable: NewInstance(), FileText: &parserlex.(*Lexer).input}
+		}
 	case 6:
-		//line waccparser.y:117
-		{ parserVAL.params = append(parserS[parserpt-2].params, parserS[parserpt-0].param)}
-	case 7:
 		//line waccparser.y:118
-		{ parserVAL.params = []Param{ parserS[parserpt-0].param } }
+		{
+			parserVAL.params = append(parserS[parserpt-2].params, parserS[parserpt-0].param)
+		}
+	case 7:
+		//line waccparser.y:119
+		{
+			parserVAL.params = []Param{parserS[parserpt-0].param}
+		}
 	case 8:
-		//line waccparser.y:120
-		{ parserVAL.param = Param{ParamType : parserS[parserpt-1].typedefinition, Ident : parserS[parserpt-0].ident} }
+		//line waccparser.y:121
+		{
+			parserVAL.param = Param{ParamType: parserS[parserpt-1].typedefinition, Ident: parserS[parserpt-0].ident}
+		}
 	case 9:
-		//line waccparser.y:122
-		{parserVAL.assignlhs = parserS[parserpt-0].ident}
-	case 10:
 		//line waccparser.y:123
-		{parserVAL.assignlhs = parserS[parserpt-0].arrayelem}
-	case 11:
+		{
+			parserVAL.assignlhs = parserS[parserpt-0].ident
+		}
+	case 10:
 		//line waccparser.y:124
-		{parserVAL.assignlhs = parserS[parserpt-0].pairelem}
+		{
+			parserVAL.assignlhs = parserS[parserpt-0].arrayelem
+		}
+	case 11:
+		//line waccparser.y:125
+		{
+			parserVAL.assignlhs = parserS[parserpt-0].pairelem
+		}
 	case 12:
-		//line waccparser.y:126
-		{parserVAL.assignrhs = parserS[parserpt-0].expr}
-	case 13:
 		//line waccparser.y:127
-		{parserVAL.assignrhs = parserS[parserpt-0].arrayliter}
-	case 14:
+		{
+			parserVAL.assignrhs = parserS[parserpt-0].expr
+		}
+	case 13:
 		//line waccparser.y:128
-		{parserVAL.assignrhs = parserS[parserpt-0].pairelem}
-	case 15:
+		{
+			parserVAL.assignrhs = parserS[parserpt-0].arrayliter
+		}
+	case 14:
 		//line waccparser.y:129
-		{ parserVAL.assignrhs = NewPair{FstExpr : parserS[parserpt-3].expr, SndExpr : parserS[parserpt-1].expr, Pos : parserS[parserpt-5].pos, FileText :&parserlex.(*Lexer).input } }
-	case 16:
+		{
+			parserVAL.assignrhs = parserS[parserpt-0].pairelem
+		}
+	case 15:
 		//line waccparser.y:130
-		{ parserVAL.assignrhs = Call{Ident : parserS[parserpt-3].ident, ParamList : parserS[parserpt-1].exprs, Pos : parserS[parserpt-4].pos, FileText :&parserlex.(*Lexer).input  } }
+		{
+			parserVAL.assignrhs = NewPair{FstExpr: parserS[parserpt-3].expr, SndExpr: parserS[parserpt-1].expr, Pos: parserS[parserpt-5].pos, FileText: &parserlex.(*Lexer).input}
+		}
+	case 16:
+		//line waccparser.y:131
+		{
+			parserVAL.assignrhs = Call{Ident: parserS[parserpt-3].ident, ParamList: parserS[parserpt-1].exprs, Pos: parserS[parserpt-4].pos, FileText: &parserlex.(*Lexer).input}
+		}
 	case 17:
-		//line waccparser.y:132
-		{ parserVAL.stmts = append(parserS[parserpt-2].stmts,parserS[parserpt-0].stmt) }
-	case 18:
 		//line waccparser.y:133
-		{ parserVAL.stmts = []Statement{parserS[parserpt-0].stmt} }
+		{
+			parserVAL.stmts = append(parserS[parserpt-2].stmts, parserS[parserpt-0].stmt)
+		}
+	case 18:
+		//line waccparser.y:134
+		{
+			parserVAL.stmts = []Statement{parserS[parserpt-0].stmt}
+		}
 	case 19:
-		//line waccparser.y:136
-		{ parserVAL.stmt = Skip{Pos : parserS[parserpt-0].pos ,FileText :&parserlex.(*Lexer).input } }
-	case 20:
 		//line waccparser.y:137
-		{ parserVAL.stmt = Declare{DecType : parserS[parserpt-3].typedefinition, Lhs : parserS[parserpt-2].ident, Rhs : parserS[parserpt-0].assignrhs, Pos : parserS[parserpt-3].pos ,FileText :&parserlex.(*Lexer).input } }
-	case 21:
+		{
+			parserVAL.stmt = Skip{Pos: parserS[parserpt-0].pos, FileText: &parserlex.(*Lexer).input}
+		}
+	case 20:
 		//line waccparser.y:138
-		{ parserVAL.stmt = Assignment{Lhs : parserS[parserpt-2].assignlhs, Rhs : parserS[parserpt-0].assignrhs, Pos : parserS[parserpt-2].pos ,FileText :&parserlex.(*Lexer).input} }
-	case 22:
+		{
+			parserVAL.stmt = Declare{DecType: parserS[parserpt-3].typedefinition, Lhs: parserS[parserpt-2].ident, Rhs: parserS[parserpt-0].assignrhs, Pos: parserS[parserpt-3].pos, FileText: &parserlex.(*Lexer).input}
+		}
+	case 21:
 		//line waccparser.y:139
-		{ parserVAL.stmt = Read{ &parserlex.(*Lexer).input, parserS[parserpt-1].pos , parserS[parserpt-0].assignlhs, } }
-	case 23:
-		//line waccparser.y:140
-		{ parserVAL.stmt = Free{&parserlex.(*Lexer).input, parserS[parserpt-1].pos, parserS[parserpt-0].expr} }
-	case 24:
+		{
+			parserVAL.stmt = Assignment{Lhs: parserS[parserpt-2].assignlhs, Rhs: parserS[parserpt-0].assignrhs, Pos: parserS[parserpt-2].pos, FileText: &parserlex.(*Lexer).input}
+		}
+	case 22:
 		//line waccparser.y:141
-		{ parserVAL.stmt = Return{&parserlex.(*Lexer).input, parserS[parserpt-1].pos, parserS[parserpt-0].expr} }
-	case 25:
-		//line waccparser.y:142
-		{ parserVAL.stmt = Exit{&parserlex.(*Lexer).input, parserS[parserpt-1].pos, parserS[parserpt-0].expr} }
-	case 26:
-		//line waccparser.y:143
-		{ parserVAL.stmt = Print{&parserlex.(*Lexer).input, parserS[parserpt-1].pos, parserS[parserpt-0].expr} }
-	case 27:
-		//line waccparser.y:144
-		{ parserVAL.stmt = Println{&parserlex.(*Lexer).input, parserS[parserpt-1].pos, parserS[parserpt-0].expr} }
-	case 28:
-		//line waccparser.y:145
-		{ parserVAL.stmt = If{Conditional : parserS[parserpt-5].expr, ThenStat : parserS[parserpt-3].stmts, ElseStat : parserS[parserpt-1].stmts, Pos : parserS[parserpt-6].pos, FileText :&parserlex.(*Lexer).input } }
-	case 29:
+		{
+			parserVAL.stmt = Binop{Left: parserS[parserpt-2].ident, Binary: PLUS, Right: parserS[parserpt-0].expr, Pos: parserS[parserpt-2].pos, FileText: &parserlex.(*Lexer).input}
+		}
+	case 23:
 		//line waccparser.y:146
-		{ parserVAL.stmt = While{Conditional : parserS[parserpt-3].expr, DoStat : parserS[parserpt-1].stmts, Pos : parserS[parserpt-4].pos, FileText :&parserlex.(*Lexer).input} }
-	case 30:
+		{
+			parserVAL.stmt = Read{&parserlex.(*Lexer).input, parserS[parserpt-1].pos, parserS[parserpt-0].assignlhs}
+		}
+	case 24:
 		//line waccparser.y:147
-		{ parserVAL.stmt = Scope{StatList : parserS[parserpt-1].stmts, Pos : parserS[parserpt-2].pos, FileText :&parserlex.(*Lexer).input } }
-	case 31:
+		{
+			parserVAL.stmt = Free{&parserlex.(*Lexer).input, parserS[parserpt-1].pos, parserS[parserpt-0].expr}
+		}
+	case 25:
 		//line waccparser.y:148
 		{
-	                                                          parserlex.Error("Syntax error : Invalid statement")
-	                                                          parserVAL.stmt = nil
-	                                                        }
-	case 32:
+			parserVAL.stmt = Return{&parserlex.(*Lexer).input, parserS[parserpt-1].pos, parserS[parserpt-0].expr}
+		}
+	case 26:
+		//line waccparser.y:149
+		{
+			parserVAL.stmt = Exit{&parserlex.(*Lexer).input, parserS[parserpt-1].pos, parserS[parserpt-0].expr}
+		}
+	case 27:
+		//line waccparser.y:150
+		{
+			parserVAL.stmt = Print{&parserlex.(*Lexer).input, parserS[parserpt-1].pos, parserS[parserpt-0].expr}
+		}
+	case 28:
+		//line waccparser.y:151
+		{
+			parserVAL.stmt = Println{&parserlex.(*Lexer).input, parserS[parserpt-1].pos, parserS[parserpt-0].expr}
+		}
+	case 29:
 		//line waccparser.y:152
-		{ parserlex.Error("Syntax error : Invalid statement")
-	                                                          parserVAL.stmt = nil
-	                                                        }
-	case 33:
+		{
+			parserVAL.stmt = If{Conditional: parserS[parserpt-5].expr, ThenStat: parserS[parserpt-3].stmts, ElseStat: parserS[parserpt-1].stmts, Pos: parserS[parserpt-6].pos, FileText: &parserlex.(*Lexer).input}
+		}
+	case 30:
+		//line waccparser.y:153
+		{
+			parserVAL.stmt = While{Conditional: parserS[parserpt-3].expr, DoStat: parserS[parserpt-1].stmts, Pos: parserS[parserpt-4].pos, FileText: &parserlex.(*Lexer).input}
+		}
+	case 31:
+		//line waccparser.y:154
+		{
+			parserVAL.stmt = Scope{StatList: parserS[parserpt-1].stmts, Pos: parserS[parserpt-2].pos, FileText: &parserlex.(*Lexer).input}
+		}
+	case 32:
 		//line waccparser.y:155
 		{
-	                                                          parserlex.Error("Syntax error : Invalid statement")
-	                                                          parserVAL.stmt = nil
-	                                                        }
-	case 34:
+			parserlex.Error("Syntax error : Invalid statement")
+			parserVAL.stmt = nil
+		}
+	case 33:
 		//line waccparser.y:159
 		{
-	                                                          parserlex.Error("Syntax error : Invalid statement")
-	                                                          parserVAL.stmt = nil
-	                                                        }
+			parserlex.Error("Syntax error : Invalid statement")
+			parserVAL.stmt = nil
+		}
+	case 34:
+		//line waccparser.y:162
+		{
+			parserlex.Error("Syntax error : Invalid statement")
+			parserVAL.stmt = nil
+		}
 	case 35:
-		//line waccparser.y:164
-		{ parserVAL.expr =  parserS[parserpt-0].integer }
-	case 36:
 		//line waccparser.y:166
-		{ parserVAL.expr =  parserS[parserpt-0].boolean }
-	case 37:
-		//line waccparser.y:167
-		{ parserVAL.expr =  parserS[parserpt-0].boolean }
-	case 38:
-		//line waccparser.y:169
-		{ parserVAL.expr =  parserS[parserpt-0].character }
-	case 39:
-		//line waccparser.y:170
-		{ parserVAL.expr =  parserS[parserpt-0].stringconst }
-	case 40:
+		{
+			parserlex.Error("Syntax error : Invalid statement")
+			parserVAL.stmt = nil
+		}
+	case 36:
 		//line waccparser.y:171
-		{ parserVAL.expr =  parserS[parserpt-0].pairliter }
-	case 41:
-		//line waccparser.y:172
-		{ parserVAL.expr =  parserS[parserpt-0].ident }
-	case 42:
+		{
+			parserVAL.expr = parserS[parserpt-0].integer
+		}
+	case 37:
 		//line waccparser.y:173
-		{ parserVAL.expr =  parserS[parserpt-0].arrayelem }
-	case 43:
-		//line waccparser.y:175
-		{ parserVAL.expr = Unop{Unary : NOT, Expr : parserS[parserpt-0].expr, Pos : parserS[parserpt-1].pos,FileText :&parserlex.(*Lexer).input   } }
-	case 44:
+		{
+			parserVAL.expr = parserS[parserpt-0].boolean
+		}
+	case 38:
+		//line waccparser.y:174
+		{
+			parserVAL.expr = parserS[parserpt-0].boolean
+		}
+	case 39:
 		//line waccparser.y:176
-		{ parserVAL.expr = Unop{Unary : LEN, Expr : parserS[parserpt-0].expr, Pos : parserS[parserpt-1].pos,FileText :&parserlex.(*Lexer).input  } }
-	case 45:
+		{
+			parserVAL.expr = parserS[parserpt-0].character
+		}
+	case 40:
 		//line waccparser.y:177
-		{ parserVAL.expr = Unop{Unary : ORD, Expr : parserS[parserpt-0].expr, Pos : parserS[parserpt-1].pos, FileText :&parserlex.(*Lexer).input  } }
-	case 46:
+		{
+			parserVAL.expr = parserS[parserpt-0].stringconst
+		}
+	case 41:
 		//line waccparser.y:178
-		{ parserVAL.expr = Unop{Unary : CHR, Expr : parserS[parserpt-0].expr, Pos : parserS[parserpt-1].pos, FileText :&parserlex.(*Lexer).input  } }
-	case 47:
+		{
+			parserVAL.expr = parserS[parserpt-0].pairliter
+		}
+	case 42:
 		//line waccparser.y:179
-		{ parserVAL.expr = Unop{Unary : SUB, Expr : parserS[parserpt-0].expr, Pos : parserS[parserpt-1].pos, FileText :&parserlex.(*Lexer).input  } }
-	case 48:
+		{
+			parserVAL.expr = parserS[parserpt-0].ident
+		}
+	case 43:
 		//line waccparser.y:180
-		{ parserVAL.expr = parserS[parserpt-0].expr }
-	case 49:
+		{
+			parserVAL.expr = parserS[parserpt-0].arrayelem
+		}
+	case 44:
+		//line waccparser.y:182
+		{
+			parserVAL.expr = Unop{Unary: NOT, Expr: parserS[parserpt-0].expr, Pos: parserS[parserpt-1].pos, FileText: &parserlex.(*Lexer).input}
+		}
+	case 45:
 		//line waccparser.y:183
-		{ parserVAL.expr = Binop{Left : parserS[parserpt-2].expr, Binary : PLUS, Right : parserS[parserpt-0].expr, Pos : parserS[parserpt-2].pos, FileText :&parserlex.(*Lexer).input  } }
-	case 50:
+		{
+			parserVAL.expr = Unop{Unary: LEN, Expr: parserS[parserpt-0].expr, Pos: parserS[parserpt-1].pos, FileText: &parserlex.(*Lexer).input}
+		}
+	case 46:
 		//line waccparser.y:184
-		{ parserVAL.expr = Binop{Left : parserS[parserpt-2].expr, Binary : SUB, Right : parserS[parserpt-0].expr,  Pos : parserS[parserpt-2].pos, FileText :&parserlex.(*Lexer).input  } }
-	case 51:
+		{
+			parserVAL.expr = Unop{Unary: ORD, Expr: parserS[parserpt-0].expr, Pos: parserS[parserpt-1].pos, FileText: &parserlex.(*Lexer).input}
+		}
+	case 47:
 		//line waccparser.y:185
-		{ parserVAL.expr = Binop{Left : parserS[parserpt-2].expr, Binary : MUL, Right : parserS[parserpt-0].expr,  Pos : parserS[parserpt-2].pos, FileText :&parserlex.(*Lexer).input  } }
-	case 52:
+		{
+			parserVAL.expr = Unop{Unary: CHR, Expr: parserS[parserpt-0].expr, Pos: parserS[parserpt-1].pos, FileText: &parserlex.(*Lexer).input}
+		}
+	case 48:
 		//line waccparser.y:186
-		{ parserVAL.expr = Binop{Left : parserS[parserpt-2].expr, Binary : MOD, Right : parserS[parserpt-0].expr,  Pos : parserS[parserpt-2].pos, FileText :&parserlex.(*Lexer).input  } }
-	case 53:
+		{
+			parserVAL.expr = Unop{Unary: SUB, Expr: parserS[parserpt-0].expr, Pos: parserS[parserpt-1].pos, FileText: &parserlex.(*Lexer).input}
+		}
+	case 49:
 		//line waccparser.y:187
-		{ parserVAL.expr = Binop{Left : parserS[parserpt-2].expr, Binary : DIV, Right : parserS[parserpt-0].expr,  Pos : parserS[parserpt-2].pos, FileText :&parserlex.(*Lexer).input  } }
-	case 54:
-		//line waccparser.y:188
-		{ parserVAL.expr = Binop{Left : parserS[parserpt-2].expr, Binary : LT, Right : parserS[parserpt-0].expr,   Pos : parserS[parserpt-2].pos, FileText :&parserlex.(*Lexer).input  } }
-	case 55:
-		//line waccparser.y:189
-		{ parserVAL.expr = Binop{Left : parserS[parserpt-2].expr, Binary : GT, Right : parserS[parserpt-0].expr,   Pos : parserS[parserpt-2].pos, FileText :&parserlex.(*Lexer).input  } }
-	case 56:
+		{
+			parserVAL.expr = parserS[parserpt-0].expr
+		}
+	case 50:
 		//line waccparser.y:190
-		{ parserVAL.expr = Binop{Left : parserS[parserpt-2].expr, Binary : LTE, Right : parserS[parserpt-0].expr,  Pos : parserS[parserpt-2].pos, FileText :&parserlex.(*Lexer).input  } }
-	case 57:
+		{
+			parserVAL.expr = Binop{Left: parserS[parserpt-2].expr, Binary: PLUS, Right: parserS[parserpt-0].expr, Pos: parserS[parserpt-2].pos, FileText: &parserlex.(*Lexer).input}
+		}
+	case 51:
 		//line waccparser.y:191
-		{ parserVAL.expr = Binop{Left : parserS[parserpt-2].expr, Binary : GTE, Right : parserS[parserpt-0].expr,  Pos : parserS[parserpt-2].pos, FileText :&parserlex.(*Lexer).input  } }
-	case 58:
+		{
+			parserVAL.expr = Binop{Left: parserS[parserpt-2].expr, Binary: SUB, Right: parserS[parserpt-0].expr, Pos: parserS[parserpt-2].pos, FileText: &parserlex.(*Lexer).input}
+		}
+	case 52:
 		//line waccparser.y:192
-		{ parserVAL.expr = Binop{Left : parserS[parserpt-2].expr, Binary : EQ, Right : parserS[parserpt-0].expr,   Pos : parserS[parserpt-2].pos, FileText :&parserlex.(*Lexer).input  } }
-	case 59:
+		{
+			parserVAL.expr = Binop{Left: parserS[parserpt-2].expr, Binary: MUL, Right: parserS[parserpt-0].expr, Pos: parserS[parserpt-2].pos, FileText: &parserlex.(*Lexer).input}
+		}
+	case 53:
 		//line waccparser.y:193
-		{ parserVAL.expr = Binop{Left : parserS[parserpt-2].expr, Binary : NEQ, Right : parserS[parserpt-0].expr,  Pos : parserS[parserpt-2].pos, FileText :&parserlex.(*Lexer).input  } }
-	case 60:
+		{
+			parserVAL.expr = Binop{Left: parserS[parserpt-2].expr, Binary: MOD, Right: parserS[parserpt-0].expr, Pos: parserS[parserpt-2].pos, FileText: &parserlex.(*Lexer).input}
+		}
+	case 54:
 		//line waccparser.y:194
-		{ parserVAL.expr = Binop{Left : parserS[parserpt-2].expr, Binary : AND, Right : parserS[parserpt-0].expr,  Pos : parserS[parserpt-2].pos, FileText :&parserlex.(*Lexer).input  } }
-	case 61:
+		{
+			parserVAL.expr = Binop{Left: parserS[parserpt-2].expr, Binary: DIV, Right: parserS[parserpt-0].expr, Pos: parserS[parserpt-2].pos, FileText: &parserlex.(*Lexer).input}
+		}
+	case 55:
 		//line waccparser.y:195
-		{ parserVAL.expr = Binop{Left : parserS[parserpt-2].expr, Binary : OR, Right : parserS[parserpt-0].expr,   Pos : parserS[parserpt-2].pos, FileText :&parserlex.(*Lexer).input  } }
-	case 62:
+		{
+			parserVAL.expr = Binop{Left: parserS[parserpt-2].expr, Binary: LT, Right: parserS[parserpt-0].expr, Pos: parserS[parserpt-2].pos, FileText: &parserlex.(*Lexer).input}
+		}
+	case 56:
 		//line waccparser.y:196
-		{ parserVAL.expr = parserS[parserpt-1].expr }
-	case 63:
+		{
+			parserVAL.expr = Binop{Left: parserS[parserpt-2].expr, Binary: GT, Right: parserS[parserpt-0].expr, Pos: parserS[parserpt-2].pos, FileText: &parserlex.(*Lexer).input}
+		}
+	case 57:
+		//line waccparser.y:197
+		{
+			parserVAL.expr = Binop{Left: parserS[parserpt-2].expr, Binary: LTE, Right: parserS[parserpt-0].expr, Pos: parserS[parserpt-2].pos, FileText: &parserlex.(*Lexer).input}
+		}
+	case 58:
+		//line waccparser.y:198
+		{
+			parserVAL.expr = Binop{Left: parserS[parserpt-2].expr, Binary: GTE, Right: parserS[parserpt-0].expr, Pos: parserS[parserpt-2].pos, FileText: &parserlex.(*Lexer).input}
+		}
+	case 59:
 		//line waccparser.y:199
-		{ parserVAL.arrayliter = ArrayLiter{&parserlex.(*Lexer).input, parserS[parserpt-2].pos, parserS[parserpt-1].exprs } }
-	case 64:
+		{
+			parserVAL.expr = Binop{Left: parserS[parserpt-2].expr, Binary: EQ, Right: parserS[parserpt-0].expr, Pos: parserS[parserpt-2].pos, FileText: &parserlex.(*Lexer).input}
+		}
+	case 60:
+		//line waccparser.y:200
+		{
+			parserVAL.expr = Binop{Left: parserS[parserpt-2].expr, Binary: NEQ, Right: parserS[parserpt-0].expr, Pos: parserS[parserpt-2].pos, FileText: &parserlex.(*Lexer).input}
+		}
+	case 61:
 		//line waccparser.y:201
-		{parserVAL.exprs = append(parserS[parserpt-2].exprs, parserS[parserpt-0].expr)}
-	case 65:
+		{
+			parserVAL.expr = Binop{Left: parserS[parserpt-2].expr, Binary: AND, Right: parserS[parserpt-0].expr, Pos: parserS[parserpt-2].pos, FileText: &parserlex.(*Lexer).input}
+		}
+	case 62:
 		//line waccparser.y:202
-		{parserVAL.exprs = []Evaluation{parserS[parserpt-0].expr}}
-	case 66:
+		{
+			parserVAL.expr = Binop{Left: parserS[parserpt-2].expr, Binary: OR, Right: parserS[parserpt-0].expr, Pos: parserS[parserpt-2].pos, FileText: &parserlex.(*Lexer).input}
+		}
+	case 63:
 		//line waccparser.y:203
-		{parserVAL.exprs = []Evaluation{}}
-	case 67:
-		//line waccparser.y:205
-		{parserVAL.arrayelem = ArrayElem{Ident: parserS[parserpt-1].ident, Exprs : parserS[parserpt-0].exprs, Pos : parserS[parserpt-1].pos,FileText :&parserlex.(*Lexer).input  } }
-	case 68:
-		//line waccparser.y:207
-		{parserVAL.exprs = append(parserS[parserpt-3].exprs, parserS[parserpt-1].expr)}
-	case 69:
+		{
+			parserVAL.expr = parserS[parserpt-1].expr
+		}
+	case 64:
+		//line waccparser.y:206
+		{
+			parserVAL.arrayliter = ArrayLiter{&parserlex.(*Lexer).input, parserS[parserpt-2].pos, parserS[parserpt-1].exprs}
+		}
+	case 65:
 		//line waccparser.y:208
-		{parserVAL.exprs = []Evaluation{parserS[parserpt-1].expr}}
-	case 70:
-		//line waccparser.y:211
-		{ parserVAL.pairliter =  PairLiter{} }
-	case 71:
+		{
+			parserVAL.exprs = append(parserS[parserpt-2].exprs, parserS[parserpt-0].expr)
+		}
+	case 66:
+		//line waccparser.y:209
+		{
+			parserVAL.exprs = []Evaluation{parserS[parserpt-0].expr}
+		}
+	case 67:
+		//line waccparser.y:210
+		{
+			parserVAL.exprs = []Evaluation{}
+		}
+	case 68:
+		//line waccparser.y:212
+		{
+			parserVAL.arrayelem = ArrayElem{Ident: parserS[parserpt-1].ident, Exprs: parserS[parserpt-0].exprs, Pos: parserS[parserpt-1].pos, FileText: &parserlex.(*Lexer).input}
+		}
+	case 69:
 		//line waccparser.y:214
-		{ parserVAL.pairelem = PairElem{Fsnd: Fst, Expr : parserS[parserpt-0].expr, Pos : parserS[parserpt-1].pos  } }
-	case 72:
+		{
+			parserVAL.exprs = append(parserS[parserpt-3].exprs, parserS[parserpt-1].expr)
+		}
+	case 70:
 		//line waccparser.y:215
-		{ parserVAL.pairelem = PairElem{Fsnd: Snd, Expr : parserS[parserpt-0].expr, Pos : parserS[parserpt-1].pos  } }
-	case 73:
-		//line waccparser.y:217
-		{ parserVAL.typedefinition = PairType{FstType : parserS[parserpt-3].pairelemtype, SndType : parserS[parserpt-1].pairelemtype} }
-	case 74:
-		//line waccparser.y:219
-		{ parserVAL.pairelemtype = parserS[parserpt-0].typedefinition }
-	case 75:
-		//line waccparser.y:220
-		{ parserVAL.pairelemtype = parserS[parserpt-0].typedefinition }
-	case 76:
+		{
+			parserVAL.exprs = []Evaluation{parserS[parserpt-1].expr}
+		}
+	case 71:
+		//line waccparser.y:218
+		{
+			parserVAL.pairliter = PairLiter{}
+		}
+	case 72:
 		//line waccparser.y:221
-		{ parserVAL.pairelemtype = Pair}
-	case 77:
-		//line waccparser.y:223
-		{ parserVAL.typedefinition =  parserS[parserpt-0].typedefinition }
-	case 78:
+		{
+			parserVAL.pairelem = PairElem{Fsnd: Fst, Expr: parserS[parserpt-0].expr, Pos: parserS[parserpt-1].pos}
+		}
+	case 73:
+		//line waccparser.y:222
+		{
+			parserVAL.pairelem = PairElem{Fsnd: Snd, Expr: parserS[parserpt-0].expr, Pos: parserS[parserpt-1].pos}
+		}
+	case 74:
 		//line waccparser.y:224
-		{ parserVAL.typedefinition =  parserS[parserpt-0].typedefinition }
-	case 79:
-		//line waccparser.y:225
-		{ parserVAL.typedefinition =  parserS[parserpt-0].typedefinition }
-	case 80:
+		{
+			parserVAL.typedefinition = PairType{FstType: parserS[parserpt-3].pairelemtype, SndType: parserS[parserpt-1].pairelemtype}
+		}
+	case 75:
+		//line waccparser.y:226
+		{
+			parserVAL.pairelemtype = parserS[parserpt-0].typedefinition
+		}
+	case 76:
 		//line waccparser.y:227
-		{ parserVAL.typedefinition =  Int }
-	case 81:
+		{
+			parserVAL.pairelemtype = parserS[parserpt-0].typedefinition
+		}
+	case 77:
 		//line waccparser.y:228
-		{ parserVAL.typedefinition =  Bool }
-	case 82:
-		//line waccparser.y:229
-		{ parserVAL.typedefinition =  Char }
-	case 83:
+		{
+			parserVAL.pairelemtype = Pair
+		}
+	case 78:
 		//line waccparser.y:230
-		{ parserVAL.typedefinition =  String }
-	case 84:
+		{
+			parserVAL.typedefinition = parserS[parserpt-0].typedefinition
+		}
+	case 79:
+		//line waccparser.y:231
+		{
+			parserVAL.typedefinition = parserS[parserpt-0].typedefinition
+		}
+	case 80:
 		//line waccparser.y:232
-		{ parserVAL.typedefinition = ArrayType{Type : parserS[parserpt-2].typedefinition} }
+		{
+			parserVAL.typedefinition = parserS[parserpt-0].typedefinition
+		}
+	case 81:
+		//line waccparser.y:234
+		{
+			parserVAL.typedefinition = Int
+		}
+	case 82:
+		//line waccparser.y:235
+		{
+			parserVAL.typedefinition = Bool
+		}
+	case 83:
+		//line waccparser.y:236
+		{
+			parserVAL.typedefinition = Char
+		}
+	case 84:
+		//line waccparser.y:237
+		{
+			parserVAL.typedefinition = String
+		}
+	case 85:
+		//line waccparser.y:239
+		{
+			parserVAL.typedefinition = ArrayType{Type: parserS[parserpt-2].typedefinition}
+		}
 	}
 	goto parserstack /* stack new state and value */
 }

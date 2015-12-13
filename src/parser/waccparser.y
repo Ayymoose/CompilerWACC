@@ -8,53 +8,54 @@ import (
 %}
 
 %union{
-str string
+str         string
 stringconst Str
-number int
-pos int
-integer Integer
-ident Ident
-character Character
-boolean Boolean
+number      int
+pos         int
+integer     Integer
+ident       Ident
+character   Character
+boolean     Boolean
 
-functions []*Function
-function *Function
-stmt  Statement
-stmts []Statement
-assignrhs Evaluation
-assignlhs Evaluation
-expr  Evaluation
-exprs []Evaluation
-params  []Param
-param Param
-bracketed []Evaluation
-pairliter Evaluation
-arrayliter ArrayLiter
-pairelem  PairElem
-arrayelem ArrayElem
+functions      []*Function
+function       *Function
+stmt           Statement
+stmts          []Statement
+assignrhs      Evaluation
+assignlhs      Evaluation
+expr           Evaluation
+exprs          []Evaluation
+params         []Param
+param          Param
+bracketed      []Evaluation
+pairliter      Evaluation
+arrayliter     ArrayLiter
+pairelem       PairElem
+arrayelem      ArrayElem
 typedefinition Type
-pairelemtype Type
+pairelemtype   Type
 }
 
 %start program
 
-%token BEGIN END                                     // Program delimiters
+%token BEGIN END                                    // Program delimiters
 %token IS
 %token <number> SKIP
 %token READ FREE RETURN EXIT PRINT PRINTLN
-%token IF THEN ELSE FI                               // If statement
-%token WHILE DO DONE                                 // While statement
+%token IF THEN ELSE FI                              // If statement
+%token WHILE DO DONE                                // While statement
 %token NEWPAIR
 %token CALL
 %token FST SND
-%token  INT BOOL CHAR STRING PAIR
-%token  NOT NEG LEN ORD CHR                                              // Unary ops   DO WE NEED THESEEEE
-%token  MUL DIV MOD PLUS SUB AND OR GT GTE LT LTE EQ NEQ                 // Binary ops
+%token INT BOOL CHAR STRING PAIR
+%token NOT NEG LEN ORD CHR                         // Unary ops
+%token MUL DIV MOD PLUS SUB AND OR GT GTE LT LTE EQ NEQ //PLUSEQ SUBEQ DIVEQ MULEQ MODEQ  // Binary ops
 %token POSITIVE NEGATIVE
-%token <boolean> TRUE FALSE                                    // Booleans
+%token <boolean> TRUE FALSE                         // Booleans
 %token NULL
 %token OPENSQUARE OPENROUND CLOSESQUARE CLOSEROUND
 %token ASSIGNMENT
+%token PLUSASSIGNMENT
 %token COMMA SEMICOLON
 %token ERROR
 
@@ -72,21 +73,21 @@ pairelemtype Type
 %type <stmts> statements
 %type <assignrhs> assignrhs
 %type <assignlhs> assignlhs
-%type	<expr>		expr
+%type	<expr>	expr
 %type <exprs> exprlist
 %type <params> paramlist
 %type <param> param
 %type <pairelem> pairelem
 %type <arrayliter> arrayliter
-%type <arrayelem>  arrayelem
+%type <arrayelem> arrayelem
 %type <exprs> bracketed
 %type <pairliter> pairliter
-%type <typedefinition>  basetype typeDef arraytype pairtype
+%type <typedefinition> basetype typeDef arraytype pairtype
 %type <pairelemtype> pairelemtype
 
 %left OR
 %left AND
-%left EQ NEQ
+%left EQ NEQ //PLUSEQ SUBEQ DIVEQ MULEQ MODEQ
 %left PLUS SUB
 %left MUL DIV MOD
 %left LT GT LTE GTE
@@ -95,7 +96,7 @@ pairelemtype Type
 %%
 
 program : BEGIN functions statements END {
-                                          parserlex.(*Lexer).prog = &Program{FunctionList : $2 , StatList : $3 , SymbolTable : NewInstance(), FileText :&parserlex.(*Lexer).input}
+                                         parserlex.(*Lexer).prog = &Program{FunctionList : $2 , StatList : $3 , SymbolTable : NewInstance(), FileText :&parserlex.(*Lexer).input}
                                          }
 
 functions : functions function  { $$ = append($1, $2)}
@@ -136,6 +137,12 @@ statements : statements SEMICOLON statement           { $$ = append($1,$3) }
 statement : SKIP                                        { $$ = Skip{Pos : $<pos>1 ,FileText :&parserlex.(*Lexer).input } }
           | typeDef IDENTIFIER ASSIGNMENT assignrhs     { $$ = Declare{DecType : $1, Lhs : $2, Rhs : $4, Pos : $<pos>1 ,FileText :&parserlex.(*Lexer).input } }
           | assignlhs ASSIGNMENT assignrhs              { $$ = Assignment{Lhs : $1, Rhs : $3, Pos : $<pos>1 ,FileText :&parserlex.(*Lexer).input} }
+
+          | IDENTIFIER PLUSASSIGNMENT expr { $$ = Binop{Left : $1, Binary : PLUS, Right : $3, Pos : $<pos>1, FileText :&parserlex.(*Lexer).input  } }
+
+
+
+
           | READ assignlhs                              { $$ = Read{ &parserlex.(*Lexer).input, $<pos>1 , $2, } }
           | FREE expr                                   { $$ = Free{&parserlex.(*Lexer).input, $<pos>1, $2} }
           | RETURN expr                                 { $$ = Return{&parserlex.(*Lexer).input, $<pos>1, $2} }
@@ -172,8 +179,8 @@ expr : INTEGER       { $$ =  $1 }
      | IDENTIFIER    { $$ =  $1 }
      | arrayelem     { $$ =  $1 }
 
-     | NOT expr     { $$ = Unop{Unary : NOT, Expr : $2, Pos : $<pos>1,FileText :&parserlex.(*Lexer).input   } }
-     | LEN expr     { $$ = Unop{Unary : LEN, Expr : $2, Pos : $<pos>1,FileText :&parserlex.(*Lexer).input  } }
+     | NOT expr     { $$ = Unop{Unary : NOT, Expr : $2, Pos : $<pos>1, FileText :&parserlex.(*Lexer).input  } }
+     | LEN expr     { $$ = Unop{Unary : LEN, Expr : $2, Pos : $<pos>1, FileText :&parserlex.(*Lexer).input  } }
      | ORD expr     { $$ = Unop{Unary : ORD, Expr : $2, Pos : $<pos>1, FileText :&parserlex.(*Lexer).input  } }
      | CHR expr     { $$ = Unop{Unary : CHR, Expr : $2, Pos : $<pos>1, FileText :&parserlex.(*Lexer).input  } }
      | SUB expr     { $$ = Unop{Unary : SUB, Expr : $2, Pos : $<pos>1, FileText :&parserlex.(*Lexer).input  } }
@@ -181,18 +188,18 @@ expr : INTEGER       { $$ =  $1 }
 
 
      | expr PLUS expr { $$ = Binop{Left : $1, Binary : PLUS, Right : $3, Pos : $<pos>1, FileText :&parserlex.(*Lexer).input  } }
-     | expr SUB expr  { $$ = Binop{Left : $1, Binary : SUB, Right : $3,  Pos : $<pos>1, FileText :&parserlex.(*Lexer).input  } }
-     | expr MUL expr  { $$ = Binop{Left : $1, Binary : MUL, Right : $3,  Pos : $<pos>1, FileText :&parserlex.(*Lexer).input  } }
-     | expr MOD expr  { $$ = Binop{Left : $1, Binary : MOD, Right : $3,  Pos : $<pos>1, FileText :&parserlex.(*Lexer).input  } }
-     | expr DIV expr  { $$ = Binop{Left : $1, Binary : DIV, Right : $3,  Pos : $<pos>1, FileText :&parserlex.(*Lexer).input  } }
-     | expr LT expr   { $$ = Binop{Left : $1, Binary : LT, Right : $3,   Pos : $<pos>1, FileText :&parserlex.(*Lexer).input  } }
-     | expr GT expr   { $$ = Binop{Left : $1, Binary : GT, Right : $3,   Pos : $<pos>1, FileText :&parserlex.(*Lexer).input  } }
-     | expr LTE expr  { $$ = Binop{Left : $1, Binary : LTE, Right : $3,  Pos : $<pos>1, FileText :&parserlex.(*Lexer).input  } }
-     | expr GTE expr  { $$ = Binop{Left : $1, Binary : GTE, Right : $3,  Pos : $<pos>1, FileText :&parserlex.(*Lexer).input  } }
-     | expr EQ expr   { $$ = Binop{Left : $1, Binary : EQ, Right : $3,   Pos : $<pos>1, FileText :&parserlex.(*Lexer).input  } }
-     | expr NEQ expr  { $$ = Binop{Left : $1, Binary : NEQ, Right : $3,  Pos : $<pos>1, FileText :&parserlex.(*Lexer).input  } }
-     | expr AND expr  { $$ = Binop{Left : $1, Binary : AND, Right : $3,  Pos : $<pos>1, FileText :&parserlex.(*Lexer).input  } }
-     | expr OR expr   { $$ = Binop{Left : $1, Binary : OR, Right : $3,   Pos : $<pos>1, FileText :&parserlex.(*Lexer).input  } }
+     | expr SUB expr  { $$ = Binop{Left : $1, Binary : SUB,  Right : $3, Pos : $<pos>1, FileText :&parserlex.(*Lexer).input  } }
+     | expr MUL expr  { $$ = Binop{Left : $1, Binary : MUL,  Right : $3, Pos : $<pos>1, FileText :&parserlex.(*Lexer).input  } }
+     | expr MOD expr  { $$ = Binop{Left : $1, Binary : MOD,  Right : $3, Pos : $<pos>1, FileText :&parserlex.(*Lexer).input  } }
+     | expr DIV expr  { $$ = Binop{Left : $1, Binary : DIV,  Right : $3, Pos : $<pos>1, FileText :&parserlex.(*Lexer).input  } }
+     | expr LT expr   { $$ = Binop{Left : $1, Binary : LT,   Right : $3, Pos : $<pos>1, FileText :&parserlex.(*Lexer).input  } }
+     | expr GT expr   { $$ = Binop{Left : $1, Binary : GT,   Right : $3, Pos : $<pos>1, FileText :&parserlex.(*Lexer).input  } }
+     | expr LTE expr  { $$ = Binop{Left : $1, Binary : LTE,  Right : $3, Pos : $<pos>1, FileText :&parserlex.(*Lexer).input  } }
+     | expr GTE expr  { $$ = Binop{Left : $1, Binary : GTE,  Right : $3, Pos : $<pos>1, FileText :&parserlex.(*Lexer).input  } }
+     | expr EQ expr   { $$ = Binop{Left : $1, Binary : EQ,   Right : $3, Pos : $<pos>1, FileText :&parserlex.(*Lexer).input  } }
+     | expr NEQ expr  { $$ = Binop{Left : $1, Binary : NEQ,  Right : $3, Pos : $<pos>1, FileText :&parserlex.(*Lexer).input  } }
+     | expr AND expr  { $$ = Binop{Left : $1, Binary : AND,  Right : $3, Pos : $<pos>1, FileText :&parserlex.(*Lexer).input  } }
+     | expr OR expr   { $$ = Binop{Left : $1, Binary : OR,   Right : $3, Pos : $<pos>1, FileText :&parserlex.(*Lexer).input  } }
      | OPENROUND expr CLOSEROUND  { $$ = $2 }
 
 

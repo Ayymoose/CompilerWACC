@@ -6,5 +6,8 @@
 # Program:
 
 begin
-int a = 34 / 3
+  char doSomething(string f) is
+    return 'g'
+  end
+  char answer = call doSomething("hello") 
 end

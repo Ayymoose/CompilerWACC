@@ -20,7 +20,7 @@ func (node If) checkIfReturn(functionTable []*Function, symbolTable *SymbolTable
 		semanticErrors = append(semanticErrors, err)
 	}
 	if cond != Bool {
-		semanticErrors = append(semanticErrors, errorConditional(node.FileText,node.Pos))
+		semanticErrors = append(semanticErrors, errorConditional(node.FileText, node.Pos))
 	}
 	thenSymTab := symbolTable.New()
 	symbolTable.Children = append(symbolTable.Children, thenSymTab)
@@ -147,6 +147,10 @@ func (root *Program) SemanticCheck() errorSlice {
 	return nil
 }
 
+func (node Binop) visitStatement(functionTable []*Function, symbolTable *SymbolTable) errorSlice {
+	return nil
+}
+
 func (node Skip) visitStatement(functionTable []*Function, symbolTable *SymbolTable) errorSlice {
 	return nil
 }
@@ -232,7 +236,7 @@ func (node Read) visitStatement(functionTable []*Function, symbolTable *SymbolTa
 	if err != nil {
 		semanticErrors = append(semanticErrors, err)
 	} else if exprTyp != Char && exprTyp != Int {
-		semanticErrors = append(semanticErrors,  errorRead(node.FileText, node.Pos))
+		semanticErrors = append(semanticErrors, errorRead(node.FileText, node.Pos))
 	}
 	if len(semanticErrors) > 0 {
 		return semanticErrors
@@ -319,8 +323,8 @@ func (node If) visitStatement(functionTable []*Function, symbolTable *SymbolTabl
 		semanticErrors = append(semanticErrors, err)
 	}
 	if cond != Bool {
-//		semanticErrors = append(semanticErrors, errors.New("line:"+fmt.Sprint(node.Pos)+" :Conditional is not boolean expression"))
-		semanticErrors = append(semanticErrors, errorConditional(node.FileText,node.Pos))
+		//		semanticErrors = append(semanticErrors, errors.New("line:"+fmt.Sprint(node.Pos)+" :Conditional is not boolean expression"))
+		semanticErrors = append(semanticErrors, errorConditional(node.FileText, node.Pos))
 	}
 	thenSymTab := symbolTable.New()
 	symbolTable.Children = append(symbolTable.Children, thenSymTab)
@@ -351,7 +355,7 @@ func (node While) visitStatement(functionTable []*Function, symbolTable *SymbolT
 		semanticErrors = append(semanticErrors, err)
 	}
 	if cond != Bool {
-	//			semanticErrors = append(semanticErrors, errors.New("line:"+fmt.Sprint(node.Pos)+" :Conditional is not boolean expression"))
+		//			semanticErrors = append(semanticErrors, errors.New("line:"+fmt.Sprint(node.Pos)+" :Conditional is not boolean expression"))
 		semanticErrors = append(semanticErrors, errorConditional(node.FileText, node.Pos))
 	}
 	whileSymTab := symbolTable.New()
