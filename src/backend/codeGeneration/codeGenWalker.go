@@ -380,12 +380,14 @@ func (cg *CodeGenerator) evalNewPairHelper(pair Evaluation, reg1 string, reg2 st
 	//Store the element to the newly allocated memory onto the heap
 	switch pairType.(type) {
 	case ConstType:
+
 		switch pairType.(ConstType) {
 		case Bool, Char:
 			appendAssembly(cg.currInstrs(), "STRB "+reg1+", [r0]", 1, 1)
 		case Int, String, Pair:
 			appendAssembly(cg.currInstrs(), "STR "+reg1+", [r0]", 1, 1)
 		}
+
 	default:
 		appendAssembly(cg.currInstrs(), "STR "+reg1+", [r0]", 1, 1)
 	}
@@ -450,20 +452,13 @@ func (cg *CodeGenerator) evalArray(array []Evaluation, srcReg string, dstReg str
 			case Bool, Char:
 				appendAssembly(cg.currInstrs(), "STRB "+srcReg+", ["+dstReg+", #"+strconv.Itoa(ARRAY_SIZE+sizeOf(t.(ArrayType).Type)*i)+"]", 1, 1)
 			default:
-				var offset, _ = cg.getIdentOffset(array[i].(Ident))
 
+				var offset, _ = cg.getIdentOffset(array[i].(Ident))
 				switch t.(ArrayType).Type.(type) {
 				case ArrayType:
 					appendAssembly(cg.currInstrs(), "LDR "+srcReg+", [sp, #"+strconv.Itoa(offset)+"]", 1, 1)
-					//appendAssembly(cg.currInstrs(), "STR "+srcReg+", [r4, #"+strconv.Itoa(ARRAY_SIZE+sizeOf(t)*i)+"]", 1, 1)
-				//case PairType:
-					//appendAssembly(cg.currInstrs(), "STR "+srcReg+", [r4, #"+strconv.Itoa(PAIR_SIZE+sizeOf(t)*i)+"]", 1, 1)
-				default: //PairType
-
 				}
-
 				appendAssembly(cg.currInstrs(), "STR "+srcReg+", [r4, #"+strconv.Itoa(sizeOf(t.(ArrayType).Type)+sizeOf(t)*i)+"]", 1, 1)
-
 
 			}
 		}
@@ -1023,21 +1018,29 @@ func (cg *CodeGenerator) cgVisitParameter(node Evaluation) {
 	switch resType {
 	case Bool, Char:
 		appendAssembly(cg.currInstrs(), "STRB r4, [sp, #"+strconv.Itoa(-sizeOf(resType))+"]!", 1, 1)
-		cg.addExtraOffset(sizeOf(resType))
-	case Int, String, Pair:
-		appendAssembly(cg.currInstrs(), "STR r4, [sp, #"+strconv.Itoa(-sizeOf(resType))+"]!", 1, 1)
-		cg.addExtraOffset(sizeOf(resType))
+		//cg.addExtraOffset(sizeOf(resType))
+	//case Int, String, Pair:
+	//	appendAssembly(cg.currInstrs(), "STR r4, [sp, #"+strconv.Itoa(-sizeOf(resType))+"]!", 1, 1)
+		//cg.addExtraOffset(sizeOf(resType))
 	default:
+    appendAssembly(cg.currInstrs(), "STR r4, [sp, #"+strconv.Itoa(-sizeOf(resType))+"]!", 1, 1)
+		//cg.addExtraOffset(sizeOf(resType))
 
-		switch resType.(type) {
+		/*switch resType.(type) {
 		case PairType:
 			appendAssembly(cg.currInstrs(), "STR r4, [sp, #"+strconv.Itoa(-PAIR_SIZE)+"]!", 1, 1)
 			cg.addExtraOffset(PAIR_SIZE)
 		case ArrayType:
 			appendAssembly(cg.currInstrs(), "STR r4, [sp, #"+strconv.Itoa(-ARRAY_SIZE)+"]!", 1, 1)
 			cg.addExtraOffset(ARRAY_SIZE)
-		}
+		}*/
+
+
 	}
+
+	cg.addExtraOffset(sizeOf(resType))
+
+
 
 }
 
