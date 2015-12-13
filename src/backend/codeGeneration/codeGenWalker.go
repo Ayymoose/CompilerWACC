@@ -566,18 +566,17 @@ func (cg *CodeGenerator) cgVisitProgram(node *Program) {
 	cg.currStack.currP = cg.currStack.size
 	cg.currStack.isFunc = false
 
+	// .text
+	appendAssembly(cg.funcInstrs, ".text", 0, 2)
+
+	// .global main
+	appendAssembly(cg.funcInstrs, ".global main", 0, 1)
 	// ASSIGN functions to global variable
 	// WE WIll only traverse them if they are called
 	functionList = node.FunctionList
 	for _, function := range functionList {
 		cg.cgVisitFunction(*function)
 	}
-
-	// .text
-	appendAssembly(cg.funcInstrs, ".text", 0, 2)
-
-	// .global main
-	appendAssembly(cg.funcInstrs, ".global main", 0, 1)
 
 	// main:
 	appendAssembly(cg.currInstrs(), "main:", 0, 1)
