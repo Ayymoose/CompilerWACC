@@ -605,7 +605,7 @@ func (cg *CodeGenerator) cgVisitProgram(node *Program) {
 	// Adds functions that were called
 	functionList = node.FunctionList
 	for _, function := range functionList {
-		if !cg.isFunctionDefined(function.Ident) {
+		if cg.isFunctionDefined(function.Ident) {
 			cg.cgVisitFunction(*function)
 		}
 	}
