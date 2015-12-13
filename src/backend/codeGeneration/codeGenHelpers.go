@@ -161,6 +161,14 @@ func isParamInList(ident Ident, paramList *[]Param) bool {
 	return false
 }
 
+// Returns total variable space a function is currently using from a starting inner scope
+func funcVarSize(scope *scopeData) int {
+	if !scope.isFunc {
+		return 0
+	}
+	return scope.size + funcVarSize(scope.parentScope)
+}
+
 // Returns the negative offset of the parameter
 func getParamOffset(ident Ident, paramList *[]Param) (int, Type) {
 	accOffset := 0

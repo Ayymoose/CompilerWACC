@@ -67,6 +67,10 @@ type scopeData struct {
 
 // Creates new scope data for a new scope.
 func (cg *CodeGenerator) setNewScope(varSpaceSize int) {
+	if varSpaceSize > 0 {
+		appendAssembly(cg.currInstrs(), "SUB sp, sp, #"+strconv.Itoa(varSpaceSize), 1, 1)
+	}
+
 	newScope := &scopeData{}
 	newScope.currP = varSpaceSize
 	newScope.size = varSpaceSize
@@ -99,6 +103,10 @@ func (cg *CodeGenerator) getFuncSymTable() *SymbolTable {
 // Creates new scope data for a new function scope. Sets isFunc to true which
 // set the code generator into function mode (So statements evaluate for functions not main)
 func (cg *CodeGenerator) setNewFuncScope(varSpaceSize int, paramList *[]Param, funcSymTable *SymbolTable) {
+	if varSpaceSize > 0 {
+		appendAssembly(cg.currInstrs(), "SUB sp, sp, #"+strconv.Itoa(varSpaceSize), 1, 1)
+	}
+
 	newScope := &scopeData{}
 	newScope.currP = varSpaceSize
 	newScope.size = varSpaceSize
@@ -113,6 +121,11 @@ func (cg *CodeGenerator) setNewFuncScope(varSpaceSize int, paramList *[]Param, f
 
 // Removes current scope and replaces it with the parent scope
 func (cg *CodeGenerator) removeCurrScope() {
+	// add sp, sp, #n to remove variable space
+	if cg.currStack.size > 0 {
+		appendAssembly(cg.currInstrs(), "ADD sp, sp, #"+strconv.Itoa(cg.currStack.size), 1, 1)
+	}
+
 	cg.currStack = cg.currStack.parentScope
 	if cg.currStack.isFunc {
 		table := cg.getFuncSymTable()
@@ -133,8 +146,17 @@ func (cg *CodeGenerator) removeCurrScope() {
 
 // Removes current function scope
 func (cg *CodeGenerator) removeFuncScope() {
+	// add sp, sp, #n to remove variable space
+	if cg.currStack.size > 0 {
+		appendAssembly(cg.currInstrs(), "ADD sp, sp, #"+strconv.Itoa(cg.currStack.size), 1, 1)
+	}
+
 	cg.currStack = cg.currStack.parentScope
 	cg.funcSymTables = cg.funcSymTables[:len(cg.funcSymTables)]
+}
+
+func (cg *CodeGenerator) removeAllFuncScopes() {
+
 }
 
 // Used to add extra offset to the current scope when intermediate values are stored on the stack
@@ -268,7 +290,7 @@ func (cg *CodeGenerator) findIdentOffset(ident Ident, symTable *SymbolTable,
 	if scope.isFunc && isParamInList(ident, scope.paramList) {
 		offset, typ := getParamOffset(ident, scope.paramList)
 		offset = -offset
-		return offset + scope.extraOffset + ADDRESS_SIZE + scope.size, typ //-scope.currP
+		return offset + scope.extraOffset + ADDRESS_SIZE + funcVarSize(scope), typ //-scope.currP
 	}
 
 	/*fmt.Println("Ident: ", ident, "  table: ", symTable, " accOffset: ", accOffset)

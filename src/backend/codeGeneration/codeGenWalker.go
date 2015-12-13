@@ -113,12 +113,12 @@ func (cg *CodeGenerator) checkArrayBounds() {
 // Helper function to remove code duplication
 func (cg CodeGenerator) arrayCheckBoundsHelper(t Type, reg1 string, reg2 string) {
 	switch t {
-		case Bool,Char:
-			appendAssembly(cg.currInstrs(), "ADD "+reg1+", "+reg1+", "+reg2, 1, 1)
-			appendAssembly(cg.currInstrs(), "LDRSB "+reg1+", ["+reg1+"]", 1, 1)
-		default:
-			appendAssembly(cg.currInstrs(), "ADD "+reg1+", "+reg1+", "+reg2+", LSL #2", 1, 1)
-			appendAssembly(cg.currInstrs(), "LDR "+reg1+", ["+reg1+"]", 1, 1)
+	case Bool, Char:
+		appendAssembly(cg.currInstrs(), "ADD "+reg1+", "+reg1+", "+reg2, 1, 1)
+		appendAssembly(cg.currInstrs(), "LDRSB "+reg1+", ["+reg1+"]", 1, 1)
+	default:
+		appendAssembly(cg.currInstrs(), "ADD "+reg1+", "+reg1+", "+reg2+", LSL #2", 1, 1)
+		appendAssembly(cg.currInstrs(), "LDR "+reg1+", ["+reg1+"]", 1, 1)
 	}
 }
 
@@ -139,14 +139,13 @@ func (cg *CodeGenerator) arrayCheckBounds(array []Evaluation, ident Ident, reg1 
 	appendAssembly(cg.currInstrs(), "BL p_check_array_bounds", 1, 1)
 	appendAssembly(cg.currInstrs(), "ADD "+reg1+", "+reg1+", #4", 1, 1)
 
-
-  // Point to the correct index
-  var t1 = cg.eval(ident)
-	switch t1.(type)  {
+	// Point to the correct index
+	var t1 = cg.eval(ident)
+	switch t1.(type) {
 	case ArrayType:
-    cg.arrayCheckBoundsHelper(t1.(ArrayType).Type,reg1,reg2)
+		cg.arrayCheckBoundsHelper(t1.(ArrayType).Type, reg1, reg2)
 	case ConstType:
-		cg.arrayCheckBoundsHelper(t1.(ConstType),reg1,reg2)
+		cg.arrayCheckBoundsHelper(t1.(ConstType), reg1, reg2)
 	}
 
 	//Load the second index if there is one
@@ -160,7 +159,7 @@ func (cg *CodeGenerator) arrayCheckBounds(array []Evaluation, ident Ident, reg1 
 		appendAssembly(cg.currInstrs(), "ADD "+reg1+", "+reg1+", #4", 1, 1)
 
 		// Point to the correct index
-		cg.arrayCheckBoundsHelper(cg.eval(ident).(ArrayType).Type.(ArrayType).Type,reg1,reg2)
+		cg.arrayCheckBoundsHelper(cg.eval(ident).(ArrayType).Type.(ArrayType).Type, reg1, reg2)
 
 		/*switch t2.(ArrayType).Type.(ArrayType).Type  {
 			case Bool, Char:
@@ -338,13 +337,12 @@ func (cg *CodeGenerator) evalRHS(t Evaluation, srcReg string) {
 				srcReg = "r4"
 			}
 
-      /*switch resType.(ArrayType).Type {
+			/*switch resType.(ArrayType).Type {
 			case Bool,Char:
 					appendAssembly(cg.currInstrs(), "LDRSB "+srcReg+", [sp, #"+strconv.Itoa(offset)+"]", 1, 1)
 			default:
 				appendAssembly(cg.currInstrs(), "LDR "+srcReg+", [sp, #"+strconv.Itoa(offset)+"]", 1, 1)
 			}*/
-
 
 			appendAssembly(cg.currInstrs(), "LDR "+srcReg+", [sp, #"+strconv.Itoa(offset)+"]", 1, 1)
 			appendAssembly(cg.currInstrs(), "MOV r0, r4", 1, 1)
@@ -723,8 +721,8 @@ func (cg *CodeGenerator) cgVisitDeclareStat(node Declare) {
 		case PairElem:
 			cg.evalPairElem(rhs.(PairElem), "r4")
 			appendAssembly(cg.currInstrs(), "STR r4, [sp, #"+cg.subCurrP(ADDRESS_SIZE)+"]", 1, 1)
-    case ArrayElem:
-		  cg.evalArrayElem(rhs.(ArrayElem), "r4", "r5")
+		case ArrayElem:
+			cg.evalArrayElem(rhs.(ArrayElem), "r4", "r5")
 			appendAssembly(cg.currInstrs(), "STR r4, [sp, #"+cg.subCurrP(ADDRESS_SIZE)+"]", 1, 1)
 		}
 
@@ -735,7 +733,7 @@ func (cg *CodeGenerator) cgVisitDeclareStat(node Declare) {
 			cg.evalArrayLiter(node.DecType, rhs, "r5", "r4")
 		case Ident:
 			cg.evalRHS(rhs.(Ident), "r4")
-    case PairElem:
+		case PairElem:
 			cg.evalPairElem(rhs.(PairElem), "r4")
 		}
 		// Now store the address of the array onto the stack
@@ -942,6 +940,8 @@ func (cg *CodeGenerator) cgVisitFreeStat(node Free) {
 // Visit Return node
 func (cg *CodeGenerator) cgVisitReturnStat(node Return) {
 	cg.evalRHS(node.Expr, "r0")
+	cg.removeAllFuncScopes()
+	appendAssembly(cg.currInstrs(), "POP {pc}", 1, 1)
 }
 
 // Visit Exit node
@@ -1066,18 +1066,10 @@ func (cg *CodeGenerator) cgVisitScopeStat(node Scope) {
 	// Amount of bytes on the stack the scope takes up for variables
 	varSpaceSize := GetScopeVarSize(node.StatList)
 	cg.setNewScope(varSpaceSize)
-	// sub sp, sp, #n to create variable space
-	if varSpaceSize > 0 {
-		appendAssembly(cg.currInstrs(), "SUB sp, sp, #"+strconv.Itoa(varSpaceSize), 1, 1)
-	}
+
 	// traverse all statements by switching on statement type
 	for _, stat := range node.StatList {
 		cg.cgEvalStat(stat)
-	}
-
-	// add sp, sp, #n to remove variable space
-	if varSpaceSize > 0 {
-		appendAssembly(cg.currInstrs(), "ADD sp, sp, #"+strconv.Itoa(varSpaceSize), 1, 1)
 	}
 
 	cg.removeCurrScope()
@@ -1129,8 +1121,6 @@ func (cg *CodeGenerator) cgVisitFunction(node Function) {
 	} else {
 		return
 	}
-	varSpaceSize := GetScopeVarSize(node.StatList)
-	cg.setNewFuncScope(varSpaceSize, &node.ParameterTypes, node.SymbolTable)
 
 	// f_funcName:
 	appendAssembly(cg.currInstrs(), "f_"+string(node.Ident)+":", 0, 1)
@@ -1138,9 +1128,8 @@ func (cg *CodeGenerator) cgVisitFunction(node Function) {
 	// push {lr} to save the caller address
 	appendAssembly(cg.currInstrs(), "PUSH {lr}", 1, 1)
 
-	if varSpaceSize > 0 {
-		appendAssembly(cg.currInstrs(), "SUB sp, sp, #"+strconv.Itoa(varSpaceSize), 1, 1)
-	}
+	varSpaceSize := GetScopeVarSize(node.StatList)
+	cg.setNewFuncScope(varSpaceSize, &node.ParameterTypes, node.SymbolTable)
 
 	// traverse all statements by switching on statement type
 	// BUT NEED TO KNOW THAT WE NEED TO ADD THIS TO DUNCTION MESSGES??
@@ -1149,17 +1138,11 @@ func (cg *CodeGenerator) cgVisitFunction(node Function) {
 		cg.cgEvalStat(stat)
 	}
 
-	// add sp, sp, #n to remove variable space
-	if varSpaceSize > 0 {
-		appendAssembly(cg.currInstrs(), "ADD sp, sp, #"+strconv.Itoa(varSpaceSize), 1, 1)
-	}
+	cg.removeFuncScope()
 
-	// TEST harness uses double POP don't think we need it
-	// You're right , we don't need it!
 	appendAssembly(cg.currInstrs(), "POP {pc}", 1, 1)
 	appendAssembly(cg.currInstrs(), ".ltorg", 1, 2)
 
-	cg.removeFuncScope()
 }
 
 // VISIT STATEMENT -------------------------------------------------------------
