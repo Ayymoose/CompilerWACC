@@ -569,6 +569,9 @@ func (cg *CodeGenerator) cgVisitProgram(node *Program) {
 	// ASSIGN functions to global variable
 	// WE WIll only traverse them if they are called
 	functionList = node.FunctionList
+	for _, function := range functionList {
+		cg.cgVisitFunction(*function)
+	}
 
 	// .text
 	appendAssembly(cg.funcInstrs, ".text", 0, 2)
@@ -1061,7 +1064,7 @@ func (cg *CodeGenerator) cgVisitCallStat(ident Ident, paramList []Evaluation, sr
 			// Remove store line moe to declare
 			///TODO
 			//appendAssembly(cg.currInstrs(), "STR r4, [sp]", 1, 1)
-			cg.cgVisitFunction(*function)
+			//cg.cgVisitFunction(*function)
 		}
 	}
 }
@@ -1075,11 +1078,11 @@ func (cg *CodeGenerator) cgGetParamSize(paramList []Evaluation) int {
 }
 
 func (cg *CodeGenerator) cgVisitFunction(node Function) {
-	if !cg.isFunctionDefined(node.Ident) {
+	/*if !cg.isFunctionDefined(node.Ident) {
 		cg.addFunctionDef(node.Ident)
 	} else {
 		return
-	}
+	}*/
 
 	varSpaceSize := GetScopeVarSize(node.StatList)
 	cg.setNewFuncScope(varSpaceSize, &node.ParameterTypes, node.SymbolTable)
