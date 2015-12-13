@@ -1,5 +1,5 @@
 SIDE CONDITIONS: COMPLETE/UNTESTED - HENRYK
--    += -= /= *= %=
+-    += -= /= *= %= -- ++
 
 REMOVED MULTIPLE NON VAR STRING: COMPLETE/UNTESTED - NANA
 
@@ -8,3 +8,22 @@ NO CALL NO FUNCTION DEF: COMPLETE/UNTESTED - NANA
 FOR LOOP: NOT COMPLETE - HENRYK
 
 CLASSES: NOT COMPLETE - FRONTEND AND NANA
+
+
+----
+BNF UPDATE
+<side effect> HENRY PLEASE DO THIS
+
+<stat> := ... | 'for' <expr> 'from' <expr> 'to' <expr> 'do' <stat> 'done'
+
+<type> ::= ... | 'class'
+
+<class-ident> := ('A'-'Z')('_'|'a'-'z'|'A'-'Z'|'0'-'9')*
+
+<assign-rhs> := 'new' <class-ident>'('<arg-list>?')'
+
+<field> := <param>
+
+<field-list> := <param-list>
+
+<class> := 'class' <class-ident> 'open' <field-list>* <func>* 'close' 
