@@ -1112,22 +1112,21 @@ func (cg *CodeGenerator) cgVisitFunction(node Function) {
 func (cg *CodeGenerator) cgVisitParameter(node Evaluation) {
 	resType := cg.eval(node)
 	cg.evalRHS(node, "r4")
+
 	switch resType {
 	case Bool, Char:
 		appendAssembly(cg.currInstrs(), "STRB r4, [sp, #"+strconv.Itoa(-sizeOf(resType))+"]!", 1, 1)
-		cg.addExtraOffset(sizeOf(resType))
 	case Int, String, Pair:
 		appendAssembly(cg.currInstrs(), "STR r4, [sp, #"+strconv.Itoa(-sizeOf(resType))+"]!", 1, 1)
-		cg.addExtraOffset(sizeOf(resType))
 	default:
+
 		switch resType.(type) {
 		case PairType:
 			appendAssembly(cg.currInstrs(), "STR r4, [sp, #"+strconv.Itoa(-PAIR_SIZE)+"]!", 1, 1)
-			cg.addExtraOffset(PAIR_SIZE)
 		case ArrayType:
 			appendAssembly(cg.currInstrs(), "STR r4, [sp, #"+strconv.Itoa(-ARRAY_SIZE)+"]!", 1, 1)
-			cg.addExtraOffset(ARRAY_SIZE)
 		}
+
 	}
 }
 
