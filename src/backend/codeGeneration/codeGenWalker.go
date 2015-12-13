@@ -303,10 +303,11 @@ func (cg *CodeGenerator) evalRHS(t Evaluation, srcReg string) {
 
 		var offset, resType = cg.getIdentOffset(t.(Ident))
 		switch resType.(type) {
-		case ArrayType:
+/*		case ArrayType:
 			appendAssembly(cg.currInstrs(), "LDR "+srcReg+", [sp, #"+strconv.Itoa(offset)+"]", 1, 1)
 		case PairType:
 			appendAssembly(cg.currInstrs(), "LDR "+srcReg+", [sp, #"+strconv.Itoa(offset)+"]", 1, 1)
+*/
 		case ConstType:
 
 			switch resType.(ConstType) {
@@ -315,6 +316,7 @@ func (cg *CodeGenerator) evalRHS(t Evaluation, srcReg string) {
 			case Int, String:
 				appendAssembly(cg.currInstrs(), "LDR "+srcReg+", [sp, #"+strconv.Itoa(offset)+"]", 1, 1)
 			}
+
 		default:
 			appendAssembly(cg.currInstrs(), "LDR "+srcReg+", [sp, #"+strconv.Itoa(offset)+"]", 1, 1)
 		}
@@ -511,7 +513,7 @@ func (cg *CodeGenerator) evalOrd(node Unop) {
 // Visit Program
 func (cg *CodeGenerator) cgVisitProgram(node *Program) {
 	// Set properties of global scope
-	cg.currStack.size = GetScopeVarSize(node.StatList)
+	cg.currStack.size = getScopeVarSize(node.StatList)
 	cg.currStack.currP = cg.currStack.size
 	cg.currStack.isFunc = false
 
@@ -597,6 +599,7 @@ func (cg *CodeGenerator) cgVisitDeclareStat(node Declare) {
 
 	switch node.DecType.(type) {
 	case ConstType:
+
 		switch node.DecType.(ConstType) {
 		case Bool, Char:
 			cg.evalRHS(rhs, "r4")
@@ -653,8 +656,8 @@ func (cg *CodeGenerator) cgVisitDeclareStat(node Declare) {
 		}
 		// Now store the address of the array onto the stack
 		appendAssembly(cg.currInstrs(), "STR r4, [sp, #"+cg.subCurrP(ADDRESS_SIZE)+"]", 1, 1)
-	default:
-		fmt.Println("Error: Unknown type")
+//	default:
+//		fmt.Println("Error: Unknown type")
 	}
 
 	// Saves Idents offset in the symbol tables offset map
@@ -806,10 +809,8 @@ func (cg *CodeGenerator) cgVisitFreeStat(node Free) {
 func (cg *CodeGenerator) cgVisitReturnStat(node Return) {
 	cg.evalRHS(node.Expr, "r0")
 	funcVarUsed := funcVarSize(cg.currStack)
-
 	if funcVarUsed > 0 {
 			cg.removeStackSpace(funcVarUsed)
-	//	appendAssembly(cg.currInstrs(), "ADD sp, sp, #"+strconv.Itoa(funcVarUsed), 1, 1)
 	}
 	appendAssembly(cg.currInstrs(), "POP {pc}", 1, 1)
 }
@@ -931,7 +932,7 @@ func (cg *CodeGenerator) cgVisitWhileStat(node While) {
 // Visit Scope node
 func (cg *CodeGenerator) cgVisitScopeStat(node Scope) {
 	// Amount of bytes on the stack the scope takes up for variables
-	varSpaceSize := GetScopeVarSize(node.StatList)
+	varSpaceSize := getScopeVarSize(node.StatList)
 	cg.setNewScope(varSpaceSize)
 
 	// traverse all statements by switching on statement type
@@ -982,7 +983,7 @@ func (cg *CodeGenerator) cgGetParamSize(paramList []Evaluation) int {
 }
 
 func (cg *CodeGenerator) cgVisitFunction(node Function) {
-	varSpaceSize := GetScopeVarSize(node.StatList)
+	varSpaceSize := getScopeVarSize(node.StatList)
 	cg.setNewFuncScope(varSpaceSize, &node.ParameterTypes, node.SymbolTable)
 
 	// f_funcName:
@@ -993,12 +994,9 @@ func (cg *CodeGenerator) cgVisitFunction(node Function) {
 
 	if varSpaceSize > 0 {
 		cg.createStackSpace(varSpaceSize)
-		//appendAssembly(cg.currInstrs(), "SUB sp, sp, #"+strconv.Itoa(varSpaceSize), 1, 1)
 	}
 
 	// traverse all statements by switching on statement type
-	// BUT NEED TO KNOW THAT WE NEED TO ADD THIS TO DUNCTION MESSGES??
-	// FLAGG??
 	for _, stat := range node.StatList {
 		cg.cgEvalStat(stat)
 	}
@@ -1006,7 +1004,6 @@ func (cg *CodeGenerator) cgVisitFunction(node Function) {
 	appendAssembly(cg.currInstrs(), ".ltorg", 1, 2)
 
 	cg.removeFuncScope()
-
 }
 
 // VISIT STATEMENT -------------------------------------------------------------
@@ -1014,34 +1011,13 @@ func (cg *CodeGenerator) cgVisitFunction(node Function) {
 func (cg *CodeGenerator) cgVisitParameter(node Evaluation) {
 	resType := cg.eval(node)
 	cg.evalRHS(node, "r4")
-
 	switch resType {
 	case Bool, Char:
 		appendAssembly(cg.currInstrs(), "STRB r4, [sp, #"+strconv.Itoa(-sizeOf(resType))+"]!", 1, 1)
-		//cg.addExtraOffset(sizeOf(resType))
-	//case Int, String, Pair:
-	//	appendAssembly(cg.currInstrs(), "STR r4, [sp, #"+strconv.Itoa(-sizeOf(resType))+"]!", 1, 1)
-		//cg.addExtraOffset(sizeOf(resType))
 	default:
     appendAssembly(cg.currInstrs(), "STR r4, [sp, #"+strconv.Itoa(-sizeOf(resType))+"]!", 1, 1)
-		//cg.addExtraOffset(sizeOf(resType))
-
-		/*switch resType.(type) {
-		case PairType:
-			appendAssembly(cg.currInstrs(), "STR r4, [sp, #"+strconv.Itoa(-PAIR_SIZE)+"]!", 1, 1)
-			cg.addExtraOffset(PAIR_SIZE)
-		case ArrayType:
-			appendAssembly(cg.currInstrs(), "STR r4, [sp, #"+strconv.Itoa(-ARRAY_SIZE)+"]!", 1, 1)
-			cg.addExtraOffset(ARRAY_SIZE)
-		}*/
-
-
 	}
-
 	cg.addExtraOffset(sizeOf(resType))
-
-
-
 }
 
 // VISIT EXPRESSIONS -----------------------------------------------------------

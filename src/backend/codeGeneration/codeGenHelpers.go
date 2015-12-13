@@ -22,7 +22,7 @@ var mapPrintFormatToSize = map[string]int{
 }
 
 //Size in bytes for all the variables in the current scope
-func GetScopeVarSize(statList []Statement) int {
+func getScopeVarSize(statList []Statement) int {
 	var scopeSize = 0
 	for _, stat := range statList {
 		switch stat.(type) {
