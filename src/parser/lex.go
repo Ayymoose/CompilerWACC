@@ -95,8 +95,6 @@ var TokenKeywordStrings = map[string]int{
 
 // TokenStrings map
 var TokenStrings = map[string]int{
-
-	//	"+=": PLUSASSIGNMENT,
 	",":  COMMA,
 	";":  SEMICOLON,
 	"%":  MOD,
@@ -108,10 +106,6 @@ var TokenStrings = map[string]int{
 	"<=": LTE,
 	">":  GT,
 	"<":  LT,
-	/*	"-=": SUBEQ,
-		"/=": DIVEQ,
-		"*=": MULEQ,
-		"%=": MODEQ,*/
 	"==": EQ,
 	"!=": NEQ,
 	"!":  NOT,
