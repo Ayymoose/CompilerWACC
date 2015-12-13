@@ -110,7 +110,8 @@ func (cg *CodeGenerator) checkArrayBounds() {
 	cg.throwRunTimeError()
 }
 
-func (cg CodeGenerator) f(t Type, reg1 string, reg2 string) {
+// Helper function to remove code duplication
+func (cg CodeGenerator) arrayCheckBoundsHelper(t Type, reg1 string, reg2 string) {
 	switch t {
 		case Bool,Char:
 			appendAssembly(cg.currInstrs(), "ADD "+reg1+", "+reg1+", "+reg2, 1, 1)
@@ -143,27 +144,9 @@ func (cg *CodeGenerator) arrayCheckBounds(array []Evaluation, ident Ident, reg1 
   var t1 = cg.eval(ident)
 	switch t1.(type)  {
 	case ArrayType:
-    cg.f(t1.(ArrayType).Type,reg1,reg2)
-		/*switch t1.(ArrayType).Type {
-		case Bool,Char:
-			appendAssembly(cg.currInstrs(), "ADD "+reg1+", "+reg1+", "+reg2, 1, 1)
-			appendAssembly(cg.currInstrs(), "LDRSB "+reg1+", ["+reg1+"]", 1, 1)
-		default:
-			appendAssembly(cg.currInstrs(), "ADD "+reg1+", "+reg1+", "+reg2+", LSL #2", 1, 1)
-			appendAssembly(cg.currInstrs(), "LDR "+reg1+", ["+reg1+"]", 1, 1)
-		}*/
-
+    cg.arrayCheckBoundsHelper(t1.(ArrayType).Type,reg1,reg2)
 	case ConstType:
-		cg.f(t1.(ConstType),reg1,reg2)
-		/*switch t1.(ConstType) {
-			case Bool, Char:
-				appendAssembly(cg.currInstrs(), "ADD "+reg1+", "+reg1+", "+reg2, 1, 1)
-				appendAssembly(cg.currInstrs(), "LDRSB "+reg1+", ["+reg1+"]", 1, 1)
-			default:
-				appendAssembly(cg.currInstrs(), "ADD "+reg1+", "+reg1+", "+reg2+", LSL #2", 1, 1)
-				appendAssembly(cg.currInstrs(), "LDR "+reg1+", ["+reg1+"]", 1, 1)
-		}*/
-
+		cg.arrayCheckBoundsHelper(t1.(ConstType),reg1,reg2)
 	}
 
 	//Load the second index if there is one
@@ -177,15 +160,16 @@ func (cg *CodeGenerator) arrayCheckBounds(array []Evaluation, ident Ident, reg1 
 		appendAssembly(cg.currInstrs(), "ADD "+reg1+", "+reg1+", #4", 1, 1)
 
 		// Point to the correct index
-		var t2 = cg.eval(ident)
-		switch t2.(ArrayType).Type.(ArrayType).Type  {
+		cg.arrayCheckBoundsHelper(cg.eval(ident).(ArrayType).Type.(ArrayType).Type,reg1,reg2)
+
+		/*switch t2.(ArrayType).Type.(ArrayType).Type  {
 			case Bool, Char:
 				appendAssembly(cg.currInstrs(), "ADD "+reg1+", "+reg1+", "+reg2, 1, 1)
 				appendAssembly(cg.currInstrs(), "LDRSB "+reg1+", ["+reg1+"]", 1, 1)
 			default:
 				appendAssembly(cg.currInstrs(), "ADD "+reg1+", "+reg1+", "+reg2+", LSL #2", 1, 1)
 				appendAssembly(cg.currInstrs(), "LDR "+reg1+", ["+reg1+"]", 1, 1)
-		}
+		}*/
 
 	}
 
