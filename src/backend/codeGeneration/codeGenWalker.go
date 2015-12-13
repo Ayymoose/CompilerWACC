@@ -111,7 +111,7 @@ func (cg *CodeGenerator) checkArrayBounds() {
 }
 
 // Checks the bounds of an array
-func (cg *CodeGenerator) arrayCheckBounds(array []Evaluation, reg1 string, reg2 string) {
+func (cg *CodeGenerator) arrayCheckBounds(array []Evaluation, ident Ident, reg1 string, reg2 string) {
 
 	// Load the first index
 	cg.evalRHS(array[0], reg2)
@@ -125,21 +125,33 @@ func (cg *CodeGenerator) arrayCheckBounds(array []Evaluation, reg1 string, reg2 
 	appendAssembly(cg.currInstrs(), "MOV r0, "+reg2, 1, 1)
 	appendAssembly(cg.currInstrs(), "MOV r1, "+reg1, 1, 1)
 	appendAssembly(cg.currInstrs(), "BL p_check_array_bounds", 1, 1)
-
-	// Get offset of
 	appendAssembly(cg.currInstrs(), "ADD "+reg1+", "+reg1+", #4", 1, 1)
-	appendAssembly(cg.currInstrs(), "ADD "+reg1+", "+reg1+", "+reg2+", LSL #2", 1, 1)
 
-	var t1 = cg.eval(array[0])
 
-	switch t1.(type) {
-	case ConstType:
-
-		switch t1.(ConstType) {
-		case Bool, Char:
+  // Point to the correct index
+  var t1 = cg.eval(ident)
+	switch t1.(type)  {
+	case ArrayType:
+		switch t1.(ArrayType).Type {
+		case Bool,Char:
+			appendAssembly(cg.currInstrs(), "ADD "+reg1+", "+reg1+", "+reg2, 1, 1)
 			appendAssembly(cg.currInstrs(), "LDRSB "+reg1+", ["+reg1+"]", 1, 1)
-		case Int, String, Pair:
+		case Int,String,Pair:
+			appendAssembly(cg.currInstrs(), "ADD "+reg1+", "+reg1+", "+reg2+", LSL #2", 1, 1)
 			appendAssembly(cg.currInstrs(), "LDR "+reg1+", ["+reg1+"]", 1, 1)
+		default:
+			appendAssembly(cg.currInstrs(), "ADD "+reg1+", "+reg1+", "+reg2+", LSL #2", 1, 1)
+			appendAssembly(cg.currInstrs(), "LDR "+reg1+", ["+reg1+"]", 1, 1)
+		}
+
+	case ConstType:
+		switch t1.(ConstType) {
+			case Bool, Char:
+				appendAssembly(cg.currInstrs(), "ADD "+reg1+", "+reg1+", "+reg2, 1, 1)
+				appendAssembly(cg.currInstrs(), "LDRSB "+reg1+", ["+reg1+"]", 1, 1)
+			case Int, String, Pair:
+				appendAssembly(cg.currInstrs(), "ADD "+reg1+", "+reg1+", "+reg2+", LSL #2", 1, 1)
+				appendAssembly(cg.currInstrs(), "LDR "+reg1+", ["+reg1+"]", 1, 1)
 		}
 
 	}
@@ -149,26 +161,20 @@ func (cg *CodeGenerator) arrayCheckBounds(array []Evaluation, reg1 string, reg2 
 
 		cg.evalRHS(array[1], reg2)
 
-		var t2 = cg.eval(array[0])
-
 		appendAssembly(cg.currInstrs(), "MOV r0, "+reg2, 1, 1)
 		appendAssembly(cg.currInstrs(), "MOV r1, "+reg1, 1, 1)
 		appendAssembly(cg.currInstrs(), "BL p_check_array_bounds", 1, 1)
-
-		// Get offset of
 		appendAssembly(cg.currInstrs(), "ADD "+reg1+", "+reg1+", #4", 1, 1)
-		appendAssembly(cg.currInstrs(), "ADD "+reg1+", "+reg1+", "+reg2+", LSL #2", 1, 1)
 
-		switch t2.(type) {
-		case ConstType:
-
-			switch t1.(ConstType) {
+		// Point to the correct index
+		var t2 = cg.eval(ident)
+		switch t2.(ArrayType).Type.(ArrayType).Type  {
 			case Bool, Char:
+				appendAssembly(cg.currInstrs(), "ADD "+reg1+", "+reg1+", "+reg2, 1, 1)
 				appendAssembly(cg.currInstrs(), "LDRSB "+reg1+", ["+reg1+"]", 1, 1)
 			case Int, String, Pair:
+				appendAssembly(cg.currInstrs(), "ADD "+reg1+", "+reg1+", "+reg2+", LSL #2", 1, 1)
 				appendAssembly(cg.currInstrs(), "LDR "+reg1+", ["+reg1+"]", 1, 1)
-			}
-
 		}
 
 	}
@@ -338,6 +344,14 @@ func (cg *CodeGenerator) evalRHS(t Evaluation, srcReg string) {
 				srcReg = "r4"
 			}
 
+      /*switch resType.(ArrayType).Type {
+			case Bool,Char:
+					appendAssembly(cg.currInstrs(), "LDRSB "+srcReg+", [sp, #"+strconv.Itoa(offset)+"]", 1, 1)
+			default:
+				appendAssembly(cg.currInstrs(), "LDR "+srcReg+", [sp, #"+strconv.Itoa(offset)+"]", 1, 1)
+			}*/
+
+
 			appendAssembly(cg.currInstrs(), "LDR "+srcReg+", [sp, #"+strconv.Itoa(offset)+"]", 1, 1)
 			appendAssembly(cg.currInstrs(), "MOV r0, r4", 1, 1)
 
@@ -435,6 +449,8 @@ func (cg *CodeGenerator) evalNewPairHelper(pair Evaluation, reg1 string, reg2 st
 			appendAssembly(cg.currInstrs(), "STR "+reg1+", [r0]", 1, 1)
 		}
 	case PairType:
+		appendAssembly(cg.currInstrs(), "STR "+reg1+", [r0]", 1, 1)
+	case ArrayType:
 		appendAssembly(cg.currInstrs(), "STR "+reg1+", [r0]", 1, 1)
 	}
 
@@ -559,7 +575,7 @@ func (cg *CodeGenerator) evalArrayElem(t Evaluation, reg1 string, reg2 string) {
 	var array = t.(ArrayElem).Exprs
 
 	//Check the bounds of the array
-	cg.arrayCheckBounds(array, reg1, reg2)
+	cg.arrayCheckBounds(array, t.(ArrayElem).Ident, reg1, reg2)
 
 	// Add message labels
 	cg.checkArrayBounds()
@@ -692,7 +708,6 @@ func (cg *CodeGenerator) cgVisitDeclareStat(node Declare) {
 				cg.evalRHS(rhs, "r4")
 			}
 			appendAssembly(cg.currInstrs(), "STR r4, [sp, #"+cg.subCurrP(STRING_SIZE)+"]", 1, 1)
-
 		}
 
 	case PairType:
@@ -700,14 +715,11 @@ func (cg *CodeGenerator) cgVisitDeclareStat(node Declare) {
 		switch rhs.(type) {
 		case NewPair:
 			cg.evalNewPair(rhs.(NewPair).FstExpr, rhs.(NewPair).SndExpr, "r5", "r4")
-			//Store the address of the pair on the stack
-			appendAssembly(cg.currInstrs(), "STR r4, [sp, #"+cg.subCurrP(PAIR_SIZE)+"]", 1, 1)
+			appendAssembly(cg.currInstrs(), "STR r4, [sp, #"+cg.subCurrP(ADDRESS_SIZE)+"]", 1, 1)
 		case Ident:
-			//TODO: UNFINISHED
 			cg.evalRHS(rhs.(Ident), "r4")
 			appendAssembly(cg.currInstrs(), "STR r4, [sp, #"+cg.subCurrP(ADDRESS_SIZE)+"]", 1, 1)
 		case PairLiter:
-
 			//Can only be Null
 			appendAssembly(cg.currInstrs(), "LDR r4, =0", 1, 1)
 			appendAssembly(cg.currInstrs(), "STR r4, [sp, #"+cg.subCurrP(ADDRESS_SIZE)+"]", 1, 1)
@@ -717,7 +729,9 @@ func (cg *CodeGenerator) cgVisitDeclareStat(node Declare) {
 		case PairElem:
 			cg.evalPairElem(rhs.(PairElem), "r4")
 			appendAssembly(cg.currInstrs(), "STR r4, [sp, #"+cg.subCurrP(ADDRESS_SIZE)+"]", 1, 1)
-
+    case ArrayElem:
+		  cg.evalArrayElem(rhs.(ArrayElem), "r4", "r5")
+			appendAssembly(cg.currInstrs(), "STR r4, [sp, #"+cg.subCurrP(ADDRESS_SIZE)+"]", 1, 1)
 		}
 
 	case ArrayType:
@@ -727,11 +741,11 @@ func (cg *CodeGenerator) cgVisitDeclareStat(node Declare) {
 			cg.evalArrayLiter(node.DecType, rhs, "r5", "r4")
 		case Ident:
 			cg.evalRHS(rhs.(Ident), "r4")
+    case PairElem:
+			cg.evalPairElem(rhs.(PairElem), "r4")
 		}
-
 		// Now store the address of the array onto the stack
 		appendAssembly(cg.currInstrs(), "STR r4, [sp, #"+cg.subCurrP(ADDRESS_SIZE)+"]", 1, 1)
-
 	default:
 		fmt.Println("Error: Unknown type")
 	}
