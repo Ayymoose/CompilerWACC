@@ -45,8 +45,6 @@ const (
 // Function global variable
 var functionList []*Function
 
-var DEBUG = false
-
 // HELPER FUNCTIONS
 // cgVisitReadStat helper function
 // Adds a function definition to the progFuncInstrs ARMList depending on the
@@ -300,27 +298,18 @@ func (cg *CodeGenerator) evalRHS(t Evaluation, srcReg string) {
 	case PairLiter:
 		appendAssembly(cg.currInstrs(), "LDR "+srcReg+", =0", 1, 1)
 	case Ident:
-
 		var offset, resType = cg.getIdentOffset(t.(Ident))
 		switch resType.(type) {
-/*		case ArrayType:
-			appendAssembly(cg.currInstrs(), "LDR "+srcReg+", [sp, #"+strconv.Itoa(offset)+"]", 1, 1)
-		case PairType:
-			appendAssembly(cg.currInstrs(), "LDR "+srcReg+", [sp, #"+strconv.Itoa(offset)+"]", 1, 1)
-*/
 		case ConstType:
-
 			switch resType.(ConstType) {
 			case Bool, Char:
 				appendAssembly(cg.currInstrs(), "LDRSB "+srcReg+", [sp, #"+strconv.Itoa(offset)+"]", 1, 1)
 			case Int, String:
 				appendAssembly(cg.currInstrs(), "LDR "+srcReg+", [sp, #"+strconv.Itoa(offset)+"]", 1, 1)
 			}
-
 		default:
 			appendAssembly(cg.currInstrs(), "LDR "+srcReg+", [sp, #"+strconv.Itoa(offset)+"]", 1, 1)
 		}
-
 	case ArrayElem:
 		cg.evalArrayElem(t)
 	case Unop:
@@ -336,7 +325,6 @@ func (cg *CodeGenerator) evalRHS(t Evaluation, srcReg string) {
 	default:
 		fmt.Println("ERROR: Expression can not be evaluated")
 	}
-
 }
 
 // Evalute a pair element
@@ -362,7 +350,6 @@ func (cg *CodeGenerator) evalPairElem(t PairElem, srcReg string) {
 
 	//Double deference
 	appendAssembly(cg.currInstrs(), "LDR "+srcReg+", ["+srcReg+"]", 1, 1)
-
 }
 
 // Helper to reduce code duplication
@@ -398,7 +385,6 @@ func (cg *CodeGenerator) evalNewPairHelper(pair Evaluation, reg1 string, reg2 st
 
 // Evalutes a pair of elements onto the stack
 func (cg *CodeGenerator) evalNewPair(fst Evaluation, snd Evaluation, reg1 string, reg2 string) {
-
 	// First allocate memory to store two addresses (8-bytes)
 	appendAssembly(cg.currInstrs(), "LDR r0, ="+strconv.Itoa(ADDRESS_SIZE*2), 1, 1)
 	appendAssembly(cg.currInstrs(), "BL malloc", 1, 1)
@@ -417,7 +403,6 @@ func (cg *CodeGenerator) evalNewPair(fst Evaluation, snd Evaluation, reg1 string
 
 	//Store the address of allocated memory block of the element on the heap
 	appendAssembly(cg.currInstrs(), "STR r0, ["+reg2+", #4]", 1, 1)
-
 }
 
 // Evaluates array literals
@@ -454,22 +439,18 @@ func (cg *CodeGenerator) evalArray(array []Evaluation, srcReg string, dstReg str
 			case Bool, Char:
 				appendAssembly(cg.currInstrs(), "STRB "+srcReg+", ["+dstReg+", #"+strconv.Itoa(ARRAY_SIZE+sizeOf(t.(ArrayType).Type)*i)+"]", 1, 1)
 			default:
-
 				var offset, _ = cg.getIdentOffset(array[i].(Ident))
 				switch t.(ArrayType).Type.(type) {
 				case ArrayType:
 					appendAssembly(cg.currInstrs(), "LDR "+srcReg+", [sp, #"+strconv.Itoa(offset)+"]", 1, 1)
 				}
 				appendAssembly(cg.currInstrs(), "STR "+srcReg+", [r4, #"+strconv.Itoa(sizeOf(t.(ArrayType).Type)+sizeOf(t)*i)+"]", 1, 1)
-
 			}
 		}
 	}
 	// Put the size of the array onto the stack
 	appendAssembly(cg.currInstrs(), "LDR "+srcReg+", ="+strconv.Itoa(arraySize), 1, 1)
-
 	appendAssembly(cg.currInstrs(), "STR "+srcReg+", ["+dstReg+"]", 1, 1)
-
 }
 
 // Evalutes array elements
@@ -504,7 +485,6 @@ func (cg *CodeGenerator) evalOrd(node Unop) {
 		fmt.Println("ArrayElem not done for ord")
 	case Character:
 		appendAssembly(cg.currInstrs(), "MOV r0, #"+string(node.Expr.(Character)), 1, 1)
-	default:
 	}
 }
 
@@ -588,18 +568,14 @@ func (cg *CodeGenerator) cgEvalStat(stat interface{}) {
 		cg.cgVisitWhileStat(stat.(While))
 	case Scope:
 		cg.cgVisitScopeStat(stat.(Scope))
-	default:
-		// Something went wrong
 	}
 }
 
 // Visit Declare node
 func (cg *CodeGenerator) cgVisitDeclareStat(node Declare) {
 	rhs := node.Rhs
-
 	switch node.DecType.(type) {
 	case ConstType:
-
 		switch node.DecType.(ConstType) {
 		case Bool, Char:
 			cg.evalRHS(rhs, "r4")
@@ -619,9 +595,7 @@ func (cg *CodeGenerator) cgVisitDeclareStat(node Declare) {
 			}
 			appendAssembly(cg.currInstrs(), "STR r4, [sp, #"+cg.subCurrP(STRING_SIZE)+"]", 1, 1)
 		}
-
 	case PairType:
-
 		switch rhs.(type) {
 		case NewPair:
 			cg.evalNewPair(rhs.(NewPair).FstExpr, rhs.(NewPair).SndExpr, "r5", "r4")
@@ -643,7 +617,6 @@ func (cg *CodeGenerator) cgVisitDeclareStat(node Declare) {
 			cg.evalArrayElem(rhs.(ArrayElem))
 			appendAssembly(cg.currInstrs(), "STR r4, [sp, #"+cg.subCurrP(ADDRESS_SIZE)+"]", 1, 1)
 		}
-
 	case ArrayType:
 		switch rhs.(type) {
 		case ArrayLiter:
@@ -656,10 +629,7 @@ func (cg *CodeGenerator) cgVisitDeclareStat(node Declare) {
 		}
 		// Now store the address of the array onto the stack
 		appendAssembly(cg.currInstrs(), "STR r4, [sp, #"+cg.subCurrP(ADDRESS_SIZE)+"]", 1, 1)
-//	default:
-//		fmt.Println("Error: Unknown type")
 	}
-
 	// Saves Idents offset in the symbol tables offset map
 	cg.currSymTable().InsertOffset(string(node.Lhs), cg.currStack.currP)
 }
@@ -674,12 +644,9 @@ func (cg *CodeGenerator) cgVisitAssignmentStat(node Assignment) {
 	// lhs can be
 	// IDENT , ARRAY-ELEM , PAIR-ELEM
 	switch lhs.(type) {
-
 	case Ident:
-
 		ident := lhs.(Ident)
 		typeIdent := cg.eval(ident)
-
 		switch typeIdent.(type) {
 		case PairType:
 			var offset, _ = cg.getIdentOffset(lhs.(Ident))
@@ -736,7 +703,6 @@ func (cg *CodeGenerator) cgVisitAssignmentStat(node Assignment) {
 		var offset, _ = cg.getIdentOffset(lhs.(PairElem).Expr.(Ident))
 		appendAssembly(cg.currInstrs(), "LDR r5, [sp, #"+strconv.Itoa(offset)+"]", 1, 1)
 		appendAssembly(cg.currInstrs(), "MOV r0, r5", 1, 1)
-
 		// Jump
 		appendAssembly(cg.currInstrs(), "BL p_check_null_pointer", 1, 1)
 		cg.dereferenceNullPointer()
@@ -750,7 +716,6 @@ func (cg *CodeGenerator) cgVisitAssignmentStat(node Assignment) {
 		// Store the value into the pair
 		appendAssembly(cg.currInstrs(), "STR r4, [r5]", 1, 1)
 	}
-
 }
 
 // Helper to remove duplication (BETTER NAME?)
@@ -817,9 +782,8 @@ func (cg *CodeGenerator) cgVisitReturnStat(node Return) {
 
 // Visit Exit node
 func (cg *CodeGenerator) cgVisitExitStat(node Exit) {
-	var reg = "r4"
-	cg.evalRHS(node.Expr, reg)
-	appendAssembly(cg.currInstrs(), "MOV r0, "+reg, 1, 1)
+	cg.evalRHS(node.Expr, "r4")
+	appendAssembly(cg.currInstrs(), "MOV r0, r4", 1, 1)
 	appendAssembly(cg.currInstrs(), "BL exit", 1, 1)
 }
 
@@ -917,12 +881,9 @@ func (cg *CodeGenerator) cgVisitIfStat(node If) {
 // Visit While node
 func (cg *CodeGenerator) cgVisitWhileStat(node While) {
 	fstLabel, sndLabel := cg.getNewLabel(), cg.getNewLabel()
-
 	appendAssembly(cg.currInstrs(), "B "+fstLabel, 1, 1)
 	appendAssembly(cg.currInstrs(), sndLabel+":", 0, 1)
-
 	cg.cgVisitScopeStat(Scope{StatList: node.DoStat})
-
 	appendAssembly(cg.currInstrs(), fstLabel+":", 0, 1)
 	cg.evalRHS(node.Conditional, "r0")
 	appendAssembly(cg.currInstrs(), "CMP r0, #1", 1, 1)
@@ -934,14 +895,11 @@ func (cg *CodeGenerator) cgVisitScopeStat(node Scope) {
 	// Amount of bytes on the stack the scope takes up for variables
 	varSpaceSize := getScopeVarSize(node.StatList)
 	cg.setNewScope(varSpaceSize)
-
 	// traverse all statements by switching on statement type
 	for _, stat := range node.StatList {
 		cg.cgEvalStat(stat)
 	}
-
 	cg.removeCurrScope()
-
 }
 
 // Create a mpa of params to offsets
@@ -957,15 +915,12 @@ func (cg *CodeGenerator) cgVisitCallStat(ident Ident, paramList []Evaluation, sr
 			for i := len(paramList) - 1; i >= 0; i-- {
 				cg.cgVisitParameter(paramList[i])
 			}
-
 			appendAssembly(cg.currInstrs(), "BL f_"+string(function.Ident), 1, 1)
-
 			offset := cg.cgGetParamSize(paramList)
 			cg.subExtraOffset(offset)
+			//THIS LINE SHOULD BE REPLACED WITH removeStackSpace() At one point it might break here...
 			appendAssembly(cg.currInstrs(), "ADD sp, sp, #"+strconv.Itoa(offset), 1, 1)
-
 			appendAssembly(cg.currInstrs(), "MOV "+srcReg+", r0", 1, 1)
-
 			if !cg.isFunctionDefined(function.Ident) {
 				cg.addFunctionDef(function.Ident)
 			}
@@ -985,24 +940,18 @@ func (cg *CodeGenerator) cgGetParamSize(paramList []Evaluation) int {
 func (cg *CodeGenerator) cgVisitFunction(node Function) {
 	varSpaceSize := getScopeVarSize(node.StatList)
 	cg.setNewFuncScope(varSpaceSize, &node.ParameterTypes, node.SymbolTable)
-
 	// f_funcName:
 	appendAssembly(cg.currInstrs(), "f_"+string(node.Ident)+":", 0, 1)
-
 	// push {lr} to save the caller address
 	appendAssembly(cg.currInstrs(), "PUSH {lr}", 1, 1)
-
 	if varSpaceSize > 0 {
 		cg.createStackSpace(varSpaceSize)
 	}
-
 	// traverse all statements by switching on statement type
 	for _, stat := range node.StatList {
 		cg.cgEvalStat(stat)
 	}
-
 	appendAssembly(cg.currInstrs(), ".ltorg", 1, 2)
-
 	cg.removeFuncScope()
 }
 
@@ -1048,11 +997,7 @@ func (cg *CodeGenerator) cgVisitUnopExpr(node Unop) {
 		cg.evalRHS(node.Expr, "r4")
 		appendAssembly(cg.currInstrs(), "EOR r4, r4, #1", 1, 1)
 		appendAssembly(cg.currInstrs(), "MOV r0, r4", 1, 1)
-	default:
-		fmt.Println("oh no")
-		fmt.Println(node.Unary)
 	}
-
 }
 
 // Visit Binop node
