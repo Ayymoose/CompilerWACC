@@ -664,6 +664,7 @@ func (cg *CodeGenerator) cgVisitAssignmentStat(node Assignment) {
 
 	var rhs = node.Rhs
 	var lhs = node.Lhs
+    cg.evalRHS(rhs, "r4")
 
 	// lhs can be
 	// IDENT , ARRAY-ELEM , PAIR-ELEM
@@ -674,38 +675,18 @@ func (cg *CodeGenerator) cgVisitAssignmentStat(node Assignment) {
 		ident := lhs.(Ident)
 		typeIdent := cg.eval(ident)
 
+
 		switch typeIdent.(type) {
 		case PairType:
 			var offset, _ = cg.getIdentOffset(lhs.(Ident))
-			cg.evalRHS(rhs, "r4")
-
+			//cg.evalRHS(rhs, "r4")
 			switch rhs.(type) {
-
-			//case PairLiter,Ident,PairElem:
-				//Store null in the pair
-				//appendAssembly(cg.currInstrs(), "STR r4, [sp, #"+strconv.Itoa(offset)+"]", 1, 1)
-			//case Ident:
-				//var offset, _ = cg.getIdentOffset(lhs.(Ident))
-				//cg.evalRHS(rhs, "r4")
-				//appendAssembly(cg.currInstrs(), "STR r4, [sp, #"+strconv.Itoa(offset)+"]", 1, 1)
-			//case PairElem:
-				//cg.evalRHS(rhs, "r4")
-				//var offset, _ = cg.getIdentOffset(lhs.(Ident))
-				//appendAssembly(cg.currInstrs(), "STR r4, [sp, #"+strconv.Itoa(offset)+"]", 1, 1)
-
 			case NewPair:
-				//var offset, _ = cg.getIdentOffset(lhs.(Ident))
 				cg.evalNewPair(rhs.(NewPair).FstExpr, rhs.(NewPair).SndExpr, "r5", "r4")
-			//	appendAssembly(cg.currInstrs(), "STR r4, [sp, #"+strconv.Itoa(offset)+"]", 1, 1)
-			
-
 			}
-
 			appendAssembly(cg.currInstrs(), "STR r4, [sp, #"+strconv.Itoa(offset)+"]", 1, 1)
-
 		case ConstType:
-			cg.evalRHS(rhs, "r4")
-
+			//cg.evalRHS(rhs, "r4")
 			offset, _ := cg.getIdentOffset(ident)
 			switch typeIdent.(ConstType) {
 			case Bool, Char:
@@ -718,7 +699,8 @@ func (cg *CodeGenerator) cgVisitAssignmentStat(node Assignment) {
 		}
 
 	case ArrayElem:
-		cg.evalRHS(rhs, "r4")
+
+		//cg.evalRHS(rhs, "r4")
 
 		var offset, _ = cg.getIdentOffset(lhs.(ArrayElem).Ident)
 
@@ -738,25 +720,25 @@ func (cg *CodeGenerator) cgVisitAssignmentStat(node Assignment) {
 		appendAssembly(cg.currInstrs(), "BL p_check_array_bounds", 1, 1)
 		cg.checkArrayBounds()
 
-		//What does this instruction do?
+    	//Point to the element to be changed
 		appendAssembly(cg.currInstrs(), "ADD r5, r5, #4", 1, 1)
-		//Point to the element to be changed
 		appendAssembly(cg.currInstrs(), "ADD r5, r5, r6, LSL #2", 1, 1)
 
 		//Get the type of the RHS
 		switch rhs.(type) {
 		case Boolean, Character:
 			appendAssembly(cg.currInstrs(), "STRB r4, [r5]", 1, 1)
-		case Integer, Str:
+	//	case Integer, Str:
+  	default:
 			appendAssembly(cg.currInstrs(), "STR r4, [r5]", 1, 1)
-		case Ident:
-			appendAssembly(cg.currInstrs(), "STR r4, [r5]", 1, 1)
-		default:
-			appendAssembly(cg.currInstrs(), "Type not added", 1, 1)
+		//case Ident:
+	//		appendAssembly(cg.currInstrs(), "STR r4, [r5]", 1, 1)
+		//default:
+		//	appendAssembly(cg.currInstrs(), "Type not added", 1, 1)
 		}
 
 	case PairElem:
-		cg.evalRHS(rhs, "r4")
+	//	cg.evalRHS(rhs, "r4")
 
 		// Load the address of the pair into a register
 		var offset, _ = cg.getIdentOffset(lhs.(PairElem).Expr.(Ident))
@@ -776,8 +758,8 @@ func (cg *CodeGenerator) cgVisitAssignmentStat(node Assignment) {
 		// Store the value into the pair
 		appendAssembly(cg.currInstrs(), "STR r4, [r5]", 1, 1)
 
-	default:
-		fmt.Println("its neither")
+	//default:
+	//	fmt.Println("its neither")
 	}
 
 }
