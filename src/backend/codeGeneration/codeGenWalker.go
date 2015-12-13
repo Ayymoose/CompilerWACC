@@ -571,12 +571,6 @@ func (cg *CodeGenerator) cgVisitProgram(node *Program) {
 
 	// .global main
 	appendAssembly(cg.funcInstrs, ".global main", 0, 1)
-	// ASSIGN functions to global variable
-	// WE WIll only traverse them if they are called
-	functionList = node.FunctionList
-	for _, function := range functionList {
-		cg.cgVisitFunction(*function)
-	}
 
 	// main:
 	appendAssembly(cg.currInstrs(), "main:", 0, 1)
@@ -607,6 +601,14 @@ func (cg *CodeGenerator) cgVisitProgram(node *Program) {
 
 	// .ltorg
 	appendAssembly(cg.currInstrs(), ".ltorg", 1, 1)
+
+	// Adds functions that were called
+	functionList = node.FunctionList
+	for _, function := range functionList {
+		if !cg.isFunctionDefined(function.Ident) {
+			cg.cgVisitFunction(*function)
+		}
+	}
 }
 
 // Evaluate a statement
@@ -1059,11 +1061,12 @@ func (cg *CodeGenerator) cgVisitCallStat(ident Ident, paramList []Evaluation, sr
 			cg.subExtraOffset(offset)
 			appendAssembly(cg.currInstrs(), "ADD sp, sp, #"+strconv.Itoa(offset), 1, 1)
 
-			appendAssembly(cg.currInstrs(), "MOV r4, r0", 1, 1)
-			// Remove store line moe to declare
-			///TODO
-			//appendAssembly(cg.currInstrs(), "STR r4, [sp]", 1, 1)
-			//cg.cgVisitFunction(*function)
+			appendAssembly(cg.currInstrs(), "MOV "+srcReg+", r0", 1, 1)
+
+			if !cg.isFunctionDefined(ident) {
+				cg.addFunctionDef(ident)
+			}
+			break
 		}
 	}
 }
@@ -1077,12 +1080,6 @@ func (cg *CodeGenerator) cgGetParamSize(paramList []Evaluation) int {
 }
 
 func (cg *CodeGenerator) cgVisitFunction(node Function) {
-	/*if !cg.isFunctionDefined(node.Ident) {
-		cg.addFunctionDef(node.Ident)
-	} else {
-		return
-	}*/
-
 	varSpaceSize := GetScopeVarSize(node.StatList)
 	cg.setNewFuncScope(varSpaceSize, &node.ParameterTypes, node.SymbolTable)
 
