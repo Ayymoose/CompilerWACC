@@ -874,8 +874,9 @@ func (cg *CodeGenerator) cgVisitReadStat(node Read) {
 	case ArrayElem:
 		//Complete
 	case PairElem:
+		cg.cgVisitReadStatHelper()
 		switch node.AssignLHS.(PairElem).Fsnd {
-     cg.cgVisitReadStatHelper()
+
 
 		case Fst:
 			/*appendAssembly(cg.currInstrs(), "LDR r4, [sp]", 1, 1)
