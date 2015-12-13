@@ -306,13 +306,7 @@ func (cg *CodeGenerator) evalRHS(t Evaluation, srcReg string) {
 		var offset, resType = cg.getIdentOffset(t.(Ident))
 		switch resType.(type) {
 		case ArrayType:
-			//HACK
-			if srcReg == "r0" {
-				srcReg = "r4"
-			}
-
 			appendAssembly(cg.currInstrs(), "LDR "+srcReg+", [sp, #"+strconv.Itoa(offset)+"]", 1, 1)
-			appendAssembly(cg.currInstrs(), "MOV r0, r4", 1, 1)
 		case PairType:
 			appendAssembly(cg.currInstrs(), "LDR "+srcReg+", [sp, #"+strconv.Itoa(offset)+"]", 1, 1)
 		case ConstType:
