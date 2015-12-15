@@ -151,6 +151,13 @@ func (node Skip) visitStatement(functionTable []*Function, symbolTable *SymbolTa
 	return nil
 }
 
+// If called function not defined : ERROR
+// other call symantic checks
+// return value does not need to be caught
+func (node Call) visitStatement(functionTable []*Function, symbolTable *SymbolTable) errorSlice {
+	return nil
+}
+
 func (node Declare) visitStatement(functionTable []*Function, symbolTable *SymbolTable) errorSlice {
 	var semanticErrors errorSlice
 	if symbolTable.isDefinedInScope(node.Lhs) {
