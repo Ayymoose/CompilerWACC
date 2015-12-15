@@ -44,6 +44,8 @@ pairelemtype   Type
 
 %token BEGIN END                                    // Program delimiters
 %token CLASS OPEN CLOSE                             // Class delimiters
+%token DOT
+%token THIS
 %token IS
 %token <number> SKIP
 %token READ FREE RETURN EXIT PRINT PRINTLN
@@ -105,10 +107,7 @@ pairelemtype   Type
 
 %%
 
-program :/* BEGIN functions statements END {
-                                         parserlex.(*Lexer).prog = &Program{FunctionList : $2 , StatList : $3 , SymbolTable : NewInstance(), FileText :&parserlex.(*Lexer).input}
-                                         }
-        | */BEGIN classes functions statements END {
+program : BEGIN classes functions statements END {
                                          parserlex.(*Lexer).prog = &Program{ClassList : $2 , FunctionList : $3 , StatList : $4 , SymbolTable : NewInstance(), FileText :&parserlex.(*Lexer).input}
                                          }
 
@@ -158,6 +157,9 @@ assignrhs : expr                                           {$$ = $1}
           | pairelem                                       {$$ = $1}
           | NEWPAIR OPENROUND expr COMMA expr CLOSEROUND   { $$ = NewPair{FstExpr : $3, SndExpr : $5, Pos : $<pos>1, FileText :&parserlex.(*Lexer).input } }
           | CALL IDENTIFIER OPENROUND exprlist CLOSEROUND  { $$ = Call{Ident : $2, ParamList : $4, Pos : $<pos>1, FileText :&parserlex.(*Lexer).input  } }
+          | CALL IDENTIFIER DOT IDENTIFIER OPENROUND exprlist CLOSEROUND { $$ = CallInstance{Class : $2 , Func : $4 , ParamList : $6 } }
+          | THIS DOT IDENTIFIER { $$ = ThisInstance{Func : $3} }
+          | IDENTIFIER DOT IDENTIFIER { $$ = Instance{IdentLHS : $1 , IdentRHS : $3} }
 
 statements : statements SEMICOLON statement                { $$ = append($1,$3)   }
            | statement                                     { $$ = []Statement{$1} }
@@ -168,13 +170,14 @@ statements : statements SEMICOLON statement                { $$ = append($1,$3) 
                                                                                                                   $$ = []Statement{d,w}
                                                                                                                 }
 
-
 statement : SKIP                                        { $$ = Skip{Pos : $<pos>1 ,FileText :&parserlex.(*Lexer).input } }
           | typeDef IDENTIFIER ASSIGNMENT assignrhs     { $$ = Declare{DecType : $1, Lhs : $2, Rhs : $4, Pos : $<pos>1 ,FileText :&parserlex.(*Lexer).input } }
 
           | assignment                                  { $$ = $1 }
 
           | CALL IDENTIFIER OPENROUND exprlist CLOSEROUND  { $$ = Call{Ident : $2, ParamList : $4, Pos : $<pos>1, FileText :&parserlex.(*Lexer).input  } }
+
+          | CALL IDENTIFIER DOT IDENTIFIER OPENROUND exprlist CLOSEROUND { $$ = CallInstance{Class : $2 , Func : $4 , ParamList : $6 } }
 
           | READ assignlhs                              { $$ = Read{ &parserlex.(*Lexer).input, $<pos>1 , $2, } }
           | FREE expr                                   { $$ = Free{&parserlex.(*Lexer).input, $<pos>1, $2} }

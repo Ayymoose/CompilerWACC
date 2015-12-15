@@ -5,6 +5,16 @@ import (
 	"fmt"
 )
 
+func (value CallInstance) Eval(functionTable []*Function, symbolTable *SymbolTable) (Type, error) {
+	return nil, nil
+}
+func (value ThisInstance) Eval(functionTable []*Function, symbolTable *SymbolTable) (Type, error) {
+	return nil, nil
+}
+func (value Instance) Eval(functionTable []*Function, symbolTable *SymbolTable) (Type, error) {
+	return nil, nil
+}
+
 func (value Call) Eval(functionTable []*Function, symbolTable *SymbolTable) (Type, error) {
 	for _, function := range functionTable {
 		if value.Ident == function.Ident {
@@ -27,7 +37,6 @@ func (value Call) Eval(functionTable []*Function, symbolTable *SymbolTable) (Typ
 }
 
 func (value ArrayLiter) Eval(functionTable []*Function, symbolTable *SymbolTable) (Type, error) {
-	//	fmt.Println("ARRRAU LITER", value.Exprs)
 	var currType Type
 	if len(value.Exprs) > 0 {
 		fstType, err := value.Exprs[0].Eval(functionTable, symbolTable)

@@ -158,6 +158,23 @@ func (node Call) visitStatement(functionTable []*Function, symbolTable *SymbolTa
 	return nil
 }
 
+//So you need to remember all classes
+//So when calling a class method you have to check if:
+//The first <ident> (object variable) is of type ClassType (using a symbol table i presume.
+//Then using a list of classes and the <class ident> inside the ClassType. You need to check if the class actually has this method
+//Then you need to check if the correct number of arguments and their type are correct​ This logic follows very closely to how class semantics is done
+func (node CallInstance) visitStatement(functionTable []*Function, symbolTable *SymbolTable) errorSlice {
+	return nil
+}
+
+func (node ThisInstance) visitStatement(functionTable []*Function, symbolTable *SymbolTable) errorSlice {
+	return nil
+}
+
+func (node Instance) visitStatement(functionTable []*Function, symbolTable *SymbolTable) errorSlice {
+	return nil
+}
+
 func (node Declare) visitStatement(functionTable []*Function, symbolTable *SymbolTable) errorSlice {
 	var semanticErrors errorSlice
 	if symbolTable.isDefinedInScope(node.Lhs) {

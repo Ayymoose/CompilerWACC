@@ -137,6 +137,21 @@ type Field struct {
 	FieldType Type
 }
 
+type CallInstance struct {
+	Class     Ident
+	Func      Ident
+	ParamList []Evaluation
+}
+
+type ThisInstance struct {
+	Func Ident
+}
+
+type Instance struct {
+	IdentLHS Ident
+	IdentRHS Ident
+}
+
 // Binop struct
 type Binop struct {
 	FileText *string
