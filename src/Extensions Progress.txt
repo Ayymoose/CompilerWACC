@@ -11,7 +11,6 @@ ALLOW FUNCTION CALLS OUTSIDE OF ASSIGNMENT: HENRYK -----------------------------
 
 CLASSES: NOT COMPLETE - FRONTEND AND NANA/AYMAN/HENRYK
 
-
 ----
 BNF UPDATE
 <side effect> HENRYK PLEASE DO THIS
@@ -36,17 +35,15 @@ BNF UPDATE
                     | <ident>'.'<ident>
 // The correct number of arguments must be present for the instantiation of the object
 
-
 <field> := <param>
 
 <field-list> := <field>(',' <field>)*
 
 <class> := 'class' <class-ident> 'open' <field-list>* <func>* 'close'
 
+<<<<<<< HEAD
 
 
 <stat> := ... | 'for' <expr> 'from' <expr> 'to' <expr> 'do' <stat> 'done'
               | 'call' <ident> '(' <arg-list>? ')'------------------------------NEED TO IMPLEMENT visitStatement IN visitStatement.GO FOR CALL node
-              | 'call' <class-type>'.'<ident> '(' <arg-list>? ')'
-
 <type> ::= ...| <class-type> ---------------------------------------------------CANT HAVE THIS AS THIS WOULD MEAN THAT FUNCTIONS CAN HAVE CLASS TYPES
