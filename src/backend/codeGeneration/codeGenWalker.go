@@ -488,6 +488,16 @@ func (cg *CodeGenerator) evalOrd(node Unop) {
 	}
 }
 
+// Places an instance of a class of type classType within the register (as an address to the object)
+func (cg *CodeGenerator) evalNewObject(classType ClassType, dstReg string) {
+	println("VISIT NEW OBJ NOT DONE")
+}
+
+// Uses the object stored in srcReg to retrieve the value of the field ident and stores its value in dstReg
+func (cg *CodeGenerator) evalField(ident Ident, classType ClassType, srcReg string, dstReg string) {
+	println("VISIT FIELD NOT DONE")
+}
+
 // VISIT FUNCTIONS -------------------------------------------------------------
 
 // Visit Program
@@ -628,6 +638,9 @@ func (cg *CodeGenerator) cgVisitDeclareStat(node Declare) {
 			cg.evalPairElem(rhs.(PairElem), "r4")
 		}
 		// Now store the address of the array onto the stack
+		appendAssembly(cg.currInstrs(), "STR r4, [sp, #"+cg.subCurrP(ADDRESS_SIZE)+"]", 1, 1)
+	case ClassType:
+		//evalRHS(rhs,"r4") NEED NEW FIELD
 		appendAssembly(cg.currInstrs(), "STR r4, [sp, #"+cg.subCurrP(ADDRESS_SIZE)+"]", 1, 1)
 	}
 	// Saves Idents offset in the symbol tables offset map
@@ -954,6 +967,10 @@ func (cg *CodeGenerator) cgVisitFunction(node Function) {
 	}
 	appendAssembly(cg.currInstrs(), ".ltorg", 1, 2)
 	cg.removeFuncScope()
+}
+
+func (cg *CodeGenerator) cgVisitMethod(node Evaluation) {
+	println("VISIT METHOD NOT DONE")
 }
 
 // VISIT STATEMENT -------------------------------------------------------------
