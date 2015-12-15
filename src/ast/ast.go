@@ -27,6 +27,8 @@ type Statement interface {
 
 type Ident string
 
+type ClassType string
+
 type Integer int
 type Character string
 type Str string

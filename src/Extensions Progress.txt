@@ -1,13 +1,13 @@
-SIDE CONDITIONS: COMPLETE/UNTESTED - HENRYK/AYMAN
+SIDE CONDITIONS: COMPLETE/TESTED - HENRYK/AYMAN
 -    += -= /= *= %= -- ++
 
 REMOVED MULTIPLE NON VAR STRING: COMPLETE/UNTESTED - NANA
 
 NO CALL NO FUNCTION DEF: COMPLETE/UNTESTED - NANA
 
-FOR LOOP: NOT COMPLETE - HENRYK/OLI
+FOR LOOP: NOT COMPLETE - OLI
 
-ALLOW FUNCTION CALLS OUTSIDE OF ASSIGNMENT: HENRYK/OLI
+ALLOW FUNCTION CALLS OUTSIDE OF ASSIGNMENT: HENRYK ----------------------------- visitStatement.go needs to be complete
 
 CLASSES: NOT COMPLETE - FRONTEND AND NANA/AYMAN/HENRYK
 
@@ -25,7 +25,7 @@ BNF UPDATE
 // To use the class ident type, the class must be previously defined
 
 <program> ::= 'begin' <class>* <func>* <stat> 'end' HENRYK
-// Classes can only be defined once within a program
+// Only one class per program is allowed
 
 <class-ident> := ('A'-'Z')('_'|'a'-'z'|'A'-'Z'|'0'-'9')* HENRYK
 // class identifiers are not allowed to clash with any variable/function/variable/type names or keywords
@@ -36,8 +36,17 @@ BNF UPDATE
                     | <ident>'.'<ident>
 // The correct number of arguments must be present for the instantiation of the object
 
+
 <field> := <param>
 
 <field-list> := <field>(',' <field>)*
 
 <class> := 'class' <class-ident> 'open' <field-list>* <func>* 'close'
+
+
+
+<stat> := ... | 'for' <expr> 'from' <expr> 'to' <expr> 'do' <stat> 'done'
+              | 'call' <ident> '(' <arg-list>? ')'------------------------------NEED TO IMPLEMENT visitStatement IN visitStatement.GO FOR CALL node
+              | 'call' <class-type>'.'<ident> '(' <arg-list>? ')'
+
+<type> ::= ...| <class-type> ---------------------------------------------------CANT HAVE THIS AS THIS WOULD MEAN THAT FUNCTIONS CAN HAVE CLASS TYPES

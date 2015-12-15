@@ -94,6 +94,8 @@ var TokenKeywordStrings = map[string]int{
 	"chr":     CHR,
 	"true":    TRUE,
 	"false":   FALSE,
+	"for":     FOR,
+	"class":   CLASS,
 }
 
 // TokenStrings map
@@ -443,6 +445,10 @@ func runeIsEscape(a rune) bool {
 		}
 	}
 	return false
+}
+
+func checkClassIdent() bool {
+
 }
 
 func checkStats(stats []Statement) bool {
