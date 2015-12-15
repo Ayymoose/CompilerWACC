@@ -639,7 +639,7 @@ func (cg *CodeGenerator) cgVisitAssignmentStat(node Assignment) {
 
 	var rhs = node.Rhs
 	var lhs = node.Lhs
-  cg.evalRHS(rhs, "r4")
+	cg.evalRHS(rhs, "r4")
 
 	// lhs can be
 	// IDENT , ARRAY-ELEM , PAIR-ELEM
@@ -686,7 +686,7 @@ func (cg *CodeGenerator) cgVisitAssignmentStat(node Assignment) {
 		appendAssembly(cg.currInstrs(), "BL p_check_array_bounds", 1, 1)
 		cg.checkArrayBounds()
 
-    	//Point to the element to be changed
+		//Point to the element to be changed
 		appendAssembly(cg.currInstrs(), "ADD r5, r5, #4", 1, 1)
 		appendAssembly(cg.currInstrs(), "ADD r5, r5, r6, LSL #2", 1, 1)
 
@@ -694,7 +694,7 @@ func (cg *CodeGenerator) cgVisitAssignmentStat(node Assignment) {
 		switch rhs.(type) {
 		case Boolean, Character:
 			appendAssembly(cg.currInstrs(), "STRB r4, [r5]", 1, 1)
-  	default:
+		default:
 			appendAssembly(cg.currInstrs(), "STR r4, [r5]", 1, 1)
 		}
 
@@ -776,7 +776,7 @@ func (cg *CodeGenerator) cgVisitReturnStat(node Return) {
 	cg.evalRHS(node.Expr, "r0")
 	funcVarUsed := funcVarSize(cg.currStack)
 	if funcVarUsed > 0 {
-			cg.removeStackSpace(funcVarUsed)
+		cg.removeStackSpace(funcVarUsed)
 	}
 	appendAssembly(cg.currInstrs(), "POP {pc}", 1, 1)
 }
@@ -903,7 +903,7 @@ func (cg *CodeGenerator) cgVisitScopeStat(node Scope) {
 	cg.removeCurrScope()
 }
 
-// Create a mpa of params to offsets
+// Create a map of params to offsets
 // make sure visitFunction can take a pointer to this map
 
 // ONLY VISIT FUNCTION IF IT IS CALLED
@@ -965,7 +965,7 @@ func (cg *CodeGenerator) cgVisitParameter(node Evaluation) {
 	case Bool, Char:
 		appendAssembly(cg.currInstrs(), "STRB r4, [sp, #"+strconv.Itoa(-sizeOf(resType))+"]!", 1, 1)
 	default:
-    appendAssembly(cg.currInstrs(), "STR r4, [sp, #"+strconv.Itoa(-sizeOf(resType))+"]!", 1, 1)
+		appendAssembly(cg.currInstrs(), "STR r4, [sp, #"+strconv.Itoa(-sizeOf(resType))+"]!", 1, 1)
 	}
 	cg.addExtraOffset(sizeOf(resType))
 }
