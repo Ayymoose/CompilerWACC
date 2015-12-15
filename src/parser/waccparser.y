@@ -19,6 +19,7 @@ boolean     Boolean
 
 functions      []*Function
 function       *Function
+class          Class
 stmt           Statement
 stmts          []Statement
 assignrhs      Evaluation
@@ -27,6 +28,8 @@ expr           Evaluation
 exprs          []Evaluation
 params         []Param
 param          Param
+fields         []Field
+field          Field
 bracketed      []Evaluation
 pairliter      Evaluation
 arrayliter     ArrayLiter
@@ -39,6 +42,7 @@ pairelemtype   Type
 %start program
 
 %token BEGIN END                                    // Program delimiters
+%token CLASS OPEN CLOSE                             // Class delimiters
 %token IS
 %token <number> SKIP
 %token READ FREE RETURN EXIT PRINT PRINTLN
@@ -49,24 +53,25 @@ pairelemtype   Type
 %token FST SND
 %token INT BOOL CHAR STRING PAIR
 %token NOT NEG LEN ORD CHR                         // Unary ops
-%token MUL DIV MOD PLUS SUB AND OR GT GTE LT LTE EQ NEQ //PLUSEQ SUBEQ DIVEQ MULEQ MODEQ  // Binary ops
+%token MUL DIV MOD PLUS SUB AND OR GT GTE LT LTE EQ NEQ // Binary ops
 %token POSITIVE NEGATIVE
 %token <boolean> TRUE FALSE                         // Booleans
 %token NULL
 %token OPENSQUARE OPENROUND CLOSESQUARE CLOSEROUND
 %token ASSIGNMENT
-//%token PLUSASSIGNMENT
 %token COMMA SEMICOLON
 %token ERROR
 
 
 %token <stringconst> STRINGCONST
 %token <ident> IDENTIFIER
+%token <ident> CLASSIDENT
 %token <integer> INTEGER
 %token <character> CHARACTER
 
 
 %type <prog> program
+%type <class> class
 %type <functions> functions
 %type <function> function
 %type <stmt> statement
@@ -77,6 +82,8 @@ pairelemtype   Type
 %type <exprs> exprlist
 %type <params> paramlist
 %type <param> param
+%type <fields> fieldlist
+%type <field> field
 %type <pairelem> pairelem
 %type <arrayliter> arrayliter
 %type <arrayelem> arrayelem
@@ -87,7 +94,7 @@ pairelemtype   Type
 
 %left OR
 %left AND
-%left EQ NEQ //PLUSEQ SUBEQ DIVEQ MULEQ MODEQ
+%left EQ NEQ
 %left PLUS SUB
 %left MUL DIV MOD
 %left LT GT LTE GTE
@@ -98,6 +105,16 @@ pairelemtype   Type
 program : BEGIN functions statements END {
                                          parserlex.(*Lexer).prog = &Program{FunctionList : $2 , StatList : $3 , SymbolTable : NewInstance(), FileText :&parserlex.(*Lexer).input}
                                          }
+        | BEGIN class functions statements END {
+                                         parserlex.(*Lexer).prog = &Program{Class : $2 , FunctionList : $3 , StatList : $4 , SymbolTable : NewInstance(), FileText :&parserlex.(*Lexer).input}
+                                         }
+
+class : CLASS CLASSIDENT OPEN fieldlist functions CLOSE { $$ = Class{Ident : $2 , FieldList : $4 , FunctionList : $5} }
+
+fieldlist : fieldlist COMMA field { $$ = append($1, $3)}
+          | field                 { $$ = []Field{ $1 } }
+
+field : typeDef IDENTIFIER { $$ = Field{FieldType : $1, Ident : $2} }
 
 functions : functions function  { $$ = append($1, $2)}
           |                     { $$ = []*Function{} }

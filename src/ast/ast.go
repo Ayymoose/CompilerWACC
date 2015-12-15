@@ -72,8 +72,8 @@ func (x PairType) typeString() string {
 }
 
 type Skip struct {
-	FileText				*string
-	Pos int
+	FileText *string
+	Pos      int
 }
 
 const (
@@ -101,7 +101,7 @@ const (
 )
 
 type Function struct {
-	FileText				*string
+	FileText       *string
 	Ident          Ident
 	ReturnType     Type
 	ParameterTypes []Param
@@ -116,57 +116,69 @@ type Param struct {
 
 // Program ..
 type Program struct {
-	FileText				*string
+	FileText     *string
 	Pos          int
+	Class        Class
 	FunctionList []*Function
 	StatList     []Statement
 	SymbolTable  *SymbolTable
 }
 
+type Class struct {
+	Ident        Ident
+	FieldList    []Field
+	FunctionList []*Function
+}
+
+type Field struct {
+	Ident     Ident // OLI NEEDS TO LOOK INTO THIS SHOULD BE TYPE
+	FieldType Type
+}
+
 // Binop struct
 type Binop struct {
-	FileText				*string
-	Pos    int
-	Binary int
-	Left   Evaluation
-	Right  Evaluation
+	FileText *string
+	Pos      int
+	Binary   int
+	Left     Evaluation
+	Right    Evaluation
 }
 
 // Unop struct
 type Unop struct {
-	FileText				*string
-	Pos   int
-	Unary int
-	Expr  Evaluation
+	FileText *string
+	Pos      int
+	Unary    int
+	Expr     Evaluation
 }
 
 type NewPair struct {
-	FileText				*string
-	Pos     int
-	FstExpr Evaluation
-	SndExpr Evaluation
+	FileText *string
+	Pos      int
+	FstExpr  Evaluation
+	SndExpr  Evaluation
 }
 
 // Declare struct
 type Declare struct {
-	FileText				*string
-	Pos     int
-	DecType Type
-	Lhs     Ident
-	Rhs     Evaluation
+	FileText *string
+	Pos      int
+	DecType  Type
+	Lhs      Ident
+	Rhs      Evaluation
 }
 
 // Assignment struct
 type Assignment struct {
-	FileText				*string
-	Pos int
-	Lhs Evaluation
-	Rhs Evaluation
+	FileText *string
+	Pos      int
+	Lhs      Evaluation
+	Rhs      Evaluation
 }
 
 // If struct
 type If struct {
-	FileText				*string
+	FileText    *string
 	Pos         int
 	Conditional Evaluation
 	ThenStat    []Statement
@@ -175,62 +187,62 @@ type If struct {
 
 // While struct
 type While struct {
-	FileText				*string
+	FileText    *string
 	Pos         int
 	Conditional Evaluation
 	DoStat      []Statement
 }
 
 type Scope struct {
-	FileText				*string
+	FileText *string
 	Pos      int
 	StatList []Statement
 }
 
 // Read struct
 type Read struct {
-	FileText				*string
+	FileText  *string
 	Pos       int
 	AssignLHS Evaluation // should be an assignLHS
 }
 
 // Free struct
 type Free struct {
-	FileText				*string
-	Pos  int
-	Expr Evaluation
+	FileText *string
+	Pos      int
+	Expr     Evaluation
 }
 
 // Return struct
 type Return struct {
-	FileText				*string
-	Pos  int
-	Expr Evaluation
+	FileText *string
+	Pos      int
+	Expr     Evaluation
 }
 
 // Exit struct
 type Exit struct {
-	FileText				*string
-	Pos  int
-	Expr Evaluation
+	FileText *string
+	Pos      int
+	Expr     Evaluation
 }
 
 // Print struct
 type Print struct {
-	FileText				*string
-	Pos  int
-	Expr Evaluation
+	FileText *string
+	Pos      int
+	Expr     Evaluation
 }
 
 // Println struct
 type Println struct {
-	FileText				*string
-	Pos  int
-	Expr Evaluation
+	FileText *string
+	Pos      int
+	Expr     Evaluation
 }
 
 type Call struct {
-	FileText				*string
+	FileText  *string
 	Pos       int
 	Ident     Ident
 	ParamList []Evaluation
@@ -242,21 +254,21 @@ type Ident struct {
 }
 */
 type PairElem struct {
-	FileText				*string
-	Pos  int
-	Fsnd FSND
-	Expr Evaluation
+	FileText *string
+	Pos      int
+	Fsnd     FSND
+	Expr     Evaluation
 }
 
 type ArrayLiter struct {
-	FileText				*string
-	Pos   int
-	Exprs []Evaluation
+	FileText *string
+	Pos      int
+	Exprs    []Evaluation
 }
 
 type ArrayElem struct {
-	FileText				*string
-	Pos   int
-	Ident Ident
-	Exprs []Evaluation
+	FileText *string
+	Pos      int
+	Ident    Ident
+	Exprs    []Evaluation
 }
