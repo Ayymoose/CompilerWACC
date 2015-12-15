@@ -16,7 +16,7 @@ CLASSES: NOT COMPLETE - FRONTEND AND NANA/AYMAN/HENRYK
 BNF UPDATE
 <side effect> HENRYK PLEASE DO THIS
 
-<stat> := ... | 'for' <expr> 'from' <expr> 'to' <expr> 'do' <stat> 'done'
+<stat> := ... | 'for' <expr> 'from' <expr> 'to' <expr> 'by' assign 'do' <stat> 'done'
               | 'call' <ident> '(' <arg-list>? ')'
               | 'call' <class-ident>'.'<ident> '(' <arg-list>? ')'
 

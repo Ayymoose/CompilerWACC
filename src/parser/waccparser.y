@@ -44,6 +44,7 @@ pairelemtype   Type
 %token READ FREE RETURN EXIT PRINT PRINTLN
 %token IF THEN ELSE FI                              // If statement
 %token WHILE DO DONE                                // While statement
+%token FOR
 %token NEWPAIR
 %token CALL
 %token FST SND
@@ -84,6 +85,7 @@ pairelemtype   Type
 %type <pairliter> pairliter
 %type <typedefinition> basetype typeDef arraytype pairtype
 %type <pairelemtype> pairelemtype
+%type <stmt> assignment
 
 %left OR
 %left AND
@@ -136,17 +138,7 @@ statements : statements SEMICOLON statement           { $$ = append($1,$3) }
 
 statement : SKIP                                        { $$ = Skip{Pos : $<pos>1 ,FileText :&parserlex.(*Lexer).input } }
           | typeDef IDENTIFIER ASSIGNMENT assignrhs     { $$ = Declare{DecType : $1, Lhs : $2, Rhs : $4, Pos : $<pos>1 ,FileText :&parserlex.(*Lexer).input } }
-          | assignlhs ASSIGNMENT assignrhs              { $$ = Assignment{Lhs : $1, Rhs : $3, Pos : $<pos>1 ,FileText :&parserlex.(*Lexer).input} }
 
-          | IDENTIFIER PLUS ASSIGNMENT expr             { $$ = Assignment{Lhs : $1, Rhs : Binop{Left : $1, Binary : PLUS, Right : $4, Pos : $<pos>1, FileText :&parserlex.(*Lexer).input}, Pos : $<pos>1 ,FileText :&parserlex.(*Lexer).input} }
-          | IDENTIFIER SUB  ASSIGNMENT expr             { $$ = Assignment{Lhs : $1, Rhs : Binop{Left : $1, Binary : SUB , Right : $4, Pos : $<pos>1, FileText :&parserlex.(*Lexer).input}, Pos : $<pos>1 ,FileText :&parserlex.(*Lexer).input} }
-          | IDENTIFIER DIV  ASSIGNMENT expr             { $$ = Assignment{Lhs : $1, Rhs : Binop{Left : $1, Binary : DIV,  Right : $4, Pos : $<pos>1, FileText :&parserlex.(*Lexer).input}, Pos : $<pos>1 ,FileText :&parserlex.(*Lexer).input} }
-          | IDENTIFIER MUL  ASSIGNMENT expr             { $$ = Assignment{Lhs : $1, Rhs : Binop{Left : $1, Binary : MUL,  Right : $4, Pos : $<pos>1, FileText :&parserlex.(*Lexer).input}, Pos : $<pos>1 ,FileText :&parserlex.(*Lexer).input} }
-          | IDENTIFIER MOD  ASSIGNMENT expr             { $$ = Assignment{Lhs : $1, Rhs : Binop{Left : $1, Binary : MOD,  Right : $4, Pos : $<pos>1, FileText :&parserlex.(*Lexer).input}, Pos : $<pos>1 ,FileText :&parserlex.(*Lexer).input} }
-
-          | IDENTIFIER PLUS PLUS                        { $$ = Assignment{Lhs : $1, Rhs : Binop{Left : $1, Binary : PLUS, Right : Integer(1), Pos : $<pos>1, FileText :&parserlex.(*Lexer).input}, Pos : $<pos>1 ,FileText :&parserlex.(*Lexer).input} }
-          | IDENTIFIER SUB  SUB                         { $$ = Assignment{Lhs : $1, Rhs : Binop{Left : $1, Binary : SUB,  Right : Integer(1), Pos : $<pos>1, FileText :&parserlex.(*Lexer).input}, Pos : $<pos>1 ,FileText :&parserlex.(*Lexer).input} }
-          | IDENTIFIER MUL  MUL                         { $$ = Assignment{Lhs : $1, Rhs : Binop{Left : $1, Binary : MUL,  Right : $1,         Pos : $<pos>1, FileText :&parserlex.(*Lexer).input}, Pos : $<pos>1 ,FileText :&parserlex.(*Lexer).input} }
 
 
           | READ assignlhs                              { $$ = Read{ &parserlex.(*Lexer).input, $<pos>1 , $2, } }
@@ -156,6 +148,8 @@ statement : SKIP                                        { $$ = Skip{Pos : $<pos>
           | PRINT expr                                  { $$ = Print{&parserlex.(*Lexer).input, $<pos>1, $2} }
           | PRINTLN expr                                { $$ = Println{&parserlex.(*Lexer).input, $<pos>1, $2} }
           | IF expr THEN statements ELSE statements FI  { $$ = If{Conditional : $2, ThenStat : $4, ElseStat : $6, Pos : $<pos>1, FileText :&parserlex.(*Lexer).input } }
+
+          | FOR typeDef IDENTIFIER ASSIGNMENT assignrhs SEMICOLON expr SEMICOLON ASSIGNMENT
           | WHILE expr DO statements DONE               { $$ = While{Conditional : $2, DoStat : $4, Pos : $<pos>1, FileText :&parserlex.(*Lexer).input} }
           | BEGIN statements END                        { $$ = Scope{StatList : $2, Pos : $<pos>1, FileText :&parserlex.(*Lexer).input } }
           | error SEMICOLON                             {
@@ -173,6 +167,17 @@ statement : SKIP                                        { $$ = Skip{Pos : $<pos>
                                                           parserlex.Error("Syntax error : Invalid statement")
                                                           $$ = nil
                                                         }
+
+assignment :   | assignlhs ASSIGNMENT assignrhs              { $$ = Assignment{Lhs : $1, Rhs : $3, Pos : $<pos>1 ,FileText :&parserlex.(*Lexer).input} }
+               | IDENTIFIER PLUS ASSIGNMENT expr             { $$ = Assignment{Lhs : $1, Rhs : Binop{Left : $1, Binary : PLUS, Right : $4, Pos : $<pos>1, FileText :&parserlex.(*Lexer).input}, Pos : $<pos>1 ,FileText :&parserlex.(*Lexer).input} }
+               | IDENTIFIER SUB  ASSIGNMENT expr             { $$ = Assignment{Lhs : $1, Rhs : Binop{Left : $1, Binary : SUB , Right : $4, Pos : $<pos>1, FileText :&parserlex.(*Lexer).input}, Pos : $<pos>1 ,FileText :&parserlex.(*Lexer).input} }
+               | IDENTIFIER DIV  ASSIGNMENT expr             { $$ = Assignment{Lhs : $1, Rhs : Binop{Left : $1, Binary : DIV,  Right : $4, Pos : $<pos>1, FileText :&parserlex.(*Lexer).input}, Pos : $<pos>1 ,FileText :&parserlex.(*Lexer).input} }
+               | IDENTIFIER MUL  ASSIGNMENT expr             { $$ = Assignment{Lhs : $1, Rhs : Binop{Left : $1, Binary : MUL,  Right : $4, Pos : $<pos>1, FileText :&parserlex.(*Lexer).input}, Pos : $<pos>1 ,FileText :&parserlex.(*Lexer).input} }
+               | IDENTIFIER MOD  ASSIGNMENT expr             { $$ = Assignment{Lhs : $1, Rhs : Binop{Left : $1, Binary : MOD,  Right : $4, Pos : $<pos>1, FileText :&parserlex.(*Lexer).input}, Pos : $<pos>1 ,FileText :&parserlex.(*Lexer).input} }
+
+               | IDENTIFIER PLUS PLUS                        { $$ = Assignment{Lhs : $1, Rhs : Binop{Left : $1, Binary : PLUS, Right : Integer(1), Pos : $<pos>1, FileText :&parserlex.(*Lexer).input}, Pos : $<pos>1 ,FileText :&parserlex.(*Lexer).input} }
+               | IDENTIFIER SUB  SUB                         { $$ = Assignment{Lhs : $1, Rhs : Binop{Left : $1, Binary : SUB,  Right : Integer(1), Pos : $<pos>1, FileText :&parserlex.(*Lexer).input}, Pos : $<pos>1 ,FileText :&parserlex.(*Lexer).input} }
+               | IDENTIFIER MUL  MUL                         { $$ = Assignment{Lhs : $1, Rhs : Binop{Left : $1, Binary : MUL,  Right : $1,         Pos : $<pos>1, FileText :&parserlex.(*Lexer).input}, Pos : $<pos>1 ,FileText :&parserlex.(*Lexer).input} }
 
 expr : INTEGER       { $$ =  $1 }
 

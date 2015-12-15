@@ -91,6 +91,7 @@ var TokenKeywordStrings = map[string]int{
 	"chr":     CHR,
 	"true":    TRUE,
 	"false":   FALSE,
+	"for":     FOR,
 }
 
 // TokenStrings map
