@@ -94,6 +94,7 @@ var TokenKeywordStrings = map[string]int{
 	"chr":     CHR,
 	"true":    TRUE,
 	"false":   FALSE,
+	"for":     FOR,
 }
 
 // TokenStrings map
@@ -445,6 +446,12 @@ func runeIsEscape(a rune) bool {
 	return false
 }
 
+func checkClassIdent(classtype Ident) bool {
+	a, _ := utf8.DecodeRuneInString(string(classtype))
+	return unicode.IsUpper(a)
+
+}
+
 func checkStats(stats []Statement) bool {
 	switch stats[len(stats)-1].(type) {
 	case Return, Exit:
@@ -455,4 +462,5 @@ func checkStats(stats []Statement) bool {
 	default:
 		return false
 	}
+
 }
