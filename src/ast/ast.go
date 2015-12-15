@@ -127,7 +127,7 @@ type Program struct {
 }
 
 type Class struct {
-	Ident        Ident
+	Ident        ClassType
 	FieldList    []Field
 	FunctionList []*Function
 }

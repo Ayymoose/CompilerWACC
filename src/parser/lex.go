@@ -95,7 +95,6 @@ var TokenKeywordStrings = map[string]int{
 	"true":    TRUE,
 	"false":   FALSE,
 	"for":     FOR,
-	"class":   CLASS,
 }
 
 // TokenStrings map
@@ -447,7 +446,9 @@ func runeIsEscape(a rune) bool {
 	return false
 }
 
-func checkClassIdent() bool {
+func checkClassIdent(classtype Ident) bool {
+	a, _ := utf8.DecodeRuneInString(string(classtype))
+	return unicode.IsUpper(a)
 
 }
 
@@ -461,4 +462,5 @@ func checkStats(stats []Statement) bool {
 	default:
 		return false
 	}
+
 }
