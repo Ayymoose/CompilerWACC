@@ -19,7 +19,8 @@ boolean     Boolean
 
 functions      []*Function
 function       *Function
-class          Class
+classes        []*Class
+class          *Class
 stmt           Statement
 stmts          []Statement
 assignrhs      Evaluation
@@ -71,6 +72,7 @@ pairelemtype   Type
 
 
 %type <prog> program
+%type <classes> classes
 %type <class> class
 %type <functions> functions
 %type <function> function
@@ -102,14 +104,19 @@ pairelemtype   Type
 
 %%
 
-program : BEGIN functions statements END {
+program :/* BEGIN functions statements END {
                                          parserlex.(*Lexer).prog = &Program{FunctionList : $2 , StatList : $3 , SymbolTable : NewInstance(), FileText :&parserlex.(*Lexer).input}
                                          }
-        | BEGIN class functions statements END {
-                                         parserlex.(*Lexer).prog = &Program{Class : $2 , FunctionList : $3 , StatList : $4 , SymbolTable : NewInstance(), FileText :&parserlex.(*Lexer).input}
+        | */BEGIN classes functions statements END {
+                                         parserlex.(*Lexer).prog = &Program{ClassList : $2 , FunctionList : $3 , StatList : $4 , SymbolTable : NewInstance(), FileText :&parserlex.(*Lexer).input}
                                          }
 
-class : CLASS CLASSIDENT OPEN fieldlist functions CLOSE { $$ = Class{Ident : $2 , FieldList : $4 , FunctionList : $5} }
+
+classes : classes class  { $$ = append($1, $2)}
+        |                { $$ = []*Class{} }
+
+
+class : CLASS CLASSIDENT OPEN fieldlist functions CLOSE { $$ = &Class{Ident : $2 , FieldList : $4 , FunctionList : $5} }
 
 fieldlist : fieldlist COMMA field { $$ = append($1, $3)}
           | field                 { $$ = []Field{ $1 } }

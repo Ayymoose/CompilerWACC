@@ -118,7 +118,7 @@ type Param struct {
 type Program struct {
 	FileText     *string
 	Pos          int
-	Class        Class
+	ClassList    []*Class
 	FunctionList []*Function
 	StatList     []Statement
 	SymbolTable  *SymbolTable
@@ -131,7 +131,7 @@ type Class struct {
 }
 
 type Field struct {
-	Ident     Ident // OLI NEEDS TO LOOK INTO THIS SHOULD BE TYPE
+	Ident     Ident
 	FieldType Type
 }
 
