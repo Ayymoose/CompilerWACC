@@ -59,6 +59,9 @@ var escapeChars = []rune{'0', 'b', 't', 'n', 'f', 'r', '\\', '\'', '"'}
 
 // TokenKeywordStrings key is a map of keywords: string keyword to integer type.
 var TokenKeywordStrings = map[string]int{
+	"class":   CLASS,
+	"open":    OPEN,
+	"close":   CLOSE,
 	"begin":   BEGIN,
 	"end":     END,
 	"is":      IS,
