@@ -145,8 +145,8 @@ func (value Ident) Eval(functionTable []*Function, symbolTable *SymbolTable) (Ty
 	if symbolTable.isDefined(value) {
 		return symbolTable.getTypeOfIdent(value), nil
 	}
-//	str :=
-	return nil, errors.New("line: " + " :Cannot sub a non Int expression")   // AWWHHHW
+	//	str :=
+	return nil, errors.New(" :Cannot find " + string(value) + "in symbol table") // AWWHHHW
 }
 
 func (binop Binop) Eval(functionTable []*Function, symbolTable *SymbolTable) (Type, error) {

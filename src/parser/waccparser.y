@@ -161,6 +161,12 @@ assignrhs : expr                                           {$$ = $1}
 
 statements : statements SEMICOLON statement                { $$ = append($1,$3)   }
            | statement                                     { $$ = []Statement{$1} }
+           | FOR typeDef IDENTIFIER ASSIGNMENT assignrhs SEMICOLON expr SEMICOLON assignment DO statements DONE {
+                                                                                                                 stats := append($11, $9)
+                                                                                                                  w := While{Conditional : $7, DoStat : stats, Pos : $<pos>1, FileText :&parserlex.(*Lexer).input}
+                                                                                                                  d := Declare{DecType : $2, Lhs : $3, Rhs : $5, Pos : $<pos>1 ,FileText :&parserlex.(*Lexer).input }
+                                                                                                                  $$ = []Statement{d,w}
+                                                                                                                }
 
 
 statement : SKIP                                        { $$ = Skip{Pos : $<pos>1 ,FileText :&parserlex.(*Lexer).input } }
@@ -178,13 +184,10 @@ statement : SKIP                                        { $$ = Skip{Pos : $<pos>
           | PRINTLN expr                                { $$ = Println{&parserlex.(*Lexer).input, $<pos>1, $2} }
           | IF expr THEN statements ELSE statements FI  { $$ = If{Conditional : $2, ThenStat : $4, ElseStat : $6, Pos : $<pos>1, FileText :&parserlex.(*Lexer).input } }
 
-          | FOR typeDef IDENTIFIER ASSIGNMENT assignrhs SEMICOLON expr SEMICOLON assignment DO statements DONE {
-                                                                                                                stats := append($11, $9)
-                                                                                                                $$ = While{Conditional : $7, DoStat : stats, Pos : $<pos>1, FileText :&parserlex.(*Lexer).input}
-                                                                                                                }
-          | FOR assignment SEMICOLON expr SEMICOLON assignment DO statements DONE {
-                                                                                  stats := append($8, $6)
-                                                                                  $$ = While{Conditional : $4, DoStat : stats, Pos : $<pos>1, FileText :&parserlex.(*Lexer).input}
+
+          | FOR expr SEMICOLON assignment DO statements DONE {
+                                                                                  stats := append($6, $4)
+                                                                                  $$ = While{Conditional : $2, DoStat : stats, Pos : $<pos>1, FileText :&parserlex.(*Lexer).input}
                                                                                   }
           | WHILE expr DO statements DONE               { $$ = While{Conditional : $2, DoStat : $4, Pos : $<pos>1, FileText :&parserlex.(*Lexer).input} }
           | BEGIN statements END                        { $$ = Scope{StatList : $2, Pos : $<pos>1, FileText :&parserlex.(*Lexer).input } }
