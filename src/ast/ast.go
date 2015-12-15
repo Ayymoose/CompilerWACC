@@ -104,6 +104,7 @@ const (
 
 type Function struct {
 	FileText       *string
+	ClassDef       Ident
 	Ident          Ident
 	ReturnType     Type
 	ParameterTypes []Param
@@ -124,6 +125,15 @@ type Program struct {
 	FunctionList []*Function
 	StatList     []Statement
 	SymbolTable  *SymbolTable
+}
+
+type NewObject struct {
+	Init []Evaluation
+}
+
+type FieldAccess struct {
+	ObjectName Ident
+	Field      Ident
 }
 
 type Class struct {
