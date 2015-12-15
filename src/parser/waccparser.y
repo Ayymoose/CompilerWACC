@@ -38,7 +38,8 @@ pairelemtype   Type
 
 %start program
 
-%token BEGIN END                                    // Program delimiters
+%token BEGIN END                               // Program delimiters
+%token CLASS
 %token IS
 %token <number> SKIP
 %token READ FREE RETURN EXIT PRINT PRINTLN
@@ -138,9 +139,7 @@ statements : statements SEMICOLON statement           { $$ = append($1,$3) }
 
 statement : SKIP                                        { $$ = Skip{Pos : $<pos>1 ,FileText :&parserlex.(*Lexer).input } }
           | typeDef IDENTIFIER ASSIGNMENT assignrhs     { $$ = Declare{DecType : $1, Lhs : $2, Rhs : $4, Pos : $<pos>1 ,FileText :&parserlex.(*Lexer).input } }
-
-
-
+          | assignment                                  { $$ = $1 }
           | READ assignlhs                              { $$ = Read{ &parserlex.(*Lexer).input, $<pos>1 , $2, } }
           | FREE expr                                   { $$ = Free{&parserlex.(*Lexer).input, $<pos>1, $2} }
           | RETURN expr                                 { $$ = Return{&parserlex.(*Lexer).input, $<pos>1, $2} }
@@ -149,9 +148,17 @@ statement : SKIP                                        { $$ = Skip{Pos : $<pos>
           | PRINTLN expr                                { $$ = Println{&parserlex.(*Lexer).input, $<pos>1, $2} }
           | IF expr THEN statements ELSE statements FI  { $$ = If{Conditional : $2, ThenStat : $4, ElseStat : $6, Pos : $<pos>1, FileText :&parserlex.(*Lexer).input } }
 
-          | FOR typeDef IDENTIFIER ASSIGNMENT assignrhs SEMICOLON expr SEMICOLON ASSIGNMENT
+          | FOR typeDef IDENTIFIER ASSIGNMENT assignrhs SEMICOLON expr SEMICOLON assignment DO statements DONE {
+                                                                                                                stats := append($11, $9)
+                                                                                                                $$ = While{Conditional : $7, DoStat : stats, Pos : $<pos>1, FileText :&parserlex.(*Lexer).input}
+                                                                                                                }
+          | FOR assignment SEMICOLON expr SEMICOLON assignment DO statements DONE {
+                                                                                  stats := append($8, $6)
+                                                                                  $$ = While{Conditional : $4, DoStat : stats, Pos : $<pos>1, FileText :&parserlex.(*Lexer).input}
+                                                                                  }
           | WHILE expr DO statements DONE               { $$ = While{Conditional : $2, DoStat : $4, Pos : $<pos>1, FileText :&parserlex.(*Lexer).input} }
           | BEGIN statements END                        { $$ = Scope{StatList : $2, Pos : $<pos>1, FileText :&parserlex.(*Lexer).input } }
+          | CLASS IDENTIFIER BEGIN END
           | error SEMICOLON                             {
                                                           parserlex.Error("Syntax error : Invalid statement")
                                                           $$ = nil
@@ -179,25 +186,20 @@ assignment :   | assignlhs ASSIGNMENT assignrhs              { $$ = Assignment{L
                | IDENTIFIER SUB  SUB                         { $$ = Assignment{Lhs : $1, Rhs : Binop{Left : $1, Binary : SUB,  Right : Integer(1), Pos : $<pos>1, FileText :&parserlex.(*Lexer).input}, Pos : $<pos>1 ,FileText :&parserlex.(*Lexer).input} }
                | IDENTIFIER MUL  MUL                         { $$ = Assignment{Lhs : $1, Rhs : Binop{Left : $1, Binary : MUL,  Right : $1,         Pos : $<pos>1, FileText :&parserlex.(*Lexer).input}, Pos : $<pos>1 ,FileText :&parserlex.(*Lexer).input} }
 
-expr : INTEGER       { $$ =  $1 }
-
-     | TRUE          { $$ =  $1 }
-     | FALSE         { $$ =  $1 }
-
-     | CHARACTER     { $$ =  $1 }
-     | STRINGCONST   { $$ =  $1 }
-     | pairliter     { $$ =  $1 }
-     | IDENTIFIER    { $$ =  $1 }
-     | arrayelem     { $$ =  $1 }
-
-     | NOT expr     { $$ = Unop{Unary : NOT, Expr : $2, Pos : $<pos>1, FileText :&parserlex.(*Lexer).input  } }
-     | LEN expr     { $$ = Unop{Unary : LEN, Expr : $2, Pos : $<pos>1, FileText :&parserlex.(*Lexer).input  } }
-     | ORD expr     { $$ = Unop{Unary : ORD, Expr : $2, Pos : $<pos>1, FileText :&parserlex.(*Lexer).input  } }
-     | CHR expr     { $$ = Unop{Unary : CHR, Expr : $2, Pos : $<pos>1, FileText :&parserlex.(*Lexer).input  } }
-     | SUB expr     { $$ = Unop{Unary : SUB, Expr : $2, Pos : $<pos>1, FileText :&parserlex.(*Lexer).input  } }
-     | PLUS expr    { $$ = $2 }
-
-
+expr : INTEGER        { $$ =  $1 }
+     | TRUE           { $$ =  $1 }
+     | FALSE          { $$ =  $1 }
+     | CHARACTER      { $$ =  $1 }
+     | STRINGCONST    { $$ =  $1 }
+     | pairliter      { $$ =  $1 }
+     | IDENTIFIER     { $$ =  $1 }
+     | arrayelem      { $$ =  $1 }
+     | NOT expr       { $$ = Unop{Unary : NOT, Expr : $2, Pos : $<pos>1, FileText :&parserlex.(*Lexer).input  } }
+     | LEN expr       { $$ = Unop{Unary : LEN, Expr : $2, Pos : $<pos>1, FileText :&parserlex.(*Lexer).input  } }
+     | ORD expr       { $$ = Unop{Unary : ORD, Expr : $2, Pos : $<pos>1, FileText :&parserlex.(*Lexer).input  } }
+     | CHR expr       { $$ = Unop{Unary : CHR, Expr : $2, Pos : $<pos>1, FileText :&parserlex.(*Lexer).input  } }
+     | SUB expr       { $$ = Unop{Unary : SUB, Expr : $2, Pos : $<pos>1, FileText :&parserlex.(*Lexer).input  } }
+     | PLUS expr      { $$ = $2 }
      | expr PLUS expr { $$ = Binop{Left : $1, Binary : PLUS, Right : $3, Pos : $<pos>1, FileText :&parserlex.(*Lexer).input  } }
      | expr SUB expr  { $$ = Binop{Left : $1, Binary : SUB,  Right : $3, Pos : $<pos>1, FileText :&parserlex.(*Lexer).input  } }
      | expr MUL expr  { $$ = Binop{Left : $1, Binary : MUL,  Right : $3, Pos : $<pos>1, FileText :&parserlex.(*Lexer).input  } }

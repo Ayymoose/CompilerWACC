@@ -1,0 +1,15 @@
+# Expected: 3
+
+begin
+  class Person open
+    string name, int age
+
+    bool birthdayMsg is 
+      print "HAPPY BIRTHDAY "; print name;
+      age++;
+      return true
+    end
+  close
+
+  skip
+end
