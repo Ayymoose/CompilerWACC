@@ -172,6 +172,7 @@ statement : SKIP                                        { $$ = Skip{Pos : $<pos>
           | IDENTIFIER SUB  SUB                         { $$ = Assignment{Lhs : $1, Rhs : Binop{Left : $1, Binary : SUB,  Right : Integer(1), Pos : $<pos>1, FileText :&parserlex.(*Lexer).input}, Pos : $<pos>1 ,FileText :&parserlex.(*Lexer).input} }
           | IDENTIFIER MUL  MUL                         { $$ = Assignment{Lhs : $1, Rhs : Binop{Left : $1, Binary : MUL,  Right : $1,         Pos : $<pos>1, FileText :&parserlex.(*Lexer).input}, Pos : $<pos>1 ,FileText :&parserlex.(*Lexer).input} }
 
+          | CALL IDENTIFIER OPENROUND exprlist CLOSEROUND  { $$ = Call{Ident : $2, ParamList : $4, Pos : $<pos>1, FileText :&parserlex.(*Lexer).input  } }
 
           | READ assignlhs                              { $$ = Read{ &parserlex.(*Lexer).input, $<pos>1 , $2, } }
           | FREE expr                                   { $$ = Free{&parserlex.(*Lexer).input, $<pos>1, $2} }
