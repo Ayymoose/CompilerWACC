@@ -17,6 +17,9 @@ func (value Instance) Eval(functionTable []*Function, symbolTable *SymbolTable) 
 func (value NewObject) Eval(functionTable []*Function, symbolTable *SymbolTable) (Type, error) {
 	return nil, nil
 }
+func (value FieldAccess) Eval(functionTable []*Function, symbolTable *SymbolTable) (Type, error) {
+	return nil, nil
+}
 func (value Call) Eval(functionTable []*Function, symbolTable *SymbolTable) (Type, error) {
 	for _, function := range functionTable {
 		if value.Ident == function.Ident {

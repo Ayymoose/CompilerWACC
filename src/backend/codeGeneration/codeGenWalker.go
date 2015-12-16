@@ -324,6 +324,18 @@ func (cg *CodeGenerator) evalRHS(t Evaluation, srcReg string) {
 		cg.cgVisitCallStat(t.(Call).Ident, t.(Call).ParamList, srcReg)
 	case NewObject:
 		cg.evalNewObject(t.(NewObject).Init, srcReg)
+	case FieldAccess:
+		classTyp := cg.eval(t.(FieldAccess).ObjectName)
+		var objClass *Class
+
+		for _, class := range cg.classes {
+			if classTyp == class.Ident {
+				objClass = class
+				break
+			}
+		}
+
+		cg.evalField(t.(FieldAccess).ObjectName, t.(FieldAccess).Field, *objClass, srcReg)
 	default:
 		fmt.Println("ERROR: Expression can not be evaluated")
 	}
@@ -506,13 +518,28 @@ func (cg *CodeGenerator) evalNewObject(initValues []Evaluation, dstReg string) {
 		cg.evalRHS(initValue, "r6")
 		//Stores the current initialiser value on the heap for the object in the correct offset
 		appendAssembly(cg.currInstrs(), "STR r6, ["+dstReg+", #"+strconv.Itoa(acc)+"]", 1, 1)
+		// Add to Accumulator
+		acc += sizeOf(cg.eval(initValue))
 	}
 
 }
 
 // Uses the object stored in srcReg to retrieve the value of the field ident and stores its value in dstReg
-func (cg *CodeGenerator) evalField(ident Ident, classType ClassType, srcReg string, dstReg string) {
-	println("VISIT FIELD NOT DONE")
+func (cg *CodeGenerator) evalField(objIdent Ident, field Ident, class Class, dstReg string) {
+	// Stores object reference in r5
+	cg.evalRHS(objIdent, "r5")
+
+	// Field Accumulator
+	acc := 0
+	for _, currField := range class.FieldList {
+		if field == currField.Ident {
+			//Stores the current initialiser value on the heap for the object in the correct offset
+			appendAssembly(cg.currInstrs(), "LDR "+dstReg+", [r5, #"+strconv.Itoa(acc)+"]", 1, 1)
+			break
+		}
+		acc += sizeOf(currField.FieldType)
+	}
+
 }
 
 // VISIT FUNCTIONS -------------------------------------------------------------
@@ -523,6 +550,7 @@ func (cg *CodeGenerator) cgVisitProgram(node *Program) {
 	cg.currStack.size = getScopeVarSize(node.StatList)
 	cg.currStack.currP = cg.currStack.size
 	cg.currStack.isFunc = false
+	cg.classes = node.ClassList
 
 	functionList = node.FunctionList
 
@@ -595,6 +623,12 @@ func (cg *CodeGenerator) cgEvalStat(stat interface{}) {
 		cg.cgVisitWhileStat(stat.(While))
 	case Scope:
 		cg.cgVisitScopeStat(stat.(Scope))
+	case CallInstance:
+		if stat.(CallInstance).Class == "" {
+			cg.cgVisitCallStat(stat.(CallInstance).Func, stat.(CallInstance).ParamList, "r0")
+		} else {
+
+		}
 	}
 }
 
@@ -745,6 +779,10 @@ func (cg *CodeGenerator) cgVisitAssignmentStat(node Assignment) {
 		}
 		// Store the value into the pair
 		appendAssembly(cg.currInstrs(), "STR r4, [r5]", 1, 1)
+	case Class:
+		offset, _ := cg.getIdentOffset(ident)
+		cg.evalRHS(rhs, "r4")
+		appendAssembly(cg.currInstrs(), "STR r4, [sp, #"+strconv.Itoa(offset)+"]", 1, 1)
 	}
 }
 

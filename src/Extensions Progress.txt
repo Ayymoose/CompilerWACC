@@ -10,11 +10,11 @@ FOR LOOP: COMPLETE - OLI
 ALLOW FUNCTION CALLS OUTSIDE OF ASSIGNMENT: HENRYK ----------------------------- visitStatement.go needs to be complete
 
 CLASSES: (Frontend done) NOT COMPLETE - FRONTEND AND NANA/AYMAN/HENRYK
-- visitDeclare update
-- visitNewObject
-- visitField
+- visitDeclare   - DONE/UNTESTED
+- visitNewObject - DONE/UNTESTED
+- visitField     - DONE BUT NEED SYMBTABLE
 - visitMethod
-- visitCall in eval statement 
+- visitCall      - DONE/ UNTESTED
 - printing classes
 
 ----
@@ -57,6 +57,8 @@ COMPLETE (APART FROM IMPLEMENTED FUNCTIONS FOR AST NODES)
                     | 'this''.'<ident>
                     | <ident>'.'<ident>
 // The correct number of arguments must be present for the instantiation of the object
+
+<assign-lhs> := ... | <ident>'.'<ident>
 
 COMPLETE
 <field> := <param>

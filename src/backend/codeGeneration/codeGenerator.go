@@ -17,6 +17,7 @@ type CodeGenerator struct {
 	msgInstrs         *ARMList          // List of assembly instructions to create msg labels
 	symTable          *SymbolTable      // Used to map variable identifiers to their types
 	funcSymTables     []*SymbolTable    // Used to map function variable indentifier to ther types
+	classes           []*Class          // List of classes defined withing the program
 	funcInstrs        *ARMList          // List of assembly instructions that define functions and their labels
 	progFuncInstrs    *ARMList          // List of assembly instructions that define program generated functions e.g. p_print_string
 	progFuncNames     *[]string         // List of program defined function names. Used to avoid program redefinitions
