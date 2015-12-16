@@ -640,7 +640,7 @@ func (cg *CodeGenerator) cgVisitDeclareStat(node Declare) {
 		// Now store the address of the array onto the stack
 		appendAssembly(cg.currInstrs(), "STR r4, [sp, #"+cg.subCurrP(ADDRESS_SIZE)+"]", 1, 1)
 	case ClassType:
-		//evalRHS(rhs,"r4") NEED NEW FIELD
+		evalRHS(rhs, "r4")
 		appendAssembly(cg.currInstrs(), "STR r4, [sp, #"+cg.subCurrP(ADDRESS_SIZE)+"]", 1, 1)
 	}
 	// Saves Idents offset in the symbol tables offset map
@@ -731,7 +731,7 @@ func (cg *CodeGenerator) cgVisitAssignmentStat(node Assignment) {
 	}
 }
 
-// Helper to remove duplication (BETTER NAME?)
+// Helper to remove duplication
 func (cg *CodeGenerator) cgVisitReadStatHelper() {
 	appendAssembly(cg.currInstrs(), "LDR r4, [sp]", 1, 1)
 	appendAssembly(cg.currInstrs(), "MOV r0, r4", 1, 1)
