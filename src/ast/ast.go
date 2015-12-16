@@ -140,6 +140,11 @@ type FieldAccess struct {
 	Field      Ident
 }
 
+type FieldAssign struct {
+	ObjectName Ident
+	Field      Ident
+}
+
 type Class struct {
 	Ident        ClassType
 	FieldList    []Field

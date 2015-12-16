@@ -151,6 +151,7 @@ param : typeDef IDENTIFIER { $$ = Param{ParamType : $1, Ident : $2} }
 assignlhs : IDENTIFIER    {$$ = $1}
           | arrayelem     {$$ = $1}
           | pairelem      {$$ = $1}
+          | IDENTIFIER DOT IDENTIFIER { $$ = FieldAssign{ObjectName : $1 , Field : $3} }
 
 assignrhs : expr                                           {$$ = $1}
           | arrayliter                                     {$$ = $1}
