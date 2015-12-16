@@ -317,3 +317,14 @@ func (cg *CodeGenerator) isFunctionDefined(ident Ident) bool {
 func (cg *CodeGenerator) addFunctionDef(ident Ident) {
 	cg.functionDefs = append(cg.functionDefs, ident)
 }
+
+// Returns total variable size of a list of evaluations
+func (cg *CodeGenerator) evalSize(es []Evaluation) int {
+	total := 0
+	var eType Type
+	for _, e := range es {
+		eType = cg.eval(e)
+		total += sizeOf(eType)
+	}
+	return total
+}

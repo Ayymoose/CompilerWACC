@@ -322,6 +322,8 @@ func (cg *CodeGenerator) evalRHS(t Evaluation, srcReg string) {
 		cg.evalPairElem(t.(PairElem), srcReg)
 	case Call:
 		cg.cgVisitCallStat(t.(Call).Ident, t.(Call).ParamList, srcReg)
+	case NewObject:
+		cg.evalNewObject(t.(NewObject).Init, srcReg)
 	default:
 		fmt.Println("ERROR: Expression can not be evaluated")
 	}
@@ -489,8 +491,23 @@ func (cg *CodeGenerator) evalOrd(node Unop) {
 }
 
 // Places an instance of a class of type classType within the register (as an address to the object)
-func (cg *CodeGenerator) evalNewObject(classType ClassType, dstReg string) {
-	println("VISIT NEW OBJ NOT DONE")
+func (cg *CodeGenerator) evalNewObject(initValues []Evaluation, dstReg string) {
+	fieldSize := cg.evalSize(initValues)
+	appendAssembly(cg.currInstrs(), "LDR r0, ="+strconv.Itoa(fieldSize), 1, 1)
+	appendAssembly(cg.currInstrs(), "BL malloc", 1, 1)
+
+	// dstReg = object address
+	appendAssembly(cg.currInstrs(), "MOV "+dstReg+", r0", 1, 1)
+
+	// Accumulator for variable sizes
+	acc := 0
+	for _, initValue := range initValues {
+		// Store the evaluation of the initial value into r6
+		cg.evalRHS(initValue, "r6")
+		//Stores the current initialiser value on the heap for the object in the correct offset
+		appendAssembly(cg.currInstrs(), "STR r6, ["+dstReg+", #"+strconv.Itoa(acc)+"]", 1, 1)
+	}
+
 }
 
 // Uses the object stored in srcReg to retrieve the value of the field ident and stores its value in dstReg
@@ -640,7 +657,7 @@ func (cg *CodeGenerator) cgVisitDeclareStat(node Declare) {
 		// Now store the address of the array onto the stack
 		appendAssembly(cg.currInstrs(), "STR r4, [sp, #"+cg.subCurrP(ADDRESS_SIZE)+"]", 1, 1)
 	case ClassType:
-		evalRHS(rhs, "r4")
+		cg.evalRHS(rhs, "r4")
 		appendAssembly(cg.currInstrs(), "STR r4, [sp, #"+cg.subCurrP(ADDRESS_SIZE)+"]", 1, 1)
 	}
 	// Saves Idents offset in the symbol tables offset map

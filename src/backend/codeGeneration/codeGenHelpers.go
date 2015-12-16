@@ -50,12 +50,12 @@ func sizeOf(t Type) int {
 		case Pair:
 			size = PAIR_SIZE
 		}
-  default: //PairType + ArrayType
+	default: //PairType + ArrayType
 		size = ADDRESS_SIZE
-/*	case PairType:
-		size = ADDRESS_SIZE
-	case ArrayType:
-		size = ADDRESS_SIZE*/
+		/*	case PairType:
+				size = ADDRESS_SIZE
+			case ArrayType:
+				size = ADDRESS_SIZE*/
 	}
 	return size
 }
