@@ -55,12 +55,13 @@ func (cg *CodeGenerator) eval(e Evaluation) Type {
 
 // Provides information about the stack in relation to a specific scope
 type scopeData struct {
-	currP       int        // the current position of the pointer to the stack
-	size        int        // size of the variable stack scope space in bytes
-	parentScope *scopeData // Address of the parent scope
-	isFunc      bool       // true iff the scope date is used for a function scope
-	paramList   *[]Param   // Map of function parameters to their offset from the start of the function
-	// only used if isFunc is true
+	currP            int              // the current position of the pointer to the stack
+	size             int              // size of the variable stack scope space in bytes
+	parentScope      *scopeData       // Address of the parent scope
+	isFunc           bool             // true iff the scope data is used for a function scope
+	paramList        *[]Param         // List of parameters for a function if the scope is a function scope
+	isMethod         bool             // true iff the scope data is used for a class method scope
+	fieldList        *[]Field         // List of fields for a class object if the scope is a class scope
 	identMsgLabelMap map[Ident]string // Map of string idents within this scope to their message labels
 	extraOffset      int              // Extra offset used when stack is used to store intermediate values
 }

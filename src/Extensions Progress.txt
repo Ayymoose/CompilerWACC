@@ -10,6 +10,11 @@ FOR LOOP: COMPLETE - OLI
 ALLOW FUNCTION CALLS OUTSIDE OF ASSIGNMENT: HENRYK ----------------------------- visitStatement.go needs to be complete
 
 CLASSES: (Frontend done) NOT COMPLETE - FRONTEND AND NANA/AYMAN/HENRYK
+- visitDeclare update
+- visitNewObject
+- visitField
+- visitMethod
+- printing classes
 
 ----
 BNF UPDATE
@@ -46,7 +51,7 @@ COMPLETE
 // class identifiers are not allowed to clash with any variable/function/variable/type names or keywords
 
 COMPLETE (APART FROM IMPLEMENTED FUNCTIONS FOR AST NODES)
-<assign-rhs> := ... |'new' <class-ident>'('<arg-list>?')'
+<assign-rhs> := ... | 'new' <class-ident>'('<arg-list>?')'
                     | 'call' <ident>'.'<ident> '(' <arg-list>? ')'
                     | 'this''.'<ident>
                     | <ident>'.'<ident>
