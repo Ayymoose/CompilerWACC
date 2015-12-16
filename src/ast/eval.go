@@ -8,6 +8,9 @@ import (
 func (value CallInstance) Eval(functionTable []*Function, symbolTable *SymbolTable) (Type, error) {
 	return nil, nil
 }
+func (value Class) Eval(functionTable []*Function, symbolTable *SymbolTable) (Type, error) {
+	return nil, nil
+}
 func (value ThisInstance) Eval(functionTable []*Function, symbolTable *SymbolTable) (Type, error) {
 	return nil, nil
 }

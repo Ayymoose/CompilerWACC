@@ -729,6 +729,9 @@ func (cg *CodeGenerator) cgVisitAssignmentStat(node Assignment) {
 				// Store the value of declaration to stack
 				appendAssembly(cg.currInstrs(), "STR r4, [sp, #"+strconv.Itoa(offset)+"]", 1, 1)
 			}
+		case ClassType:
+			offset, _ := cg.getIdentOffset(ident)
+			appendAssembly(cg.currInstrs(), "STRB r4, [sp, #"+strconv.Itoa(offset)+"]", 1, 1)
 		}
 
 	case ArrayElem:
@@ -779,10 +782,6 @@ func (cg *CodeGenerator) cgVisitAssignmentStat(node Assignment) {
 		}
 		// Store the value into the pair
 		appendAssembly(cg.currInstrs(), "STR r4, [r5]", 1, 1)
-	case Class:
-		offset, _ := cg.getIdentOffset(ident)
-		cg.evalRHS(rhs, "r4")
-		appendAssembly(cg.currInstrs(), "STR r4, [sp, #"+strconv.Itoa(offset)+"]", 1, 1)
 	}
 }
 
