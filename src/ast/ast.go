@@ -75,6 +75,10 @@ func (x ArrayType) typeString() string {
 	return "Array:" + x.Type.typeString()
 }
 
+func (x ClassType) typeString() string {
+	return "Class:" + string(x)
+}
+
 func (x PairType) typeString() string {
 	return "Pair:" + x.FstType.typeString() + "/" + x.SndType.typeString()
 }
