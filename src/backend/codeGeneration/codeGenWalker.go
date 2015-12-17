@@ -588,6 +588,15 @@ func (cg *CodeGenerator) cgVisitProgram(node *Program) {
 			cg.cgVisitFunction(*function)
 		}
 	}
+
+	// Adds methods that were called
+	for _, class := range cg.classes {
+		for _, function := range cg.functionList {
+			if cg.isFunctionDefined(Ident(string(class.Ident) + "." + string(function.Ident))) {
+				cg.cgVisitMethod(*function, *class)
+			}
+		}
+	}
 }
 
 // Evaluate a statement
@@ -902,7 +911,7 @@ func (cg *CodeGenerator) cgVisitPrintStat(node Print) {
 			// Define relevant print function definition (iff it hasnt been defined)
 			cg.cgVisitPrintStatFuncHelper("p_print_reference")
 		}
-	case PairType, ArrayType:
+	case PairType, ArrayType, ClassType:
 
 		switch exprType.(type) {
 		case ArrayType:
@@ -1007,24 +1016,35 @@ func (cg *CodeGenerator) cgVisitCallStat(ident Ident, paramList []Evaluation, sr
 	}
 }
 
-func (cg *CodeGenerator) cgVisitCallMethod(ident Ident, classIdent Ident, paramList []Evaluation, srcReg string) {
-	/*for _, function := range cg.functionList {
-		if function.Ident == ident {
-			for i := len(paramList) - 1; i >= 0; i-- {
-				cg.cgVisitParameter(paramList[i])
+func (cg *CodeGenerator) cgVisitCallMethod(ident Ident, objIdent Ident, paramList []Evaluation, srcReg string) {
+	for _, class := range cg.classes {
+		classTyp := cg.eval(objIdent).(ClassType)
+		if class.Ident == classTyp {
+
+			for _, function := range class.FunctionList {
+				if function.Ident == ident {
+					// Store object onto the stack
+					cg.evalRHS(objIdent, "r4")
+					appendAssembly(cg.currInstrs(), "STRB r4, [sp, #"+strconv.Itoa(-ADDRESS_SIZE)+"]!", 1, 1)
+
+					for i := len(paramList) - 1; i >= 0; i-- {
+						cg.cgVisitParameter(paramList[i])
+					}
+					appendAssembly(cg.currInstrs(), "BL f_"+string(classTyp)+"."+string(function.Ident), 1, 1)
+					offset := cg.cgGetParamSize(paramList) + ADDRESS_SIZE
+					cg.subExtraOffset(offset)
+					//THIS LINE SHOULD BE REPLACED WITH removeStackSpace() At one point it might break here...
+					appendAssembly(cg.currInstrs(), "ADD sp, sp, #"+strconv.Itoa(offset), 1, 1)
+					appendAssembly(cg.currInstrs(), "MOV "+srcReg+", r0", 1, 1)
+					if !cg.isFunctionDefined(Ident(string(classTyp) + "." + string(function.Ident))) {
+						cg.addFunctionDef(Ident(string(classTyp) + "." + string(function.Ident)))
+					}
+					break
+				}
+
 			}
-			appendAssembly(cg.currInstrs(), "BL f_"+string(function.Ident), 1, 1)
-			offset := cg.cgGetParamSize(paramList)
-			cg.subExtraOffset(offset)
-			//THIS LINE SHOULD BE REPLACED WITH removeStackSpace() At one point it might break here...
-			appendAssembly(cg.currInstrs(), "ADD sp, sp, #"+strconv.Itoa(offset), 1, 1)
-			appendAssembly(cg.currInstrs(), "MOV "+srcReg+", r0", 1, 1)
-			if !cg.isFunctionDefined(function.Ident) {
-				cg.addFunctionDef(function.Ident)
-			}
-			break
 		}
-	}*/
+	}
 }
 
 func (cg *CodeGenerator) cgGetParamSize(paramList []Evaluation) int {
@@ -1053,8 +1073,22 @@ func (cg *CodeGenerator) cgVisitFunction(node Function) {
 	cg.removeFuncScope()
 }
 
-func (cg *CodeGenerator) cgVisitMethod(node Evaluation) {
-	println("VISIT METHOD NOT DONE")
+func (cg *CodeGenerator) cgVisitMethod(node Function, class Class) {
+	varSpaceSize := getScopeVarSize(node.StatList)
+	cg.setNewMethodScope(varSpaceSize, &node.ParameterTypes, node.SymbolTable, &class.FieldList)
+	// f_funcName:
+	appendAssembly(cg.currInstrs(), "f_"+string(node.Ident)+"."+string(class.Ident)+":", 0, 1)
+	// push {lr} to save the caller address
+	appendAssembly(cg.currInstrs(), "PUSH {lr}", 1, 1)
+	if varSpaceSize > 0 {
+		cg.createStackSpace(varSpaceSize)
+	}
+	// traverse all statements by switching on statement type
+	for _, stat := range node.StatList {
+		cg.cgEvalStat(stat)
+	}
+	appendAssembly(cg.currInstrs(), ".ltorg", 1, 2)
+	cg.removeFuncScope()
 }
 
 // VISIT STATEMENT -------------------------------------------------------------
