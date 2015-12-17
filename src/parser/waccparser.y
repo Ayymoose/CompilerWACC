@@ -160,7 +160,9 @@ assignrhs : expr                                           {$$ = $1}
           | NEWPAIR OPENROUND expr COMMA expr CLOSEROUND   { $$ = NewPair{FstExpr : $3, SndExpr : $5, Pos : $<pos>1, FileText :&parserlex.(*Lexer).input } }
 
 statements : statements SEMICOLON statement                { $$ = append($1,$3)   }
-           | statement                                     { $$ = []Statement{$1} }
+        //   | statement                                     { $$ = []Statement{$1} }
+   |                                      { $$ = []Statement{} }
+
            | FOR typeDef ident ASSIGNMENT assignrhs SEMICOLON expr SEMICOLON assignment DO statements DONE {
                                                                                                                  stats := append($11, $9)
                                                                                                                   w := While{Conditional : $7, DoStat : stats, Pos : $<pos>1, FileText :&parserlex.(*Lexer).input}
