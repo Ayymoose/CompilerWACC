@@ -138,7 +138,10 @@ type Program struct {
 }
 
 type NewObject struct {
-	Init []Evaluation
+	FileText *string
+	Pos      int
+	Class    ClassType
+	Init     []Evaluation
 }
 
 type FieldAccess struct {
