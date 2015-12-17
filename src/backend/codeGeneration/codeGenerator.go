@@ -329,3 +329,13 @@ func (cg *CodeGenerator) evalSize(es []Evaluation) int {
 	}
 	return total
 }
+
+// Returns class with the given class identifier
+func (cg *CodeGenerator) getClass(classIdent ClassType) *Class {
+	for _, class := range cg.classes {
+		if classIdent == class.Ident {
+			return class
+		}
+	}
+	return nil
+}

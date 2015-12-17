@@ -325,15 +325,8 @@ func (cg *CodeGenerator) evalRHS(t Evaluation, srcReg string) {
 	case NewObject:
 		cg.evalNewObject(t.(NewObject).Init, srcReg)
 	case FieldAccess:
-		classTyp := cg.eval(t.(FieldAccess).ObjectName)
-		var objClass *Class
-
-		for _, class := range cg.classes {
-			if classTyp == class.Ident {
-				objClass = class
-				break
-			}
-		}
+		classTyp := cg.eval(t.(FieldAccess).ObjectName).(ClassType)
+		objClass := cg.getClass(classTyp)
 
 		cg.evalField(t.(FieldAccess).ObjectName, t.(FieldAccess).Field, *objClass, srcReg)
 	default:
@@ -782,6 +775,25 @@ func (cg *CodeGenerator) cgVisitAssignmentStat(node Assignment) {
 		}
 		// Store the value into the pair
 		appendAssembly(cg.currInstrs(), "STR r4, [r5]", 1, 1)
+	case FieldAssign:
+		objIdent := lhs.(FieldAssign).ObjectName
+		field := lhs.(FieldAssign).Field
+		classTyp := cg.eval(objIdent).(ClassType)
+		class := cg.getClass(classTyp)
+
+		cg.evalRHS(objIdent, "r5")
+
+		// Field Accumulator
+		acc := 0
+		for _, currField := range class.FieldList {
+			if field == currField.Ident {
+				//Stores the current initialiser value on the heap for the object in the correct offset
+				appendAssembly(cg.currInstrs(), "STR r4, [r5, #"+strconv.Itoa(acc)+"]", 1, 1)
+				break
+			}
+			acc += sizeOf(currField.FieldType)
+		}
+
 	}
 }
 
