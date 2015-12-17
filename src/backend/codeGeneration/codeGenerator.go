@@ -17,7 +17,8 @@ type CodeGenerator struct {
 	msgInstrs         *ARMList          // List of assembly instructions to create msg labels
 	symTable          *SymbolTable      // Used to map variable identifiers to their types
 	funcSymTables     []*SymbolTable    // Used to map function variable indentifier to ther types
-	classes           []*Class          // List of classes defined withing the program
+	classes           []*Class          // List of classes defined within the program
+	functionList      []*Function       // List of functions defined within the program
 	funcInstrs        *ARMList          // List of assembly instructions that define functions and their labels
 	progFuncInstrs    *ARMList          // List of assembly instructions that define program generated functions e.g. p_print_string
 	progFuncNames     *[]string         // List of program defined function names. Used to avoid program redefinitions
@@ -48,10 +49,10 @@ func (cg *CodeGenerator) eval(e Evaluation) Type {
 
 	if cg.currStack.isFunc {
 		context1 := &Context{cg.root.FunctionList, cg.getFuncSymTable(), cg.classes}
-			eType, _ = e.Eval(context1)
-//		eType, _ = e.Eval(cg.root.FunctionList, cg.getFuncSymTable())
+		eType, _ = e.Eval(context1)
+		//		eType, _ = e.Eval(cg.root.FunctionList, cg.getFuncSymTable())
 	} else {
-			context2 := &Context{cg.root.FunctionList, cg.symTable, cg.classes}
+		context2 := &Context{cg.root.FunctionList, cg.symTable, cg.classes}
 		eType, _ = e.Eval(context2)
 	}
 

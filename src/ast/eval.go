@@ -169,21 +169,21 @@ func (value ArrayElem) Eval(context *Context) (Type, error) {
 // Get ident before first dot, look up in symboltable and get type (should be of type ClassType and in the []*Class)
 // get next ident, check if Class/field/method is defined in class
 func (value Ident) Eval(context *Context) (Type, error) {
-/*	valueString := string(value)
-	if strings.Contains(valueString, ".") {
-		index := strings.Index(valueString, ".")
-		///item := valueString[:index]
-		rest := valueString[index:]
+	/*	valueString := string(value)
+		if strings.Contains(valueString, ".") {
+			index := strings.Index(valueString, ".")
+			///item := valueString[:index]
+			rest := valueString[index:]
 
-		if context.symbolTable.isDefined(Ident(item)) {
-			resType, err := Ident(rest).Eval(context)
+			if context.symbolTable.isDefined(Ident(item)) {
+				resType, err := Ident(rest).Eval(context)
 
-			//Check if class type
-			switch resType.(type) {
-			case ClassType:
+				//Check if class type
+				switch resType.(type) {
+				case ClassType:
 
+				}
 			}
-		}
 
 	} else {  */
 		if context.SymbolTable.isDefined(value) {

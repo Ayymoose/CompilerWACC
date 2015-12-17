@@ -1,0 +1,10 @@
+# Expected:
+
+begin
+  bool printHello() is
+    print "HELLO WORLD!";
+    return true
+  end
+
+  call printHello()
+end

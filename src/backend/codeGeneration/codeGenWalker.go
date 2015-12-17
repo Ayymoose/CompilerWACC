@@ -42,9 +42,6 @@ const (
 	DIVIDE_BY_ZERO       = "\"DivideByZeroError: divide or modulo by zero\\n\\0\""
 )
 
-// Function global variable
-var functionList []*Function
-
 // HELPER FUNCTIONS
 // cgVisitReadStat helper function
 // Adds a function definition to the progFuncInstrs ARMList depending on the
@@ -322,6 +319,9 @@ func (cg *CodeGenerator) evalRHS(t Evaluation, srcReg string) {
 		cg.evalPairElem(t.(PairElem), srcReg)
 	case Call:
 		cg.cgVisitCallStat(t.(Call).Ident, t.(Call).ParamList, srcReg)
+	case CallInstance:
+		cg.cgVisitCallMethod(t.(CallInstance).Func,
+			t.(CallInstance).Class, t.(CallInstance).ParamList, srcReg)
 	case NewObject:
 		cg.evalNewObject(t.(NewObject).Init, srcReg)
 	case FieldAccess:
@@ -544,8 +544,7 @@ func (cg *CodeGenerator) cgVisitProgram(node *Program) {
 	cg.currStack.currP = cg.currStack.size
 	cg.currStack.isFunc = false
 	cg.classes = node.ClassList
-
-	functionList = node.FunctionList
+	cg.functionList = node.FunctionList
 
 	// .text
 	appendAssembly(cg.funcInstrs, ".text", 0, 2)
@@ -584,7 +583,7 @@ func (cg *CodeGenerator) cgVisitProgram(node *Program) {
 	appendAssembly(cg.currInstrs(), ".ltorg", 1, 1)
 
 	// Adds functions that were called
-	for _, function := range functionList {
+	for _, function := range cg.functionList {
 		if cg.isFunctionDefined(function.Ident) {
 			cg.cgVisitFunction(*function)
 		}
@@ -616,12 +615,11 @@ func (cg *CodeGenerator) cgEvalStat(stat interface{}) {
 		cg.cgVisitWhileStat(stat.(While))
 	case Scope:
 		cg.cgVisitScopeStat(stat.(Scope))
+	case Call:
+		cg.cgVisitCallStat(stat.(Call).Ident, stat.(Call).ParamList, "r0")
 	case CallInstance:
-		if stat.(CallInstance).Class == "" {
-			cg.cgVisitCallStat(stat.(CallInstance).Func, stat.(CallInstance).ParamList, "r0")
-		} else {
-
-		}
+		cg.cgVisitCallMethod(stat.(CallInstance).Func,
+			stat.(CallInstance).Class, stat.(CallInstance).ParamList, "r0")
 	}
 }
 
@@ -990,7 +988,7 @@ func (cg *CodeGenerator) cgVisitScopeStat(node Scope) {
 // but
 // WE EXECUTE WHAT IS INSIDE THE FUNCTION REGARDLESS OF WHETHER IT IS CALLED OR NOT
 func (cg *CodeGenerator) cgVisitCallStat(ident Ident, paramList []Evaluation, srcReg string) {
-	for _, function := range functionList {
+	for _, function := range cg.functionList {
 		if function.Ident == ident {
 			for i := len(paramList) - 1; i >= 0; i-- {
 				cg.cgVisitParameter(paramList[i])
@@ -1007,6 +1005,26 @@ func (cg *CodeGenerator) cgVisitCallStat(ident Ident, paramList []Evaluation, sr
 			break
 		}
 	}
+}
+
+func (cg *CodeGenerator) cgVisitCallMethod(ident Ident, classIdent Ident, paramList []Evaluation, srcReg string) {
+	/*for _, function := range cg.functionList {
+		if function.Ident == ident {
+			for i := len(paramList) - 1; i >= 0; i-- {
+				cg.cgVisitParameter(paramList[i])
+			}
+			appendAssembly(cg.currInstrs(), "BL f_"+string(function.Ident), 1, 1)
+			offset := cg.cgGetParamSize(paramList)
+			cg.subExtraOffset(offset)
+			//THIS LINE SHOULD BE REPLACED WITH removeStackSpace() At one point it might break here...
+			appendAssembly(cg.currInstrs(), "ADD sp, sp, #"+strconv.Itoa(offset), 1, 1)
+			appendAssembly(cg.currInstrs(), "MOV "+srcReg+", r0", 1, 1)
+			if !cg.isFunctionDefined(function.Ident) {
+				cg.addFunctionDef(function.Ident)
+			}
+			break
+		}
+	}*/
 }
 
 func (cg *CodeGenerator) cgGetParamSize(paramList []Evaluation) int {
