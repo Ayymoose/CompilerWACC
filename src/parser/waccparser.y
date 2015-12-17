@@ -272,6 +272,7 @@ pairtype : PAIR OPENROUND pairelemtype COMMA pairelemtype CLOSEROUND  { $$ = Pai
 pairelemtype : basetype  { $$ = $1 }
              | arraytype { $$ = $1 }
              | PAIR      { $$ = Pair}
+             | IDENTIFIER { $$ = ClassType($1)}
 
 typeDef : basetype  { $$ =  $1 }
         | arraytype { $$ =  $1 }
@@ -282,6 +283,8 @@ basetype : INT      { $$ =  Int }
          | CHAR     { $$ =  Char }
          | STRING   { $$ =  String }
 
-arraytype : typeDef OPENSQUARE CLOSESQUARE { $$ = ArrayType{Type : $1} }
+arraytype : basetype OPENSQUARE CLOSESQUARE { $$ = ArrayType{Type : $1} }
+          | pairtype OPENSQUARE CLOSESQUARE { $$ = ArrayType{Type : $1} }
+          | arraytype OPENSQUARE CLOSESQUARE { $$ = ArrayType{Type : $1} }
 
 %%
