@@ -79,12 +79,11 @@ state 5
 
 
 state 6
-	class:  CLASS.ident OPEN fieldlist functions CLOSE 
+	class:  CLASS.IDENTIFIER OPEN fieldlist functions CLOSE 
 
-	IDENTIFIER  shift 36
+	IDENTIFIER  shift 39
 	.  error
 
-	ident  goto 39
 
 state 7
 	program:  BEGIN classes functions statements.END 
@@ -553,7 +552,7 @@ state 38
 	ident  goto 50
 
 state 39
-	class:  CLASS ident.OPEN fieldlist functions CLOSE 
+	class:  CLASS IDENTIFIER.OPEN fieldlist functions CLOSE 
 
 	OPEN  shift 90
 	.  error
@@ -1381,7 +1380,7 @@ state 89
 
 
 state 90
-	class:  CLASS ident OPEN.fieldlist functions CLOSE 
+	class:  CLASS IDENTIFIER OPEN.fieldlist functions CLOSE 
 
 	INT  shift 29
 	BOOL  shift 30
@@ -2424,7 +2423,7 @@ state 145
 
 
 state 146
-	class:  CLASS ident OPEN fieldlist.functions CLOSE 
+	class:  CLASS IDENTIFIER OPEN fieldlist.functions CLOSE 
 	fieldlist:  fieldlist.COMMA field 
 	functions: .    (9)
 
@@ -3182,7 +3181,7 @@ state 184
 	pairelemtype  goto 202
 
 state 185
-	class:  CLASS ident OPEN fieldlist functions.CLOSE 
+	class:  CLASS IDENTIFIER OPEN fieldlist functions.CLOSE 
 	functions:  functions.function 
 
 	CLOSE  shift 203
@@ -3467,7 +3466,7 @@ state 202
 
 
 state 203
-	class:  CLASS ident OPEN fieldlist functions CLOSE.    (4)
+	class:  CLASS IDENTIFIER OPEN fieldlist functions CLOSE.    (4)
 
 	.  reduce 4 (src line 120)
 
@@ -3846,7 +3845,7 @@ state 229
 memory: parser 515/30000
 196 extra closures
 1459 shift entries, 3 exceptions
-142 goto entries
+141 goto entries
 240 entries saved by goto default
 Optimizer space used: output 686/30000
 686 table entries, 171 zero

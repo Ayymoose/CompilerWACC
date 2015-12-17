@@ -117,7 +117,7 @@ classes : classes class  { $$ = append($1, $2)}
         |                { $$ = []*Class{} }
 
 
-class : CLASS ident OPEN fieldlist functions CLOSE { if !checkClassIdent($2) {
+class : CLASS IDENTIFIER OPEN fieldlist functions CLOSE { if !checkClassIdent($2) {
                                                          	parserlex.Error("Invalid class name")
                                                      }
                                                      $$ = &Class{Ident : ClassType($2), FieldList : $4 , FunctionList : $5}
