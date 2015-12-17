@@ -5,5 +5,5 @@ begin
     string name, int age, bool epic
   close
 
-  skip
+  Person p = new Person("Nana",19,true)
 end
