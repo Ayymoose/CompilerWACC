@@ -253,6 +253,7 @@ expr : INTEGER        { $$ =  $1 }
      | expr AND expr  { $$ = Binop{Left : $1, Binary : AND,  Right : $3, Pos : $<pos>1, FileText :&parserlex.(*Lexer).input  } }
      | expr OR expr   { $$ = Binop{Left : $1, Binary : OR,   Right : $3, Pos : $<pos>1, FileText :&parserlex.(*Lexer).input  } }
      | OPENROUND expr CLOSEROUND  { $$ = $2 }
+     | CALL ident OPENROUND exprlist CLOSEROUND  { $$ = Call{Ident : $2, ParamList : $4, Pos : $<pos>1, FileText :&parserlex.(*Lexer).input  } }
 
 
 arrayliter : OPENSQUARE exprlist CLOSESQUARE { $$ = ArrayLiter{&parserlex.(*Lexer).input, $<pos>1, $2 } }
