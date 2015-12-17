@@ -222,7 +222,7 @@ expr : INTEGER        { $$ =  $1 }
      | CHARACTER      { $$ =  $1 }
      | STRINGCONST    { $$ =  $1 }
      | pairliter      { $$ =  $1 }
-     | ident     { $$ =  $1 }
+     | ident          { $$ =  $1 }
      | arrayelem      { $$ =  $1 }
      | NOT expr       { $$ = Unop{Unary : NOT, Expr : $2, Pos : $<pos>1, FileText :&parserlex.(*Lexer).input  } }
      | LEN expr       { $$ = Unop{Unary : LEN, Expr : $2, Pos : $<pos>1, FileText :&parserlex.(*Lexer).input  } }
@@ -245,6 +245,8 @@ expr : INTEGER        { $$ =  $1 }
      | expr OR expr   { $$ = Binop{Left : $1, Binary : OR,   Right : $3, Pos : $<pos>1, FileText :&parserlex.(*Lexer).input  } }
      | OPENROUND expr CLOSEROUND  { $$ = $2 }
      | CALL ident OPENROUND exprlist CLOSEROUND  { $$ = Call{Ident : $2, ParamList : $4, Pos : $<pos>1, FileText :&parserlex.(*Lexer).input  } }
+     | THIS DOT ident                                  { $$ = ThisInstance{$3} }
+     | NEW IDENTIFIER OPENROUND exprlist CLOSEROUND   { $$ = NewObject{Class : ClassType($2) , Init : $4 , Pos : $<pos>1, FileText :&parserlex.(*Lexer).input}}
 
 
 arrayliter : OPENSQUARE exprlist CLOSESQUARE { $$ = ArrayLiter{&parserlex.(*Lexer).input, $<pos>1, $2 } }
