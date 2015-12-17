@@ -152,11 +152,16 @@ param : typeDef ident { $$ = Param{ParamType : $1, Ident : $2} }
 assignlhs : ident    {$$ = $1}
           | arrayelem     {$$ = $1}
           | pairelem      {$$ = $1}
+      //    | ident DOT ident { $$ = FieldAssign{ObjectName : $1 , Field : $3} }
 
 assignrhs : expr                                           {$$ = $1}
           | arrayliter                                     {$$ = $1}
           | pairelem                                       {$$ = $1}
           | NEWPAIR OPENROUND expr COMMA expr CLOSEROUND   { $$ = NewPair{FstExpr : $3, SndExpr : $5, Pos : $<pos>1, FileText :&parserlex.(*Lexer).input } }
+//          | CALL ident OPENROUND exprlist CLOSEROUND  { $$ = Call{Ident : $2, ParamList : $4, Pos : $<pos>1, FileText :&parserlex.(*Lexer).input  } }
+//          | CALL ident DOT ident OPENROUND exprlist CLOSEROUND { $$ = CallInstance{Class : $2 , Func : $4 , ParamList : $6 } }
+          | THIS DOT ident { $$ = ThisInstance{$3} }
+  //        | ident DOT ident { $$ = Instance{IdentLHS : $1 , IdentRHS : $3} }
 
 statements : statements SEMICOLON statement                { $$ = append($1,$3)   }
            | statement                                     { $$ = []Statement{$1} }
@@ -174,6 +179,10 @@ statement : SKIP                                        { $$ = Skip{Pos : $<pos>
           | typeDef ident ASSIGNMENT assignrhs     { $$ = Declare{DecType : $1, Lhs : $2, Rhs : $4, Pos : $<pos>1 ,FileText :&parserlex.(*Lexer).input } }
 
           | assignment                                  { $$ = $1 }
+
+//          | CALL ident OPENROUND exprlist CLOSEROUND  { $$ = Call{Ident : $2, ParamList : $4, Pos : $<pos>1, FileText :&parserlex.(*Lexer).input  } }
+
+//          | CALL ident DOT ident OPENROUND exprlist CLOSEROUND { $$ = CallInstance{Class : $2 , Func : $4 , ParamList : $6 } }
 
           | READ assignlhs                              { $$ = Read{ &parserlex.(*Lexer).input, $<pos>1 , $2, } }
           | FREE expr                                   { $$ = Free{&parserlex.(*Lexer).input, $<pos>1, $2} }

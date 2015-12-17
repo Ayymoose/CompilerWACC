@@ -79,7 +79,6 @@ var TokenKeywordStrings = map[string]int{
 	"while":   WHILE,
 	"done":    DONE,
 	"do":      DO,
-	"new": NEW,
 	"newpair": NEWPAIR,
 	"call":    CALL,
 	"fst":     FST,
@@ -327,11 +326,7 @@ func lexIdentifier(l *Lexer) stateFn {
 	for isAlphaNumeric(l.peek()) || l.peek() == '_' {
 		l.next()
 	}
-/*	if l.lastItem == CLASS || l.lastItem == NEW {
-		l.emit(CLASSTYPE)
-	} else {  */
 	l.emit(IDENTIFIER)
-//}
 	return lexInsideProgram
 }
 
@@ -407,8 +402,6 @@ func (l *Lexer) Lex(lval *parserSymType) int {
 		*lval = parserSymType{character: Character(token.Lexeme), pos: position}
 	case IDENTIFIER:
 		*lval = parserSymType{ident: Ident(token.Lexeme), pos: position}
-/*	case CLASSTYPE:
-			*lval = parserSymType{classtype: Ident(token.Lexeme), pos: position}   */
 	case TRUE:
 		*lval = parserSymType{boolean: Boolean(true), pos: position}
 	case FALSE:
