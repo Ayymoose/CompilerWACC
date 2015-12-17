@@ -3,6 +3,7 @@ package ast
 import (
 	"errors"
 	"fmt"
+//	"strings"
 )
 
 func (value CallInstance) Eval(context *Context) (Type, error) {
@@ -184,11 +185,11 @@ func (value Ident) Eval(context *Context) (Type, error) {
 				}
 			}
 
-		} else { */
-	if context.SymbolTable.isDefined(value) {
-		return context.SymbolTable.getTypeOfIdent(value), nil
-		//		}
-	}
+	} else {  */
+		if context.SymbolTable.isDefined(value) {
+			return context.SymbolTable.getTypeOfIdent(value), nil
+		}
+	//}
 	return nil, errors.New(" :Cannot find " + string(value) + "in symbol table") // AWWHHHW
 }
 
