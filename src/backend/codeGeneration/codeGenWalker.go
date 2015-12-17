@@ -42,9 +42,6 @@ const (
 	DIVIDE_BY_ZERO       = "\"DivideByZeroError: divide or modulo by zero\\n\\0\""
 )
 
-// Function global variable
-var functionList []*Function
-
 // HELPER FUNCTIONS
 // cgVisitReadStat helper function
 // Adds a function definition to the progFuncInstrs ARMList depending on the
@@ -547,8 +544,7 @@ func (cg *CodeGenerator) cgVisitProgram(node *Program) {
 	cg.currStack.currP = cg.currStack.size
 	cg.currStack.isFunc = false
 	cg.classes = node.ClassList
-
-	functionList = node.FunctionList
+	cg.functionList = node.FunctionList
 
 	// .text
 	appendAssembly(cg.funcInstrs, ".text", 0, 2)
@@ -587,7 +583,7 @@ func (cg *CodeGenerator) cgVisitProgram(node *Program) {
 	appendAssembly(cg.currInstrs(), ".ltorg", 1, 1)
 
 	// Adds functions that were called
-	for _, function := range functionList {
+	for _, function := range cg.functionList {
 		if cg.isFunctionDefined(function.Ident) {
 			cg.cgVisitFunction(*function)
 		}
@@ -992,7 +988,7 @@ func (cg *CodeGenerator) cgVisitScopeStat(node Scope) {
 // but
 // WE EXECUTE WHAT IS INSIDE THE FUNCTION REGARDLESS OF WHETHER IT IS CALLED OR NOT
 func (cg *CodeGenerator) cgVisitCallStat(ident Ident, paramList []Evaluation, srcReg string) {
-	for _, function := range functionList {
+	for _, function := range cg.functionList {
 		if function.Ident == ident {
 			for i := len(paramList) - 1; i >= 0; i-- {
 				cg.cgVisitParameter(paramList[i])
@@ -1012,7 +1008,7 @@ func (cg *CodeGenerator) cgVisitCallStat(ident Ident, paramList []Evaluation, sr
 }
 
 func (cg *CodeGenerator) cgVisitCallMethod(ident Ident, classIdent Ident, paramList []Evaluation, srcReg string) {
-	/*for _, function := range functionList {
+	/*for _, function := range cg.functionList {
 		if function.Ident == ident {
 			for i := len(paramList) - 1; i >= 0; i-- {
 				cg.cgVisitParameter(paramList[i])
