@@ -16,6 +16,7 @@ integer     Integer
 ident       Ident
 character   Character
 boolean     Boolean
+
 functions      []*Function
 function       *Function
 classes        []*Class
@@ -122,7 +123,7 @@ class : CLASS IDENTIFIER OPEN fieldlist functions CLOSE { if !checkClassIdent($2
 
 fieldlist : fieldlist COMMA field { $$ = append($1, $3)}
           | field               { $$ = []Field{$1}   }
-    //        |                     { $$ = []Field{}     }
+
 
 field : typeDef ident { $$ = Field{FieldType : $1, Ident : $2} }
 
@@ -147,6 +148,7 @@ paramlist : paramlist COMMA param { $$ = append($1, $3)}
 
 
 param : typeDef ident     { $$ = Param{ParamType : $1, Ident : $2} }
+
 assignlhs : ident         {$$ = $1}
           | arrayelem     {$$ = $1}
           | pairelem      {$$ = $1}
@@ -270,15 +272,15 @@ pairelemtype : basetype  { $$ = $1 }
 typeDef : basetype   { $$ =  $1          }
         | arraytype  { $$ =  $1          }
         | pairtype   { $$ =  $1          }
-        | IDENTIFIER { $$ = ClassType($1)}
+//        | IDENTIFIER { $$ = ClassType($1)}
 
 basetype : INT      { $$ =  Int    }
          | BOOL     { $$ =  Bool   }
          | CHAR     { $$ =  Char   }
          | STRING   { $$ =  String }
 
-arraytype : basetype OPENSQUARE CLOSESQUARE { $$ = ArrayType{Type : $1} }
-          | pairtype OPENSQUARE CLOSESQUARE { $$ = ArrayType{Type : $1} }
-          | arraytype OPENSQUARE CLOSESQUARE { $$ = ArrayType{Type : $1} }
+arraytype : typeDef OPENSQUARE CLOSESQUARE { $$ = ArrayType{Type : $1} }
+//          | pairtype OPENSQUARE CLOSESQUARE { $$ = ArrayType{Type : $1} }
+//          | arraytype OPENSQUARE CLOSESQUARE { $$ = ArrayType{Type : $1} }
 
 %%

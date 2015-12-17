@@ -74,3 +74,4 @@ COMPLETE
 <expr> := NEW IDENTIFIER OPENROUND ParamList CLOSEROUND
 
 // cannot create array of objects
+// Add instance function 

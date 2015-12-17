@@ -79,6 +79,10 @@ func (x PairType) typeString() string {
 	return "Pair:" + x.FstType.typeString() + "/" + x.SndType.typeString()
 }
 
+func (x ClassType) typeString() string {
+	return "Class:" + string(x)
+}
+
 type Skip struct {
 	FileText *string
 	Pos      int
@@ -136,8 +140,8 @@ type Program struct {
 type NewObject struct {
 	FileText *string
 	Pos      int
-	Class ClassType
-	Init []Evaluation
+	Class    ClassType
+	Init     []Evaluation
 }
 
 type FieldAccess struct {
