@@ -1,0 +1,5 @@
+begin
+class Test open
+int field
+close
+end
