@@ -201,6 +201,12 @@ type NewPair struct {
 	SndExpr  Evaluation
 }
 
+type NewClass struct {
+	FileText *string
+	Pos      int
+	classType ClassType
+}
+
 // Declare struct
 type Declare struct {
 	FileText *string

@@ -69,3 +69,6 @@ COMPLETE
 
 COMPLETE
 <class> := 'class' <class-ident> 'open' <field-list>* <func>* 'close'
+
+
+<expr> := NEW IDENTIFIER OPENROUND ParamList CLOSEROUND

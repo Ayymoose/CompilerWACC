@@ -124,7 +124,7 @@ class : CLASS ident OPEN fieldlist functions CLOSE { if !checkClassIdent($2) {
                                                    }
 
 fieldlist : fieldlist COMMA field { $$ = append($1, $3)}
-          | field                 { $$ = []Field{ $1 } }
+          |                       { $$ = []Field{}     }
 
 field : typeDef ident { $$ = Field{FieldType : $1, Ident : $2} }
 
@@ -147,43 +147,32 @@ function : typeDef ident OPENROUND CLOSEROUND IS statements END
 paramlist : paramlist COMMA param { $$ = append($1, $3)}
           | param                 { $$ = []Param{ $1 } }
 
-param : typeDef ident { $$ = Param{ParamType : $1, Ident : $2} }
 
-assignlhs : ident    {$$ = $1}
+param : typeDef ident     { $$ = Param{ParamType : $1, Ident : $2} }
+assignlhs : ident         {$$ = $1}
           | arrayelem     {$$ = $1}
           | pairelem      {$$ = $1}
-      //    | ident DOT ident { $$ = FieldAssign{ObjectName : $1 , Field : $3} }
 
-assignrhs : expr                                           {$$ = $1}
-          | arrayliter                                     {$$ = $1}
-          | pairelem                                       {$$ = $1}
+assignrhs : expr                                           { $$ = $1 }
+          | arrayliter                                     { $$ = $1 }
+          | pairelem                                       { $$ = $1 }
           | NEWPAIR OPENROUND expr COMMA expr CLOSEROUND   { $$ = NewPair{FstExpr : $3, SndExpr : $5, Pos : $<pos>1, FileText :&parserlex.(*Lexer).input } }
-//          | CALL ident OPENROUND exprlist CLOSEROUND  { $$ = Call{Ident : $2, ParamList : $4, Pos : $<pos>1, FileText :&parserlex.(*Lexer).input  } }
-//          | CALL ident DOT ident OPENROUND exprlist CLOSEROUND { $$ = CallInstance{Class : $2 , Func : $4 , ParamList : $6 } }
-          | THIS DOT ident { $$ = ThisInstance{$3} }
-  //        | ident DOT ident { $$ = Instance{IdentLHS : $1 , IdentRHS : $3} }
 
 statements : statements SEMICOLON statement                { $$ = append($1,$3)   }
            | statement                                     { $$ = []Statement{$1} }
            | FOR typeDef ident ASSIGNMENT assignrhs SEMICOLON expr SEMICOLON assignment DO statements DONE {
-                                                                                                                 stats := append($11, $9)
-                                                                                                                  w := While{Conditional : $7, DoStat : stats, Pos : $<pos>1, FileText :&parserlex.(*Lexer).input}
-                                                                                                                  d := Declare{DecType : $2, Lhs : $3, Rhs : $5, Pos : $<pos>1 ,FileText :&parserlex.(*Lexer).input }
-                                                                                                                  $$ = []Statement{d,w}
-                                                                                                                }
+                                                                                                            stats := append($11, $9)
+                                                                                                            w := While{Conditional : $7, DoStat : stats, Pos : $<pos>1, FileText :&parserlex.(*Lexer).input}
+                                                                                                            d := Declare{DecType : $2, Lhs : $3, Rhs : $5, Pos : $<pos>1 ,FileText :&parserlex.(*Lexer).input }
+                                                                                                            $$ = []Statement{d,w}
+                                                                                                           }
 
 ident : IDENTIFIER                                      { $$ = $1}
       | IDENTIFIER DOT ident                            { $$ = Ident(string($1)+"."+string($3))}
 
 statement : SKIP                                        { $$ = Skip{Pos : $<pos>1 ,FileText :&parserlex.(*Lexer).input } }
-          | typeDef ident ASSIGNMENT assignrhs     { $$ = Declare{DecType : $1, Lhs : $2, Rhs : $4, Pos : $<pos>1 ,FileText :&parserlex.(*Lexer).input } }
-
+          | typeDef ident ASSIGNMENT assignrhs          { $$ = Declare{DecType : $1, Lhs : $2, Rhs : $4, Pos : $<pos>1 ,FileText :&parserlex.(*Lexer).input } }
           | assignment                                  { $$ = $1 }
-
-//          | CALL ident OPENROUND exprlist CLOSEROUND  { $$ = Call{Ident : $2, ParamList : $4, Pos : $<pos>1, FileText :&parserlex.(*Lexer).input  } }
-
-//          | CALL ident DOT ident OPENROUND exprlist CLOSEROUND { $$ = CallInstance{Class : $2 , Func : $4 , ParamList : $6 } }
-
           | READ assignlhs                              { $$ = Read{ &parserlex.(*Lexer).input, $<pos>1 , $2, } }
           | FREE expr                                   { $$ = Free{&parserlex.(*Lexer).input, $<pos>1, $2} }
           | RETURN expr                                 { $$ = Return{&parserlex.(*Lexer).input, $<pos>1, $2} }
@@ -191,12 +180,10 @@ statement : SKIP                                        { $$ = Skip{Pos : $<pos>
           | PRINT expr                                  { $$ = Print{&parserlex.(*Lexer).input, $<pos>1, $2} }
           | PRINTLN expr                                { $$ = Println{&parserlex.(*Lexer).input, $<pos>1, $2} }
           | IF expr THEN statements ELSE statements FI  { $$ = If{Conditional : $2, ThenStat : $4, ElseStat : $6, Pos : $<pos>1, FileText :&parserlex.(*Lexer).input } }
-
-
           | FOR expr SEMICOLON assignment DO statements DONE {
-                                                                                  stats := append($6, $4)
-                                                                                  $$ = While{Conditional : $2, DoStat : stats, Pos : $<pos>1, FileText :&parserlex.(*Lexer).input}
-                                                                                  }
+                                                              stats := append($6, $4)
+                                                              $$ = While{Conditional : $2, DoStat : stats, Pos : $<pos>1, FileText :&parserlex.(*Lexer).input}
+                                                             }
           | WHILE expr DO statements DONE               { $$ = While{Conditional : $2, DoStat : $4, Pos : $<pos>1, FileText :&parserlex.(*Lexer).input} }
           | BEGIN statements END                        { $$ = Scope{StatList : $2, Pos : $<pos>1, FileText :&parserlex.(*Lexer).input } }
           | error SEMICOLON                             {
@@ -215,15 +202,14 @@ statement : SKIP                                        { $$ = Skip{Pos : $<pos>
                                                           $$ = nil
                                                         }
 
-assignment :  assignlhs ASSIGNMENT assignrhs              { $$ = Assignment{Lhs : $1, Rhs : $3, Pos : $<pos>1 ,FileText :&parserlex.(*Lexer).input} }
-             | ident PLUS ASSIGNMENT expr             { $$ = Assignment{Lhs : $1, Rhs : Binop{Left : $1, Binary : PLUS, Right : $4, Pos : $<pos>1, FileText :&parserlex.(*Lexer).input}, Pos : $<pos>1 ,FileText :&parserlex.(*Lexer).input} }
-             | ident SUB  ASSIGNMENT expr             { $$ = Assignment{Lhs : $1, Rhs : Binop{Left : $1, Binary : SUB , Right : $4, Pos : $<pos>1, FileText :&parserlex.(*Lexer).input}, Pos : $<pos>1 ,FileText :&parserlex.(*Lexer).input} }
-             | ident DIV  ASSIGNMENT expr             { $$ = Assignment{Lhs : $1, Rhs : Binop{Left : $1, Binary : DIV,  Right : $4, Pos : $<pos>1, FileText :&parserlex.(*Lexer).input}, Pos : $<pos>1 ,FileText :&parserlex.(*Lexer).input} }
-             | ident MUL  ASSIGNMENT expr             { $$ = Assignment{Lhs : $1, Rhs : Binop{Left : $1, Binary : MUL,  Right : $4, Pos : $<pos>1, FileText :&parserlex.(*Lexer).input}, Pos : $<pos>1 ,FileText :&parserlex.(*Lexer).input} }
-             | ident MOD  ASSIGNMENT expr             { $$ = Assignment{Lhs : $1, Rhs : Binop{Left : $1, Binary : MOD,  Right : $4, Pos : $<pos>1, FileText :&parserlex.(*Lexer).input}, Pos : $<pos>1 ,FileText :&parserlex.(*Lexer).input} }
-             | ident PLUS PLUS                        { $$ = Assignment{Lhs : $1, Rhs : Binop{Left : $1, Binary : PLUS, Right : Integer(1), Pos : $<pos>1, FileText :&parserlex.(*Lexer).input}, Pos : $<pos>1 ,FileText :&parserlex.(*Lexer).input} }
-             | ident SUB  SUB                         { $$ = Assignment{Lhs : $1, Rhs : Binop{Left : $1, Binary : SUB,  Right : Integer(1), Pos : $<pos>1, FileText :&parserlex.(*Lexer).input}, Pos : $<pos>1 ,FileText :&parserlex.(*Lexer).input} }
-             | ident MUL  MUL                         { $$ = Assignment{Lhs : $1, Rhs : Binop{Left : $1, Binary : MUL,  Right : $1,         Pos : $<pos>1, FileText :&parserlex.(*Lexer).input}, Pos : $<pos>1 ,FileText :&parserlex.(*Lexer).input} }
+assignment : assignlhs ASSIGNMENT assignrhs         { $$ = Assignment{Lhs : $1, Rhs : $3, Pos : $<pos>1 ,FileText :&parserlex.(*Lexer).input} }
+           | ident PLUS ASSIGNMENT expr             { $$ = Assignment{Lhs : $1, Rhs : Binop{Left : $1, Binary : PLUS, Right : $4, Pos : $<pos>1, FileText :&parserlex.(*Lexer).input}, Pos : $<pos>1 ,FileText :&parserlex.(*Lexer).input} }
+           | ident SUB  ASSIGNMENT expr             { $$ = Assignment{Lhs : $1, Rhs : Binop{Left : $1, Binary : SUB , Right : $4, Pos : $<pos>1, FileText :&parserlex.(*Lexer).input}, Pos : $<pos>1 ,FileText :&parserlex.(*Lexer).input} }
+           | ident DIV  ASSIGNMENT expr             { $$ = Assignment{Lhs : $1, Rhs : Binop{Left : $1, Binary : DIV,  Right : $4, Pos : $<pos>1, FileText :&parserlex.(*Lexer).input}, Pos : $<pos>1 ,FileText :&parserlex.(*Lexer).input} }
+           | ident MUL  ASSIGNMENT expr             { $$ = Assignment{Lhs : $1, Rhs : Binop{Left : $1, Binary : MUL,  Right : $4, Pos : $<pos>1, FileText :&parserlex.(*Lexer).input}, Pos : $<pos>1 ,FileText :&parserlex.(*Lexer).input} }             | ident MOD  ASSIGNMENT expr             { $$ = Assignment{Lhs : $1, Rhs : Binop{Left : $1, Binary : MOD,  Right : $4, Pos : $<pos>1, FileText :&parserlex.(*Lexer).input}, Pos : $<pos>1 ,FileText :&parserlex.(*Lexer).input} }
+           | ident PLUS PLUS                        { $$ = Assignment{Lhs : $1, Rhs : Binop{Left : $1, Binary : PLUS, Right : Integer(1), Pos : $<pos>1, FileText :&parserlex.(*Lexer).input}, Pos : $<pos>1 ,FileText :&parserlex.(*Lexer).input} }
+           | ident SUB  SUB                         { $$ = Assignment{Lhs : $1, Rhs : Binop{Left : $1, Binary : SUB,  Right : Integer(1), Pos : $<pos>1, FileText :&parserlex.(*Lexer).input}, Pos : $<pos>1 ,FileText :&parserlex.(*Lexer).input} }
+           | ident MUL  MUL                         { $$ = Assignment{Lhs : $1, Rhs : Binop{Left : $1, Binary : MUL,  Right : $1,         Pos : $<pos>1, FileText :&parserlex.(*Lexer).input}, Pos : $<pos>1 ,FileText :&parserlex.(*Lexer).input} }
 
 expr : INTEGER        { $$ =  $1 }
      | TRUE           { $$ =  $1 }
@@ -231,7 +217,7 @@ expr : INTEGER        { $$ =  $1 }
      | CHARACTER      { $$ =  $1 }
      | STRINGCONST    { $$ =  $1 }
      | pairliter      { $$ =  $1 }
-     | ident     { $$ =  $1 }
+     | ident          { $$ =  $1 }
      | arrayelem      { $$ =  $1 }
      | NOT expr       { $$ = Unop{Unary : NOT, Expr : $2, Pos : $<pos>1, FileText :&parserlex.(*Lexer).input  } }
      | LEN expr       { $$ = Unop{Unary : LEN, Expr : $2, Pos : $<pos>1, FileText :&parserlex.(*Lexer).input  } }
@@ -252,8 +238,10 @@ expr : INTEGER        { $$ =  $1 }
      | expr NEQ expr  { $$ = Binop{Left : $1, Binary : NEQ,  Right : $3, Pos : $<pos>1, FileText :&parserlex.(*Lexer).input  } }
      | expr AND expr  { $$ = Binop{Left : $1, Binary : AND,  Right : $3, Pos : $<pos>1, FileText :&parserlex.(*Lexer).input  } }
      | expr OR expr   { $$ = Binop{Left : $1, Binary : OR,   Right : $3, Pos : $<pos>1, FileText :&parserlex.(*Lexer).input  } }
-     | OPENROUND expr CLOSEROUND  { $$ = $2 }
-     | CALL ident OPENROUND exprlist CLOSEROUND  { $$ = Call{Ident : $2, ParamList : $4, Pos : $<pos>1, FileText :&parserlex.(*Lexer).input  } }
+     | OPENROUND expr CLOSEROUND                       { $$ = $2 }
+     | CALL ident OPENROUND exprlist CLOSEROUND        { $$ = Call{Ident : $2, ParamList : $4, Pos : $<pos>1, FileText :&parserlex.(*Lexer).input  } }
+     | THIS DOT ident                                  { $$ = ThisInstance{$3} }
+     | NEW IDENTIFIER OPENROUND ParamList CLOSEROUND   { $$ = NewObject{Class : $2 ,Pos : $<pos>1, FileText :&parserlex.(*Lexer).input}}
 
 
 arrayliter : OPENSQUARE exprlist CLOSESQUARE { $$ = ArrayLiter{&parserlex.(*Lexer).input, $<pos>1, $2 } }
