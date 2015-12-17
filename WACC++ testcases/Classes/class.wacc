@@ -1,5 +1,5 @@
 begin
 class Test open
-int field
+int cool, char k
 close
 end

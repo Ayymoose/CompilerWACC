@@ -3,7 +3,7 @@ package ast
 import (
 	"errors"
 	"fmt"
-	"strings"
+//	"strings"
 )
 
 func (value CallInstance) Eval(context *Context) (Type, error) {
@@ -169,7 +169,7 @@ func (value ArrayElem) Eval(context *Context) (Type, error) {
 // Get ident before first dot, look up in symboltable and get type (should be of type ClassType and in the []*Class)
 // get next ident, check if Class/field/method is defined in class
 func (value Ident) Eval(context *Context) (Type, error) {
-	valueString := string(value)
+/*	valueString := string(value)
 	if strings.Contains(valueString, ".") {
 		index := strings.Index(valueString, ".")
 		///item := valueString[:index]
@@ -185,11 +185,11 @@ func (value Ident) Eval(context *Context) (Type, error) {
 			}
 		}
 
-	} else {
+	} else {  */
 		if context.SymbolTable.isDefined(value) {
 			return context.SymbolTable.getTypeOfIdent(value), nil
 		}
-	}
+	//}
 	return nil, errors.New(" :Cannot find " + string(value) + "in symbol table") // AWWHHHW
 }
 
