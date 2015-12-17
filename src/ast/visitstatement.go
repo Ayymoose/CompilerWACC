@@ -22,8 +22,8 @@ func (node If) checkIfReturn(context *Context, returnType Type) errorSlice {
 	if cond != Bool {
 		semanticErrors = append(semanticErrors, errorConditional(node.FileText, node.Pos))
 	}
-	thenSymTab := context.symbolTable.New()
-	context.symbolTable.Children = append(context.symbolTable.Children, thenSymTab)
+	thenSymTab := context.SymbolTable.New()
+	context.SymbolTable.Children = append(context.SymbolTable.Children, thenSymTab)
 	for _, thenstat := range node.ThenStat {
 		switch thenstat.(type) {
 		case Return:
@@ -43,8 +43,8 @@ func (node If) checkIfReturn(context *Context, returnType Type) errorSlice {
 			}
 		}
 	}
-	elseSymTab := context.symbolTable.New()
-	context.symbolTable.Children = append(context.symbolTable.Children, elseSymTab)
+	elseSymTab := context.SymbolTable.New()
+	context.SymbolTable.Children = append(context.SymbolTable.Children, elseSymTab)
 	for _, elsestat := range node.ElseStat {
 		switch elsestat.(type) {
 		case Return:
@@ -179,7 +179,7 @@ func (node Instance) visitStatement(context *Context) errorSlice {
 
 func (node Declare) visitStatement(context *Context) errorSlice {
 	var semanticErrors errorSlice
-	if context.symbolTable.isDefinedInScope(node.Lhs) {
+	if context.SymbolTable.isDefinedInScope(node.Lhs) {
 		semanticErrors = append(semanticErrors, errorDeclared(node.FileText, node.Pos))
 	}
 	exprType, errs := node.Rhs.Eval(context)
@@ -218,7 +218,7 @@ func (node Declare) visitStatement(context *Context) errorSlice {
 			semanticErrors = append(semanticErrors, errorTypeMatch(node.FileText, node.Pos))
 		}
 	}
-	context.symbolTable.insert(node.Lhs, node.DecType)
+	context.SymbolTable.insert(node.Lhs, node.DecType)
 	if len(semanticErrors) > 0 {
 		return semanticErrors
 	}
@@ -348,18 +348,18 @@ func (node If) visitStatement(context *Context) errorSlice {
 		//		semanticErrors = append(semanticErrors, errors.New("line:"+fmt.Sprint(node.Pos)+" :Conditional is not boolean expression"))
 		semanticErrors = append(semanticErrors, errorConditional(node.FileText, node.Pos))
 	}
-	thenSymTab := context.symbolTable.New()
-	thenContext := &Context{context.functionTable, thenSymTab, context.classTable}
-	context.symbolTable.Children = append(context.symbolTable.Children, thenSymTab)
+	thenSymTab := context.SymbolTable.New()
+	thenContext := &Context{context.FunctionTable, thenSymTab, context.ClassTable}
+	context.SymbolTable.Children = append(context.SymbolTable.Children, thenSymTab)
 	for _, thenstat := range node.ThenStat {
 		errs := thenstat.visitStatement(thenContext)
 		if errs != nil {
 			semanticErrors = append(semanticErrors, errs)
 		}
 	}
-	elseSymTab := context.symbolTable.New()
-	elseContext := &Context{context.functionTable, elseSymTab, context.classTable}
-	context.symbolTable.Children = append(context.symbolTable.Children, elseSymTab)
+	elseSymTab := context.SymbolTable.New()
+	elseContext := &Context{context.FunctionTable, elseSymTab, context.ClassTable}
+	context.SymbolTable.Children = append(context.SymbolTable.Children, elseSymTab)
 	for _, elsestat := range node.ElseStat {
 		errs := elsestat.visitStatement(elseContext)
 		if errs != nil {
@@ -382,9 +382,9 @@ func (node While) visitStatement(context *Context) errorSlice {
 		//			semanticErrors = append(semanticErrors, errors.New("line:"+fmt.Sprint(node.Pos)+" :Conditional is not boolean expression"))
 		semanticErrors = append(semanticErrors, errorConditional(node.FileText, node.Pos))
 	}
-	whileSymTab := context.symbolTable.New()
-	context.symbolTable.Children = append(context.symbolTable.Children, whileSymTab)
-	newContext := &Context{context.functionTable, whileSymTab, context.classTable}
+	whileSymTab := context.SymbolTable.New()
+	context.SymbolTable.Children = append(context.SymbolTable.Children, whileSymTab)
+	newContext := &Context{context.FunctionTable, whileSymTab, context.ClassTable}
 	for _, dostat := range node.DoStat {
 		errs := dostat.visitStatement(newContext)
 		if errs != nil {
@@ -399,9 +399,9 @@ func (node While) visitStatement(context *Context) errorSlice {
 
 func (node Scope) visitStatement(context *Context) errorSlice {
 	var semanticErrors errorSlice
-	newSymTab := context.symbolTable.New()
-	context.symbolTable.Children = append(context.symbolTable.Children, newSymTab)
-	newContext := &Context{context.functionTable, newSymTab, context.classTable}
+	newSymTab := context.SymbolTable.New()
+	context.SymbolTable.Children = append(context.SymbolTable.Children, newSymTab)
+	newContext := &Context{context.FunctionTable, newSymTab, context.ClassTable}
 	for _, stat := range node.StatList {
 		errs := stat.visitStatement(newContext)
 		if errs != nil {

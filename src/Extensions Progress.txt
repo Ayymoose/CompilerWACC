@@ -12,7 +12,8 @@ ALLOW FUNCTION CALLS OUTSIDE OF ASSIGNMENT: HENRYK -----------------------------
 CLASSES: (Frontend done) NOT COMPLETE - FRONTEND AND NANA/AYMAN/HENRYK
 - visitDeclare   - DONE/UNTESTED
 - visitNewObject - DONE/UNTESTED
-- visitField     - DONE BUT NEED SYMBTABLE
+- visitField     - DONE/UNTESTED
+- Assign to field - DONE/UNTESTED
 - visitMethod
 - visitCall      - DONE/ UNTESTED
 - printing classes

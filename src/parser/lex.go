@@ -95,10 +95,12 @@ var TokenKeywordStrings = map[string]int{
 	"true":    TRUE,
 	"false":   FALSE,
 	"for":     FOR,
+	"this": THIS,
 }
 
 // TokenStrings map
 var TokenStrings = map[string]int{
+	".": DOT,
 	",":  COMMA,
 	";":  SEMICOLON,
 	"%":  MOD,
