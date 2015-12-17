@@ -3,38 +3,39 @@ package ast
 import (
 	"errors"
 	"fmt"
+	"strings"
 )
 
-func (value CallInstance) Eval(functionTable []*Function, symbolTable *SymbolTable) (Type, error) {
+func (value CallInstance) Eval(context *Context) (Type, error) {
 	return nil, nil
 }
-func (value Class) Eval(functionTable []*Function, symbolTable *SymbolTable) (Type, error) {
+func (value Class) Eval(context *Context) (Type, error) {
 	return nil, nil
 }
-func (value ThisInstance) Eval(functionTable []*Function, symbolTable *SymbolTable) (Type, error) {
+func (value ThisInstance) Eval(context *Context) (Type, error) {
 	return nil, nil
 }
-func (value Instance) Eval(functionTable []*Function, symbolTable *SymbolTable) (Type, error) {
+func (value Instance) Eval(context *Context) (Type, error) {
 	return nil, nil
 }
-func (value NewObject) Eval(functionTable []*Function, symbolTable *SymbolTable) (Type, error) {
+func (value NewObject) Eval(context *Context) (Type, error) {
 	return nil, nil
 }
-func (value FieldAccess) Eval(functionTable []*Function, symbolTable *SymbolTable) (Type, error) {
+func (value FieldAccess) Eval(context *Context) (Type, error) {
 	return nil, nil
 }
-func (value FieldAssign) Eval(functionTable []*Function, symbolTable *SymbolTable) (Type, error) {
+func (value FieldAssign) Eval(context *Context) (Type, error) {
 	return nil, nil
 }
 
-func (value Call) Eval(functionTable []*Function, symbolTable *SymbolTable) (Type, error) {
-	for _, function := range functionTable {
+func (value Call) Eval(context *Context) (Type, error) {
+	for _, function := range context.functionTable {
 		if value.Ident == function.Ident {
 			if len(value.ParamList) != len(function.ParameterTypes) {
 				return nil, errorCallParam(value.FileText, value.Pos)
 			}
 			for ind := range value.ParamList {
-				exprType, err := value.ParamList[ind].Eval(functionTable, symbolTable)
+				exprType, err := value.ParamList[ind].Eval(context)
 				if err != nil {
 					return nil, err
 				}
@@ -48,16 +49,16 @@ func (value Call) Eval(functionTable []*Function, symbolTable *SymbolTable) (Typ
 	return nil, errorNoFunction(value.FileText, value.Pos)
 }
 
-func (value ArrayLiter) Eval(functionTable []*Function, symbolTable *SymbolTable) (Type, error) {
+func (value ArrayLiter) Eval(context *Context) (Type, error) {
 	var currType Type
 	if len(value.Exprs) > 0 {
-		fstType, err := value.Exprs[0].Eval(functionTable, symbolTable)
+		fstType, err := value.Exprs[0].Eval(context)
 		currType = fstType
 		if err != nil {
 			return nil, err
 		}
 		for _, exprs := range value.Exprs {
-			currType2, err2 := exprs.Eval(functionTable, symbolTable)
+			currType2, err2 := exprs.Eval(context)
 			if err2 != nil {
 				return nil, err2
 			}
@@ -70,9 +71,9 @@ func (value ArrayLiter) Eval(functionTable []*Function, symbolTable *SymbolTable
 	return nil, nil
 }
 
-func (value NewPair) Eval(functionTable []*Function, symbolTable *SymbolTable) (Type, error) {
-	fstTyp, err1 := value.FstExpr.Eval(functionTable, symbolTable)
-	sndTyp, err2 := value.SndExpr.Eval(functionTable, symbolTable)
+func (value NewPair) Eval(context *Context) (Type, error) {
+	fstTyp, err1 := value.FstExpr.Eval(context)
+	sndTyp, err2 := value.SndExpr.Eval(context)
 	if err1 != nil {
 		return nil, err1
 	}
@@ -82,9 +83,9 @@ func (value NewPair) Eval(functionTable []*Function, symbolTable *SymbolTable) (
 	return PairType{FstType: fstTyp, SndType: sndTyp}, nil
 }
 
-func (value PairElem) Eval(functionTable []*Function, symbolTable *SymbolTable) (Type, error) {
+func (value PairElem) Eval(context *Context) (Type, error) {
 	fstsnd := value.Fsnd
-	exprTyp, err := value.Expr.Eval(functionTable, symbolTable)
+	exprTyp, err := value.Expr.Eval(context)
 	if err != nil {
 		return nil, err
 	}
@@ -100,37 +101,37 @@ func (value PairElem) Eval(functionTable []*Function, symbolTable *SymbolTable) 
 	return nil, errorBadElemPair(value.FileText, value.Pos)
 }
 
-func (value Integer) Eval(functionTable []*Function, symbolTable *SymbolTable) (Type, error) {
+func (value Integer) Eval(context *Context) (Type, error) {
 	return Int, nil
 }
 
-func (value PairLiter) Eval(functionTable []*Function, symbolTable *SymbolTable) (Type, error) {
+func (value PairLiter) Eval(context *Context) (Type, error) {
 	return Pair, nil
 }
 
-func (value Str) Eval(functionTable []*Function, symbolTable *SymbolTable) (Type, error) {
+func (value Str) Eval(context *Context) (Type, error) {
 	return String, nil
 }
 
-func (value Character) Eval(functionTable []*Function, symbolTable *SymbolTable) (Type, error) {
+func (value Character) Eval(context *Context) (Type, error) {
 	return Char, nil
 }
 
-func (value Boolean) Eval(functionTable []*Function, symbolTable *SymbolTable) (Type, error) {
+func (value Boolean) Eval(context *Context) (Type, error) {
 	return Bool, nil
 }
 
-func (value ArrayElem) Eval(functionTable []*Function, symbolTable *SymbolTable) (Type, error) {
+func (value ArrayElem) Eval(context *Context) (Type, error) {
 	var currType Type
 
 	if len(value.Exprs) > 0 {
-		fstType, err := value.Exprs[0].Eval(functionTable, symbolTable)
+		fstType, err := value.Exprs[0].Eval(context)
 		currType = fstType
 		if err != nil {
 			return nil, err
 		}
 		for _, exprs := range value.Exprs {
-			currType2, err2 := exprs.Eval(functionTable, symbolTable)
+			currType2, err2 := exprs.Eval(context)
 			if err2 != nil {
 				return nil, err2
 			}
@@ -142,10 +143,10 @@ func (value ArrayElem) Eval(functionTable []*Function, symbolTable *SymbolTable)
 	if currType != Int {
 		return nil, errorArrayAccessExpr(value.FileText, value.Pos)
 	}
-	if !symbolTable.isDefined(value.Ident) {
+	if !context.symbolTable.isDefined(value.Ident) {
 		return nil, errorArrayNotDefined(value.FileText, value.Pos)
 	}
-	arrayTyp := symbolTable.getTypeOfIdent(value.Ident)
+	arrayTyp := context.symbolTable.getTypeOfIdent(value.Ident)
 	for _ = range value.Exprs {
 		switch arrayTyp.(type) {
 		case ArrayType:
@@ -161,18 +162,31 @@ func (value ArrayElem) Eval(functionTable []*Function, symbolTable *SymbolTable)
 	return arrayTyp, nil
 }
 
-func (value Ident) Eval(functionTable []*Function, symbolTable *SymbolTable) (Type, error) {
-	//	fmt.Println(symbolTable, "::::", value)
-	if symbolTable.isDefined(value) {
-		return symbolTable.getTypeOfIdent(value), nil
+// Recursive function
+// Base case : No more dots
+// Keep recursing while there are dots
+
+// Get ident before first dot, look up in symboltable and get type (should be of type ClassType and in the []*Class)
+// get next ident, check if field/method is defined in class
+func (value Ident) Eval(context *Context) (Type, error) {
+	valueString := string(value)
+	if strings.Contains(valueString, ".") {
+		index := strings.Index(valueString, ".")
+		item := valueString[:index]
+		rest := valueString[index:]
+
+		rest.Eval()
+	} else {
+		if context.symbolTable.isDefined(value) {
+			return context.symbolTable.getTypeOfIdent(value), nil
+		}
 	}
-	//	str :=
 	return nil, errors.New(" :Cannot find " + string(value) + "in symbol table") // AWWHHHW
 }
 
-func (binop Binop) Eval(functionTable []*Function, symbolTable *SymbolTable) (Type, error) {
-	typl, err := binop.Left.Eval(functionTable, symbolTable)
-	typr, err2 := binop.Right.Eval(functionTable, symbolTable)
+func (binop Binop) Eval(context *Context) (Type, error) {
+	typl, err := binop.Left.Eval(context)
+	typr, err2 := binop.Right.Eval(context)
 	if err != nil {
 		return nil, err
 	}
@@ -217,8 +231,8 @@ func (binop Binop) Eval(functionTable []*Function, symbolTable *SymbolTable) (Ty
 	}
 }
 
-func (value Unop) Eval(functionTable []*Function, symbolTable *SymbolTable) (Type, error) {
-	typExpr, err := value.Expr.Eval(functionTable, symbolTable)
+func (value Unop) Eval(context *Context) (Type, error) {
+	typExpr, err := value.Expr.Eval(context)
 	if err != nil {
 		return nil, err
 	}

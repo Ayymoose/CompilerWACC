@@ -13,52 +13,52 @@ func containsDuplicateFunc(functionTable []*Function) bool {
 	return false
 }
 
-func (node If) checkIfReturn(functionTable []*Function, symbolTable *SymbolTable, returnType Type) errorSlice {
+func (node If) checkIfReturn(context *Context, returnType Type) errorSlice {
 	var semanticErrors errorSlice
-	cond, err := node.Conditional.Eval(functionTable, symbolTable)
+	cond, err := node.Conditional.Eval(context)
 	if err != nil {
 		semanticErrors = append(semanticErrors, err)
 	}
 	if cond != Bool {
 		semanticErrors = append(semanticErrors, errorConditional(node.FileText, node.Pos))
 	}
-	thenSymTab := symbolTable.New()
-	symbolTable.Children = append(symbolTable.Children, thenSymTab)
+	thenSymTab := context.symbolTable.New()
+	context.symbolTable.Children = append(context.symbolTable.Children, thenSymTab)
 	for _, thenstat := range node.ThenStat {
 		switch thenstat.(type) {
 		case Return:
-			errs := thenstat.(Return).checkReturnReturn(functionTable, thenSymTab, returnType)
+			errs := thenstat.(Return).checkReturnReturn(context, returnType)
 			if errs != nil {
 				semanticErrors = append(semanticErrors, errs)
 			}
 		case If:
-			errs := thenstat.(If).checkIfReturn(functionTable, thenSymTab, returnType)
+			errs := thenstat.(If).checkIfReturn(context, returnType)
 			if errs != nil {
 				semanticErrors = append(semanticErrors, errs)
 			}
 		default:
-			errs := thenstat.visitStatement(functionTable, thenSymTab)
+			errs := thenstat.visitStatement(context)
 			if errs != nil {
 				semanticErrors = append(semanticErrors, errs)
 			}
 		}
 	}
-	elseSymTab := symbolTable.New()
-	symbolTable.Children = append(symbolTable.Children, elseSymTab)
+	elseSymTab := context.symbolTable.New()
+	context.symbolTable.Children = append(context.symbolTable.Children, elseSymTab)
 	for _, elsestat := range node.ElseStat {
 		switch elsestat.(type) {
 		case Return:
-			errs := elsestat.(Return).checkReturnReturn(functionTable, elseSymTab, returnType)
+			errs := elsestat.(Return).checkReturnReturn(context, returnType)
 			if errs != nil {
 				semanticErrors = append(semanticErrors, errs)
 			}
 		case If:
-			errs := elsestat.(If).checkIfReturn(functionTable, elseSymTab, returnType)
+			errs := elsestat.(If).checkIfReturn(context, returnType)
 			if errs != nil {
 				semanticErrors = append(semanticErrors, errs)
 			}
 		default:
-			errs := elsestat.visitStatement(functionTable, elseSymTab)
+			errs := elsestat.visitStatement(context)
 			if errs != nil {
 				semanticErrors = append(semanticErrors, errs)
 			}
@@ -70,9 +70,9 @@ func (node If) checkIfReturn(functionTable []*Function, symbolTable *SymbolTable
 	return nil
 }
 
-func (node Return) checkReturnReturn(functionTable []*Function, symbolTable *SymbolTable, returnType Type) errorSlice {
+func (node Return) checkReturnReturn(context *Context, returnType Type) errorSlice {
 	var semanticErrors []error
-	exprTyp, err := node.Expr.Eval(functionTable, symbolTable)
+	exprTyp, err := node.Expr.Eval(context)
 	if err != nil {
 		semanticErrors = append(semanticErrors, err)
 	} else {
@@ -89,6 +89,7 @@ func (node Return) checkReturnReturn(functionTable []*Function, symbolTable *Sym
 func (function *Function) checkFunc(root *Program) errorSlice {
 	var semanticErrors []error
 	funcSymbolTable := function.SymbolTable
+	context := &Context{root.FunctionList, funcSymbolTable, root.ClassList}
 	for _, param := range function.ParameterTypes {
 		funcSymbolTable.insert(param.Ident, param.ParamType)
 	}
@@ -96,18 +97,18 @@ func (function *Function) checkFunc(root *Program) errorSlice {
 		if ind == len(function.StatList)-1 {
 			switch stat.(type) {
 			case If:
-				errIf := stat.(If).checkIfReturn(root.FunctionList, funcSymbolTable, function.ReturnType)
+				errIf := stat.(If).checkIfReturn(context, function.ReturnType)
 				if errIf != nil {
 					semanticErrors = append(semanticErrors, errIf)
 				}
 			case Return:
-				errRet := stat.(Return).checkReturnReturn(root.FunctionList, funcSymbolTable, function.ReturnType)
+				errRet := stat.(Return).checkReturnReturn(context, function.ReturnType)
 				if errRet != nil {
 					semanticErrors = append(semanticErrors, errRet)
 				}
 			}
 		}
-		errs := stat.visitStatement(root.FunctionList, funcSymbolTable)
+		errs := stat.visitStatement(context)
 		if errs != nil {
 			semanticErrors = append(semanticErrors, errs)
 		}
@@ -122,6 +123,7 @@ func (function *Function) checkFunc(root *Program) errorSlice {
 
 func (root *Program) SemanticCheck() errorSlice {
 	var semanticErrors []error
+	context := &Context{root.FunctionList, root.SymbolTable, root.ClassList}
 	if containsDuplicateFunc(root.FunctionList) {
 		semanticErrors = append(semanticErrors, errorFuncRedef(root.FileText, root.Pos))
 	}
@@ -132,7 +134,7 @@ func (root *Program) SemanticCheck() errorSlice {
 		}
 	}
 	for _, stat := range root.StatList {
-		errs := stat.visitStatement(root.FunctionList, root.SymbolTable)
+		errs := stat.visitStatement(context)
 		if errs != nil {
 			semanticErrors = append(semanticErrors, errs)
 		}
@@ -147,14 +149,14 @@ func (root *Program) SemanticCheck() errorSlice {
 	return nil
 }
 
-func (node Skip) visitStatement(functionTable []*Function, symbolTable *SymbolTable) errorSlice {
+func (node Skip) visitStatement(context *Context) errorSlice {
 	return nil
 }
 
 // If called function not defined : ERROR
 // other call symantic checks
 // return value does not need to be caught
-func (node Call) visitStatement(functionTable []*Function, symbolTable *SymbolTable) errorSlice {
+func (node Call) visitStatement(context *Context) errorSlice {
 	return nil
 }
 
@@ -163,24 +165,24 @@ func (node Call) visitStatement(functionTable []*Function, symbolTable *SymbolTa
 //The first <ident> (object variable) is of type ClassType (using a symbol table i presume.
 //Then using a list of classes and the <class ident> inside the ClassType. You need to check if the class actually has this method
 //Then you need to check if the correct number of arguments and their type are correct​ This logic follows very closely to how class semantics is done
-func (node CallInstance) visitStatement(functionTable []*Function, symbolTable *SymbolTable) errorSlice {
+func (node CallInstance) visitStatement(context *Context) errorSlice {
 	return nil
 }
 
-func (node ThisInstance) visitStatement(functionTable []*Function, symbolTable *SymbolTable) errorSlice {
+func (node ThisInstance) visitStatement(context *Context) errorSlice {
 	return nil
 }
 
-func (node Instance) visitStatement(functionTable []*Function, symbolTable *SymbolTable) errorSlice {
+func (node Instance) visitStatement(context *Context) errorSlice {
 	return nil
 }
 
-func (node Declare) visitStatement(functionTable []*Function, symbolTable *SymbolTable) errorSlice {
+func (node Declare) visitStatement(context *Context) errorSlice {
 	var semanticErrors errorSlice
-	if symbolTable.isDefinedInScope(node.Lhs) {
+	if context.symbolTable.isDefinedInScope(node.Lhs) {
 		semanticErrors = append(semanticErrors, errorDeclared(node.FileText, node.Pos))
 	}
-	exprType, errs := node.Rhs.Eval(functionTable, symbolTable)
+	exprType, errs := node.Rhs.Eval(context)
 	if errs != nil {
 		semanticErrors = append(semanticErrors, errs)
 	}
@@ -216,17 +218,17 @@ func (node Declare) visitStatement(functionTable []*Function, symbolTable *Symbo
 			semanticErrors = append(semanticErrors, errorTypeMatch(node.FileText, node.Pos))
 		}
 	}
-	symbolTable.insert(node.Lhs, node.DecType)
+	context.symbolTable.insert(node.Lhs, node.DecType)
 	if len(semanticErrors) > 0 {
 		return semanticErrors
 	}
 	return nil
 }
 
-func (node Assignment) visitStatement(functionTable []*Function, symbolTable *SymbolTable) errorSlice {
+func (node Assignment) visitStatement(context *Context) errorSlice {
 	var semanticErrors errorSlice
-	lhsType, errl := node.Lhs.Eval(functionTable, symbolTable)
-	rhsType, errr := node.Rhs.Eval(functionTable, symbolTable)
+	lhsType, errl := node.Lhs.Eval(context)
+	rhsType, errr := node.Rhs.Eval(context)
 	if errl != nil {
 		semanticErrors = append(semanticErrors, errl)
 	}
@@ -250,9 +252,9 @@ func (node Assignment) visitStatement(functionTable []*Function, symbolTable *Sy
 	return nil
 }
 
-func (node Read) visitStatement(functionTable []*Function, symbolTable *SymbolTable) errorSlice {
+func (node Read) visitStatement(context *Context) errorSlice {
 	var semanticErrors errorSlice
-	exprTyp, err := node.AssignLHS.Eval(functionTable, symbolTable)
+	exprTyp, err := node.AssignLHS.Eval(context)
 	if err != nil {
 		semanticErrors = append(semanticErrors, err)
 	} else if exprTyp != Char && exprTyp != Int {
@@ -264,9 +266,9 @@ func (node Read) visitStatement(functionTable []*Function, symbolTable *SymbolTa
 	return nil
 }
 
-func (node Free) visitStatement(functionTable []*Function, symbolTable *SymbolTable) errorSlice {
+func (node Free) visitStatement(context *Context) errorSlice {
 	var semanticErrors errorSlice
-	exprTyp, err := node.Expr.Eval(functionTable, symbolTable)
+	exprTyp, err := node.Expr.Eval(context)
 	if err != nil {
 		semanticErrors = append(semanticErrors, err)
 	}
@@ -284,9 +286,9 @@ func (node Free) visitStatement(functionTable []*Function, symbolTable *SymbolTa
 	return nil
 }
 
-func (node Return) visitStatement(functionTable []*Function, symbolTable *SymbolTable) errorSlice {
+func (node Return) visitStatement(context *Context) errorSlice {
 	var semanticErrors errorSlice
-	_, err := node.Expr.Eval(functionTable, symbolTable)
+	_, err := node.Expr.Eval(context)
 	if err != nil {
 		semanticErrors = append(semanticErrors, err)
 	}
@@ -297,9 +299,9 @@ func (node Return) visitStatement(functionTable []*Function, symbolTable *Symbol
 	return nil
 }
 
-func (node Exit) visitStatement(functionTable []*Function, symbolTable *SymbolTable) errorSlice {
+func (node Exit) visitStatement(context *Context) errorSlice {
 	var semanticErrors errorSlice
-	exprTyp, err := node.Expr.Eval(functionTable, symbolTable)
+	exprTyp, err := node.Expr.Eval(context)
 	if err != nil {
 		semanticErrors = append(semanticErrors, err)
 	}
@@ -312,9 +314,9 @@ func (node Exit) visitStatement(functionTable []*Function, symbolTable *SymbolTa
 	return nil
 }
 
-func (node Print) visitStatement(functionTable []*Function, symbolTable *SymbolTable) errorSlice {
+func (node Print) visitStatement(context *Context) errorSlice {
 	var semanticErrors errorSlice
-	_, err := node.Expr.Eval(functionTable, symbolTable)
+	_, err := node.Expr.Eval(context)
 	if err != nil {
 		semanticErrors = append(semanticErrors, err)
 	}
@@ -324,9 +326,9 @@ func (node Print) visitStatement(functionTable []*Function, symbolTable *SymbolT
 	return nil
 }
 
-func (node Println) visitStatement(functionTable []*Function, symbolTable *SymbolTable) errorSlice {
+func (node Println) visitStatement(context *Context) errorSlice {
 	var semanticErrors errorSlice
-	_, err := node.Expr.Eval(functionTable, symbolTable)
+	_, err := node.Expr.Eval(context)
 	if err != nil {
 		semanticErrors = append(semanticErrors, err)
 	}
@@ -336,9 +338,9 @@ func (node Println) visitStatement(functionTable []*Function, symbolTable *Symbo
 	return nil
 }
 
-func (node If) visitStatement(functionTable []*Function, symbolTable *SymbolTable) errorSlice {
+func (node If) visitStatement(context *Context) errorSlice {
 	var semanticErrors errorSlice
-	cond, err := node.Conditional.Eval(functionTable, symbolTable)
+	cond, err := node.Conditional.Eval(context)
 	if err != nil {
 		semanticErrors = append(semanticErrors, err)
 	}
@@ -346,18 +348,20 @@ func (node If) visitStatement(functionTable []*Function, symbolTable *SymbolTabl
 		//		semanticErrors = append(semanticErrors, errors.New("line:"+fmt.Sprint(node.Pos)+" :Conditional is not boolean expression"))
 		semanticErrors = append(semanticErrors, errorConditional(node.FileText, node.Pos))
 	}
-	thenSymTab := symbolTable.New()
-	symbolTable.Children = append(symbolTable.Children, thenSymTab)
+	thenSymTab := context.symbolTable.New()
+	thenContext := &Context{context.functionTable, thenSymTab, context.classTable}
+	context.symbolTable.Children = append(context.symbolTable.Children, thenSymTab)
 	for _, thenstat := range node.ThenStat {
-		errs := thenstat.visitStatement(functionTable, thenSymTab)
+		errs := thenstat.visitStatement(thenContext)
 		if errs != nil {
 			semanticErrors = append(semanticErrors, errs)
 		}
 	}
-	elseSymTab := symbolTable.New()
-	symbolTable.Children = append(symbolTable.Children, elseSymTab)
+	elseSymTab := context.symbolTable.New()
+	elseContext := &Context{context.functionTable, elseSymTab, context.classTable}
+	context.symbolTable.Children = append(context.symbolTable.Children, elseSymTab)
 	for _, elsestat := range node.ElseStat {
-		errs := elsestat.visitStatement(functionTable, elseSymTab)
+		errs := elsestat.visitStatement(elseContext)
 		if errs != nil {
 			semanticErrors = append(semanticErrors, errs)
 		}
@@ -368,9 +372,9 @@ func (node If) visitStatement(functionTable []*Function, symbolTable *SymbolTabl
 	return nil
 }
 
-func (node While) visitStatement(functionTable []*Function, symbolTable *SymbolTable) errorSlice {
+func (node While) visitStatement(context *Context) errorSlice {
 	var semanticErrors errorSlice
-	cond, err := node.Conditional.Eval(functionTable, symbolTable)
+	cond, err := node.Conditional.Eval(context)
 	if err != nil {
 		semanticErrors = append(semanticErrors, err)
 	}
@@ -378,10 +382,11 @@ func (node While) visitStatement(functionTable []*Function, symbolTable *SymbolT
 		//			semanticErrors = append(semanticErrors, errors.New("line:"+fmt.Sprint(node.Pos)+" :Conditional is not boolean expression"))
 		semanticErrors = append(semanticErrors, errorConditional(node.FileText, node.Pos))
 	}
-	whileSymTab := symbolTable.New()
-	symbolTable.Children = append(symbolTable.Children, whileSymTab)
+	whileSymTab := context.symbolTable.New()
+	context.symbolTable.Children = append(context.symbolTable.Children, whileSymTab)
+	newContext := &Context{context.functionTable, whileSymTab, context.classTable}
 	for _, dostat := range node.DoStat {
-		errs := dostat.visitStatement(functionTable, whileSymTab)
+		errs := dostat.visitStatement(newContext)
 		if errs != nil {
 			semanticErrors = append(semanticErrors, errs)
 		}
@@ -392,12 +397,13 @@ func (node While) visitStatement(functionTable []*Function, symbolTable *SymbolT
 	return nil
 }
 
-func (node Scope) visitStatement(functionTable []*Function, symbolTable *SymbolTable) errorSlice {
+func (node Scope) visitStatement(context *Context) errorSlice {
 	var semanticErrors errorSlice
-	newSymTab := symbolTable.New()
-	symbolTable.Children = append(symbolTable.Children, newSymTab)
+	newSymTab := context.symbolTable.New()
+	context.symbolTable.Children = append(context.symbolTable.Children, newSymTab)
+	newContext := &Context{context.functionTable, newSymTab, context.classTable}
 	for _, stat := range node.StatList {
-		errs := stat.visitStatement(functionTable, newSymTab)
+		errs := stat.visitStatement(newContext)
 		if errs != nil {
 			semanticErrors = append(semanticErrors, errs)
 		}

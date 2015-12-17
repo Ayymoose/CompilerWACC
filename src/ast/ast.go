@@ -17,12 +17,18 @@ type Type interface {
 	typeString() string
 }
 
+type Context struct {
+	functionTable []*Function
+	symbolTable   *SymbolTable
+	classTable    []*Class
+}
+
 type Evaluation interface {
-	Eval(functionTable []*Function, symbolTable *SymbolTable) (Type, error)
+	Eval(context *Context) (Type, error)
 }
 
 type Statement interface {
-	visitStatement(functionTable []*Function, symbolTable *SymbolTable) errorSlice
+	visitStatement(context *Context) errorSlice
 }
 
 type Ident string
