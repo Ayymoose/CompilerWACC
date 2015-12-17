@@ -123,6 +123,24 @@ func (cg *CodeGenerator) setNewFuncScope(varSpaceSize int, paramList *[]Param, f
 	cg.funcSymTables = append(cg.funcSymTables, funcSymTable)
 }
 
+// Creates new scope data for a new function scope. Sets isFunc to true which
+// set the code generator into function mode (So statements evaluate for functions not main)
+func (cg *CodeGenerator) setNewMethodScope(varSpaceSize int, paramList *[]Param, funcSymTable *SymbolTable, fieldList *[]Field) {
+	newScope := &scopeData{}
+	newScope.currP = varSpaceSize
+	newScope.size = varSpaceSize
+	newScope.parentScope = cg.currStack
+	newScope.isFunc = true
+	newScope.paramList = paramList
+	newScope.identMsgLabelMap = make(map[Ident]string)
+	newScope.isMethod = true
+	newScope.fieldList = fieldList
+
+	cg.currStack = newScope
+
+	cg.funcSymTables = append(cg.funcSymTables, funcSymTable)
+}
+
 // Removes current scope and replaces it with the parent scope
 func (cg *CodeGenerator) removeCurrScope() {
 	// add sp, sp, #n to remove variable space

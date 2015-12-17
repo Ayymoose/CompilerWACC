@@ -14,9 +14,9 @@ CLASSES: (Frontend done) NOT COMPLETE - FRONTEND AND NANA/AYMAN/HENRYK
 - visitNewObject - DONE/UNTESTED
 - visitField     - DONE/UNTESTED
 - Assign to field - DONE/UNTESTED
-- visitMethod
+- visitMethod     - DONE/UNTESTED (codegen.go still needs to be updated)
 - visitCall      - DONE/ UNTESTED
-- printing classes
+- printing classes/ free classes - DONE/UNTESTED
 
 ----
 BNF UPDATE
