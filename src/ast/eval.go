@@ -29,7 +29,7 @@ func (value FieldAssign) Eval(context *Context) (Type, error) {
 }
 
 func (value Call) Eval(context *Context) (Type, error) {
-	for _, function := range context.functionTable {
+	for _, function := range context.FunctionTable {
 		if value.Ident == function.Ident {
 			if len(value.ParamList) != len(function.ParameterTypes) {
 				return nil, errorCallParam(value.FileText, value.Pos)
@@ -143,10 +143,10 @@ func (value ArrayElem) Eval(context *Context) (Type, error) {
 	if currType != Int {
 		return nil, errorArrayAccessExpr(value.FileText, value.Pos)
 	}
-	if !context.symbolTable.isDefined(value.Ident) {
+	if !context.SymbolTable.isDefined(value.Ident) {
 		return nil, errorArrayNotDefined(value.FileText, value.Pos)
 	}
-	arrayTyp := context.symbolTable.getTypeOfIdent(value.Ident)
+	arrayTyp := context.SymbolTable.getTypeOfIdent(value.Ident)
 	for _ = range value.Exprs {
 		switch arrayTyp.(type) {
 		case ArrayType:
@@ -172,13 +172,13 @@ func (value Ident) Eval(context *Context) (Type, error) {
 	valueString := string(value)
 	if strings.Contains(valueString, ".") {
 		index := strings.Index(valueString, ".")
-		item := valueString[:index]
+		///item := valueString[:index]
 		rest := valueString[index:]
 
-		rest.Eval()
+		Ident(rest).Eval(context)
 	} else {
-		if context.symbolTable.isDefined(value) {
-			return context.symbolTable.getTypeOfIdent(value), nil
+		if context.SymbolTable.isDefined(value) {
+			return context.SymbolTable.getTypeOfIdent(value), nil
 		}
 	}
 	return nil, errors.New(" :Cannot find " + string(value) + "in symbol table") // AWWHHHW

@@ -45,10 +45,14 @@ func ConstructCodeGenerator(cRoot *Program, cInstrs *ARMList, cSymTable *SymbolT
 // Evaluates the evaluation using the code generator
 func (cg *CodeGenerator) eval(e Evaluation) Type {
 	var eType Type
+
 	if cg.currStack.isFunc {
-		eType, _ = e.Eval(cg.root.FunctionList, cg.getFuncSymTable())
+		context1 := &Context{cg.root.FunctionList, cg.getFuncSymTable(), cg.classes}
+			eType, _ = e.Eval(context1)
+//		eType, _ = e.Eval(cg.root.FunctionList, cg.getFuncSymTable())
 	} else {
-		eType, _ = e.Eval(cg.root.FunctionList, cg.symTable)
+			context2 := &Context{cg.root.FunctionList, cg.symTable, cg.classes}
+		eType, _ = e.Eval(context2)
 	}
 
 	return eType

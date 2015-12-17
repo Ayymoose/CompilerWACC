@@ -18,9 +18,9 @@ type Type interface {
 }
 
 type Context struct {
-	functionTable []*Function
-	symbolTable   *SymbolTable
-	classTable    []*Class
+	FunctionTable []*Function
+	SymbolTable   *SymbolTable
+	ClassTable    []*Class
 }
 
 type Evaluation interface {
@@ -169,7 +169,7 @@ type CallInstance struct {
 }
 
 type ThisInstance struct {
-	Func Ident
+	Field Ident
 }
 
 type Instance struct {
