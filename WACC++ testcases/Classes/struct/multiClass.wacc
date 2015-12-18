@@ -1,4 +1,4 @@
-# Expected:
+# PARSE FAIL
 
 begin
   class A open
