@@ -784,9 +784,9 @@ func (cg *CodeGenerator) cgVisitAssignmentStat(node Assignment) {
 		}
 		// Store the value into the pair
 		appendAssembly(cg.currInstrs(), "STR r4, [r5]", 1, 1)
-	case FieldAssign:
-		objIdent := lhs.(FieldAssign).ObjectName
-		field := lhs.(FieldAssign).Field
+	case FieldAccess:
+		objIdent := lhs.(FieldAccess).ObjectName
+		field := lhs.(FieldAccess).Field
 		classTyp := cg.eval(objIdent).(ClassType)
 		class := cg.getClass(classTyp)
 

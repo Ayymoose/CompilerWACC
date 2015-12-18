@@ -153,11 +153,6 @@ type FieldAccess struct {
 	Field      Ident
 }
 
-type FieldAssign struct {
-	ObjectName Ident
-	Field      Ident
-}
-
 type Class struct {
 	Ident        ClassType
 	FieldList    []Field
@@ -170,6 +165,8 @@ type Field struct {
 }
 
 type CallInstance struct {
+	FileText  *string
+	Pos       int
 	Class     Ident
 	Func      Ident
 	ParamList []Evaluation

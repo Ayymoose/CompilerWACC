@@ -23,9 +23,6 @@ func (value NewObject) Eval(context *Context) (Type, error) {
 func (value FieldAccess) Eval(context *Context) (Type, error) {
 	return nil, nil
 }
-func (value FieldAssign) Eval(context *Context) (Type, error) {
-	return nil, nil
-}
 
 func (value Call) Eval(context *Context) (Type, error) {
 	for _, function := range context.FunctionTable {
