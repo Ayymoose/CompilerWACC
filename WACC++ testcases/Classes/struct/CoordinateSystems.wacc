@@ -25,12 +25,12 @@ begin
   end
 
   Coordinate origin = new Coordinate(0,0,false,"Origin of plane");
-  printInfo(origin);
+  call printInfo(origin);
 
-  Coordinate a = Coordinate(20,5,false,"Coor A");
-  Coordinate b = Coordinate(0,5,false,"Coor B");
-  TwoCoordinate t = TwoCoordinate(b,a);
-  int mid = midX(t);
+  Coordinate a = new Coordinate(20,5,false,"Coor A");
+  Coordinate b = new Coordinate(0,5,false,"Coor B");
+  TwoCoordinate t = new TwoCoordinate(b,a);
+  int mid = call midX(t);
   print "Mid x = "; println mid
 
 end

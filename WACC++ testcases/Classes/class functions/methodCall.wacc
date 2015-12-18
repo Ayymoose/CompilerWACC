@@ -10,5 +10,6 @@ begin
     end
   close
 
-  skip
+  Person p = new Person("Nana",19);
+  call p.birthdayMsg()
 end
