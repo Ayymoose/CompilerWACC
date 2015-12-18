@@ -54,14 +54,14 @@ COMPLETE
 COMPLETE (APART FROM IMPLEMENTED FUNCTIONS FOR AST NODES)
 <assign-rhs> := ... | 'new' <class-ident>'('<arg-list>?')'
                     | 'call' <ident>'.'<ident> '(' <arg-list>? ')'
-                    | 'this''.'<ident>
-                    | <ident>'.'<ident>
+
 // The correct number of arguments must be present for the instantiation of the object
 
 <assign-lhs> := ... | <ident>'.'<ident>
+                    | 'this''.'<ident>
 
 <expr> := ... | <ident>'.'<ident>
-              | this'.'<ident>
+              | 'this''.'<ident>
 
 COMPLETE
 <field> := <param>
