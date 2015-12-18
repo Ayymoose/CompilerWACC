@@ -208,7 +208,7 @@ statement : SKIP                                        { $$ = Skip{Pos : $<pos>
           | CALL IDENTIFIER OPENROUND exprlist CLOSEROUND    { $$ = Call{Ident : $2, ParamList : $4, Pos : $<pos>1, FileText :&parserlex.(*Lexer).input  } }
           | CALL fieldaccess OPENROUND exprlist CLOSEROUND    { $$ = CallInstance{Class : ($2.(FieldAccess)).ObjectName, Func: ($2.(FieldAccess)).Field, ParamList : $4, Pos : $<pos>1, FileText :&parserlex.(*Lexer).input  } }
 
-assignment :  assignlhs ASSIGNMENT assignrhs              { $$ = Assignment{Lhs : $1, Rhs : $3, Pos : $<pos>1 ,FileText :&parserlex.(*Lexer).input} }
+assignment :  assignlhs ASSIGNMENT assignrhs               { $$ = Assignment{Lhs : $1, Rhs : $3, Pos : $<pos>1 ,FileText :&parserlex.(*Lexer).input} }
              | IDENTIFIER PLUS ASSIGNMENT expr             { $$ = Assignment{Lhs : $1, Rhs : Binop{Left : $1, Binary : PLUS, Right : $4, Pos : $<pos>1, FileText :&parserlex.(*Lexer).input}, Pos : $<pos>1 ,FileText :&parserlex.(*Lexer).input} }
              | IDENTIFIER SUB  ASSIGNMENT expr             { $$ = Assignment{Lhs : $1, Rhs : Binop{Left : $1, Binary : SUB , Right : $4, Pos : $<pos>1, FileText :&parserlex.(*Lexer).input}, Pos : $<pos>1 ,FileText :&parserlex.(*Lexer).input} }
              | IDENTIFIER DIV  ASSIGNMENT expr             { $$ = Assignment{Lhs : $1, Rhs : Binop{Left : $1, Binary : DIV,  Right : $4, Pos : $<pos>1, FileText :&parserlex.(*Lexer).input}, Pos : $<pos>1 ,FileText :&parserlex.(*Lexer).input} }
