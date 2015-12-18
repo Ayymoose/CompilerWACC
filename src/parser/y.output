@@ -51,27 +51,27 @@ state 4
 	CALL  shift 24
 	FST  shift 38
 	SND  shift 39
-	INT  shift 30
-	BOOL  shift 31
-	CHAR  shift 32
-	STRING  shift 33
-	PAIR  shift 34
+	INT  shift 31
+	BOOL  shift 32
+	CHAR  shift 33
+	STRING  shift 34
+	PAIR  shift 35
 	FOR  shift 10
-	IDENTIFIER  shift 37
+	IDENTIFIER  shift 28
 	.  error
 
 	function  goto 8
 	statement  goto 9
 	statements  goto 7
-	assignlhs  goto 28
-	pairelem  goto 36
-	arrayelem  goto 35
+	assignlhs  goto 29
+	pairelem  goto 37
+	arrayelem  goto 36
 	basetype  goto 25
 	typeDef  goto 11
 	arraytype  goto 26
 	pairtype  goto 27
 	assignment  goto 13
-	ident  goto 29
+	ident  goto 30
 
 state 5
 	classes:  classes class.    (2)
@@ -82,7 +82,7 @@ state 5
 state 6
 	class:  CLASS.ident OPEN fieldlist functions CLOSE 
 
-	IDENTIFIER  shift 37
+	IDENTIFIER  shift 41
 	.  error
 
 	ident  goto 40
@@ -91,8 +91,8 @@ state 7
 	program:  BEGIN classes functions statements.END 
 	statements:  statements.SEMICOLON statement 
 
-	END  shift 41
-	SEMICOLON  shift 42
+	END  shift 42
+	SEMICOLON  shift 43
 	.  error
 
 
@@ -103,68 +103,67 @@ state 8
 
 
 state 9
-	statements:  statement.    (23)
+	statements:  statement.    (24)
 
-	.  reduce 23 (src line 163)
+	.  reduce 24 (src line 164)
 
 
 state 10
 	statements:  FOR.typeDef ident ASSIGNMENT assignrhs SEMICOLON expr SEMICOLON assignment DO statements DONE 
 	statement:  FOR.expr SEMICOLON assignment DO statements DONE 
 
-	NEW  shift 62
-	THIS  shift 61
-	CALL  shift 60
-	INT  shift 30
-	BOOL  shift 31
-	CHAR  shift 32
-	STRING  shift 33
-	PAIR  shift 34
-	NOT  shift 53
-	LEN  shift 54
-	ORD  shift 55
-	CHR  shift 56
-	PLUS  shift 58
-	SUB  shift 57
-	TRUE  shift 46
-	FALSE  shift 47
+	THIS  shift 62
+	CALL  shift 61
+	INT  shift 31
+	BOOL  shift 32
+	CHAR  shift 33
+	STRING  shift 34
+	PAIR  shift 35
+	NOT  shift 54
+	LEN  shift 55
+	ORD  shift 56
+	CHR  shift 57
+	PLUS  shift 59
+	SUB  shift 58
+	TRUE  shift 47
+	FALSE  shift 48
 	NULL  shift 63
-	OPENROUND  shift 59
-	STRINGCONST  shift 49
-	IDENTIFIER  shift 37
-	INTEGER  shift 45
-	CHARACTER  shift 48
+	OPENROUND  shift 60
+	STRINGCONST  shift 50
+	IDENTIFIER  shift 28
+	INTEGER  shift 46
+	CHARACTER  shift 49
 	.  error
 
-	expr  goto 44
-	arrayelem  goto 52
-	pairliter  goto 50
+	expr  goto 45
+	arrayelem  goto 53
+	pairliter  goto 51
 	basetype  goto 25
-	typeDef  goto 43
+	typeDef  goto 44
 	arraytype  goto 26
 	pairtype  goto 27
-	ident  goto 51
+	ident  goto 52
 
 state 11
 	function:  typeDef.ident OPENROUND CLOSEROUND IS statements END 
 	function:  typeDef.ident OPENROUND paramlist CLOSEROUND IS statements END 
 	statement:  typeDef.ident ASSIGNMENT assignrhs 
 
-	IDENTIFIER  shift 37
+	IDENTIFIER  shift 41
 	.  error
 
 	ident  goto 64
 
 state 12
-	statement:  SKIP.    (27)
+	statement:  SKIP.    (28)
 
-	.  reduce 27 (src line 174)
+	.  reduce 28 (src line 175)
 
 
 state 13
-	statement:  assignment.    (29)
+	statement:  assignment.    (30)
 
-	.  reduce 29 (src line 176)
+	.  reduce 30 (src line 177)
 
 
 state 14
@@ -172,202 +171,195 @@ state 14
 
 	FST  shift 38
 	SND  shift 39
-	IDENTIFIER  shift 37
+	IDENTIFIER  shift 41
 	.  error
 
 	assignlhs  goto 65
-	pairelem  goto 36
-	arrayelem  goto 35
+	pairelem  goto 37
+	arrayelem  goto 36
 	ident  goto 66
 
 state 15
 	statement:  FREE.expr 
 
-	NEW  shift 62
-	THIS  shift 61
-	CALL  shift 60
-	NOT  shift 53
-	LEN  shift 54
-	ORD  shift 55
-	CHR  shift 56
-	PLUS  shift 58
-	SUB  shift 57
-	TRUE  shift 46
-	FALSE  shift 47
+	THIS  shift 62
+	CALL  shift 61
+	NOT  shift 54
+	LEN  shift 55
+	ORD  shift 56
+	CHR  shift 57
+	PLUS  shift 59
+	SUB  shift 58
+	TRUE  shift 47
+	FALSE  shift 48
 	NULL  shift 63
-	OPENROUND  shift 59
-	STRINGCONST  shift 49
-	IDENTIFIER  shift 37
-	INTEGER  shift 45
-	CHARACTER  shift 48
+	OPENROUND  shift 60
+	STRINGCONST  shift 50
+	IDENTIFIER  shift 41
+	INTEGER  shift 46
+	CHARACTER  shift 49
 	.  error
 
 	expr  goto 67
-	arrayelem  goto 52
-	pairliter  goto 50
-	ident  goto 51
+	arrayelem  goto 53
+	pairliter  goto 51
+	ident  goto 52
 
 state 16
 	statement:  RETURN.expr 
 
-	NEW  shift 62
-	THIS  shift 61
-	CALL  shift 60
-	NOT  shift 53
-	LEN  shift 54
-	ORD  shift 55
-	CHR  shift 56
-	PLUS  shift 58
-	SUB  shift 57
-	TRUE  shift 46
-	FALSE  shift 47
+	THIS  shift 62
+	CALL  shift 61
+	NOT  shift 54
+	LEN  shift 55
+	ORD  shift 56
+	CHR  shift 57
+	PLUS  shift 59
+	SUB  shift 58
+	TRUE  shift 47
+	FALSE  shift 48
 	NULL  shift 63
-	OPENROUND  shift 59
-	STRINGCONST  shift 49
-	IDENTIFIER  shift 37
-	INTEGER  shift 45
-	CHARACTER  shift 48
+	OPENROUND  shift 60
+	STRINGCONST  shift 50
+	IDENTIFIER  shift 41
+	INTEGER  shift 46
+	CHARACTER  shift 49
 	.  error
 
 	expr  goto 68
-	arrayelem  goto 52
-	pairliter  goto 50
-	ident  goto 51
+	arrayelem  goto 53
+	pairliter  goto 51
+	ident  goto 52
 
 state 17
 	statement:  EXIT.expr 
 
-	NEW  shift 62
-	THIS  shift 61
-	CALL  shift 60
-	NOT  shift 53
-	LEN  shift 54
-	ORD  shift 55
-	CHR  shift 56
-	PLUS  shift 58
-	SUB  shift 57
-	TRUE  shift 46
-	FALSE  shift 47
+	THIS  shift 62
+	CALL  shift 61
+	NOT  shift 54
+	LEN  shift 55
+	ORD  shift 56
+	CHR  shift 57
+	PLUS  shift 59
+	SUB  shift 58
+	TRUE  shift 47
+	FALSE  shift 48
 	NULL  shift 63
-	OPENROUND  shift 59
-	STRINGCONST  shift 49
-	IDENTIFIER  shift 37
-	INTEGER  shift 45
-	CHARACTER  shift 48
+	OPENROUND  shift 60
+	STRINGCONST  shift 50
+	IDENTIFIER  shift 41
+	INTEGER  shift 46
+	CHARACTER  shift 49
 	.  error
 
 	expr  goto 69
-	arrayelem  goto 52
-	pairliter  goto 50
-	ident  goto 51
+	arrayelem  goto 53
+	pairliter  goto 51
+	ident  goto 52
 
 state 18
 	statement:  PRINT.expr 
 
-	NEW  shift 62
-	THIS  shift 61
-	CALL  shift 60
-	NOT  shift 53
-	LEN  shift 54
-	ORD  shift 55
-	CHR  shift 56
-	PLUS  shift 58
-	SUB  shift 57
-	TRUE  shift 46
-	FALSE  shift 47
+	THIS  shift 62
+	CALL  shift 61
+	NOT  shift 54
+	LEN  shift 55
+	ORD  shift 56
+	CHR  shift 57
+	PLUS  shift 59
+	SUB  shift 58
+	TRUE  shift 47
+	FALSE  shift 48
 	NULL  shift 63
-	OPENROUND  shift 59
-	STRINGCONST  shift 49
-	IDENTIFIER  shift 37
-	INTEGER  shift 45
-	CHARACTER  shift 48
+	OPENROUND  shift 60
+	STRINGCONST  shift 50
+	IDENTIFIER  shift 41
+	INTEGER  shift 46
+	CHARACTER  shift 49
 	.  error
 
 	expr  goto 70
-	arrayelem  goto 52
-	pairliter  goto 50
-	ident  goto 51
+	arrayelem  goto 53
+	pairliter  goto 51
+	ident  goto 52
 
 state 19
 	statement:  PRINTLN.expr 
 
-	NEW  shift 62
-	THIS  shift 61
-	CALL  shift 60
-	NOT  shift 53
-	LEN  shift 54
-	ORD  shift 55
-	CHR  shift 56
-	PLUS  shift 58
-	SUB  shift 57
-	TRUE  shift 46
-	FALSE  shift 47
+	THIS  shift 62
+	CALL  shift 61
+	NOT  shift 54
+	LEN  shift 55
+	ORD  shift 56
+	CHR  shift 57
+	PLUS  shift 59
+	SUB  shift 58
+	TRUE  shift 47
+	FALSE  shift 48
 	NULL  shift 63
-	OPENROUND  shift 59
-	STRINGCONST  shift 49
-	IDENTIFIER  shift 37
-	INTEGER  shift 45
-	CHARACTER  shift 48
+	OPENROUND  shift 60
+	STRINGCONST  shift 50
+	IDENTIFIER  shift 41
+	INTEGER  shift 46
+	CHARACTER  shift 49
 	.  error
 
 	expr  goto 71
-	arrayelem  goto 52
-	pairliter  goto 50
-	ident  goto 51
+	arrayelem  goto 53
+	pairliter  goto 51
+	ident  goto 52
 
 state 20
 	statement:  IF.expr THEN statements ELSE statements FI 
 
-	NEW  shift 62
-	THIS  shift 61
-	CALL  shift 60
-	NOT  shift 53
-	LEN  shift 54
-	ORD  shift 55
-	CHR  shift 56
-	PLUS  shift 58
-	SUB  shift 57
-	TRUE  shift 46
-	FALSE  shift 47
+	THIS  shift 62
+	CALL  shift 61
+	NOT  shift 54
+	LEN  shift 55
+	ORD  shift 56
+	CHR  shift 57
+	PLUS  shift 59
+	SUB  shift 58
+	TRUE  shift 47
+	FALSE  shift 48
 	NULL  shift 63
-	OPENROUND  shift 59
-	STRINGCONST  shift 49
-	IDENTIFIER  shift 37
-	INTEGER  shift 45
-	CHARACTER  shift 48
+	OPENROUND  shift 60
+	STRINGCONST  shift 50
+	IDENTIFIER  shift 41
+	INTEGER  shift 46
+	CHARACTER  shift 49
 	.  error
 
 	expr  goto 72
-	arrayelem  goto 52
-	pairliter  goto 50
-	ident  goto 51
+	arrayelem  goto 53
+	pairliter  goto 51
+	ident  goto 52
 
 state 21
 	statement:  WHILE.expr DO statements DONE 
 
-	NEW  shift 62
-	THIS  shift 61
-	CALL  shift 60
-	NOT  shift 53
-	LEN  shift 54
-	ORD  shift 55
-	CHR  shift 56
-	PLUS  shift 58
-	SUB  shift 57
-	TRUE  shift 46
-	FALSE  shift 47
+	THIS  shift 62
+	CALL  shift 61
+	NOT  shift 54
+	LEN  shift 55
+	ORD  shift 56
+	CHR  shift 57
+	PLUS  shift 59
+	SUB  shift 58
+	TRUE  shift 47
+	FALSE  shift 48
 	NULL  shift 63
-	OPENROUND  shift 59
-	STRINGCONST  shift 49
-	IDENTIFIER  shift 37
-	INTEGER  shift 45
-	CHARACTER  shift 48
+	OPENROUND  shift 60
+	STRINGCONST  shift 50
+	IDENTIFIER  shift 41
+	INTEGER  shift 46
+	CHARACTER  shift 49
 	.  error
 
 	expr  goto 73
-	arrayelem  goto 52
-	pairliter  goto 50
-	ident  goto 51
+	arrayelem  goto 53
+	pairliter  goto 51
+	ident  goto 52
 
 state 22
 	statement:  BEGIN.statements END 
@@ -386,26 +378,26 @@ state 22
 	CALL  shift 24
 	FST  shift 38
 	SND  shift 39
-	INT  shift 30
-	BOOL  shift 31
-	CHAR  shift 32
-	STRING  shift 33
-	PAIR  shift 34
+	INT  shift 31
+	BOOL  shift 32
+	CHAR  shift 33
+	STRING  shift 34
+	PAIR  shift 35
 	FOR  shift 10
-	IDENTIFIER  shift 37
+	IDENTIFIER  shift 28
 	.  error
 
 	statement  goto 9
 	statements  goto 74
-	assignlhs  goto 28
-	pairelem  goto 36
-	arrayelem  goto 35
+	assignlhs  goto 29
+	pairelem  goto 37
+	arrayelem  goto 36
 	basetype  goto 25
 	typeDef  goto 75
 	arraytype  goto 26
 	pairtype  goto 27
 	assignment  goto 13
-	ident  goto 29
+	ident  goto 30
 
 state 23
 	statement:  error.SEMICOLON 
@@ -423,7 +415,7 @@ state 23
 state 24
 	statement:  CALL.ident OPENROUND exprlist CLOSEROUND 
 
-	IDENTIFIER  shift 37
+	IDENTIFIER  shift 41
 	.  error
 
 	ident  goto 80
@@ -453,13 +445,23 @@ state 27
 
 
 state 28
-	assignment:  assignlhs.ASSIGNMENT assignrhs 
+	ident:  IDENTIFIER.    (26)
+	ident:  IDENTIFIER.DOT ident 
+	typeDef:  IDENTIFIER.    (103)
 
-	ASSIGNMENT  shift 84
-	.  error
+	DOT  shift 84
+	IDENTIFIER  reduce 103 (src line 280)
+	.  reduce 26 (src line 172)
 
 
 state 29
+	assignment:  assignlhs.ASSIGNMENT assignrhs 
+
+	ASSIGNMENT  shift 85
+	.  error
+
+
+state 30
 	assignlhs:  ident.    (15)
 	assignment:  ident.PLUS ASSIGNMENT expr 
 	assignment:  ident.SUB ASSIGNMENT expr 
@@ -471,120 +473,110 @@ state 29
 	assignment:  ident.MUL MUL 
 	arrayelem:  ident.bracketed 
 
-	MUL  shift 88
-	DIV  shift 87
-	MOD  shift 89
-	PLUS  shift 85
-	SUB  shift 86
-	OPENSQUARE  shift 91
+	MUL  shift 89
+	DIV  shift 88
+	MOD  shift 90
+	PLUS  shift 86
+	SUB  shift 87
+	OPENSQUARE  shift 92
 	.  reduce 15 (src line 153)
 
-	bracketed  goto 90
-
-state 30
-	basetype:  INT.    (103)
-
-	.  reduce 103 (src line 281)
-
+	bracketed  goto 91
 
 state 31
-	basetype:  BOOL.    (104)
+	basetype:  INT.    (104)
 
 	.  reduce 104 (src line 282)
 
 
 state 32
-	basetype:  CHAR.    (105)
+	basetype:  BOOL.    (105)
 
 	.  reduce 105 (src line 283)
 
 
 state 33
-	basetype:  STRING.    (106)
+	basetype:  CHAR.    (106)
 
 	.  reduce 106 (src line 284)
 
 
 state 34
-	pairtype:  PAIR.OPENROUND pairelemtype COMMA pairelemtype CLOSEROUND 
+	basetype:  STRING.    (107)
 
-	OPENROUND  shift 92
-	.  error
+	.  reduce 107 (src line 285)
 
 
 state 35
+	pairtype:  PAIR.OPENROUND pairelemtype COMMA pairelemtype CLOSEROUND 
+
+	OPENROUND  shift 93
+	.  error
+
+
+state 36
 	assignlhs:  arrayelem.    (16)
 
 	.  reduce 16 (src line 154)
 
 
-state 36
+state 37
 	assignlhs:  pairelem.    (17)
 
 	.  reduce 17 (src line 155)
 
 
-state 37
-	ident:  IDENTIFIER.    (25)
-	ident:  IDENTIFIER.DOT ident 
-
-	DOT  shift 93
-	.  reduce 25 (src line 171)
-
-
 state 38
 	pairelem:  FST.expr 
 
-	NEW  shift 62
-	THIS  shift 61
-	CALL  shift 60
-	NOT  shift 53
-	LEN  shift 54
-	ORD  shift 55
-	CHR  shift 56
-	PLUS  shift 58
-	SUB  shift 57
-	TRUE  shift 46
-	FALSE  shift 47
+	THIS  shift 62
+	CALL  shift 61
+	NOT  shift 54
+	LEN  shift 55
+	ORD  shift 56
+	CHR  shift 57
+	PLUS  shift 59
+	SUB  shift 58
+	TRUE  shift 47
+	FALSE  shift 48
 	NULL  shift 63
-	OPENROUND  shift 59
-	STRINGCONST  shift 49
-	IDENTIFIER  shift 37
-	INTEGER  shift 45
-	CHARACTER  shift 48
+	OPENROUND  shift 60
+	STRINGCONST  shift 50
+	IDENTIFIER  shift 41
+	INTEGER  shift 46
+	CHARACTER  shift 49
 	.  error
 
 	expr  goto 94
-	arrayelem  goto 52
-	pairliter  goto 50
-	ident  goto 51
+	arrayelem  goto 53
+	pairliter  goto 51
+	ident  goto 52
 
 state 39
 	pairelem:  SND.expr 
 
-	NEW  shift 62
-	THIS  shift 61
-	CALL  shift 60
-	NOT  shift 53
-	LEN  shift 54
-	ORD  shift 55
-	CHR  shift 56
-	PLUS  shift 58
-	SUB  shift 57
-	TRUE  shift 46
-	FALSE  shift 47
+	THIS  shift 62
+	CALL  shift 61
+	NOT  shift 54
+	LEN  shift 55
+	ORD  shift 56
+	CHR  shift 57
+	PLUS  shift 59
+	SUB  shift 58
+	TRUE  shift 47
+	FALSE  shift 48
 	NULL  shift 63
-	OPENROUND  shift 59
-	STRINGCONST  shift 49
-	IDENTIFIER  shift 37
-	INTEGER  shift 45
-	CHARACTER  shift 48
+	OPENROUND  shift 60
+	STRINGCONST  shift 50
+	IDENTIFIER  shift 41
+	INTEGER  shift 46
+	CHARACTER  shift 49
 	.  error
 
 	expr  goto 95
-	arrayelem  goto 52
-	pairliter  goto 50
-	ident  goto 51
+	arrayelem  goto 53
+	pairliter  goto 51
+	ident  goto 52
 
 state 40
 	class:  CLASS ident.OPEN fieldlist functions CLOSE 
@@ -594,12 +586,20 @@ state 40
 
 
 state 41
+	ident:  IDENTIFIER.    (26)
+	ident:  IDENTIFIER.DOT ident 
+
+	DOT  shift 84
+	.  reduce 26 (src line 172)
+
+
+state 42
 	program:  BEGIN classes functions statements END.    (1)
 
 	.  reduce 1 (src line 111)
 
 
-state 42
+state 43
 	statements:  statements SEMICOLON.statement 
 
 	error  shift 23
@@ -616,35 +616,35 @@ state 42
 	CALL  shift 24
 	FST  shift 38
 	SND  shift 39
-	INT  shift 30
-	BOOL  shift 31
-	CHAR  shift 32
-	STRING  shift 33
-	PAIR  shift 34
+	INT  shift 31
+	BOOL  shift 32
+	CHAR  shift 33
+	STRING  shift 34
+	PAIR  shift 35
 	FOR  shift 98
-	IDENTIFIER  shift 37
+	IDENTIFIER  shift 28
 	.  error
 
 	statement  goto 97
-	assignlhs  goto 28
-	pairelem  goto 36
-	arrayelem  goto 35
+	assignlhs  goto 29
+	pairelem  goto 37
+	arrayelem  goto 36
 	basetype  goto 25
 	typeDef  goto 75
 	arraytype  goto 26
 	pairtype  goto 27
 	assignment  goto 13
-	ident  goto 29
+	ident  goto 30
 
-state 43
+state 44
 	statements:  FOR typeDef.ident ASSIGNMENT assignrhs SEMICOLON expr SEMICOLON assignment DO statements DONE 
 
-	IDENTIFIER  shift 37
+	IDENTIFIER  shift 41
 	.  error
 
 	ident  goto 99
 
-state 44
+state 45
 	statement:  FOR expr.SEMICOLON assignment DO statements DONE 
 	expr:  expr.PLUS expr 
 	expr:  expr.SUB expr 
@@ -677,265 +677,251 @@ state 44
 	.  error
 
 
-state 45
-	expr:  INTEGER.    (54)
-
-	.  reduce 54 (src line 219)
-
-
 state 46
-	expr:  TRUE.    (55)
+	expr:  INTEGER.    (55)
 
-	.  reduce 55 (src line 220)
+	.  reduce 55 (src line 221)
 
 
 state 47
-	expr:  FALSE.    (56)
+	expr:  TRUE.    (56)
 
-	.  reduce 56 (src line 221)
+	.  reduce 56 (src line 222)
 
 
 state 48
-	expr:  CHARACTER.    (57)
+	expr:  FALSE.    (57)
 
-	.  reduce 57 (src line 222)
+	.  reduce 57 (src line 223)
 
 
 state 49
-	expr:  STRINGCONST.    (58)
+	expr:  CHARACTER.    (58)
 
-	.  reduce 58 (src line 223)
+	.  reduce 58 (src line 224)
 
 
 state 50
-	expr:  pairliter.    (59)
+	expr:  STRINGCONST.    (59)
 
-	.  reduce 59 (src line 224)
+	.  reduce 59 (src line 225)
 
 
 state 51
-	expr:  ident.    (60)
-	arrayelem:  ident.bracketed 
+	expr:  pairliter.    (60)
 
-	OPENSQUARE  shift 91
-	.  reduce 60 (src line 225)
+	.  reduce 60 (src line 226)
 
-	bracketed  goto 90
 
 state 52
-	expr:  arrayelem.    (61)
+	expr:  ident.    (61)
+	arrayelem:  ident.bracketed 
 
-	.  reduce 61 (src line 226)
+	OPENSQUARE  shift 92
+	.  reduce 61 (src line 227)
 
+	bracketed  goto 91
 
 state 53
+	expr:  arrayelem.    (62)
+
+	.  reduce 62 (src line 228)
+
+
+state 54
 	expr:  NOT.expr 
 
-	NEW  shift 62
-	THIS  shift 61
-	CALL  shift 60
-	NOT  shift 53
-	LEN  shift 54
-	ORD  shift 55
-	CHR  shift 56
-	PLUS  shift 58
-	SUB  shift 57
-	TRUE  shift 46
-	FALSE  shift 47
+	THIS  shift 62
+	CALL  shift 61
+	NOT  shift 54
+	LEN  shift 55
+	ORD  shift 56
+	CHR  shift 57
+	PLUS  shift 59
+	SUB  shift 58
+	TRUE  shift 47
+	FALSE  shift 48
 	NULL  shift 63
-	OPENROUND  shift 59
-	STRINGCONST  shift 49
-	IDENTIFIER  shift 37
-	INTEGER  shift 45
-	CHARACTER  shift 48
+	OPENROUND  shift 60
+	STRINGCONST  shift 50
+	IDENTIFIER  shift 41
+	INTEGER  shift 46
+	CHARACTER  shift 49
 	.  error
 
 	expr  goto 114
-	arrayelem  goto 52
-	pairliter  goto 50
-	ident  goto 51
+	arrayelem  goto 53
+	pairliter  goto 51
+	ident  goto 52
 
-state 54
+state 55
 	expr:  LEN.expr 
 
-	NEW  shift 62
-	THIS  shift 61
-	CALL  shift 60
-	NOT  shift 53
-	LEN  shift 54
-	ORD  shift 55
-	CHR  shift 56
-	PLUS  shift 58
-	SUB  shift 57
-	TRUE  shift 46
-	FALSE  shift 47
+	THIS  shift 62
+	CALL  shift 61
+	NOT  shift 54
+	LEN  shift 55
+	ORD  shift 56
+	CHR  shift 57
+	PLUS  shift 59
+	SUB  shift 58
+	TRUE  shift 47
+	FALSE  shift 48
 	NULL  shift 63
-	OPENROUND  shift 59
-	STRINGCONST  shift 49
-	IDENTIFIER  shift 37
-	INTEGER  shift 45
-	CHARACTER  shift 48
+	OPENROUND  shift 60
+	STRINGCONST  shift 50
+	IDENTIFIER  shift 41
+	INTEGER  shift 46
+	CHARACTER  shift 49
 	.  error
 
 	expr  goto 115
-	arrayelem  goto 52
-	pairliter  goto 50
-	ident  goto 51
+	arrayelem  goto 53
+	pairliter  goto 51
+	ident  goto 52
 
-state 55
+state 56
 	expr:  ORD.expr 
 
-	NEW  shift 62
-	THIS  shift 61
-	CALL  shift 60
-	NOT  shift 53
-	LEN  shift 54
-	ORD  shift 55
-	CHR  shift 56
-	PLUS  shift 58
-	SUB  shift 57
-	TRUE  shift 46
-	FALSE  shift 47
+	THIS  shift 62
+	CALL  shift 61
+	NOT  shift 54
+	LEN  shift 55
+	ORD  shift 56
+	CHR  shift 57
+	PLUS  shift 59
+	SUB  shift 58
+	TRUE  shift 47
+	FALSE  shift 48
 	NULL  shift 63
-	OPENROUND  shift 59
-	STRINGCONST  shift 49
-	IDENTIFIER  shift 37
-	INTEGER  shift 45
-	CHARACTER  shift 48
+	OPENROUND  shift 60
+	STRINGCONST  shift 50
+	IDENTIFIER  shift 41
+	INTEGER  shift 46
+	CHARACTER  shift 49
 	.  error
 
 	expr  goto 116
-	arrayelem  goto 52
-	pairliter  goto 50
-	ident  goto 51
+	arrayelem  goto 53
+	pairliter  goto 51
+	ident  goto 52
 
-state 56
+state 57
 	expr:  CHR.expr 
 
-	NEW  shift 62
-	THIS  shift 61
-	CALL  shift 60
-	NOT  shift 53
-	LEN  shift 54
-	ORD  shift 55
-	CHR  shift 56
-	PLUS  shift 58
-	SUB  shift 57
-	TRUE  shift 46
-	FALSE  shift 47
+	THIS  shift 62
+	CALL  shift 61
+	NOT  shift 54
+	LEN  shift 55
+	ORD  shift 56
+	CHR  shift 57
+	PLUS  shift 59
+	SUB  shift 58
+	TRUE  shift 47
+	FALSE  shift 48
 	NULL  shift 63
-	OPENROUND  shift 59
-	STRINGCONST  shift 49
-	IDENTIFIER  shift 37
-	INTEGER  shift 45
-	CHARACTER  shift 48
+	OPENROUND  shift 60
+	STRINGCONST  shift 50
+	IDENTIFIER  shift 41
+	INTEGER  shift 46
+	CHARACTER  shift 49
 	.  error
 
 	expr  goto 117
-	arrayelem  goto 52
-	pairliter  goto 50
-	ident  goto 51
+	arrayelem  goto 53
+	pairliter  goto 51
+	ident  goto 52
 
-state 57
+state 58
 	expr:  SUB.expr 
 
-	NEW  shift 62
-	THIS  shift 61
-	CALL  shift 60
-	NOT  shift 53
-	LEN  shift 54
-	ORD  shift 55
-	CHR  shift 56
-	PLUS  shift 58
-	SUB  shift 57
-	TRUE  shift 46
-	FALSE  shift 47
+	THIS  shift 62
+	CALL  shift 61
+	NOT  shift 54
+	LEN  shift 55
+	ORD  shift 56
+	CHR  shift 57
+	PLUS  shift 59
+	SUB  shift 58
+	TRUE  shift 47
+	FALSE  shift 48
 	NULL  shift 63
-	OPENROUND  shift 59
-	STRINGCONST  shift 49
-	IDENTIFIER  shift 37
-	INTEGER  shift 45
-	CHARACTER  shift 48
+	OPENROUND  shift 60
+	STRINGCONST  shift 50
+	IDENTIFIER  shift 41
+	INTEGER  shift 46
+	CHARACTER  shift 49
 	.  error
 
 	expr  goto 118
-	arrayelem  goto 52
-	pairliter  goto 50
-	ident  goto 51
+	arrayelem  goto 53
+	pairliter  goto 51
+	ident  goto 52
 
-state 58
+state 59
 	expr:  PLUS.expr 
 
-	NEW  shift 62
-	THIS  shift 61
-	CALL  shift 60
-	NOT  shift 53
-	LEN  shift 54
-	ORD  shift 55
-	CHR  shift 56
-	PLUS  shift 58
-	SUB  shift 57
-	TRUE  shift 46
-	FALSE  shift 47
+	THIS  shift 62
+	CALL  shift 61
+	NOT  shift 54
+	LEN  shift 55
+	ORD  shift 56
+	CHR  shift 57
+	PLUS  shift 59
+	SUB  shift 58
+	TRUE  shift 47
+	FALSE  shift 48
 	NULL  shift 63
-	OPENROUND  shift 59
-	STRINGCONST  shift 49
-	IDENTIFIER  shift 37
-	INTEGER  shift 45
-	CHARACTER  shift 48
+	OPENROUND  shift 60
+	STRINGCONST  shift 50
+	IDENTIFIER  shift 41
+	INTEGER  shift 46
+	CHARACTER  shift 49
 	.  error
 
 	expr  goto 119
-	arrayelem  goto 52
-	pairliter  goto 50
-	ident  goto 51
+	arrayelem  goto 53
+	pairliter  goto 51
+	ident  goto 52
 
-state 59
+state 60
 	expr:  OPENROUND.expr CLOSEROUND 
 
-	NEW  shift 62
-	THIS  shift 61
-	CALL  shift 60
-	NOT  shift 53
-	LEN  shift 54
-	ORD  shift 55
-	CHR  shift 56
-	PLUS  shift 58
-	SUB  shift 57
-	TRUE  shift 46
-	FALSE  shift 47
+	THIS  shift 62
+	CALL  shift 61
+	NOT  shift 54
+	LEN  shift 55
+	ORD  shift 56
+	CHR  shift 57
+	PLUS  shift 59
+	SUB  shift 58
+	TRUE  shift 47
+	FALSE  shift 48
 	NULL  shift 63
-	OPENROUND  shift 59
-	STRINGCONST  shift 49
-	IDENTIFIER  shift 37
-	INTEGER  shift 45
-	CHARACTER  shift 48
+	OPENROUND  shift 60
+	STRINGCONST  shift 50
+	IDENTIFIER  shift 41
+	INTEGER  shift 46
+	CHARACTER  shift 49
 	.  error
 
 	expr  goto 120
-	arrayelem  goto 52
-	pairliter  goto 50
-	ident  goto 51
+	arrayelem  goto 53
+	pairliter  goto 51
+	ident  goto 52
 
-state 60
+state 61
 	expr:  CALL.ident OPENROUND exprlist CLOSEROUND 
 
-	IDENTIFIER  shift 37
+	IDENTIFIER  shift 41
 	.  error
 
 	ident  goto 121
 
-state 61
+state 62
 	expr:  THIS.DOT ident 
 
 	DOT  shift 122
-	.  error
-
-
-state 62
-	expr:  NEW.IDENTIFIER OPENROUND exprlist CLOSEROUND 
-
-	IDENTIFIER  shift 123
 	.  error
 
 
@@ -950,60 +936,28 @@ state 64
 	function:  typeDef ident.OPENROUND paramlist CLOSEROUND IS statements END 
 	statement:  typeDef ident.ASSIGNMENT assignrhs 
 
-	OPENROUND  shift 124
-	ASSIGNMENT  shift 125
+	OPENROUND  shift 123
+	ASSIGNMENT  shift 124
 	.  error
 
 
 state 65
-	statement:  READ assignlhs.    (30)
+	statement:  READ assignlhs.    (31)
 
-	.  reduce 30 (src line 177)
+	.  reduce 31 (src line 178)
 
 
 state 66
 	assignlhs:  ident.    (15)
 	arrayelem:  ident.bracketed 
 
-	OPENSQUARE  shift 91
+	OPENSQUARE  shift 92
 	.  reduce 15 (src line 153)
 
-	bracketed  goto 90
+	bracketed  goto 91
 
 state 67
-	statement:  FREE expr.    (31)
-	expr:  expr.PLUS expr 
-	expr:  expr.SUB expr 
-	expr:  expr.MUL expr 
-	expr:  expr.MOD expr 
-	expr:  expr.DIV expr 
-	expr:  expr.LT expr 
-	expr:  expr.GT expr 
-	expr:  expr.LTE expr 
-	expr:  expr.GTE expr 
-	expr:  expr.EQ expr 
-	expr:  expr.NEQ expr 
-	expr:  expr.AND expr 
-	expr:  expr.OR expr 
-
-	MUL  shift 103
-	DIV  shift 105
-	MOD  shift 104
-	PLUS  shift 101
-	SUB  shift 102
-	AND  shift 112
-	OR  shift 113
-	GT  shift 107
-	GTE  shift 109
-	LT  shift 106
-	LTE  shift 108
-	EQ  shift 110
-	NEQ  shift 111
-	.  reduce 31 (src line 178)
-
-
-state 68
-	statement:  RETURN expr.    (32)
+	statement:  FREE expr.    (32)
 	expr:  expr.PLUS expr 
 	expr:  expr.SUB expr 
 	expr:  expr.MUL expr 
@@ -1034,8 +988,8 @@ state 68
 	.  reduce 32 (src line 179)
 
 
-state 69
-	statement:  EXIT expr.    (33)
+state 68
+	statement:  RETURN expr.    (33)
 	expr:  expr.PLUS expr 
 	expr:  expr.SUB expr 
 	expr:  expr.MUL expr 
@@ -1066,8 +1020,8 @@ state 69
 	.  reduce 33 (src line 180)
 
 
-state 70
-	statement:  PRINT expr.    (34)
+state 69
+	statement:  EXIT expr.    (34)
 	expr:  expr.PLUS expr 
 	expr:  expr.SUB expr 
 	expr:  expr.MUL expr 
@@ -1098,8 +1052,8 @@ state 70
 	.  reduce 34 (src line 181)
 
 
-state 71
-	statement:  PRINTLN expr.    (35)
+state 70
+	statement:  PRINT expr.    (35)
 	expr:  expr.PLUS expr 
 	expr:  expr.SUB expr 
 	expr:  expr.MUL expr 
@@ -1130,6 +1084,38 @@ state 71
 	.  reduce 35 (src line 182)
 
 
+state 71
+	statement:  PRINTLN expr.    (36)
+	expr:  expr.PLUS expr 
+	expr:  expr.SUB expr 
+	expr:  expr.MUL expr 
+	expr:  expr.MOD expr 
+	expr:  expr.DIV expr 
+	expr:  expr.LT expr 
+	expr:  expr.GT expr 
+	expr:  expr.LTE expr 
+	expr:  expr.GTE expr 
+	expr:  expr.EQ expr 
+	expr:  expr.NEQ expr 
+	expr:  expr.AND expr 
+	expr:  expr.OR expr 
+
+	MUL  shift 103
+	DIV  shift 105
+	MOD  shift 104
+	PLUS  shift 101
+	SUB  shift 102
+	AND  shift 112
+	OR  shift 113
+	GT  shift 107
+	GTE  shift 109
+	LT  shift 106
+	LTE  shift 108
+	EQ  shift 110
+	NEQ  shift 111
+	.  reduce 36 (src line 183)
+
+
 state 72
 	statement:  IF expr.THEN statements ELSE statements FI 
 	expr:  expr.PLUS expr 
@@ -1146,7 +1132,7 @@ state 72
 	expr:  expr.AND expr 
 	expr:  expr.OR expr 
 
-	THEN  shift 126
+	THEN  shift 125
 	MUL  shift 103
 	DIV  shift 105
 	MOD  shift 104
@@ -1179,7 +1165,7 @@ state 73
 	expr:  expr.AND expr 
 	expr:  expr.OR expr 
 
-	DO  shift 127
+	DO  shift 126
 	MUL  shift 103
 	DIV  shift 105
 	MOD  shift 104
@@ -1200,204 +1186,203 @@ state 74
 	statements:  statements.SEMICOLON statement 
 	statement:  BEGIN statements.END 
 
-	END  shift 128
-	SEMICOLON  shift 42
+	END  shift 127
+	SEMICOLON  shift 43
 	.  error
 
 
 state 75
 	statement:  typeDef.ident ASSIGNMENT assignrhs 
 
-	IDENTIFIER  shift 37
+	IDENTIFIER  shift 41
 	.  error
 
-	ident  goto 129
+	ident  goto 128
 
 state 76
-	statement:  error SEMICOLON.    (40)
+	statement:  error SEMICOLON.    (41)
 
-	.  reduce 40 (src line 190)
+	.  reduce 41 (src line 191)
 
 
 state 77
-	statement:  error END.    (41)
+	statement:  error END.    (42)
 
-	.  reduce 41 (src line 194)
+	.  reduce 42 (src line 195)
 
 
 state 78
-	statement:  error FI.    (42)
+	statement:  error FI.    (43)
 
-	.  reduce 42 (src line 197)
+	.  reduce 43 (src line 198)
 
 
 state 79
-	statement:  error DONE.    (43)
+	statement:  error DONE.    (44)
 
-	.  reduce 43 (src line 201)
+	.  reduce 44 (src line 202)
 
 
 state 80
 	statement:  CALL ident.OPENROUND exprlist CLOSEROUND 
 
-	OPENROUND  shift 130
+	OPENROUND  shift 129
 	.  error
 
 
 state 81
 	arraytype:  basetype OPENSQUARE.CLOSESQUARE 
 
-	CLOSESQUARE  shift 131
+	CLOSESQUARE  shift 130
 	.  error
 
 
 state 82
 	arraytype:  arraytype OPENSQUARE.CLOSESQUARE 
 
-	CLOSESQUARE  shift 132
+	CLOSESQUARE  shift 131
 	.  error
 
 
 state 83
 	arraytype:  pairtype OPENSQUARE.CLOSESQUARE 
 
-	CLOSESQUARE  shift 133
+	CLOSESQUARE  shift 132
 	.  error
 
 
 state 84
+	ident:  IDENTIFIER DOT.ident 
+
+	IDENTIFIER  shift 41
+	.  error
+
+	ident  goto 133
+
+state 85
 	assignment:  assignlhs ASSIGNMENT.assignrhs 
 
-	NEW  shift 62
-	THIS  shift 61
-	NEWPAIR  shift 138
-	CALL  shift 60
+	NEW  shift 138
+	THIS  shift 62
+	NEWPAIR  shift 139
+	CALL  shift 61
 	FST  shift 38
 	SND  shift 39
-	NOT  shift 53
-	LEN  shift 54
-	ORD  shift 55
-	CHR  shift 56
-	PLUS  shift 58
-	SUB  shift 57
-	TRUE  shift 46
-	FALSE  shift 47
+	NOT  shift 54
+	LEN  shift 55
+	ORD  shift 56
+	CHR  shift 57
+	PLUS  shift 59
+	SUB  shift 58
+	TRUE  shift 47
+	FALSE  shift 48
 	NULL  shift 63
-	OPENSQUARE  shift 139
-	OPENROUND  shift 59
-	STRINGCONST  shift 49
-	IDENTIFIER  shift 37
-	INTEGER  shift 45
-	CHARACTER  shift 48
+	OPENSQUARE  shift 140
+	OPENROUND  shift 60
+	STRINGCONST  shift 50
+	IDENTIFIER  shift 41
+	INTEGER  shift 46
+	CHARACTER  shift 49
 	.  error
 
 	assignrhs  goto 134
 	expr  goto 135
 	pairelem  goto 137
 	arrayliter  goto 136
-	arrayelem  goto 52
-	pairliter  goto 50
-	ident  goto 51
+	arrayelem  goto 53
+	pairliter  goto 51
+	ident  goto 52
 
-state 85
+state 86
 	assignment:  ident PLUS.ASSIGNMENT expr 
 	assignment:  ident PLUS.PLUS 
 
-	PLUS  shift 141
-	ASSIGNMENT  shift 140
-	.  error
-
-
-state 86
-	assignment:  ident SUB.ASSIGNMENT expr 
-	assignment:  ident SUB.SUB 
-
-	SUB  shift 143
-	ASSIGNMENT  shift 142
+	PLUS  shift 142
+	ASSIGNMENT  shift 141
 	.  error
 
 
 state 87
-	assignment:  ident DIV.ASSIGNMENT expr 
+	assignment:  ident SUB.ASSIGNMENT expr 
+	assignment:  ident SUB.SUB 
 
-	ASSIGNMENT  shift 144
+	SUB  shift 144
+	ASSIGNMENT  shift 143
 	.  error
 
 
 state 88
-	assignment:  ident MUL.ASSIGNMENT expr 
-	assignment:  ident MUL.MUL 
+	assignment:  ident DIV.ASSIGNMENT expr 
 
-	MUL  shift 146
 	ASSIGNMENT  shift 145
 	.  error
 
 
 state 89
-	assignment:  ident MOD.ASSIGNMENT expr 
+	assignment:  ident MUL.ASSIGNMENT expr 
+	assignment:  ident MUL.MUL 
 
-	ASSIGNMENT  shift 147
+	MUL  shift 147
+	ASSIGNMENT  shift 146
 	.  error
 
 
 state 90
-	arrayelem:  ident bracketed.    (89)
-	bracketed:  bracketed.OPENSQUARE expr CLOSESQUARE 
+	assignment:  ident MOD.ASSIGNMENT expr 
 
-	OPENSQUARE  shift 148
-	.  reduce 89 (src line 258)
+	ASSIGNMENT  shift 148
+	.  error
 
 
 state 91
-	bracketed:  OPENSQUARE.expr CLOSESQUARE 
+	arrayelem:  ident bracketed.    (89)
+	bracketed:  bracketed.OPENSQUARE expr CLOSESQUARE 
 
-	NEW  shift 62
-	THIS  shift 61
-	CALL  shift 60
-	NOT  shift 53
-	LEN  shift 54
-	ORD  shift 55
-	CHR  shift 56
-	PLUS  shift 58
-	SUB  shift 57
-	TRUE  shift 46
-	FALSE  shift 47
-	NULL  shift 63
-	OPENROUND  shift 59
-	STRINGCONST  shift 49
-	IDENTIFIER  shift 37
-	INTEGER  shift 45
-	CHARACTER  shift 48
-	.  error
+	OPENSQUARE  shift 149
+	.  reduce 89 (src line 258)
 
-	expr  goto 149
-	arrayelem  goto 52
-	pairliter  goto 50
-	ident  goto 51
 
 state 92
-	pairtype:  PAIR OPENROUND.pairelemtype COMMA pairelemtype CLOSEROUND 
+	bracketed:  OPENSQUARE.expr CLOSESQUARE 
 
-	INT  shift 30
-	BOOL  shift 31
-	CHAR  shift 32
-	STRING  shift 33
-	PAIR  shift 153
-	IDENTIFIER  shift 154
+	THIS  shift 62
+	CALL  shift 61
+	NOT  shift 54
+	LEN  shift 55
+	ORD  shift 56
+	CHR  shift 57
+	PLUS  shift 59
+	SUB  shift 58
+	TRUE  shift 47
+	FALSE  shift 48
+	NULL  shift 63
+	OPENROUND  shift 60
+	STRINGCONST  shift 50
+	IDENTIFIER  shift 41
+	INTEGER  shift 46
+	CHARACTER  shift 49
 	.  error
 
-	basetype  goto 151
-	arraytype  goto 152
-	pairtype  goto 155
-	pairelemtype  goto 150
+	expr  goto 150
+	arrayelem  goto 53
+	pairliter  goto 51
+	ident  goto 52
 
 state 93
-	ident:  IDENTIFIER DOT.ident 
+	pairtype:  PAIR OPENROUND.pairelemtype COMMA pairelemtype CLOSEROUND 
 
-	IDENTIFIER  shift 37
+	INT  shift 31
+	BOOL  shift 32
+	CHAR  shift 33
+	STRING  shift 34
+	PAIR  shift 154
+	IDENTIFIER  shift 155
 	.  error
 
-	ident  goto 156
+	basetype  goto 152
+	arraytype  goto 153
+	pairtype  goto 156
+	pairelemtype  goto 151
 
 state 94
 	expr:  expr.PLUS expr 
@@ -1466,11 +1451,12 @@ state 95
 state 96
 	class:  CLASS ident OPEN.fieldlist functions CLOSE 
 
-	INT  shift 30
-	BOOL  shift 31
-	CHAR  shift 32
-	STRING  shift 33
-	PAIR  shift 34
+	INT  shift 31
+	BOOL  shift 32
+	CHAR  shift 33
+	STRING  shift 34
+	PAIR  shift 35
+	IDENTIFIER  shift 160
 	.  error
 
 	fieldlist  goto 157
@@ -1481,42 +1467,41 @@ state 96
 	pairtype  goto 27
 
 state 97
-	statements:  statements SEMICOLON statement.    (22)
+	statements:  statements SEMICOLON statement.    (23)
 
-	.  reduce 22 (src line 162)
+	.  reduce 23 (src line 163)
 
 
 state 98
 	statement:  FOR.expr SEMICOLON assignment DO statements DONE 
 
-	NEW  shift 62
-	THIS  shift 61
-	CALL  shift 60
-	NOT  shift 53
-	LEN  shift 54
-	ORD  shift 55
-	CHR  shift 56
-	PLUS  shift 58
-	SUB  shift 57
-	TRUE  shift 46
-	FALSE  shift 47
+	THIS  shift 62
+	CALL  shift 61
+	NOT  shift 54
+	LEN  shift 55
+	ORD  shift 56
+	CHR  shift 57
+	PLUS  shift 59
+	SUB  shift 58
+	TRUE  shift 47
+	FALSE  shift 48
 	NULL  shift 63
-	OPENROUND  shift 59
-	STRINGCONST  shift 49
-	IDENTIFIER  shift 37
-	INTEGER  shift 45
-	CHARACTER  shift 48
+	OPENROUND  shift 60
+	STRINGCONST  shift 50
+	IDENTIFIER  shift 41
+	INTEGER  shift 46
+	CHARACTER  shift 49
 	.  error
 
-	expr  goto 44
-	arrayelem  goto 52
-	pairliter  goto 50
-	ident  goto 51
+	expr  goto 45
+	arrayelem  goto 53
+	pairliter  goto 51
+	ident  goto 52
 
 state 99
 	statements:  FOR typeDef ident.ASSIGNMENT assignrhs SEMICOLON expr SEMICOLON assignment DO statements DONE 
 
-	ASSIGNMENT  shift 160
+	ASSIGNMENT  shift 161
 	.  error
 
 
@@ -1525,368 +1510,355 @@ state 100
 
 	FST  shift 38
 	SND  shift 39
-	IDENTIFIER  shift 37
+	IDENTIFIER  shift 41
 	.  error
 
-	assignlhs  goto 28
-	pairelem  goto 36
-	arrayelem  goto 35
-	assignment  goto 161
-	ident  goto 29
+	assignlhs  goto 29
+	pairelem  goto 37
+	arrayelem  goto 36
+	assignment  goto 162
+	ident  goto 30
 
 state 101
 	expr:  expr PLUS.expr 
 
-	NEW  shift 62
-	THIS  shift 61
-	CALL  shift 60
-	NOT  shift 53
-	LEN  shift 54
-	ORD  shift 55
-	CHR  shift 56
-	PLUS  shift 58
-	SUB  shift 57
-	TRUE  shift 46
-	FALSE  shift 47
+	THIS  shift 62
+	CALL  shift 61
+	NOT  shift 54
+	LEN  shift 55
+	ORD  shift 56
+	CHR  shift 57
+	PLUS  shift 59
+	SUB  shift 58
+	TRUE  shift 47
+	FALSE  shift 48
 	NULL  shift 63
-	OPENROUND  shift 59
-	STRINGCONST  shift 49
-	IDENTIFIER  shift 37
-	INTEGER  shift 45
-	CHARACTER  shift 48
+	OPENROUND  shift 60
+	STRINGCONST  shift 50
+	IDENTIFIER  shift 41
+	INTEGER  shift 46
+	CHARACTER  shift 49
 	.  error
 
-	expr  goto 162
-	arrayelem  goto 52
-	pairliter  goto 50
-	ident  goto 51
+	expr  goto 163
+	arrayelem  goto 53
+	pairliter  goto 51
+	ident  goto 52
 
 state 102
 	expr:  expr SUB.expr 
 
-	NEW  shift 62
-	THIS  shift 61
-	CALL  shift 60
-	NOT  shift 53
-	LEN  shift 54
-	ORD  shift 55
-	CHR  shift 56
-	PLUS  shift 58
-	SUB  shift 57
-	TRUE  shift 46
-	FALSE  shift 47
+	THIS  shift 62
+	CALL  shift 61
+	NOT  shift 54
+	LEN  shift 55
+	ORD  shift 56
+	CHR  shift 57
+	PLUS  shift 59
+	SUB  shift 58
+	TRUE  shift 47
+	FALSE  shift 48
 	NULL  shift 63
-	OPENROUND  shift 59
-	STRINGCONST  shift 49
-	IDENTIFIER  shift 37
-	INTEGER  shift 45
-	CHARACTER  shift 48
+	OPENROUND  shift 60
+	STRINGCONST  shift 50
+	IDENTIFIER  shift 41
+	INTEGER  shift 46
+	CHARACTER  shift 49
 	.  error
 
-	expr  goto 163
-	arrayelem  goto 52
-	pairliter  goto 50
-	ident  goto 51
+	expr  goto 164
+	arrayelem  goto 53
+	pairliter  goto 51
+	ident  goto 52
 
 state 103
 	expr:  expr MUL.expr 
 
-	NEW  shift 62
-	THIS  shift 61
-	CALL  shift 60
-	NOT  shift 53
-	LEN  shift 54
-	ORD  shift 55
-	CHR  shift 56
-	PLUS  shift 58
-	SUB  shift 57
-	TRUE  shift 46
-	FALSE  shift 47
+	THIS  shift 62
+	CALL  shift 61
+	NOT  shift 54
+	LEN  shift 55
+	ORD  shift 56
+	CHR  shift 57
+	PLUS  shift 59
+	SUB  shift 58
+	TRUE  shift 47
+	FALSE  shift 48
 	NULL  shift 63
-	OPENROUND  shift 59
-	STRINGCONST  shift 49
-	IDENTIFIER  shift 37
-	INTEGER  shift 45
-	CHARACTER  shift 48
+	OPENROUND  shift 60
+	STRINGCONST  shift 50
+	IDENTIFIER  shift 41
+	INTEGER  shift 46
+	CHARACTER  shift 49
 	.  error
 
-	expr  goto 164
-	arrayelem  goto 52
-	pairliter  goto 50
-	ident  goto 51
+	expr  goto 165
+	arrayelem  goto 53
+	pairliter  goto 51
+	ident  goto 52
 
 state 104
 	expr:  expr MOD.expr 
 
-	NEW  shift 62
-	THIS  shift 61
-	CALL  shift 60
-	NOT  shift 53
-	LEN  shift 54
-	ORD  shift 55
-	CHR  shift 56
-	PLUS  shift 58
-	SUB  shift 57
-	TRUE  shift 46
-	FALSE  shift 47
+	THIS  shift 62
+	CALL  shift 61
+	NOT  shift 54
+	LEN  shift 55
+	ORD  shift 56
+	CHR  shift 57
+	PLUS  shift 59
+	SUB  shift 58
+	TRUE  shift 47
+	FALSE  shift 48
 	NULL  shift 63
-	OPENROUND  shift 59
-	STRINGCONST  shift 49
-	IDENTIFIER  shift 37
-	INTEGER  shift 45
-	CHARACTER  shift 48
+	OPENROUND  shift 60
+	STRINGCONST  shift 50
+	IDENTIFIER  shift 41
+	INTEGER  shift 46
+	CHARACTER  shift 49
 	.  error
 
-	expr  goto 165
-	arrayelem  goto 52
-	pairliter  goto 50
-	ident  goto 51
+	expr  goto 166
+	arrayelem  goto 53
+	pairliter  goto 51
+	ident  goto 52
 
 state 105
 	expr:  expr DIV.expr 
 
-	NEW  shift 62
-	THIS  shift 61
-	CALL  shift 60
-	NOT  shift 53
-	LEN  shift 54
-	ORD  shift 55
-	CHR  shift 56
-	PLUS  shift 58
-	SUB  shift 57
-	TRUE  shift 46
-	FALSE  shift 47
+	THIS  shift 62
+	CALL  shift 61
+	NOT  shift 54
+	LEN  shift 55
+	ORD  shift 56
+	CHR  shift 57
+	PLUS  shift 59
+	SUB  shift 58
+	TRUE  shift 47
+	FALSE  shift 48
 	NULL  shift 63
-	OPENROUND  shift 59
-	STRINGCONST  shift 49
-	IDENTIFIER  shift 37
-	INTEGER  shift 45
-	CHARACTER  shift 48
+	OPENROUND  shift 60
+	STRINGCONST  shift 50
+	IDENTIFIER  shift 41
+	INTEGER  shift 46
+	CHARACTER  shift 49
 	.  error
 
-	expr  goto 166
-	arrayelem  goto 52
-	pairliter  goto 50
-	ident  goto 51
+	expr  goto 167
+	arrayelem  goto 53
+	pairliter  goto 51
+	ident  goto 52
 
 state 106
 	expr:  expr LT.expr 
 
-	NEW  shift 62
-	THIS  shift 61
-	CALL  shift 60
-	NOT  shift 53
-	LEN  shift 54
-	ORD  shift 55
-	CHR  shift 56
-	PLUS  shift 58
-	SUB  shift 57
-	TRUE  shift 46
-	FALSE  shift 47
+	THIS  shift 62
+	CALL  shift 61
+	NOT  shift 54
+	LEN  shift 55
+	ORD  shift 56
+	CHR  shift 57
+	PLUS  shift 59
+	SUB  shift 58
+	TRUE  shift 47
+	FALSE  shift 48
 	NULL  shift 63
-	OPENROUND  shift 59
-	STRINGCONST  shift 49
-	IDENTIFIER  shift 37
-	INTEGER  shift 45
-	CHARACTER  shift 48
+	OPENROUND  shift 60
+	STRINGCONST  shift 50
+	IDENTIFIER  shift 41
+	INTEGER  shift 46
+	CHARACTER  shift 49
 	.  error
 
-	expr  goto 167
-	arrayelem  goto 52
-	pairliter  goto 50
-	ident  goto 51
+	expr  goto 168
+	arrayelem  goto 53
+	pairliter  goto 51
+	ident  goto 52
 
 state 107
 	expr:  expr GT.expr 
 
-	NEW  shift 62
-	THIS  shift 61
-	CALL  shift 60
-	NOT  shift 53
-	LEN  shift 54
-	ORD  shift 55
-	CHR  shift 56
-	PLUS  shift 58
-	SUB  shift 57
-	TRUE  shift 46
-	FALSE  shift 47
+	THIS  shift 62
+	CALL  shift 61
+	NOT  shift 54
+	LEN  shift 55
+	ORD  shift 56
+	CHR  shift 57
+	PLUS  shift 59
+	SUB  shift 58
+	TRUE  shift 47
+	FALSE  shift 48
 	NULL  shift 63
-	OPENROUND  shift 59
-	STRINGCONST  shift 49
-	IDENTIFIER  shift 37
-	INTEGER  shift 45
-	CHARACTER  shift 48
+	OPENROUND  shift 60
+	STRINGCONST  shift 50
+	IDENTIFIER  shift 41
+	INTEGER  shift 46
+	CHARACTER  shift 49
 	.  error
 
-	expr  goto 168
-	arrayelem  goto 52
-	pairliter  goto 50
-	ident  goto 51
+	expr  goto 169
+	arrayelem  goto 53
+	pairliter  goto 51
+	ident  goto 52
 
 state 108
 	expr:  expr LTE.expr 
 
-	NEW  shift 62
-	THIS  shift 61
-	CALL  shift 60
-	NOT  shift 53
-	LEN  shift 54
-	ORD  shift 55
-	CHR  shift 56
-	PLUS  shift 58
-	SUB  shift 57
-	TRUE  shift 46
-	FALSE  shift 47
+	THIS  shift 62
+	CALL  shift 61
+	NOT  shift 54
+	LEN  shift 55
+	ORD  shift 56
+	CHR  shift 57
+	PLUS  shift 59
+	SUB  shift 58
+	TRUE  shift 47
+	FALSE  shift 48
 	NULL  shift 63
-	OPENROUND  shift 59
-	STRINGCONST  shift 49
-	IDENTIFIER  shift 37
-	INTEGER  shift 45
-	CHARACTER  shift 48
+	OPENROUND  shift 60
+	STRINGCONST  shift 50
+	IDENTIFIER  shift 41
+	INTEGER  shift 46
+	CHARACTER  shift 49
 	.  error
 
-	expr  goto 169
-	arrayelem  goto 52
-	pairliter  goto 50
-	ident  goto 51
+	expr  goto 170
+	arrayelem  goto 53
+	pairliter  goto 51
+	ident  goto 52
 
 state 109
 	expr:  expr GTE.expr 
 
-	NEW  shift 62
-	THIS  shift 61
-	CALL  shift 60
-	NOT  shift 53
-	LEN  shift 54
-	ORD  shift 55
-	CHR  shift 56
-	PLUS  shift 58
-	SUB  shift 57
-	TRUE  shift 46
-	FALSE  shift 47
+	THIS  shift 62
+	CALL  shift 61
+	NOT  shift 54
+	LEN  shift 55
+	ORD  shift 56
+	CHR  shift 57
+	PLUS  shift 59
+	SUB  shift 58
+	TRUE  shift 47
+	FALSE  shift 48
 	NULL  shift 63
-	OPENROUND  shift 59
-	STRINGCONST  shift 49
-	IDENTIFIER  shift 37
-	INTEGER  shift 45
-	CHARACTER  shift 48
+	OPENROUND  shift 60
+	STRINGCONST  shift 50
+	IDENTIFIER  shift 41
+	INTEGER  shift 46
+	CHARACTER  shift 49
 	.  error
 
-	expr  goto 170
-	arrayelem  goto 52
-	pairliter  goto 50
-	ident  goto 51
+	expr  goto 171
+	arrayelem  goto 53
+	pairliter  goto 51
+	ident  goto 52
 
 state 110
 	expr:  expr EQ.expr 
 
-	NEW  shift 62
-	THIS  shift 61
-	CALL  shift 60
-	NOT  shift 53
-	LEN  shift 54
-	ORD  shift 55
-	CHR  shift 56
-	PLUS  shift 58
-	SUB  shift 57
-	TRUE  shift 46
-	FALSE  shift 47
+	THIS  shift 62
+	CALL  shift 61
+	NOT  shift 54
+	LEN  shift 55
+	ORD  shift 56
+	CHR  shift 57
+	PLUS  shift 59
+	SUB  shift 58
+	TRUE  shift 47
+	FALSE  shift 48
 	NULL  shift 63
-	OPENROUND  shift 59
-	STRINGCONST  shift 49
-	IDENTIFIER  shift 37
-	INTEGER  shift 45
-	CHARACTER  shift 48
+	OPENROUND  shift 60
+	STRINGCONST  shift 50
+	IDENTIFIER  shift 41
+	INTEGER  shift 46
+	CHARACTER  shift 49
 	.  error
 
-	expr  goto 171
-	arrayelem  goto 52
-	pairliter  goto 50
-	ident  goto 51
+	expr  goto 172
+	arrayelem  goto 53
+	pairliter  goto 51
+	ident  goto 52
 
 state 111
 	expr:  expr NEQ.expr 
 
-	NEW  shift 62
-	THIS  shift 61
-	CALL  shift 60
-	NOT  shift 53
-	LEN  shift 54
-	ORD  shift 55
-	CHR  shift 56
-	PLUS  shift 58
-	SUB  shift 57
-	TRUE  shift 46
-	FALSE  shift 47
+	THIS  shift 62
+	CALL  shift 61
+	NOT  shift 54
+	LEN  shift 55
+	ORD  shift 56
+	CHR  shift 57
+	PLUS  shift 59
+	SUB  shift 58
+	TRUE  shift 47
+	FALSE  shift 48
 	NULL  shift 63
-	OPENROUND  shift 59
-	STRINGCONST  shift 49
-	IDENTIFIER  shift 37
-	INTEGER  shift 45
-	CHARACTER  shift 48
+	OPENROUND  shift 60
+	STRINGCONST  shift 50
+	IDENTIFIER  shift 41
+	INTEGER  shift 46
+	CHARACTER  shift 49
 	.  error
 
-	expr  goto 172
-	arrayelem  goto 52
-	pairliter  goto 50
-	ident  goto 51
+	expr  goto 173
+	arrayelem  goto 53
+	pairliter  goto 51
+	ident  goto 52
 
 state 112
 	expr:  expr AND.expr 
 
-	NEW  shift 62
-	THIS  shift 61
-	CALL  shift 60
-	NOT  shift 53
-	LEN  shift 54
-	ORD  shift 55
-	CHR  shift 56
-	PLUS  shift 58
-	SUB  shift 57
-	TRUE  shift 46
-	FALSE  shift 47
+	THIS  shift 62
+	CALL  shift 61
+	NOT  shift 54
+	LEN  shift 55
+	ORD  shift 56
+	CHR  shift 57
+	PLUS  shift 59
+	SUB  shift 58
+	TRUE  shift 47
+	FALSE  shift 48
 	NULL  shift 63
-	OPENROUND  shift 59
-	STRINGCONST  shift 49
-	IDENTIFIER  shift 37
-	INTEGER  shift 45
-	CHARACTER  shift 48
+	OPENROUND  shift 60
+	STRINGCONST  shift 50
+	IDENTIFIER  shift 41
+	INTEGER  shift 46
+	CHARACTER  shift 49
 	.  error
 
-	expr  goto 173
-	arrayelem  goto 52
-	pairliter  goto 50
-	ident  goto 51
+	expr  goto 174
+	arrayelem  goto 53
+	pairliter  goto 51
+	ident  goto 52
 
 state 113
 	expr:  expr OR.expr 
 
-	NEW  shift 62
-	THIS  shift 61
-	CALL  shift 60
-	NOT  shift 53
-	LEN  shift 54
-	ORD  shift 55
-	CHR  shift 56
-	PLUS  shift 58
-	SUB  shift 57
-	TRUE  shift 46
-	FALSE  shift 47
+	THIS  shift 62
+	CALL  shift 61
+	NOT  shift 54
+	LEN  shift 55
+	ORD  shift 56
+	CHR  shift 57
+	PLUS  shift 59
+	SUB  shift 58
+	TRUE  shift 47
+	FALSE  shift 48
 	NULL  shift 63
-	OPENROUND  shift 59
-	STRINGCONST  shift 49
-	IDENTIFIER  shift 37
-	INTEGER  shift 45
-	CHARACTER  shift 48
+	OPENROUND  shift 60
+	STRINGCONST  shift 50
+	IDENTIFIER  shift 41
+	INTEGER  shift 46
+	CHARACTER  shift 49
 	.  error
 
-	expr  goto 174
-	arrayelem  goto 52
-	pairliter  goto 50
-	ident  goto 51
+	expr  goto 175
+	arrayelem  goto 53
+	pairliter  goto 51
+	ident  goto 52
 
 state 114
-	expr:  NOT expr.    (62)
+	expr:  NOT expr.    (63)
 	expr:  expr.PLUS expr 
 	expr:  expr.SUB expr 
 	expr:  expr.MUL expr 
@@ -1901,11 +1873,11 @@ state 114
 	expr:  expr.AND expr 
 	expr:  expr.OR expr 
 
-	.  reduce 62 (src line 227)
+	.  reduce 63 (src line 229)
 
 
 state 115
-	expr:  LEN expr.    (63)
+	expr:  LEN expr.    (64)
 	expr:  expr.PLUS expr 
 	expr:  expr.SUB expr 
 	expr:  expr.MUL expr 
@@ -1920,11 +1892,11 @@ state 115
 	expr:  expr.AND expr 
 	expr:  expr.OR expr 
 
-	.  reduce 63 (src line 228)
+	.  reduce 64 (src line 230)
 
 
 state 116
-	expr:  ORD expr.    (64)
+	expr:  ORD expr.    (65)
 	expr:  expr.PLUS expr 
 	expr:  expr.SUB expr 
 	expr:  expr.MUL expr 
@@ -1939,11 +1911,11 @@ state 116
 	expr:  expr.AND expr 
 	expr:  expr.OR expr 
 
-	.  reduce 64 (src line 229)
+	.  reduce 65 (src line 231)
 
 
 state 117
-	expr:  CHR expr.    (65)
+	expr:  CHR expr.    (66)
 	expr:  expr.PLUS expr 
 	expr:  expr.SUB expr 
 	expr:  expr.MUL expr 
@@ -1958,11 +1930,11 @@ state 117
 	expr:  expr.AND expr 
 	expr:  expr.OR expr 
 
-	.  reduce 65 (src line 230)
+	.  reduce 66 (src line 232)
 
 
 state 118
-	expr:  SUB expr.    (66)
+	expr:  SUB expr.    (67)
 	expr:  expr.PLUS expr 
 	expr:  expr.SUB expr 
 	expr:  expr.MUL expr 
@@ -1984,11 +1956,11 @@ state 118
 	GTE  shift 109
 	LT  shift 106
 	LTE  shift 108
-	.  reduce 66 (src line 231)
+	.  reduce 67 (src line 233)
 
 
 state 119
-	expr:  PLUS expr.    (67)
+	expr:  PLUS expr.    (68)
 	expr:  expr.PLUS expr 
 	expr:  expr.SUB expr 
 	expr:  expr.MUL expr 
@@ -2010,7 +1982,7 @@ state 119
 	GTE  shift 109
 	LT  shift 106
 	LTE  shift 108
-	.  reduce 67 (src line 232)
+	.  reduce 68 (src line 234)
 
 
 state 120
@@ -2042,42 +2014,36 @@ state 120
 	LTE  shift 108
 	EQ  shift 110
 	NEQ  shift 111
-	CLOSEROUND  shift 175
+	CLOSEROUND  shift 176
 	.  error
 
 
 state 121
 	expr:  CALL ident.OPENROUND exprlist CLOSEROUND 
 
-	OPENROUND  shift 176
+	OPENROUND  shift 177
 	.  error
 
 
 state 122
 	expr:  THIS DOT.ident 
 
-	IDENTIFIER  shift 37
+	IDENTIFIER  shift 41
 	.  error
 
-	ident  goto 177
+	ident  goto 178
 
 state 123
-	expr:  NEW IDENTIFIER.OPENROUND exprlist CLOSEROUND 
-
-	OPENROUND  shift 178
-	.  error
-
-
-state 124
 	function:  typeDef ident OPENROUND.CLOSEROUND IS statements END 
 	function:  typeDef ident OPENROUND.paramlist CLOSEROUND IS statements END 
 
-	INT  shift 30
-	BOOL  shift 31
-	CHAR  shift 32
-	STRING  shift 33
-	PAIR  shift 34
+	INT  shift 31
+	BOOL  shift 32
+	CHAR  shift 33
+	STRING  shift 34
+	PAIR  shift 35
 	CLOSEROUND  shift 179
+	IDENTIFIER  shift 160
 	.  error
 
 	paramlist  goto 180
@@ -2087,41 +2053,41 @@ state 124
 	arraytype  goto 26
 	pairtype  goto 27
 
-state 125
+state 124
 	statement:  typeDef ident ASSIGNMENT.assignrhs 
 
-	NEW  shift 62
-	THIS  shift 61
-	NEWPAIR  shift 138
-	CALL  shift 60
+	NEW  shift 138
+	THIS  shift 62
+	NEWPAIR  shift 139
+	CALL  shift 61
 	FST  shift 38
 	SND  shift 39
-	NOT  shift 53
-	LEN  shift 54
-	ORD  shift 55
-	CHR  shift 56
-	PLUS  shift 58
-	SUB  shift 57
-	TRUE  shift 46
-	FALSE  shift 47
+	NOT  shift 54
+	LEN  shift 55
+	ORD  shift 56
+	CHR  shift 57
+	PLUS  shift 59
+	SUB  shift 58
+	TRUE  shift 47
+	FALSE  shift 48
 	NULL  shift 63
-	OPENSQUARE  shift 139
-	OPENROUND  shift 59
-	STRINGCONST  shift 49
-	IDENTIFIER  shift 37
-	INTEGER  shift 45
-	CHARACTER  shift 48
+	OPENSQUARE  shift 140
+	OPENROUND  shift 60
+	STRINGCONST  shift 50
+	IDENTIFIER  shift 41
+	INTEGER  shift 46
+	CHARACTER  shift 49
 	.  error
 
 	assignrhs  goto 183
 	expr  goto 135
 	pairelem  goto 137
 	arrayliter  goto 136
-	arrayelem  goto 52
-	pairliter  goto 50
-	ident  goto 51
+	arrayelem  goto 53
+	pairliter  goto 51
+	ident  goto 52
 
-state 126
+state 125
 	statement:  IF expr THEN.statements ELSE statements FI 
 
 	error  shift 23
@@ -2138,28 +2104,28 @@ state 126
 	CALL  shift 24
 	FST  shift 38
 	SND  shift 39
-	INT  shift 30
-	BOOL  shift 31
-	CHAR  shift 32
-	STRING  shift 33
-	PAIR  shift 34
+	INT  shift 31
+	BOOL  shift 32
+	CHAR  shift 33
+	STRING  shift 34
+	PAIR  shift 35
 	FOR  shift 10
-	IDENTIFIER  shift 37
+	IDENTIFIER  shift 28
 	.  error
 
 	statement  goto 9
 	statements  goto 184
-	assignlhs  goto 28
-	pairelem  goto 36
-	arrayelem  goto 35
+	assignlhs  goto 29
+	pairelem  goto 37
+	arrayelem  goto 36
 	basetype  goto 25
 	typeDef  goto 75
 	arraytype  goto 26
 	pairtype  goto 27
 	assignment  goto 13
-	ident  goto 29
+	ident  goto 30
 
-state 127
+state 126
 	statement:  WHILE expr DO.statements DONE 
 
 	error  shift 23
@@ -2176,91 +2142,96 @@ state 127
 	CALL  shift 24
 	FST  shift 38
 	SND  shift 39
-	INT  shift 30
-	BOOL  shift 31
-	CHAR  shift 32
-	STRING  shift 33
-	PAIR  shift 34
+	INT  shift 31
+	BOOL  shift 32
+	CHAR  shift 33
+	STRING  shift 34
+	PAIR  shift 35
 	FOR  shift 10
-	IDENTIFIER  shift 37
+	IDENTIFIER  shift 28
 	.  error
 
 	statement  goto 9
 	statements  goto 185
-	assignlhs  goto 28
-	pairelem  goto 36
-	arrayelem  goto 35
+	assignlhs  goto 29
+	pairelem  goto 37
+	arrayelem  goto 36
 	basetype  goto 25
 	typeDef  goto 75
 	arraytype  goto 26
 	pairtype  goto 27
 	assignment  goto 13
-	ident  goto 29
+	ident  goto 30
+
+state 127
+	statement:  BEGIN statements END.    (40)
+
+	.  reduce 40 (src line 190)
+
 
 state 128
-	statement:  BEGIN statements END.    (39)
-
-	.  reduce 39 (src line 189)
-
-
-state 129
 	statement:  typeDef ident.ASSIGNMENT assignrhs 
 
-	ASSIGNMENT  shift 125
+	ASSIGNMENT  shift 124
 	.  error
 
 
-state 130
+state 129
 	statement:  CALL ident OPENROUND.exprlist CLOSEROUND 
 	exprlist: .    (88)
 
-	NEW  shift 62
-	THIS  shift 61
-	CALL  shift 60
-	NOT  shift 53
-	LEN  shift 54
-	ORD  shift 55
-	CHR  shift 56
-	PLUS  shift 58
-	SUB  shift 57
-	TRUE  shift 46
-	FALSE  shift 47
+	THIS  shift 62
+	CALL  shift 61
+	NOT  shift 54
+	LEN  shift 55
+	ORD  shift 56
+	CHR  shift 57
+	PLUS  shift 59
+	SUB  shift 58
+	TRUE  shift 47
+	FALSE  shift 48
 	NULL  shift 63
-	OPENROUND  shift 59
-	STRINGCONST  shift 49
-	IDENTIFIER  shift 37
-	INTEGER  shift 45
-	CHARACTER  shift 48
+	OPENROUND  shift 60
+	STRINGCONST  shift 50
+	IDENTIFIER  shift 41
+	INTEGER  shift 46
+	CHARACTER  shift 49
 	.  reduce 88 (src line 256)
 
 	expr  goto 187
 	exprlist  goto 186
-	arrayelem  goto 52
-	pairliter  goto 50
-	ident  goto 51
+	arrayelem  goto 53
+	pairliter  goto 51
+	ident  goto 52
+
+state 130
+	arraytype:  basetype OPENSQUARE CLOSESQUARE.    (108)
+
+	.  reduce 108 (src line 287)
+
 
 state 131
-	arraytype:  basetype OPENSQUARE CLOSESQUARE.    (107)
+	arraytype:  arraytype OPENSQUARE CLOSESQUARE.    (110)
 
-	.  reduce 107 (src line 286)
+	.  reduce 110 (src line 289)
 
 
 state 132
-	arraytype:  arraytype OPENSQUARE CLOSESQUARE.    (109)
+	arraytype:  pairtype OPENSQUARE CLOSESQUARE.    (109)
 
 	.  reduce 109 (src line 288)
 
 
 state 133
-	arraytype:  pairtype OPENSQUARE CLOSESQUARE.    (108)
+	ident:  IDENTIFIER DOT ident.    (27)
 
-	.  reduce 108 (src line 287)
+	.  reduce 27 (src line 173)
 
 
 state 134
-	assignment:  assignlhs ASSIGNMENT assignrhs.    (45)
+	assignment:  assignlhs ASSIGNMENT assignrhs.    (46)
 
-	.  reduce 45 (src line 209)
+	.  reduce 46 (src line 210)
 
 
 state 135
@@ -2308,222 +2279,222 @@ state 137
 
 
 state 138
-	assignrhs:  NEWPAIR.OPENROUND expr COMMA expr CLOSEROUND 
+	assignrhs:  NEW.IDENTIFIER OPENROUND exprlist CLOSEROUND 
 
-	OPENROUND  shift 188
+	IDENTIFIER  shift 188
 	.  error
 
 
 state 139
+	assignrhs:  NEWPAIR.OPENROUND expr COMMA expr CLOSEROUND 
+
+	OPENROUND  shift 189
+	.  error
+
+
+state 140
 	arrayliter:  OPENSQUARE.exprlist CLOSESQUARE 
 	exprlist: .    (88)
 
-	NEW  shift 62
-	THIS  shift 61
-	CALL  shift 60
-	NOT  shift 53
-	LEN  shift 54
-	ORD  shift 55
-	CHR  shift 56
-	PLUS  shift 58
-	SUB  shift 57
-	TRUE  shift 46
-	FALSE  shift 47
+	THIS  shift 62
+	CALL  shift 61
+	NOT  shift 54
+	LEN  shift 55
+	ORD  shift 56
+	CHR  shift 57
+	PLUS  shift 59
+	SUB  shift 58
+	TRUE  shift 47
+	FALSE  shift 48
 	NULL  shift 63
-	OPENROUND  shift 59
-	STRINGCONST  shift 49
-	IDENTIFIER  shift 37
-	INTEGER  shift 45
-	CHARACTER  shift 48
+	OPENROUND  shift 60
+	STRINGCONST  shift 50
+	IDENTIFIER  shift 41
+	INTEGER  shift 46
+	CHARACTER  shift 49
 	.  reduce 88 (src line 256)
 
 	expr  goto 187
-	exprlist  goto 189
-	arrayelem  goto 52
-	pairliter  goto 50
-	ident  goto 51
-
-state 140
-	assignment:  ident PLUS ASSIGNMENT.expr 
-
-	NEW  shift 62
-	THIS  shift 61
-	CALL  shift 60
-	NOT  shift 53
-	LEN  shift 54
-	ORD  shift 55
-	CHR  shift 56
-	PLUS  shift 58
-	SUB  shift 57
-	TRUE  shift 46
-	FALSE  shift 47
-	NULL  shift 63
-	OPENROUND  shift 59
-	STRINGCONST  shift 49
-	IDENTIFIER  shift 37
-	INTEGER  shift 45
-	CHARACTER  shift 48
-	.  error
-
-	expr  goto 190
-	arrayelem  goto 52
-	pairliter  goto 50
-	ident  goto 51
+	exprlist  goto 190
+	arrayelem  goto 53
+	pairliter  goto 51
+	ident  goto 52
 
 state 141
-	assignment:  ident PLUS PLUS.    (51)
+	assignment:  ident PLUS ASSIGNMENT.expr 
 
-	.  reduce 51 (src line 215)
-
-
-state 142
-	assignment:  ident SUB ASSIGNMENT.expr 
-
-	NEW  shift 62
-	THIS  shift 61
-	CALL  shift 60
-	NOT  shift 53
-	LEN  shift 54
-	ORD  shift 55
-	CHR  shift 56
-	PLUS  shift 58
-	SUB  shift 57
-	TRUE  shift 46
-	FALSE  shift 47
+	THIS  shift 62
+	CALL  shift 61
+	NOT  shift 54
+	LEN  shift 55
+	ORD  shift 56
+	CHR  shift 57
+	PLUS  shift 59
+	SUB  shift 58
+	TRUE  shift 47
+	FALSE  shift 48
 	NULL  shift 63
-	OPENROUND  shift 59
-	STRINGCONST  shift 49
-	IDENTIFIER  shift 37
-	INTEGER  shift 45
-	CHARACTER  shift 48
+	OPENROUND  shift 60
+	STRINGCONST  shift 50
+	IDENTIFIER  shift 41
+	INTEGER  shift 46
+	CHARACTER  shift 49
 	.  error
 
 	expr  goto 191
-	arrayelem  goto 52
-	pairliter  goto 50
-	ident  goto 51
+	arrayelem  goto 53
+	pairliter  goto 51
+	ident  goto 52
+
+state 142
+	assignment:  ident PLUS PLUS.    (52)
+
+	.  reduce 52 (src line 217)
+
 
 state 143
-	assignment:  ident SUB SUB.    (52)
+	assignment:  ident SUB ASSIGNMENT.expr 
 
-	.  reduce 52 (src line 216)
-
-
-state 144
-	assignment:  ident DIV ASSIGNMENT.expr 
-
-	NEW  shift 62
-	THIS  shift 61
-	CALL  shift 60
-	NOT  shift 53
-	LEN  shift 54
-	ORD  shift 55
-	CHR  shift 56
-	PLUS  shift 58
-	SUB  shift 57
-	TRUE  shift 46
-	FALSE  shift 47
+	THIS  shift 62
+	CALL  shift 61
+	NOT  shift 54
+	LEN  shift 55
+	ORD  shift 56
+	CHR  shift 57
+	PLUS  shift 59
+	SUB  shift 58
+	TRUE  shift 47
+	FALSE  shift 48
 	NULL  shift 63
-	OPENROUND  shift 59
-	STRINGCONST  shift 49
-	IDENTIFIER  shift 37
-	INTEGER  shift 45
-	CHARACTER  shift 48
+	OPENROUND  shift 60
+	STRINGCONST  shift 50
+	IDENTIFIER  shift 41
+	INTEGER  shift 46
+	CHARACTER  shift 49
 	.  error
 
 	expr  goto 192
-	arrayelem  goto 52
-	pairliter  goto 50
-	ident  goto 51
+	arrayelem  goto 53
+	pairliter  goto 51
+	ident  goto 52
+
+state 144
+	assignment:  ident SUB SUB.    (53)
+
+	.  reduce 53 (src line 218)
+
 
 state 145
-	assignment:  ident MUL ASSIGNMENT.expr 
+	assignment:  ident DIV ASSIGNMENT.expr 
 
-	NEW  shift 62
-	THIS  shift 61
-	CALL  shift 60
-	NOT  shift 53
-	LEN  shift 54
-	ORD  shift 55
-	CHR  shift 56
-	PLUS  shift 58
-	SUB  shift 57
-	TRUE  shift 46
-	FALSE  shift 47
+	THIS  shift 62
+	CALL  shift 61
+	NOT  shift 54
+	LEN  shift 55
+	ORD  shift 56
+	CHR  shift 57
+	PLUS  shift 59
+	SUB  shift 58
+	TRUE  shift 47
+	FALSE  shift 48
 	NULL  shift 63
-	OPENROUND  shift 59
-	STRINGCONST  shift 49
-	IDENTIFIER  shift 37
-	INTEGER  shift 45
-	CHARACTER  shift 48
+	OPENROUND  shift 60
+	STRINGCONST  shift 50
+	IDENTIFIER  shift 41
+	INTEGER  shift 46
+	CHARACTER  shift 49
 	.  error
 
 	expr  goto 193
-	arrayelem  goto 52
-	pairliter  goto 50
-	ident  goto 51
+	arrayelem  goto 53
+	pairliter  goto 51
+	ident  goto 52
 
 state 146
-	assignment:  ident MUL MUL.    (53)
+	assignment:  ident MUL ASSIGNMENT.expr 
 
-	.  reduce 53 (src line 217)
-
-
-state 147
-	assignment:  ident MOD ASSIGNMENT.expr 
-
-	NEW  shift 62
-	THIS  shift 61
-	CALL  shift 60
-	NOT  shift 53
-	LEN  shift 54
-	ORD  shift 55
-	CHR  shift 56
-	PLUS  shift 58
-	SUB  shift 57
-	TRUE  shift 46
-	FALSE  shift 47
+	THIS  shift 62
+	CALL  shift 61
+	NOT  shift 54
+	LEN  shift 55
+	ORD  shift 56
+	CHR  shift 57
+	PLUS  shift 59
+	SUB  shift 58
+	TRUE  shift 47
+	FALSE  shift 48
 	NULL  shift 63
-	OPENROUND  shift 59
-	STRINGCONST  shift 49
-	IDENTIFIER  shift 37
-	INTEGER  shift 45
-	CHARACTER  shift 48
+	OPENROUND  shift 60
+	STRINGCONST  shift 50
+	IDENTIFIER  shift 41
+	INTEGER  shift 46
+	CHARACTER  shift 49
 	.  error
 
 	expr  goto 194
-	arrayelem  goto 52
-	pairliter  goto 50
-	ident  goto 51
+	arrayelem  goto 53
+	pairliter  goto 51
+	ident  goto 52
+
+state 147
+	assignment:  ident MUL MUL.    (54)
+
+	.  reduce 54 (src line 219)
+
 
 state 148
-	bracketed:  bracketed OPENSQUARE.expr CLOSESQUARE 
+	assignment:  ident MOD ASSIGNMENT.expr 
 
-	NEW  shift 62
-	THIS  shift 61
-	CALL  shift 60
-	NOT  shift 53
-	LEN  shift 54
-	ORD  shift 55
-	CHR  shift 56
-	PLUS  shift 58
-	SUB  shift 57
-	TRUE  shift 46
-	FALSE  shift 47
+	THIS  shift 62
+	CALL  shift 61
+	NOT  shift 54
+	LEN  shift 55
+	ORD  shift 56
+	CHR  shift 57
+	PLUS  shift 59
+	SUB  shift 58
+	TRUE  shift 47
+	FALSE  shift 48
 	NULL  shift 63
-	OPENROUND  shift 59
-	STRINGCONST  shift 49
-	IDENTIFIER  shift 37
-	INTEGER  shift 45
-	CHARACTER  shift 48
+	OPENROUND  shift 60
+	STRINGCONST  shift 50
+	IDENTIFIER  shift 41
+	INTEGER  shift 46
+	CHARACTER  shift 49
 	.  error
 
 	expr  goto 195
-	arrayelem  goto 52
-	pairliter  goto 50
-	ident  goto 51
+	arrayelem  goto 53
+	pairliter  goto 51
+	ident  goto 52
 
 state 149
+	bracketed:  bracketed OPENSQUARE.expr CLOSESQUARE 
+
+	THIS  shift 62
+	CALL  shift 61
+	NOT  shift 54
+	LEN  shift 55
+	ORD  shift 56
+	CHR  shift 57
+	PLUS  shift 59
+	SUB  shift 58
+	TRUE  shift 47
+	FALSE  shift 48
+	NULL  shift 63
+	OPENROUND  shift 60
+	STRINGCONST  shift 50
+	IDENTIFIER  shift 41
+	INTEGER  shift 46
+	CHARACTER  shift 49
+	.  error
+
+	expr  goto 196
+	arrayelem  goto 53
+	pairliter  goto 51
+	ident  goto 52
+
+state 150
 	expr:  expr.PLUS expr 
 	expr:  expr.SUB expr 
 	expr:  expr.MUL expr 
@@ -2552,18 +2523,18 @@ state 149
 	LTE  shift 108
 	EQ  shift 110
 	NEQ  shift 111
-	CLOSESQUARE  shift 196
-	.  error
-
-
-state 150
-	pairtype:  PAIR OPENROUND pairelemtype.COMMA pairelemtype CLOSEROUND 
-
-	COMMA  shift 197
+	CLOSESQUARE  shift 197
 	.  error
 
 
 state 151
+	pairtype:  PAIR OPENROUND pairelemtype.COMMA pairelemtype CLOSEROUND 
+
+	COMMA  shift 198
+	.  error
+
+
+state 152
 	pairelemtype:  basetype.    (96)
 	arraytype:  basetype.OPENSQUARE CLOSESQUARE 
 
@@ -2571,7 +2542,7 @@ state 151
 	.  reduce 96 (src line 272)
 
 
-state 152
+state 153
 	pairelemtype:  arraytype.    (97)
 	arraytype:  arraytype.OPENSQUARE CLOSESQUARE 
 
@@ -2579,31 +2550,25 @@ state 152
 	.  reduce 97 (src line 273)
 
 
-state 153
+state 154
 	pairtype:  PAIR.OPENROUND pairelemtype COMMA pairelemtype CLOSEROUND 
 	pairelemtype:  PAIR.    (98)
 
-	OPENROUND  shift 92
+	OPENROUND  shift 93
 	.  reduce 98 (src line 274)
 
 
-state 154
+state 155
 	pairelemtype:  IDENTIFIER.    (99)
 
 	.  reduce 99 (src line 275)
 
 
-state 155
+state 156
 	arraytype:  pairtype.OPENSQUARE CLOSESQUARE 
 
 	OPENSQUARE  shift 83
 	.  error
-
-
-state 156
-	ident:  IDENTIFIER DOT ident.    (26)
-
-	.  reduce 26 (src line 172)
 
 
 state 157
@@ -2611,10 +2576,10 @@ state 157
 	fieldlist:  fieldlist.COMMA field 
 	functions: .    (9)
 
-	COMMA  shift 199
+	COMMA  shift 200
 	.  reduce 9 (src line 133)
 
-	functions  goto 198
+	functions  goto 199
 
 state 158
 	fieldlist:  field.    (6)
@@ -2625,82 +2590,62 @@ state 158
 state 159
 	field:  typeDef.ident 
 
-	IDENTIFIER  shift 37
+	IDENTIFIER  shift 41
 	.  error
 
-	ident  goto 200
+	ident  goto 201
 
 state 160
+	typeDef:  IDENTIFIER.    (103)
+
+	.  reduce 103 (src line 280)
+
+
+state 161
 	statements:  FOR typeDef ident ASSIGNMENT.assignrhs SEMICOLON expr SEMICOLON assignment DO statements DONE 
 
-	NEW  shift 62
-	THIS  shift 61
-	NEWPAIR  shift 138
-	CALL  shift 60
+	NEW  shift 138
+	THIS  shift 62
+	NEWPAIR  shift 139
+	CALL  shift 61
 	FST  shift 38
 	SND  shift 39
-	NOT  shift 53
-	LEN  shift 54
-	ORD  shift 55
-	CHR  shift 56
-	PLUS  shift 58
-	SUB  shift 57
-	TRUE  shift 46
-	FALSE  shift 47
+	NOT  shift 54
+	LEN  shift 55
+	ORD  shift 56
+	CHR  shift 57
+	PLUS  shift 59
+	SUB  shift 58
+	TRUE  shift 47
+	FALSE  shift 48
 	NULL  shift 63
-	OPENSQUARE  shift 139
-	OPENROUND  shift 59
-	STRINGCONST  shift 49
-	IDENTIFIER  shift 37
-	INTEGER  shift 45
-	CHARACTER  shift 48
+	OPENSQUARE  shift 140
+	OPENROUND  shift 60
+	STRINGCONST  shift 50
+	IDENTIFIER  shift 41
+	INTEGER  shift 46
+	CHARACTER  shift 49
 	.  error
 
-	assignrhs  goto 201
+	assignrhs  goto 202
 	expr  goto 135
 	pairelem  goto 137
 	arrayliter  goto 136
-	arrayelem  goto 52
-	pairliter  goto 50
-	ident  goto 51
-
-state 161
-	statement:  FOR expr SEMICOLON assignment.DO statements DONE 
-
-	DO  shift 202
-	.  error
-
+	arrayelem  goto 53
+	pairliter  goto 51
+	ident  goto 52
 
 state 162
-	expr:  expr.PLUS expr 
-	expr:  expr PLUS expr.    (68)
-	expr:  expr.SUB expr 
-	expr:  expr.MUL expr 
-	expr:  expr.MOD expr 
-	expr:  expr.DIV expr 
-	expr:  expr.LT expr 
-	expr:  expr.GT expr 
-	expr:  expr.LTE expr 
-	expr:  expr.GTE expr 
-	expr:  expr.EQ expr 
-	expr:  expr.NEQ expr 
-	expr:  expr.AND expr 
-	expr:  expr.OR expr 
+	statement:  FOR expr SEMICOLON assignment.DO statements DONE 
 
-	MUL  shift 103
-	DIV  shift 105
-	MOD  shift 104
-	GT  shift 107
-	GTE  shift 109
-	LT  shift 106
-	LTE  shift 108
-	.  reduce 68 (src line 233)
+	DO  shift 203
+	.  error
 
 
 state 163
 	expr:  expr.PLUS expr 
+	expr:  expr PLUS expr.    (69)
 	expr:  expr.SUB expr 
-	expr:  expr SUB expr.    (69)
 	expr:  expr.MUL expr 
 	expr:  expr.MOD expr 
 	expr:  expr.DIV expr 
@@ -2720,14 +2665,14 @@ state 163
 	GTE  shift 109
 	LT  shift 106
 	LTE  shift 108
-	.  reduce 69 (src line 234)
+	.  reduce 69 (src line 235)
 
 
 state 164
 	expr:  expr.PLUS expr 
 	expr:  expr.SUB expr 
+	expr:  expr SUB expr.    (70)
 	expr:  expr.MUL expr 
-	expr:  expr MUL expr.    (70)
 	expr:  expr.MOD expr 
 	expr:  expr.DIV expr 
 	expr:  expr.LT expr 
@@ -2739,19 +2684,22 @@ state 164
 	expr:  expr.AND expr 
 	expr:  expr.OR expr 
 
+	MUL  shift 103
+	DIV  shift 105
+	MOD  shift 104
 	GT  shift 107
 	GTE  shift 109
 	LT  shift 106
 	LTE  shift 108
-	.  reduce 70 (src line 235)
+	.  reduce 70 (src line 236)
 
 
 state 165
 	expr:  expr.PLUS expr 
 	expr:  expr.SUB expr 
 	expr:  expr.MUL expr 
+	expr:  expr MUL expr.    (71)
 	expr:  expr.MOD expr 
-	expr:  expr MOD expr.    (71)
 	expr:  expr.DIV expr 
 	expr:  expr.LT expr 
 	expr:  expr.GT expr 
@@ -2766,7 +2714,7 @@ state 165
 	GTE  shift 109
 	LT  shift 106
 	LTE  shift 108
-	.  reduce 71 (src line 236)
+	.  reduce 71 (src line 237)
 
 
 state 166
@@ -2774,8 +2722,8 @@ state 166
 	expr:  expr.SUB expr 
 	expr:  expr.MUL expr 
 	expr:  expr.MOD expr 
+	expr:  expr MOD expr.    (72)
 	expr:  expr.DIV expr 
-	expr:  expr DIV expr.    (72)
 	expr:  expr.LT expr 
 	expr:  expr.GT expr 
 	expr:  expr.LTE expr 
@@ -2789,7 +2737,7 @@ state 166
 	GTE  shift 109
 	LT  shift 106
 	LTE  shift 108
-	.  reduce 72 (src line 237)
+	.  reduce 72 (src line 238)
 
 
 state 167
@@ -2798,8 +2746,8 @@ state 167
 	expr:  expr.MUL expr 
 	expr:  expr.MOD expr 
 	expr:  expr.DIV expr 
+	expr:  expr DIV expr.    (73)
 	expr:  expr.LT expr 
-	expr:  expr LT expr.    (73)
 	expr:  expr.GT expr 
 	expr:  expr.LTE expr 
 	expr:  expr.GTE expr 
@@ -2808,7 +2756,11 @@ state 167
 	expr:  expr.AND expr 
 	expr:  expr.OR expr 
 
-	.  reduce 73 (src line 238)
+	GT  shift 107
+	GTE  shift 109
+	LT  shift 106
+	LTE  shift 108
+	.  reduce 73 (src line 239)
 
 
 state 168
@@ -2818,8 +2770,8 @@ state 168
 	expr:  expr.MOD expr 
 	expr:  expr.DIV expr 
 	expr:  expr.LT expr 
+	expr:  expr LT expr.    (74)
 	expr:  expr.GT expr 
-	expr:  expr GT expr.    (74)
 	expr:  expr.LTE expr 
 	expr:  expr.GTE expr 
 	expr:  expr.EQ expr 
@@ -2827,7 +2779,7 @@ state 168
 	expr:  expr.AND expr 
 	expr:  expr.OR expr 
 
-	.  reduce 74 (src line 239)
+	.  reduce 74 (src line 240)
 
 
 state 169
@@ -2838,15 +2790,15 @@ state 169
 	expr:  expr.DIV expr 
 	expr:  expr.LT expr 
 	expr:  expr.GT expr 
+	expr:  expr GT expr.    (75)
 	expr:  expr.LTE expr 
-	expr:  expr LTE expr.    (75)
 	expr:  expr.GTE expr 
 	expr:  expr.EQ expr 
 	expr:  expr.NEQ expr 
 	expr:  expr.AND expr 
 	expr:  expr.OR expr 
 
-	.  reduce 75 (src line 240)
+	.  reduce 75 (src line 241)
 
 
 state 170
@@ -2858,14 +2810,14 @@ state 170
 	expr:  expr.LT expr 
 	expr:  expr.GT expr 
 	expr:  expr.LTE expr 
+	expr:  expr LTE expr.    (76)
 	expr:  expr.GTE expr 
-	expr:  expr GTE expr.    (76)
 	expr:  expr.EQ expr 
 	expr:  expr.NEQ expr 
 	expr:  expr.AND expr 
 	expr:  expr.OR expr 
 
-	.  reduce 76 (src line 241)
+	.  reduce 76 (src line 242)
 
 
 state 171
@@ -2878,22 +2830,13 @@ state 171
 	expr:  expr.GT expr 
 	expr:  expr.LTE expr 
 	expr:  expr.GTE expr 
+	expr:  expr GTE expr.    (77)
 	expr:  expr.EQ expr 
-	expr:  expr EQ expr.    (77)
 	expr:  expr.NEQ expr 
 	expr:  expr.AND expr 
 	expr:  expr.OR expr 
 
-	MUL  shift 103
-	DIV  shift 105
-	MOD  shift 104
-	PLUS  shift 101
-	SUB  shift 102
-	GT  shift 107
-	GTE  shift 109
-	LT  shift 106
-	LTE  shift 108
-	.  reduce 77 (src line 242)
+	.  reduce 77 (src line 243)
 
 
 state 172
@@ -2907,8 +2850,8 @@ state 172
 	expr:  expr.LTE expr 
 	expr:  expr.GTE expr 
 	expr:  expr.EQ expr 
+	expr:  expr EQ expr.    (78)
 	expr:  expr.NEQ expr 
-	expr:  expr NEQ expr.    (78)
 	expr:  expr.AND expr 
 	expr:  expr.OR expr 
 
@@ -2921,7 +2864,7 @@ state 172
 	GTE  shift 109
 	LT  shift 106
 	LTE  shift 108
-	.  reduce 78 (src line 243)
+	.  reduce 78 (src line 244)
 
 
 state 173
@@ -2936,8 +2879,8 @@ state 173
 	expr:  expr.GTE expr 
 	expr:  expr.EQ expr 
 	expr:  expr.NEQ expr 
+	expr:  expr NEQ expr.    (79)
 	expr:  expr.AND expr 
-	expr:  expr AND expr.    (79)
 	expr:  expr.OR expr 
 
 	MUL  shift 103
@@ -2949,9 +2892,7 @@ state 173
 	GTE  shift 109
 	LT  shift 106
 	LTE  shift 108
-	EQ  shift 110
-	NEQ  shift 111
-	.  reduce 79 (src line 244)
+	.  reduce 79 (src line 245)
 
 
 state 174
@@ -2967,8 +2908,38 @@ state 174
 	expr:  expr.EQ expr 
 	expr:  expr.NEQ expr 
 	expr:  expr.AND expr 
+	expr:  expr AND expr.    (80)
 	expr:  expr.OR expr 
-	expr:  expr OR expr.    (80)
+
+	MUL  shift 103
+	DIV  shift 105
+	MOD  shift 104
+	PLUS  shift 101
+	SUB  shift 102
+	GT  shift 107
+	GTE  shift 109
+	LT  shift 106
+	LTE  shift 108
+	EQ  shift 110
+	NEQ  shift 111
+	.  reduce 80 (src line 246)
+
+
+state 175
+	expr:  expr.PLUS expr 
+	expr:  expr.SUB expr 
+	expr:  expr.MUL expr 
+	expr:  expr.MOD expr 
+	expr:  expr.DIV expr 
+	expr:  expr.LT expr 
+	expr:  expr.GT expr 
+	expr:  expr.LTE expr 
+	expr:  expr.GTE expr 
+	expr:  expr.EQ expr 
+	expr:  expr.NEQ expr 
+	expr:  expr.AND expr 
+	expr:  expr.OR expr 
+	expr:  expr OR expr.    (81)
 
 	MUL  shift 103
 	DIV  shift 105
@@ -2982,78 +2953,48 @@ state 174
 	LTE  shift 108
 	EQ  shift 110
 	NEQ  shift 111
-	.  reduce 80 (src line 245)
-
-
-state 175
-	expr:  OPENROUND expr CLOSEROUND.    (81)
-
-	.  reduce 81 (src line 246)
+	.  reduce 81 (src line 247)
 
 
 state 176
+	expr:  OPENROUND expr CLOSEROUND.    (82)
+
+	.  reduce 82 (src line 248)
+
+
+state 177
 	expr:  CALL ident OPENROUND.exprlist CLOSEROUND 
 	exprlist: .    (88)
 
-	NEW  shift 62
-	THIS  shift 61
-	CALL  shift 60
-	NOT  shift 53
-	LEN  shift 54
-	ORD  shift 55
-	CHR  shift 56
-	PLUS  shift 58
-	SUB  shift 57
-	TRUE  shift 46
-	FALSE  shift 47
+	THIS  shift 62
+	CALL  shift 61
+	NOT  shift 54
+	LEN  shift 55
+	ORD  shift 56
+	CHR  shift 57
+	PLUS  shift 59
+	SUB  shift 58
+	TRUE  shift 47
+	FALSE  shift 48
 	NULL  shift 63
-	OPENROUND  shift 59
-	STRINGCONST  shift 49
-	IDENTIFIER  shift 37
-	INTEGER  shift 45
-	CHARACTER  shift 48
-	.  reduce 88 (src line 256)
-
-	expr  goto 187
-	exprlist  goto 203
-	arrayelem  goto 52
-	pairliter  goto 50
-	ident  goto 51
-
-state 177
-	expr:  THIS DOT ident.    (83)
-
-	.  reduce 83 (src line 248)
-
-
-state 178
-	expr:  NEW IDENTIFIER OPENROUND.exprlist CLOSEROUND 
-	exprlist: .    (88)
-
-	NEW  shift 62
-	THIS  shift 61
-	CALL  shift 60
-	NOT  shift 53
-	LEN  shift 54
-	ORD  shift 55
-	CHR  shift 56
-	PLUS  shift 58
-	SUB  shift 57
-	TRUE  shift 46
-	FALSE  shift 47
-	NULL  shift 63
-	OPENROUND  shift 59
-	STRINGCONST  shift 49
-	IDENTIFIER  shift 37
-	INTEGER  shift 45
-	CHARACTER  shift 48
+	OPENROUND  shift 60
+	STRINGCONST  shift 50
+	IDENTIFIER  shift 41
+	INTEGER  shift 46
+	CHARACTER  shift 49
 	.  reduce 88 (src line 256)
 
 	expr  goto 187
 	exprlist  goto 204
-	arrayelem  goto 52
-	pairliter  goto 50
-	ident  goto 51
+	arrayelem  goto 53
+	pairliter  goto 51
+	ident  goto 52
+
+state 178
+	expr:  THIS DOT ident.    (84)
+
+	.  reduce 84 (src line 250)
+
 
 state 179
 	function:  typeDef ident OPENROUND CLOSEROUND.IS statements END 
@@ -3080,15 +3021,15 @@ state 181
 state 182
 	param:  typeDef.ident 
 
-	IDENTIFIER  shift 37
+	IDENTIFIER  shift 41
 	.  error
 
 	ident  goto 208
 
 state 183
-	statement:  typeDef ident ASSIGNMENT assignrhs.    (28)
+	statement:  typeDef ident ASSIGNMENT assignrhs.    (29)
 
-	.  reduce 28 (src line 175)
+	.  reduce 29 (src line 176)
 
 
 state 184
@@ -3096,7 +3037,7 @@ state 184
 	statement:  IF expr THEN statements.ELSE statements FI 
 
 	ELSE  shift 209
-	SEMICOLON  shift 42
+	SEMICOLON  shift 43
 	.  error
 
 
@@ -3105,7 +3046,7 @@ state 185
 	statement:  WHILE expr DO statements.DONE 
 
 	DONE  shift 210
-	SEMICOLON  shift 42
+	SEMICOLON  shift 43
 	.  error
 
 
@@ -3151,75 +3092,49 @@ state 187
 
 
 state 188
-	assignrhs:  NEWPAIR OPENROUND.expr COMMA expr CLOSEROUND 
+	assignrhs:  NEW IDENTIFIER.OPENROUND exprlist CLOSEROUND 
 
-	NEW  shift 62
-	THIS  shift 61
-	CALL  shift 60
-	NOT  shift 53
-	LEN  shift 54
-	ORD  shift 55
-	CHR  shift 56
-	PLUS  shift 58
-	SUB  shift 57
-	TRUE  shift 46
-	FALSE  shift 47
-	NULL  shift 63
-	OPENROUND  shift 59
-	STRINGCONST  shift 49
-	IDENTIFIER  shift 37
-	INTEGER  shift 45
-	CHARACTER  shift 48
+	OPENROUND  shift 213
 	.  error
 
-	expr  goto 213
-	arrayelem  goto 52
-	pairliter  goto 50
-	ident  goto 51
 
 state 189
+	assignrhs:  NEWPAIR OPENROUND.expr COMMA expr CLOSEROUND 
+
+	THIS  shift 62
+	CALL  shift 61
+	NOT  shift 54
+	LEN  shift 55
+	ORD  shift 56
+	CHR  shift 57
+	PLUS  shift 59
+	SUB  shift 58
+	TRUE  shift 47
+	FALSE  shift 48
+	NULL  shift 63
+	OPENROUND  shift 60
+	STRINGCONST  shift 50
+	IDENTIFIER  shift 41
+	INTEGER  shift 46
+	CHARACTER  shift 49
+	.  error
+
+	expr  goto 214
+	arrayelem  goto 53
+	pairliter  goto 51
+	ident  goto 52
+
+state 190
 	arrayliter:  OPENSQUARE exprlist.CLOSESQUARE 
 	exprlist:  exprlist.COMMA expr 
 
-	CLOSESQUARE  shift 214
+	CLOSESQUARE  shift 215
 	COMMA  shift 212
 	.  error
 
 
-state 190
-	assignment:  ident PLUS ASSIGNMENT expr.    (46)
-	expr:  expr.PLUS expr 
-	expr:  expr.SUB expr 
-	expr:  expr.MUL expr 
-	expr:  expr.MOD expr 
-	expr:  expr.DIV expr 
-	expr:  expr.LT expr 
-	expr:  expr.GT expr 
-	expr:  expr.LTE expr 
-	expr:  expr.GTE expr 
-	expr:  expr.EQ expr 
-	expr:  expr.NEQ expr 
-	expr:  expr.AND expr 
-	expr:  expr.OR expr 
-
-	MUL  shift 103
-	DIV  shift 105
-	MOD  shift 104
-	PLUS  shift 101
-	SUB  shift 102
-	AND  shift 112
-	OR  shift 113
-	GT  shift 107
-	GTE  shift 109
-	LT  shift 106
-	LTE  shift 108
-	EQ  shift 110
-	NEQ  shift 111
-	.  reduce 46 (src line 210)
-
-
 state 191
-	assignment:  ident SUB ASSIGNMENT expr.    (47)
+	assignment:  ident PLUS ASSIGNMENT expr.    (47)
 	expr:  expr.PLUS expr 
 	expr:  expr.SUB expr 
 	expr:  expr.MUL expr 
@@ -3247,11 +3162,11 @@ state 191
 	LTE  shift 108
 	EQ  shift 110
 	NEQ  shift 111
-	.  reduce 47 (src line 211)
+	.  reduce 47 (src line 212)
 
 
 state 192
-	assignment:  ident DIV ASSIGNMENT expr.    (48)
+	assignment:  ident SUB ASSIGNMENT expr.    (48)
 	expr:  expr.PLUS expr 
 	expr:  expr.SUB expr 
 	expr:  expr.MUL expr 
@@ -3279,11 +3194,11 @@ state 192
 	LTE  shift 108
 	EQ  shift 110
 	NEQ  shift 111
-	.  reduce 48 (src line 212)
+	.  reduce 48 (src line 213)
 
 
 state 193
-	assignment:  ident MUL ASSIGNMENT expr.    (49)
+	assignment:  ident DIV ASSIGNMENT expr.    (49)
 	expr:  expr.PLUS expr 
 	expr:  expr.SUB expr 
 	expr:  expr.MUL expr 
@@ -3311,11 +3226,11 @@ state 193
 	LTE  shift 108
 	EQ  shift 110
 	NEQ  shift 111
-	.  reduce 49 (src line 213)
+	.  reduce 49 (src line 214)
 
 
 state 194
-	assignment:  ident MOD ASSIGNMENT expr.    (50)
+	assignment:  ident MUL ASSIGNMENT expr.    (50)
 	expr:  expr.PLUS expr 
 	expr:  expr.SUB expr 
 	expr:  expr.MUL expr 
@@ -3343,10 +3258,42 @@ state 194
 	LTE  shift 108
 	EQ  shift 110
 	NEQ  shift 111
-	.  reduce 50 (src line 214)
+	.  reduce 50 (src line 215)
 
 
 state 195
+	assignment:  ident MOD ASSIGNMENT expr.    (51)
+	expr:  expr.PLUS expr 
+	expr:  expr.SUB expr 
+	expr:  expr.MUL expr 
+	expr:  expr.MOD expr 
+	expr:  expr.DIV expr 
+	expr:  expr.LT expr 
+	expr:  expr.GT expr 
+	expr:  expr.LTE expr 
+	expr:  expr.GTE expr 
+	expr:  expr.EQ expr 
+	expr:  expr.NEQ expr 
+	expr:  expr.AND expr 
+	expr:  expr.OR expr 
+
+	MUL  shift 103
+	DIV  shift 105
+	MOD  shift 104
+	PLUS  shift 101
+	SUB  shift 102
+	AND  shift 112
+	OR  shift 113
+	GT  shift 107
+	GTE  shift 109
+	LT  shift 106
+	LTE  shift 108
+	EQ  shift 110
+	NEQ  shift 111
+	.  reduce 51 (src line 216)
+
+
+state 196
 	expr:  expr.PLUS expr 
 	expr:  expr.SUB expr 
 	expr:  expr.MUL expr 
@@ -3375,80 +3322,82 @@ state 195
 	LTE  shift 108
 	EQ  shift 110
 	NEQ  shift 111
-	CLOSESQUARE  shift 215
+	CLOSESQUARE  shift 216
 	.  error
 
 
-state 196
+state 197
 	bracketed:  OPENSQUARE expr CLOSESQUARE.    (91)
 
 	.  reduce 91 (src line 261)
 
 
-state 197
+state 198
 	pairtype:  PAIR OPENROUND pairelemtype COMMA.pairelemtype CLOSEROUND 
 
-	INT  shift 30
-	BOOL  shift 31
-	CHAR  shift 32
-	STRING  shift 33
-	PAIR  shift 153
-	IDENTIFIER  shift 154
+	INT  shift 31
+	BOOL  shift 32
+	CHAR  shift 33
+	STRING  shift 34
+	PAIR  shift 154
+	IDENTIFIER  shift 155
 	.  error
 
-	basetype  goto 151
-	arraytype  goto 152
-	pairtype  goto 155
-	pairelemtype  goto 216
+	basetype  goto 152
+	arraytype  goto 153
+	pairtype  goto 156
+	pairelemtype  goto 217
 
-state 198
+state 199
 	class:  CLASS ident OPEN fieldlist functions.CLOSE 
 	functions:  functions.function 
 
-	CLOSE  shift 217
-	INT  shift 30
-	BOOL  shift 31
-	CHAR  shift 32
-	STRING  shift 33
-	PAIR  shift 34
+	CLOSE  shift 218
+	INT  shift 31
+	BOOL  shift 32
+	CHAR  shift 33
+	STRING  shift 34
+	PAIR  shift 35
+	IDENTIFIER  shift 160
 	.  error
 
 	function  goto 8
 	basetype  goto 25
-	typeDef  goto 218
+	typeDef  goto 219
 	arraytype  goto 26
 	pairtype  goto 27
 
-state 199
+state 200
 	fieldlist:  fieldlist COMMA.field 
 
-	INT  shift 30
-	BOOL  shift 31
-	CHAR  shift 32
-	STRING  shift 33
-	PAIR  shift 34
+	INT  shift 31
+	BOOL  shift 32
+	CHAR  shift 33
+	STRING  shift 34
+	PAIR  shift 35
+	IDENTIFIER  shift 160
 	.  error
 
-	field  goto 219
+	field  goto 220
 	basetype  goto 25
 	typeDef  goto 159
 	arraytype  goto 26
 	pairtype  goto 27
 
-state 200
+state 201
 	field:  typeDef ident.    (7)
 
 	.  reduce 7 (src line 130)
 
 
-state 201
+state 202
 	statements:  FOR typeDef ident ASSIGNMENT assignrhs.SEMICOLON expr SEMICOLON assignment DO statements DONE 
 
-	SEMICOLON  shift 220
+	SEMICOLON  shift 221
 	.  error
 
 
-state 202
+state 203
 	statement:  FOR expr SEMICOLON assignment DO.statements DONE 
 
 	error  shift 23
@@ -3465,38 +3414,29 @@ state 202
 	CALL  shift 24
 	FST  shift 38
 	SND  shift 39
-	INT  shift 30
-	BOOL  shift 31
-	CHAR  shift 32
-	STRING  shift 33
-	PAIR  shift 34
+	INT  shift 31
+	BOOL  shift 32
+	CHAR  shift 33
+	STRING  shift 34
+	PAIR  shift 35
 	FOR  shift 10
-	IDENTIFIER  shift 37
+	IDENTIFIER  shift 28
 	.  error
 
 	statement  goto 9
-	statements  goto 221
-	assignlhs  goto 28
-	pairelem  goto 36
-	arrayelem  goto 35
+	statements  goto 222
+	assignlhs  goto 29
+	pairelem  goto 37
+	arrayelem  goto 36
 	basetype  goto 25
 	typeDef  goto 75
 	arraytype  goto 26
 	pairtype  goto 27
 	assignment  goto 13
-	ident  goto 29
-
-state 203
-	expr:  CALL ident OPENROUND exprlist.CLOSEROUND 
-	exprlist:  exprlist.COMMA expr 
-
-	CLOSEROUND  shift 222
-	COMMA  shift 212
-	.  error
-
+	ident  goto 30
 
 state 204
-	expr:  NEW IDENTIFIER OPENROUND exprlist.CLOSEROUND 
+	expr:  CALL ident OPENROUND exprlist.CLOSEROUND 
 	exprlist:  exprlist.COMMA expr 
 
 	CLOSEROUND  shift 223
@@ -3521,26 +3461,26 @@ state 205
 	CALL  shift 24
 	FST  shift 38
 	SND  shift 39
-	INT  shift 30
-	BOOL  shift 31
-	CHAR  shift 32
-	STRING  shift 33
-	PAIR  shift 34
+	INT  shift 31
+	BOOL  shift 32
+	CHAR  shift 33
+	STRING  shift 34
+	PAIR  shift 35
 	FOR  shift 10
-	IDENTIFIER  shift 37
+	IDENTIFIER  shift 28
 	.  error
 
 	statement  goto 9
 	statements  goto 224
-	assignlhs  goto 28
-	pairelem  goto 36
-	arrayelem  goto 35
+	assignlhs  goto 29
+	pairelem  goto 37
+	arrayelem  goto 36
 	basetype  goto 25
 	typeDef  goto 75
 	arraytype  goto 26
 	pairtype  goto 27
 	assignment  goto 13
-	ident  goto 29
+	ident  goto 30
 
 state 206
 	function:  typeDef ident OPENROUND paramlist CLOSEROUND.IS statements END 
@@ -3552,11 +3492,12 @@ state 206
 state 207
 	paramlist:  paramlist COMMA.param 
 
-	INT  shift 30
-	BOOL  shift 31
-	CHAR  shift 32
-	STRING  shift 33
-	PAIR  shift 34
+	INT  shift 31
+	BOOL  shift 32
+	CHAR  shift 33
+	STRING  shift 34
+	PAIR  shift 35
+	IDENTIFIER  shift 160
 	.  error
 
 	param  goto 226
@@ -3588,67 +3529,94 @@ state 209
 	CALL  shift 24
 	FST  shift 38
 	SND  shift 39
-	INT  shift 30
-	BOOL  shift 31
-	CHAR  shift 32
-	STRING  shift 33
-	PAIR  shift 34
+	INT  shift 31
+	BOOL  shift 32
+	CHAR  shift 33
+	STRING  shift 34
+	PAIR  shift 35
 	FOR  shift 10
-	IDENTIFIER  shift 37
+	IDENTIFIER  shift 28
 	.  error
 
 	statement  goto 9
 	statements  goto 227
-	assignlhs  goto 28
-	pairelem  goto 36
-	arrayelem  goto 35
+	assignlhs  goto 29
+	pairelem  goto 37
+	arrayelem  goto 36
 	basetype  goto 25
 	typeDef  goto 75
 	arraytype  goto 26
 	pairtype  goto 27
 	assignment  goto 13
-	ident  goto 29
+	ident  goto 30
 
 state 210
-	statement:  WHILE expr DO statements DONE.    (38)
+	statement:  WHILE expr DO statements DONE.    (39)
 
-	.  reduce 38 (src line 188)
+	.  reduce 39 (src line 189)
 
 
 state 211
-	statement:  CALL ident OPENROUND exprlist CLOSEROUND.    (44)
+	statement:  CALL ident OPENROUND exprlist CLOSEROUND.    (45)
 
-	.  reduce 44 (src line 205)
+	.  reduce 45 (src line 206)
 
 
 state 212
 	exprlist:  exprlist COMMA.expr 
 
-	NEW  shift 62
-	THIS  shift 61
-	CALL  shift 60
-	NOT  shift 53
-	LEN  shift 54
-	ORD  shift 55
-	CHR  shift 56
-	PLUS  shift 58
-	SUB  shift 57
-	TRUE  shift 46
-	FALSE  shift 47
+	THIS  shift 62
+	CALL  shift 61
+	NOT  shift 54
+	LEN  shift 55
+	ORD  shift 56
+	CHR  shift 57
+	PLUS  shift 59
+	SUB  shift 58
+	TRUE  shift 47
+	FALSE  shift 48
 	NULL  shift 63
-	OPENROUND  shift 59
-	STRINGCONST  shift 49
-	IDENTIFIER  shift 37
-	INTEGER  shift 45
-	CHARACTER  shift 48
+	OPENROUND  shift 60
+	STRINGCONST  shift 50
+	IDENTIFIER  shift 41
+	INTEGER  shift 46
+	CHARACTER  shift 49
 	.  error
 
 	expr  goto 228
-	arrayelem  goto 52
-	pairliter  goto 50
-	ident  goto 51
+	arrayelem  goto 53
+	pairliter  goto 51
+	ident  goto 52
 
 state 213
+	assignrhs:  NEW IDENTIFIER OPENROUND.exprlist CLOSEROUND 
+	exprlist: .    (88)
+
+	THIS  shift 62
+	CALL  shift 61
+	NOT  shift 54
+	LEN  shift 55
+	ORD  shift 56
+	CHR  shift 57
+	PLUS  shift 59
+	SUB  shift 58
+	TRUE  shift 47
+	FALSE  shift 48
+	NULL  shift 63
+	OPENROUND  shift 60
+	STRINGCONST  shift 50
+	IDENTIFIER  shift 41
+	INTEGER  shift 46
+	CHARACTER  shift 49
+	.  reduce 88 (src line 256)
+
+	expr  goto 187
+	exprlist  goto 229
+	arrayelem  goto 53
+	pairliter  goto 51
+	ident  goto 52
+
+state 214
 	assignrhs:  NEWPAIR OPENROUND expr.COMMA expr CLOSEROUND 
 	expr:  expr.PLUS expr 
 	expr:  expr.SUB expr 
@@ -3677,104 +3645,97 @@ state 213
 	LTE  shift 108
 	EQ  shift 110
 	NEQ  shift 111
-	COMMA  shift 229
+	COMMA  shift 230
 	.  error
 
 
-state 214
+state 215
 	arrayliter:  OPENSQUARE exprlist CLOSESQUARE.    (85)
 
 	.  reduce 85 (src line 252)
 
 
-state 215
+state 216
 	bracketed:  bracketed OPENSQUARE expr CLOSESQUARE.    (90)
 
 	.  reduce 90 (src line 260)
 
 
-state 216
+state 217
 	pairtype:  PAIR OPENROUND pairelemtype COMMA pairelemtype.CLOSEROUND 
 
-	CLOSEROUND  shift 230
+	CLOSEROUND  shift 231
 	.  error
 
 
-state 217
+state 218
 	class:  CLASS ident OPEN fieldlist functions CLOSE.    (4)
 
 	.  reduce 4 (src line 120)
 
 
-state 218
+state 219
 	function:  typeDef.ident OPENROUND CLOSEROUND IS statements END 
 	function:  typeDef.ident OPENROUND paramlist CLOSEROUND IS statements END 
 
-	IDENTIFIER  shift 37
+	IDENTIFIER  shift 41
 	.  error
 
-	ident  goto 231
+	ident  goto 232
 
-state 219
+state 220
 	fieldlist:  fieldlist COMMA field.    (5)
 
 	.  reduce 5 (src line 126)
 
 
-state 220
+state 221
 	statements:  FOR typeDef ident ASSIGNMENT assignrhs SEMICOLON.expr SEMICOLON assignment DO statements DONE 
 
-	NEW  shift 62
-	THIS  shift 61
-	CALL  shift 60
-	NOT  shift 53
-	LEN  shift 54
-	ORD  shift 55
-	CHR  shift 56
-	PLUS  shift 58
-	SUB  shift 57
-	TRUE  shift 46
-	FALSE  shift 47
+	THIS  shift 62
+	CALL  shift 61
+	NOT  shift 54
+	LEN  shift 55
+	ORD  shift 56
+	CHR  shift 57
+	PLUS  shift 59
+	SUB  shift 58
+	TRUE  shift 47
+	FALSE  shift 48
 	NULL  shift 63
-	OPENROUND  shift 59
-	STRINGCONST  shift 49
-	IDENTIFIER  shift 37
-	INTEGER  shift 45
-	CHARACTER  shift 48
+	OPENROUND  shift 60
+	STRINGCONST  shift 50
+	IDENTIFIER  shift 41
+	INTEGER  shift 46
+	CHARACTER  shift 49
 	.  error
 
-	expr  goto 232
-	arrayelem  goto 52
-	pairliter  goto 50
-	ident  goto 51
+	expr  goto 233
+	arrayelem  goto 53
+	pairliter  goto 51
+	ident  goto 52
 
-state 221
+state 222
 	statements:  statements.SEMICOLON statement 
 	statement:  FOR expr SEMICOLON assignment DO statements.DONE 
 
-	DONE  shift 233
-	SEMICOLON  shift 42
+	DONE  shift 234
+	SEMICOLON  shift 43
 	.  error
 
 
-state 222
-	expr:  CALL ident OPENROUND exprlist CLOSEROUND.    (82)
-
-	.  reduce 82 (src line 247)
-
-
 state 223
-	expr:  NEW IDENTIFIER OPENROUND exprlist CLOSEROUND.    (84)
+	expr:  CALL ident OPENROUND exprlist CLOSEROUND.    (83)
 
-	.  reduce 84 (src line 249)
+	.  reduce 83 (src line 249)
 
 
 state 224
 	function:  typeDef ident OPENROUND CLOSEROUND IS statements.END 
 	statements:  statements.SEMICOLON statement 
 
-	END  shift 234
-	SEMICOLON  shift 42
+	END  shift 235
+	SEMICOLON  shift 43
 	.  error
 
 
@@ -3795,26 +3756,26 @@ state 225
 	CALL  shift 24
 	FST  shift 38
 	SND  shift 39
-	INT  shift 30
-	BOOL  shift 31
-	CHAR  shift 32
-	STRING  shift 33
-	PAIR  shift 34
+	INT  shift 31
+	BOOL  shift 32
+	CHAR  shift 33
+	STRING  shift 34
+	PAIR  shift 35
 	FOR  shift 10
-	IDENTIFIER  shift 37
+	IDENTIFIER  shift 28
 	.  error
 
 	statement  goto 9
-	statements  goto 235
-	assignlhs  goto 28
-	pairelem  goto 36
-	arrayelem  goto 35
+	statements  goto 236
+	assignlhs  goto 29
+	pairelem  goto 37
+	arrayelem  goto 36
 	basetype  goto 25
 	typeDef  goto 75
 	arraytype  goto 26
 	pairtype  goto 27
 	assignment  goto 13
-	ident  goto 29
+	ident  goto 30
 
 state 226
 	paramlist:  paramlist COMMA param.    (12)
@@ -3826,8 +3787,8 @@ state 227
 	statements:  statements.SEMICOLON statement 
 	statement:  IF expr THEN statements ELSE statements.FI 
 
-	FI  shift 236
-	SEMICOLON  shift 42
+	FI  shift 237
+	SEMICOLON  shift 43
 	.  error
 
 
@@ -3864,47 +3825,55 @@ state 228
 
 
 state 229
-	assignrhs:  NEWPAIR OPENROUND expr COMMA.expr CLOSEROUND 
+	assignrhs:  NEW IDENTIFIER OPENROUND exprlist.CLOSEROUND 
+	exprlist:  exprlist.COMMA expr 
 
-	NEW  shift 62
-	THIS  shift 61
-	CALL  shift 60
-	NOT  shift 53
-	LEN  shift 54
-	ORD  shift 55
-	CHR  shift 56
-	PLUS  shift 58
-	SUB  shift 57
-	TRUE  shift 46
-	FALSE  shift 47
-	NULL  shift 63
-	OPENROUND  shift 59
-	STRINGCONST  shift 49
-	IDENTIFIER  shift 37
-	INTEGER  shift 45
-	CHARACTER  shift 48
+	CLOSEROUND  shift 238
+	COMMA  shift 212
 	.  error
 
-	expr  goto 237
-	arrayelem  goto 52
-	pairliter  goto 50
-	ident  goto 51
 
 state 230
+	assignrhs:  NEWPAIR OPENROUND expr COMMA.expr CLOSEROUND 
+
+	THIS  shift 62
+	CALL  shift 61
+	NOT  shift 54
+	LEN  shift 55
+	ORD  shift 56
+	CHR  shift 57
+	PLUS  shift 59
+	SUB  shift 58
+	TRUE  shift 47
+	FALSE  shift 48
+	NULL  shift 63
+	OPENROUND  shift 60
+	STRINGCONST  shift 50
+	IDENTIFIER  shift 41
+	INTEGER  shift 46
+	CHARACTER  shift 49
+	.  error
+
+	expr  goto 239
+	arrayelem  goto 53
+	pairliter  goto 51
+	ident  goto 52
+
+state 231
 	pairtype:  PAIR OPENROUND pairelemtype COMMA pairelemtype CLOSEROUND.    (95)
 
 	.  reduce 95 (src line 270)
 
 
-state 231
+state 232
 	function:  typeDef ident.OPENROUND CLOSEROUND IS statements END 
 	function:  typeDef ident.OPENROUND paramlist CLOSEROUND IS statements END 
 
-	OPENROUND  shift 124
+	OPENROUND  shift 123
 	.  error
 
 
-state 232
+state 233
 	statements:  FOR typeDef ident ASSIGNMENT assignrhs SEMICOLON expr.SEMICOLON assignment DO statements DONE 
 	expr:  expr.PLUS expr 
 	expr:  expr.SUB expr 
@@ -3933,38 +3902,44 @@ state 232
 	LTE  shift 108
 	EQ  shift 110
 	NEQ  shift 111
-	SEMICOLON  shift 238
+	SEMICOLON  shift 240
 	.  error
 
 
-state 233
-	statement:  FOR expr SEMICOLON assignment DO statements DONE.    (37)
-
-	.  reduce 37 (src line 184)
-
-
 state 234
+	statement:  FOR expr SEMICOLON assignment DO statements DONE.    (38)
+
+	.  reduce 38 (src line 185)
+
+
+state 235
 	function:  typeDef ident OPENROUND CLOSEROUND IS statements END.    (10)
 
 	.  reduce 10 (src line 135)
 
 
-state 235
+state 236
 	function:  typeDef ident OPENROUND paramlist CLOSEROUND IS statements.END 
 	statements:  statements.SEMICOLON statement 
 
-	END  shift 239
-	SEMICOLON  shift 42
+	END  shift 241
+	SEMICOLON  shift 43
 	.  error
 
 
-state 236
-	statement:  IF expr THEN statements ELSE statements FI.    (36)
-
-	.  reduce 36 (src line 183)
-
-
 state 237
+	statement:  IF expr THEN statements ELSE statements FI.    (37)
+
+	.  reduce 37 (src line 184)
+
+
+state 238
+	assignrhs:  NEW IDENTIFIER OPENROUND exprlist CLOSEROUND.    (21)
+
+	.  reduce 21 (src line 160)
+
+
+state 239
 	assignrhs:  NEWPAIR OPENROUND expr COMMA expr.CLOSEROUND 
 	expr:  expr.PLUS expr 
 	expr:  expr.SUB expr 
@@ -3993,44 +3968,44 @@ state 237
 	LTE  shift 108
 	EQ  shift 110
 	NEQ  shift 111
-	CLOSEROUND  shift 240
+	CLOSEROUND  shift 242
 	.  error
 
 
-state 238
+state 240
 	statements:  FOR typeDef ident ASSIGNMENT assignrhs SEMICOLON expr SEMICOLON.assignment DO statements DONE 
 
 	FST  shift 38
 	SND  shift 39
-	IDENTIFIER  shift 37
+	IDENTIFIER  shift 41
 	.  error
 
-	assignlhs  goto 28
-	pairelem  goto 36
-	arrayelem  goto 35
-	assignment  goto 241
-	ident  goto 29
+	assignlhs  goto 29
+	pairelem  goto 37
+	arrayelem  goto 36
+	assignment  goto 243
+	ident  goto 30
 
-state 239
+state 241
 	function:  typeDef ident OPENROUND paramlist CLOSEROUND IS statements END.    (11)
 
 	.  reduce 11 (src line 141)
 
 
-state 240
-	assignrhs:  NEWPAIR OPENROUND expr COMMA expr CLOSEROUND.    (21)
+state 242
+	assignrhs:  NEWPAIR OPENROUND expr COMMA expr CLOSEROUND.    (22)
 
-	.  reduce 21 (src line 160)
+	.  reduce 22 (src line 161)
 
 
-state 241
+state 243
 	statements:  FOR typeDef ident ASSIGNMENT assignrhs SEMICOLON expr SEMICOLON assignment.DO statements DONE 
 
-	DO  shift 242
+	DO  shift 244
 	.  error
 
 
-state 242
+state 244
 	statements:  FOR typeDef ident ASSIGNMENT assignrhs SEMICOLON expr SEMICOLON assignment DO.statements DONE 
 
 	error  shift 23
@@ -4047,51 +4022,51 @@ state 242
 	CALL  shift 24
 	FST  shift 38
 	SND  shift 39
-	INT  shift 30
-	BOOL  shift 31
-	CHAR  shift 32
-	STRING  shift 33
-	PAIR  shift 34
+	INT  shift 31
+	BOOL  shift 32
+	CHAR  shift 33
+	STRING  shift 34
+	PAIR  shift 35
 	FOR  shift 10
-	IDENTIFIER  shift 37
+	IDENTIFIER  shift 28
 	.  error
 
 	statement  goto 9
-	statements  goto 243
-	assignlhs  goto 28
-	pairelem  goto 36
-	arrayelem  goto 35
+	statements  goto 245
+	assignlhs  goto 29
+	pairelem  goto 37
+	arrayelem  goto 36
 	basetype  goto 25
 	typeDef  goto 75
 	arraytype  goto 26
 	pairtype  goto 27
 	assignment  goto 13
-	ident  goto 29
+	ident  goto 30
 
-state 243
+state 245
 	statements:  statements.SEMICOLON statement 
 	statements:  FOR typeDef ident ASSIGNMENT assignrhs SEMICOLON expr SEMICOLON assignment DO statements.DONE 
 
-	DONE  shift 244
-	SEMICOLON  shift 42
+	DONE  shift 246
+	SEMICOLON  shift 43
 	.  error
 
 
-state 244
-	statements:  FOR typeDef ident ASSIGNMENT assignrhs SEMICOLON expr SEMICOLON assignment DO statements DONE.    (24)
+state 246
+	statements:  FOR typeDef ident ASSIGNMENT assignrhs SEMICOLON expr SEMICOLON assignment DO statements DONE.    (25)
 
-	.  reduce 24 (src line 164)
+	.  reduce 25 (src line 165)
 
 
 71 terminals, 28 nonterminals
-110 grammar rules, 245/2000 states
+111 grammar rules, 247/2000 states
 0 shift/reduce, 0 reduce/reduce conflicts reported
 77 working sets used
-memory: parser 502/30000
+memory: parser 503/30000
 215 extra closures
-1605 shift entries, 1 exceptions
+1565 shift entries, 2 exceptions
 146 goto entries
 245 entries saved by goto default
-Optimizer space used: output 689/30000
-689 table entries, 153 zero
-maximum spread: 71, maximum offset: 242
+Optimizer space used: output 698/30000
+698 table entries, 161 zero
+maximum spread: 71, maximum offset: 244

@@ -83,6 +83,10 @@ func (x PairType) typeString() string {
 	return "Pair:" + x.FstType.typeString() + "/" + x.SndType.typeString()
 }
 
+func (x Ident) typeString() string {
+	return "Fix this"
+}
+
 type Skip struct {
 	FileText *string
 	Pos      int

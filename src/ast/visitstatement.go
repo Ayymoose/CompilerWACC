@@ -177,6 +177,10 @@ func (node Instance) visitStatement(context *Context) errorSlice {
 	return nil
 }
 
+func (node NewObject) visitStatement(context *Context) errorSlice {
+	return nil
+}
+
 func (node Declare) visitStatement(context *Context) errorSlice {
 	var semanticErrors errorSlice
 	if context.SymbolTable.isDefinedInScope(node.Lhs) {

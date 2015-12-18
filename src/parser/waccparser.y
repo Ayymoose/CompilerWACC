@@ -157,6 +157,7 @@ assignlhs : ident    {$$ = $1}
 assignrhs : expr                                           {$$ = $1}
           | arrayliter                                     {$$ = $1}
           | pairelem                                       {$$ = $1}
+          | NEW IDENTIFIER OPENROUND exprlist CLOSEROUND   { $$ = NewObject{Class : ClassType($2) , Init : $4 , Pos : $<pos>1, FileText :&parserlex.(*Lexer).input}}
           | NEWPAIR OPENROUND expr COMMA expr CLOSEROUND   { $$ = NewPair{FstExpr : $3, SndExpr : $5, Pos : $<pos>1, FileText :&parserlex.(*Lexer).input } }
 
 statements : statements SEMICOLON statement                { $$ = append($1,$3)   }
@@ -207,6 +208,7 @@ statement : SKIP                                        { $$ = Skip{Pos : $<pos>
 
 
 assignment :  assignlhs ASSIGNMENT assignrhs              { $$ = Assignment{Lhs : $1, Rhs : $3, Pos : $<pos>1 ,FileText :&parserlex.(*Lexer).input} }
+
              | ident PLUS ASSIGNMENT expr             { $$ = Assignment{Lhs : $1, Rhs : Binop{Left : $1, Binary : PLUS, Right : $4, Pos : $<pos>1, FileText :&parserlex.(*Lexer).input}, Pos : $<pos>1 ,FileText :&parserlex.(*Lexer).input} }
              | ident SUB  ASSIGNMENT expr             { $$ = Assignment{Lhs : $1, Rhs : Binop{Left : $1, Binary : SUB , Right : $4, Pos : $<pos>1, FileText :&parserlex.(*Lexer).input}, Pos : $<pos>1 ,FileText :&parserlex.(*Lexer).input} }
              | ident DIV  ASSIGNMENT expr             { $$ = Assignment{Lhs : $1, Rhs : Binop{Left : $1, Binary : DIV,  Right : $4, Pos : $<pos>1, FileText :&parserlex.(*Lexer).input}, Pos : $<pos>1 ,FileText :&parserlex.(*Lexer).input} }
@@ -246,8 +248,6 @@ expr : INTEGER        { $$ =  $1 }
      | OPENROUND expr CLOSEROUND  { $$ = $2 }
      | CALL ident OPENROUND exprlist CLOSEROUND  { $$ = Call{Ident : $2, ParamList : $4, Pos : $<pos>1, FileText :&parserlex.(*Lexer).input  } }
      | THIS DOT ident                                  { $$ = ThisInstance{$3} }
-     | NEW IDENTIFIER OPENROUND exprlist CLOSEROUND   { $$ = NewObject{Class : ClassType($2) , Init : $4 , Pos : $<pos>1, FileText :&parserlex.(*Lexer).input}}
-
 
 arrayliter : OPENSQUARE exprlist CLOSESQUARE { $$ = ArrayLiter{&parserlex.(*Lexer).input, $<pos>1, $2 } }
 
@@ -277,6 +277,7 @@ pairelemtype : basetype  { $$ = $1 }
 typeDef : basetype  { $$ =  $1 }
         | arraytype { $$ =  $1 }
         | pairtype  { $$ =  $1 }
+        | IDENTIFIER { $$ = $1 }
 
 basetype : INT      { $$ =  Int }
          | BOOL     { $$ =  Bool }
