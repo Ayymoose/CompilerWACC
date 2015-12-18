@@ -1,4 +1,4 @@
-# Expected:
+# PASS
 
 begin
   bool printLine(int num) is

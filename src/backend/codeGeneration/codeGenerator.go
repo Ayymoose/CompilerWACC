@@ -171,13 +171,6 @@ func (cg *CodeGenerator) removeFuncScope() {
 	cg.funcSymTables = cg.funcSymTables[:len(cg.funcSymTables)]
 }
 
-func (cg *CodeGenerator) removeAllFuncScopes() {
-	for !cg.currStack.parentScope.isFunc {
-		cg.currStack = cg.currStack.parentScope
-	}
-	cg.removeFuncScope()
-}
-
 // Used to add extra offset to the current scope when intermediate values are stored on the stack
 func (cg *CodeGenerator) addExtraOffset(n int) {
 	cg.currStack.extraOffset += n

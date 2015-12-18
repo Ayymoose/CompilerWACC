@@ -1,4 +1,4 @@
-# Expected:
+# PASS
 
 begin
   bool printHello() is
