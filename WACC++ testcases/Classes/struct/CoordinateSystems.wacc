@@ -13,9 +13,10 @@ begin
     Coordinate c2
   close
 
-#  string printInfo(Coordinate c) is
-#    println c.info
-#  end
+  string printInfo(Coordinate c) is
+    println c.info;
+    return "success"
+  end
 
   int midX(TwoCoordinate cs) is
     Coordinate c1 = cs.c1;
