@@ -21,7 +21,20 @@ func (value NewObject) Eval(context *Context) (Type, error) {
 	return nil, nil
 }
 func (value FieldAccess) Eval(context *Context) (Type, error) {
-	return nil, nil
+	classType, err := value.ObjectName.Eval(context)
+	if err != nil {
+		return nil, errorFieldUndefined(value.FileText, value.Pos)
+	}
+	for _, k := range context.ClassTable {
+		if k.Ident == classType {
+			for _, a := range k.FieldList {
+				if a.Ident == value.Field {
+					return a.FieldType, nil
+				}
+			}
+		}
+	}
+	return nil, errorFieldUndefined(value.FileText, value.Pos)
 }
 
 func (value Call) Eval(context *Context) (Type, error) {

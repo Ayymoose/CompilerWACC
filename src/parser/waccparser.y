@@ -155,7 +155,7 @@ assignlhs : IDENTIFIER    {$$ = $1}
           | fieldaccess   { $$ = $1}
           | THIS DOT IDENTIFIER                  { $$ = ThisInstance{$3} }
 
-fieldaccess : IDENTIFIER DOT IDENTIFIER {$$ = FieldAccess{$1, $3}}
+fieldaccess : IDENTIFIER DOT IDENTIFIER {$$ = FieldAccess{ &parserlex.(*Lexer).input, $<pos>1, $1, $3, } }
 
 assignrhs : expr                                           {$$ = $1}
           | arrayliter                                     {$$ = $1}
@@ -168,9 +168,9 @@ statements : statements SEMICOLON statement                { $$ = append($1,$3) 
         //   |                                               { $$ = []Statement{} }
            | FOR typeDef IDENTIFIER ASSIGNMENT assignrhs SEMICOLON expr SEMICOLON assignment DO statements DONE {
                                                                                                                  stats := append($11, $9)
-                                                                                                                  w := While{Conditional : $7, DoStat : stats, Pos : $<pos>1, FileText :&parserlex.(*Lexer).input}
-                                                                                                                  d := Declare{DecType : $2, Lhs : $3, Rhs : $5, Pos : $<pos>1 ,FileText :&parserlex.(*Lexer).input }
-                                                                                                                  $$ = []Statement{d,w}
+                                                                                                                 w := While{Conditional : $7, DoStat : stats, Pos : $<pos>1, FileText :&parserlex.(*Lexer).input}
+                                                                                                                 d := Declare{DecType : $2, Lhs : $3, Rhs : $5, Pos : $<pos>1 ,FileText :&parserlex.(*Lexer).input }
+                                                                                                                 $$ = []Statement{d,w}
                                                                                                                 }
 
 

@@ -149,6 +149,8 @@ type NewObject struct {
 }
 
 type FieldAccess struct {
+	FileText *string
+	Pos      int
 	ObjectName Ident
 	Field      Ident
 }

@@ -120,6 +120,12 @@ func errorBadBinary(file *string, pos int) error {
   return errors.New(msg)
 }
 
+func errorFieldUndefined(file *string, pos int) error {
+  line, col := LineAndCol(file, pos)
+  msg := fmt.Sprint(line, ":", col,"  ", " :Field undefined", getLine(file, pos))
+  return errors.New(msg)
+}
+
 //Returns line number and column number of current lexing item in .wacc file
 func LineAndCol(file *string, pos int) (line int, col int) {
   str := *file
