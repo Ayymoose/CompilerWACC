@@ -8,17 +8,61 @@ import (
 func (value CallInstance) Eval(context *Context) (Type, error) {
 	return nil, nil
 }
+
 func (value Class) Eval(context *Context) (Type, error) {
-	return nil, nil
+	for _, field := range value.FieldList {
+		switch field.FieldType.(type) {
+		case ClassType:
+			for _, classname := range context.ClassTable {
+				if field.FieldType == classname.Ident {
+					return field.FieldType, nil
+				}
+			}
+			return nil, errorFieldUndefined(value.FileText, value.Pos)
+		case ConstType:
+			return field.FieldType, nil
+		case ArrayType:
+			return field.FieldType, nil
+		case PairType:
+			return field.FieldType, nil
+		}
+	}
+	return nil,  errorFieldUndefined(value.FileText, value.Pos)
 }
+
 func (value ThisInstance) Eval(context *Context) (Type, error) {
-	return nil, nil
+
+	if context.SymbolTable.isDefined(Ident("this")) {
+		classType := context.SymbolTable.getTypeOfIdent(Ident("this"))
+		for _, class := range context.ClassTable {
+			if classType == class.Ident {
+				for _, field := range class.FieldList {
+					if field.Ident == value.Field {
+						return field.FieldType, nil
+					}
+				}
+			}
+		}
+	}
+	return nil, errorFieldUndefined(value.FileText, value.Pos)
 }
-func (value Instance) Eval(context *Context) (Type, error) {
-	return nil, nil
-}
+
 func (value NewObject) Eval(context *Context) (Type, error) {
-	return nil, nil
+	classType := value.Class
+	for _, class := range context.ClassTable {
+		if classType == class.Ident {
+			for ind, ev := range value.Init {
+				t, err := ev.Eval(context)
+				if err != nil {
+					return nil, err
+				}
+				if t != class.FieldList[ind].FieldType {
+					errorMisMatchingTypeInConstructor(value.FileText, value.Pos)
+				}
+			}
+		}
+	}
+	return classType,nil
 }
 func (value FieldAccess) Eval(context *Context) (Type, error) {
 	classType, err := value.ObjectName.Eval(context)

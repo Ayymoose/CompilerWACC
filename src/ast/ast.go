@@ -156,6 +156,8 @@ type FieldAccess struct {
 }
 
 type Class struct {
+	FileText  *string
+	Pos       int
 	Ident        ClassType
 	FieldList    []Field
 	FunctionList []*Function
@@ -175,6 +177,8 @@ type CallInstance struct {
 }
 
 type ThisInstance struct {
+	FileText  *string
+	Pos       int
 	Field Ident
 }
 

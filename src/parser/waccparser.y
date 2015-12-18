@@ -108,8 +108,8 @@ pairelemtype   Type
 %%
 
 program : BEGIN classes functions statements END {
-                                         parserlex.(*Lexer).prog = &Program{ClassList : $2 , FunctionList : $3 , StatList : $4 , SymbolTable : NewInstance(), FileText :&parserlex.(*Lexer).input}
-                                         }
+                                                  parserlex.(*Lexer).prog = &Program{ClassList : $2 , FunctionList : $3 , StatList : $4 , SymbolTable : NewInstance(), FileText :&parserlex.(*Lexer).input}
+                                                 }
 
 
 classes : classes class  { $$ = append($1, $2)}
@@ -119,12 +119,12 @@ classes : classes class  { $$ = append($1, $2)}
 class : CLASS IDENTIFIER OPEN fieldlist functions CLOSE { if !checkClassIdent($2) {
                                                          	parserlex.Error("Invalid class name")
                                                      }
-                                                     $$ = &Class{Ident : ClassType($2), FieldList : $4 , FunctionList : $5}
+                                                     $$ = &Class{ Pos : $<pos>1, FileText :&parserlex.(*Lexer).input, Ident : ClassType($2), FieldList : $4 , FunctionList : $5}
                                                    }
 
 fieldlist : fieldlist COMMA field { $$ = append($1, $3)}
           | field                 { $$ = []Field{ $1 } }
-      //  |                     { $$ = []Field{}     }
+      //  |                       { $$ = []Field{}     }
 
 field : typeDef IDENTIFIER { $$ = Field{FieldType : $1, Ident : $2} }
 
@@ -153,7 +153,7 @@ assignlhs : IDENTIFIER    {$$ = $1}
           | arrayelem     {$$ = $1}
           | pairelem      {$$ = $1}
           | fieldaccess   { $$ = $1}
-          | THIS DOT IDENTIFIER                  { $$ = ThisInstance{$3} }
+          | THIS DOT IDENTIFIER                  { $$ = ThisInstance{&parserlex.(*Lexer).input, $<pos>1, $3} }
 
 fieldaccess : IDENTIFIER DOT IDENTIFIER {$$ = FieldAccess{ &parserlex.(*Lexer).input, $<pos>1, $1, $3, } }
 
@@ -161,7 +161,6 @@ assignrhs : expr                                           {$$ = $1}
           | arrayliter                                     {$$ = $1}
           | pairelem                                       {$$ = $1}
           | NEW IDENTIFIER OPENROUND exprlist CLOSEROUND   { $$ = NewObject{Class : ClassType($2) , Init : $4 , Pos : $<pos>1, FileText :&parserlex.(*Lexer).input}}
-          | NEWPAIR OPENROUND expr COMMA expr CLOSEROUND   { $$ = NewPair{FstExpr : $3, SndExpr : $5, Pos : $<pos>1, FileText :&parserlex.(*Lexer).input } }
 
 statements : statements SEMICOLON statement                { $$ = append($1,$3)   }
            | statement                                     { $$ = []Statement{$1} }
@@ -172,7 +171,6 @@ statements : statements SEMICOLON statement                { $$ = append($1,$3) 
                                                                                                                  d := Declare{DecType : $2, Lhs : $3, Rhs : $5, Pos : $<pos>1 ,FileText :&parserlex.(*Lexer).input }
                                                                                                                  $$ = []Statement{d,w}
                                                                                                                 }
-
 
 statement : SKIP                                        { $$ = Skip{Pos : $<pos>1 ,FileText :&parserlex.(*Lexer).input } }
           | typeDef IDENTIFIER ASSIGNMENT assignrhs     { $$ = Declare{DecType : $1, Lhs : $2, Rhs : $4, Pos : $<pos>1 ,FileText :&parserlex.(*Lexer).input } }
@@ -258,7 +256,8 @@ expr : INTEGER        { $$ =  $1 }
      | OPENROUND expr CLOSEROUND  { $$ = $2 }
      | CALL IDENTIFIER OPENROUND exprlist CLOSEROUND    { $$ = Call{Ident : $2, ParamList : $4, Pos : $<pos>1, FileText :&parserlex.(*Lexer).input  } }
      | CALL fieldaccess OPENROUND exprlist CLOSEROUND   { $$ = CallInstance{Class : ($2.(FieldAccess)).ObjectName, Func: ($2.(FieldAccess)).Field, ParamList : $4, Pos : $<pos>1, FileText :&parserlex.(*Lexer).input  } }
-     | THIS DOT IDENTIFIER                              { $$ = ThisInstance{$3} }
+     | THIS DOT IDENTIFIER                                 { $$ = ThisInstance{&parserlex.(*Lexer).input, $<pos>1, $3} }
+     | NEWPAIR OPENROUND expr COMMA expr CLOSEROUND   { $$ = NewPair{FstExpr : $3, SndExpr : $5, Pos : $<pos>1, FileText :&parserlex.(*Lexer).input } }
 
 arrayliter : OPENSQUARE exprlist CLOSESQUARE { $$ = ArrayLiter{&parserlex.(*Lexer).input, $<pos>1, $2 } }
 

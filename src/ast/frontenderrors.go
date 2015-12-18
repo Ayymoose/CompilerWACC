@@ -24,6 +24,18 @@ func errorConditional(file *string, pos int) error {
   return errors.New(msg)
 }
 
+func errorClassError(file *string, pos int) error {
+  line, col := LineAndCol(file, pos)
+  msg := fmt.Sprint(line, ":", col,"  ", "Error in Class:", getLine(file, pos))
+  return errors.New(msg)
+}
+
+func errorMisMatchingTypeInConstructor(file *string, pos int) error {
+  line, col := LineAndCol(file, pos)
+  msg := fmt.Sprint(line, ":", col,"  ", "Mismatching types in constructor:", getLine(file, pos))
+  return errors.New(msg)
+}
+
 func errorExit(file *string, pos int) error {
   line, col := LineAndCol(file, pos)
   msg := fmt.Sprint(line, ":", col,"  ", "exit value must be type int:", getLine(file, pos))

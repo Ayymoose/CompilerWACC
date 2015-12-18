@@ -85,7 +85,6 @@ func (node Return) checkReturnReturn(context *Context, returnType Type) errorSli
 	}
 	return nil
 }
-
 func (function *Function) checkFunc(root *Program) errorSlice {
 	var semanticErrors []error
 	funcSymbolTable := function.SymbolTable
@@ -123,9 +122,20 @@ func (function *Function) checkFunc(root *Program) errorSlice {
 
 func (root *Program) SemanticCheck() errorSlice {
 	var semanticErrors []error
-	context := &Context{root.FunctionList, root.SymbolTable, root.ClassList}
+	context := &Context{root.FunctionList, root.SymbolTable, root.ClassList }
 	if containsDuplicateFunc(root.FunctionList) {
 		semanticErrors = append(semanticErrors, errorFuncRedef(root.FileText, root.Pos))
+	}
+
+	for _, class := range root.ClassList {
+    classymbtab := root.SymbolTable.New()
+		classymbtab.insert(Ident("this"), class.Ident)
+		classContext := &Context{root.FunctionList, classymbtab , root.ClassList }
+  	_, err :=	class.Eval(classContext)
+  	if err != nil {
+			semanticErrors = append(semanticErrors, errorClassError(root.FileText, root.Pos))
+  	}
+
 	}
 	for _, functionProg := range root.FunctionList {
 		funcErrs := functionProg.checkFunc(root)
