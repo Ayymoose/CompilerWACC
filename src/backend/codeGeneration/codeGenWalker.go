@@ -693,6 +693,8 @@ func (cg *CodeGenerator) cgVisitDeclareStat(node Declare) {
 	case ClassType:
 		cg.evalRHS(rhs, "r4")
 		appendAssembly(cg.currInstrs(), "STR r4, [sp, #"+cg.subCurrP(ADDRESS_SIZE)+"]", 1, 1)
+	default:
+		fmt.Println("ERROR: UNKNOWN DECLARE TYPE")
 	}
 	// Saves Idents offset in the symbol tables offset map
 	cg.currSymTable().InsertOffset(string(node.Lhs), cg.currStack.currP)

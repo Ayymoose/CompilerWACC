@@ -60,6 +60,9 @@ COMPLETE (APART FROM IMPLEMENTED FUNCTIONS FOR AST NODES)
 
 <assign-lhs> := ... | <ident>'.'<ident>
 
+<expr> := ... | <ident>'.'<ident>
+              | this'.'<ident>
+
 COMPLETE
 <field> := <param>
 

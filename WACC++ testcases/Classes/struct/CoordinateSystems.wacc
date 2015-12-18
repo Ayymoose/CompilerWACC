@@ -1,0 +1,36 @@
+# Expected:
+
+begin
+  class Coordinate open
+    int x,
+    int y,
+    bool complex,
+    string info
+  close
+
+  class TwoCoordinate open
+    Coordinate c1;
+    Coordinate c2
+  close
+
+  string printInfo(Coordinate c) is
+    println c.info
+  end
+
+  int midX(TwoCoordinate cs) is
+    Coordinate c1 = cs.c1;
+    Coordinate c2 = cs.c2;
+    int ret = c1.x + c2.x;
+    return ret / 2
+  end
+
+  Coordinate origin = new Coordinate(0,0,false,"Origin of plane");
+  printInfo(origin);
+
+  Coordinate a = Coordinate(20,5,false,"Coor A");
+  Coordinate b = Coordinate(0,5,false,"Coor B");
+  TwoCoordinate t = TwoCoordinate(b,a);
+  int mid = midX(t);
+  print "Mid x = "; println mid
+
+end

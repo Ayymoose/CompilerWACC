@@ -7,9 +7,7 @@ begin
   close
 
   Animal cheetah = new Animal(4, true);
-  if cheetah.isFast then
-    print "This animal is FAST!"
-  else skip
-  fi
+  bool b = cheetah.isFast;
+  int n = cheetah.numberOfLegs
 
 end

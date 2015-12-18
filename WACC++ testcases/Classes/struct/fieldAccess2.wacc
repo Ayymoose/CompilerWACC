@@ -1,0 +1,21 @@
+# Expected:
+
+begin
+  class Coordinate open
+    int x,
+    int y,
+    bool complex
+  close
+
+  int a = 5;
+
+  Coordinate c = new Coordinate(2,10,true);
+  int pointX = a + c.x;
+  int pointY = a + c.y;
+
+  if !c.complex then
+    print "not complex"
+  else skip
+  fi
+
+end
