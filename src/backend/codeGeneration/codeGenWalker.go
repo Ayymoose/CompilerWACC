@@ -961,7 +961,7 @@ func (cg *CodeGenerator) cgVisitPrintStat(node Print) {
 		cg.cgVisitPrintStatFuncHelper("p_print_reference")
 
 	default:
-		appendAssembly(cg.currInstrs(), "Error: type not implemented", 1, 1)
+		fmt.Println("Error: type not implemented")
 	}
 
 }
@@ -1035,7 +1035,7 @@ func (cg *CodeGenerator) cgVisitCallStat(ident Ident, paramList []Evaluation, sr
 			appendAssembly(cg.currInstrs(), "BL f_"+string(function.Ident), 1, 1)
 			offset := cg.cgGetParamSize(paramList)
 			cg.subExtraOffset(offset)
-			//THIS LINE SHOULD BE REPLACED WITH removeStackSpace() At one point it might break here...
+
 			appendAssembly(cg.currInstrs(), "ADD sp, sp, #"+strconv.Itoa(offset), 1, 1)
 			appendAssembly(cg.currInstrs(), "MOV "+srcReg+", r0", 1, 1)
 			if !cg.isFunctionDefined(function.Ident) {
@@ -1062,8 +1062,8 @@ func (cg *CodeGenerator) cgVisitCallMethod(ident Ident, objIdent Ident, paramLis
 					}
 					appendAssembly(cg.currInstrs(), "BL f_"+string(classTyp)+"."+string(function.Ident), 1, 1)
 					offset := cg.cgGetParamSize(paramList) + ADDRESS_SIZE
-					cg.subExtraOffset(offset)
-					//THIS LINE SHOULD BE REPLACED WITH removeStackSpace() At one point it might break here...
+					//cg.subExtraOffset(offset)
+
 					appendAssembly(cg.currInstrs(), "ADD sp, sp, #"+strconv.Itoa(offset), 1, 1)
 					appendAssembly(cg.currInstrs(), "MOV "+srcReg+", r0", 1, 1)
 
