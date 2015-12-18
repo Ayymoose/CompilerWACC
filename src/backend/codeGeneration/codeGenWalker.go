@@ -329,6 +329,19 @@ func (cg *CodeGenerator) evalRHS(t Evaluation, srcReg string) {
 		objClass := cg.getClass(classTyp)
 
 		cg.evalField(t.(FieldAccess).ObjectName, t.(FieldAccess).Field, *objClass, srcReg)
+	case ThisInstance:
+		field := t.(ThisInstance).Field
+		appendAssembly(cg.currInstrs(), "LDR r5, [sp, #"+strconv.Itoa(cg.getObjectOffset())+"]", 1, 1)
+		// Field Accumulator
+		acc := 0
+		for _, currField := range *cg.currStack.fieldList {
+			if field == currField.Ident {
+				//Stores the current initialiser value on the heap for the object in the correct offset
+				appendAssembly(cg.currInstrs(), "LDR "+srcReg+", [r5, #"+strconv.Itoa(acc)+"]", 1, 1)
+				break
+			}
+			acc += sizeOf(currField.FieldType)
+		}
 	default:
 		fmt.Println("ERROR: Expression can not be evaluated")
 	}
@@ -590,9 +603,11 @@ func (cg *CodeGenerator) cgVisitProgram(node *Program) {
 	}
 
 	// Adds methods that were called
+	var methodName Ident
 	for _, class := range cg.classes {
-		for _, function := range cg.functionList {
-			if cg.isFunctionDefined(Ident(string(class.Ident) + "." + string(function.Ident))) {
+		for _, function := range class.FunctionList {
+			methodName = Ident(string(class.Ident) + "." + string(function.Ident))
+			if cg.isFunctionDefined(methodName) {
 				cg.cgVisitMethod(*function, *class)
 			}
 		}
@@ -802,7 +817,20 @@ func (cg *CodeGenerator) cgVisitAssignmentStat(node Assignment) {
 			}
 			acc += sizeOf(currField.FieldType)
 		}
+	case ThisInstance:
+		appendAssembly(cg.currInstrs(), "LDR r5, [sp, #"+strconv.Itoa(cg.getObjectOffset())+"]", 1, 1)
+		field := lhs.(ThisInstance).Field
 
+		// Field Accumulator
+		acc := 0
+		for _, currField := range *cg.currStack.fieldList {
+			if field == currField.Ident {
+				//Stores the current initialiser value on the heap for the object in the correct offset
+				appendAssembly(cg.currInstrs(), "STR r4, [r5, #"+strconv.Itoa(acc)+"]", 1, 1)
+				break
+			}
+			acc += sizeOf(currField.FieldType)
+		}
 	}
 }
 
@@ -933,7 +961,7 @@ func (cg *CodeGenerator) cgVisitPrintStat(node Print) {
 		cg.cgVisitPrintStatFuncHelper("p_print_reference")
 
 	default:
-		appendAssembly(cg.currInstrs(), "Error: type not implemented", 1, 1)
+		fmt.Println("Error: type not implemented")
 	}
 
 }
@@ -1007,7 +1035,7 @@ func (cg *CodeGenerator) cgVisitCallStat(ident Ident, paramList []Evaluation, sr
 			appendAssembly(cg.currInstrs(), "BL f_"+string(function.Ident), 1, 1)
 			offset := cg.cgGetParamSize(paramList)
 			cg.subExtraOffset(offset)
-			//THIS LINE SHOULD BE REPLACED WITH removeStackSpace() At one point it might break here...
+
 			appendAssembly(cg.currInstrs(), "ADD sp, sp, #"+strconv.Itoa(offset), 1, 1)
 			appendAssembly(cg.currInstrs(), "MOV "+srcReg+", r0", 1, 1)
 			if !cg.isFunctionDefined(function.Ident) {
@@ -1034,12 +1062,14 @@ func (cg *CodeGenerator) cgVisitCallMethod(ident Ident, objIdent Ident, paramLis
 					}
 					appendAssembly(cg.currInstrs(), "BL f_"+string(classTyp)+"."+string(function.Ident), 1, 1)
 					offset := cg.cgGetParamSize(paramList) + ADDRESS_SIZE
-					cg.subExtraOffset(offset)
-					//THIS LINE SHOULD BE REPLACED WITH removeStackSpace() At one point it might break here...
+					//cg.subExtraOffset(offset)
+
 					appendAssembly(cg.currInstrs(), "ADD sp, sp, #"+strconv.Itoa(offset), 1, 1)
 					appendAssembly(cg.currInstrs(), "MOV "+srcReg+", r0", 1, 1)
-					if !cg.isFunctionDefined(Ident(string(classTyp) + "." + string(function.Ident))) {
-						cg.addFunctionDef(Ident(string(classTyp) + "." + string(function.Ident)))
+
+					methodName := Ident(string(classTyp) + "." + string(function.Ident))
+					if !cg.isFunctionDefined(methodName) {
+						cg.addFunctionDef(methodName)
 					}
 					break
 				}
@@ -1079,7 +1109,7 @@ func (cg *CodeGenerator) cgVisitMethod(node Function, class Class) {
 	varSpaceSize := getScopeVarSize(node.StatList)
 	cg.setNewMethodScope(varSpaceSize, &node.ParameterTypes, node.SymbolTable, &class.FieldList)
 	// f_funcName:
-	appendAssembly(cg.currInstrs(), "f_"+string(node.Ident)+"."+string(class.Ident)+":", 0, 1)
+	appendAssembly(cg.currInstrs(), "f_"+string(class.Ident)+"."+string(node.Ident)+":", 0, 1)
 	// push {lr} to save the caller address
 	appendAssembly(cg.currInstrs(), "PUSH {lr}", 1, 1)
 	if varSpaceSize > 0 {

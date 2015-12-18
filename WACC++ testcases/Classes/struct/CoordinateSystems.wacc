@@ -21,8 +21,7 @@ begin
   int midX(TwoCoordinate cs) is
     Coordinate c1 = cs.c1;
     Coordinate c2 = cs.c2;
-    int ret = c1.x + c2.x;
-    return 2 #ret / 2
+    return c1.x + c2.x / 2
   end
 
   Coordinate origin = new Coordinate(0,0,false,"Origin of plane");
