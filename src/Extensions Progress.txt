@@ -1,21 +1,20 @@
-SIDE CONDITIONS: COMPLETE/TESTED - HENRYK/AYMAN
+SIDE CONDITIONS: COMPLETE/TESTED -----------------------------------------------
 -    += -= /= *= %= -- ++
 
-REMOVED MULTIPLE NON VAR STRING: COMPLETE/UNTESTED - NANA
+NO CALL NO FUNCTION DEF: COMPLETE ----------------------------------------------
 
-NO CALL NO FUNCTION DEF: COMPLETE/UNTESTED - NANA
+FOR LOOP: COMPLETE -------------------------------------------------------------
 
-FOR LOOP: COMPLETE - OLI
-
-ALLOW FUNCTION CALLS OUTSIDE OF ASSIGNMENT: HENRYK ----------------------------- visitStatement.go needs to be complete
+ALLOW FUNCTION CALLS OUTSIDE OF ASSIGNMENT: HENRYK -----------------------------
 
 CLASSES: (Frontend done) NOT COMPLETE - FRONTEND AND NANA/AYMAN/HENRYK
 - visitDeclare   - DONE/UNTESTED
 - visitNewObject - DONE/UNTESTED
 - visitField     - DONE/UNTESTED
+- THIS .         - not done
 - Assign to field - DONE/UNTESTED
 - visitMethod     - DONE/UNTESTED (codegen.go still needs to be updated)
-- visitCall      - DONE/ UNTESTED
+- visitCall      - DONE --------------------------------------------------------
 - printing classes/ free classes - DONE/UNTESTED
 
 ----
@@ -74,4 +73,4 @@ COMPLETE
 <expr> := NEW IDENTIFIER OPENROUND ParamList CLOSEROUND
 
 // cannot create array of objects
-// Add instance function 
+// Add instance function
