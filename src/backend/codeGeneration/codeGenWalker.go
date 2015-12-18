@@ -329,6 +329,19 @@ func (cg *CodeGenerator) evalRHS(t Evaluation, srcReg string) {
 		objClass := cg.getClass(classTyp)
 
 		cg.evalField(t.(FieldAccess).ObjectName, t.(FieldAccess).Field, *objClass, srcReg)
+	case ThisInstance:
+		field := t.(ThisInstance).Field
+		appendAssembly(cg.currInstrs(), "LDR r5, [sp, #"+strconv.Itoa(cg.getObjectOffset())+"]", 1, 1)
+		// Field Accumulator
+		acc := 0
+		for _, currField := range *cg.currStack.fieldList {
+			if field == currField.Ident {
+				//Stores the current initialiser value on the heap for the object in the correct offset
+				appendAssembly(cg.currInstrs(), "LDR "+srcReg+", [r5, #"+strconv.Itoa(acc)+"]", 1, 1)
+				break
+			}
+			acc += sizeOf(currField.FieldType)
+		}
 	default:
 		fmt.Println("ERROR: Expression can not be evaluated")
 	}
@@ -804,7 +817,20 @@ func (cg *CodeGenerator) cgVisitAssignmentStat(node Assignment) {
 			}
 			acc += sizeOf(currField.FieldType)
 		}
+	case ThisInstance:
+		appendAssembly(cg.currInstrs(), "LDR r5, [sp, #"+strconv.Itoa(cg.getObjectOffset())+"]", 1, 1)
+		field := lhs.(ThisInstance).Field
 
+		// Field Accumulator
+		acc := 0
+		for _, currField := range *cg.currStack.fieldList {
+			if field == currField.Ident {
+				//Stores the current initialiser value on the heap for the object in the correct offset
+				appendAssembly(cg.currInstrs(), "STR r4, [r5, #"+strconv.Itoa(acc)+"]", 1, 1)
+				break
+			}
+			acc += sizeOf(currField.FieldType)
+		}
 	}
 }
 

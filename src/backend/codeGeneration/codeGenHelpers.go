@@ -170,6 +170,15 @@ func funcVarSize(scope *scopeData) int {
 	return scope.size + funcVarSize(scope.parentScope)
 }
 
+// returns total size of a list of params
+func paramListSize(paramList []Param) int {
+	totalCount := 0
+	for _, param := range paramList {
+		totalCount += sizeOf(param.ParamType)
+	}
+	return totalCount
+}
+
 // Returns the negative offset of the parameter
 func getParamOffset(ident Ident, paramList *[]Param) (int, Type) {
 	accOffset := 0

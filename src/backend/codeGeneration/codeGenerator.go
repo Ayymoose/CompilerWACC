@@ -355,3 +355,8 @@ func (cg *CodeGenerator) getClass(classIdent ClassType) *Class {
 	}
 	return nil
 }
+
+// Returns the offset to a object on the stack. Can only be used when within a method scope
+func (cg *CodeGenerator) getObjectOffset() int {
+	return ADDRESS_SIZE + paramListSize(*cg.currStack.paramList)
+}
