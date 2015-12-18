@@ -122,7 +122,7 @@ const parserEofCode = 1
 const parserErrCode = 2
 const parserMaxDepth = 200
 
-//line waccparser.y:300
+//line waccparser.y:301
 
 
 //line yacctab:1
@@ -131,14 +131,14 @@ var parserExca = []int{
 	1, -1,
 	-2, 0,
 	-1, 28,
-	69, 115,
+	69, 116,
 	-2, 15,
 	-1, 46,
-	69, 115,
+	69, 116,
 	-2, 71,
 }
 
-const parserNprod = 123
+const parserNprod = 124
 const parserPrivate = 57344
 
 var parserTokenNames []string
@@ -158,20 +158,20 @@ var parserAct = []int{
 	11, 36, 181, 202, 273, 252, 44, 267, 138, 229,
 	181, 38, 42, 239, 270, 81, 242, 132, 82, 266,
 	184, 255, 36, 242, 227, 247, 155, 157, 242, 39,
-	40, 159, 240, 263, 134, 43, 176, 135, 173, 45,
+	40, 159, 240, 263, 134, 43, 175, 135, 173, 45,
 	172, 43, 185, 186, 187, 188, 189, 190, 191, 192,
 	193, 194, 195, 196, 197, 183, 43, 79, 43, 31,
 	32, 33, 34, 174, 43, 30, 157, 43, 43, 67,
 	159, 43, 43, 135, 182, 207, 208, 212, 206, 213,
 	170, 214, 215, 167, 216, 217, 254, 211, 242, 36,
-	153, 30, 30, 166, 222, 63, 223, 175, 224, 225,
+	153, 30, 30, 166, 222, 63, 223, 176, 224, 225,
 	150, 226, 180, 243, 241, 242, 242, 96, 221, 249,
 	88, 165, 62, 157, 144, 36, 36, 159, 228, 236,
 	55, 237, 56, 57, 58, 231, 169, 152, 60, 59,
 	205, 164, 31, 32, 33, 34, 35, 143, 149, 147,
 	48, 49, 64, 142, 61, 233, 234, 87, 168, 151,
 	163, 246, 51, 70, 47, 50, 148, 134, 146, 245,
-	199, 176, 251, 173, 248, 172, 102, 220, 200, 258,
+	199, 175, 251, 173, 248, 172, 102, 220, 200, 258,
 	181, 253, 88, 260, 256, 141, 86, 88, 259, 85,
 	154, 257, 276, 265, 9, 232, 235, 30, 133, 103,
 	30, 261, 106, 271, 30, 29, 268, 113, 115, 114,
@@ -238,7 +238,7 @@ var parserPact = []int{
 	154, 154, -1000, -1000, -1000, -1000, 154, -1000, 154, -1000,
 	154, 154, -1000, 154, 154, 564, -1000, 619, -1000, -1000,
 	-44, 177, 154, 154, -1000, 154, -1000, 154, 154, -1000,
-	154, 30, 190, 187, 176, -1000, 158, -1000, 15, -1000,
+	154, 30, 190, 187, 176, 158, -1000, -1000, 15, -1000,
 	-46, -1000, 299, 230, 273, 403, 403, 297, 297, 297,
 	-1000, -1000, -1000, -1000, 645, 645, 632, 459, -1000, 154,
 	154, -1000, 244, 127, -1000, -56, -1000, 61, 76, 112,
@@ -269,8 +269,8 @@ var parserR1 = []int{
 	10, 10, 10, 10, 10, 10, 10, 10, 10, 10,
 	10, 10, 10, 10, 10, 10, 10, 17, 11, 11,
 	11, 18, 19, 19, 20, 16, 16, 24, 25, 25,
-	25, 25, 22, 22, 22, 22, 21, 21, 21, 21,
-	23, 23, 23,
+	25, 25, 25, 22, 22, 22, 22, 21, 21, 21,
+	21, 23, 23, 23,
 }
 var parserR2 = []int{
 
@@ -286,7 +286,7 @@ var parserR2 = []int{
 	3, 3, 3, 3, 5, 5, 3, 3, 3, 1,
 	0, 2, 4, 3, 1, 2, 2, 6, 1, 1,
 	1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
-	3, 3, 3,
+	1, 3, 3, 3,
 }
 var parserChk = []int{
 
@@ -307,7 +307,7 @@ var parserChk = []int{
 	60, 60, 61, 61, 61, 69, 63, 44, 63, 45,
 	63, 63, 41, 63, 59, -10, -8, -10, -17, -16,
 	9, 27, 59, 63, 44, 63, 45, 63, 63, 41,
-	63, -25, -21, -23, 35, 69, -24, 69, -14, -15,
+	63, -25, -21, -23, 35, -24, 69, 69, -14, -15,
 	-22, 69, 63, -26, 69, -10, -10, -10, -10, -10,
 	-10, -10, -10, -10, -10, -10, -10, -10, 62, 60,
 	60, 69, 62, -12, -13, -22, -8, -7, -7, -11,
@@ -323,8 +323,8 @@ var parserDef = []int{
 
 	0, -2, 3, 9, 0, 2, 0, 0, 8, 27,
 	0, 0, 29, 31, 0, 0, 0, 0, 0, 0,
-	0, 0, 0, 0, 0, 112, 113, 114, -2, 0,
-	18, 116, 117, 118, 119, 0, 16, 17, 0, 0,
+	0, 0, 0, 0, 0, 113, 114, 115, -2, 0,
+	18, 117, 118, 119, 120, 0, 16, 17, 0, 0,
 	0, 0, 1, 0, 0, 0, -2, 65, 66, 67,
 	68, 69, 70, 72, 73, 0, 0, 0, 0, 0,
 	0, 0, 0, 0, 104, 0, 32, 15, 18, 33,
@@ -335,11 +335,11 @@ var parserDef = []int{
 	0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
 	0, 0, 0, 0, 74, 75, 76, 77, 78, 79,
 	0, 0, 0, 0, 0, 0, 0, 0, 41, 0,
-	100, 100, 120, 122, 121, 20, 0, 54, 0, 55,
+	100, 100, 121, 123, 122, 20, 0, 54, 0, 55,
 	0, 0, 56, 0, 0, 0, 48, 21, 22, 23,
 	0, 0, 100, 0, 62, 0, 63, 0, 0, 64,
-	0, 0, 108, 109, 110, 111, 0, 19, 9, 6,
-	0, 115, 0, 0, 15, 80, 81, 82, 83, 84,
+	0, 0, 108, 109, 110, 111, 112, 19, 9, 6,
+	0, 116, 0, 0, 15, 80, 81, 82, 83, 84,
 	85, 86, 87, 88, 89, 90, 91, 92, 93, 100,
 	100, 96, 0, 0, 13, 0, 30, 0, 0, 0,
 	99, 0, 49, 50, 51, 52, 53, 0, 103, 0,
@@ -958,10 +958,10 @@ parserdefault:
 		{ parserVAL.pairelemtype = Pair}
 	case 111:
 		//line waccparser.y:284
-		{ parserVAL.pairelemtype = ClassType(parserS[parserpt-0].ident)}
+		{ parserVAL.pairelemtype = parserS[parserpt-0].typedefinition}
 	case 112:
-		//line waccparser.y:286
-		{ parserVAL.typedefinition =  parserS[parserpt-0].typedefinition }
+		//line waccparser.y:285
+		{ parserVAL.pairelemtype = ClassType(parserS[parserpt-0].ident)}
 	case 113:
 		//line waccparser.y:287
 		{ parserVAL.typedefinition =  parserS[parserpt-0].typedefinition }
@@ -970,27 +970,30 @@ parserdefault:
 		{ parserVAL.typedefinition =  parserS[parserpt-0].typedefinition }
 	case 115:
 		//line waccparser.y:289
-		{ parserVAL.typedefinition = ClassType(parserS[parserpt-0].ident) }
+		{ parserVAL.typedefinition =  parserS[parserpt-0].typedefinition }
 	case 116:
-		//line waccparser.y:291
-		{ parserVAL.typedefinition =  Int }
+		//line waccparser.y:290
+		{ parserVAL.typedefinition = ClassType(parserS[parserpt-0].ident) }
 	case 117:
 		//line waccparser.y:292
-		{ parserVAL.typedefinition =  Bool }
+		{ parserVAL.typedefinition =  Int }
 	case 118:
 		//line waccparser.y:293
-		{ parserVAL.typedefinition =  Char }
+		{ parserVAL.typedefinition =  Bool }
 	case 119:
 		//line waccparser.y:294
-		{ parserVAL.typedefinition =  String }
+		{ parserVAL.typedefinition =  Char }
 	case 120:
-		//line waccparser.y:296
-		{ parserVAL.typedefinition = ArrayType{Type : parserS[parserpt-2].typedefinition} }
+		//line waccparser.y:295
+		{ parserVAL.typedefinition =  String }
 	case 121:
 		//line waccparser.y:297
 		{ parserVAL.typedefinition = ArrayType{Type : parserS[parserpt-2].typedefinition} }
 	case 122:
 		//line waccparser.y:298
+		{ parserVAL.typedefinition = ArrayType{Type : parserS[parserpt-2].typedefinition} }
+	case 123:
+		//line waccparser.y:299
 		{ parserVAL.typedefinition = ArrayType{Type : parserS[parserpt-2].typedefinition} }
 	}
 	goto parserstack /* stack new state and value */

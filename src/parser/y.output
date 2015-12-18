@@ -423,27 +423,27 @@ state 24
 	fieldaccess  goto 84
 
 state 25
-	typeDef:  basetype.    (112)
+	typeDef:  basetype.    (113)
 	arraytype:  basetype.OPENSQUARE CLOSESQUARE 
 
 	OPENSQUARE  shift 85
-	.  reduce 112 (src line 286)
-
-
-state 26
-	typeDef:  arraytype.    (113)
-	arraytype:  arraytype.OPENSQUARE CLOSESQUARE 
-
-	OPENSQUARE  shift 86
 	.  reduce 113 (src line 287)
 
 
+state 26
+	typeDef:  arraytype.    (114)
+	arraytype:  arraytype.OPENSQUARE CLOSESQUARE 
+
+	OPENSQUARE  shift 86
+	.  reduce 114 (src line 288)
+
+
 state 27
-	typeDef:  pairtype.    (114)
+	typeDef:  pairtype.    (115)
 	arraytype:  pairtype.OPENSQUARE CLOSESQUARE 
 
 	OPENSQUARE  shift 87
-	.  reduce 114 (src line 288)
+	.  reduce 115 (src line 289)
 
 
 state 28
@@ -458,7 +458,7 @@ state 28
 	assignment:  IDENTIFIER.SUB SUB 
 	assignment:  IDENTIFIER.MUL MUL 
 	arrayelem:  IDENTIFIER.bracketed 
-	typeDef:  IDENTIFIER.    (115)
+	typeDef:  IDENTIFIER.    (116)
 
 	DOT  shift 88
 	MUL  shift 92
@@ -467,7 +467,7 @@ state 28
 	PLUS  shift 89
 	SUB  shift 90
 	OPENSQUARE  shift 95
-	IDENTIFIER  reduce 115 (src line 289)
+	IDENTIFIER  reduce 116 (src line 290)
 	.  reduce 15 (src line 152)
 
 	bracketed  goto 94
@@ -499,27 +499,27 @@ state 30
 
 
 state 31
-	basetype:  INT.    (116)
-
-	.  reduce 116 (src line 291)
-
-
-state 32
-	basetype:  BOOL.    (117)
+	basetype:  INT.    (117)
 
 	.  reduce 117 (src line 292)
 
 
-state 33
-	basetype:  CHAR.    (118)
+state 32
+	basetype:  BOOL.    (118)
 
 	.  reduce 118 (src line 293)
 
 
-state 34
-	basetype:  STRING.    (119)
+state 33
+	basetype:  CHAR.    (119)
 
 	.  reduce 119 (src line 294)
+
+
+state 34
+	basetype:  STRING.    (120)
+
+	.  reduce 120 (src line 295)
 
 
 state 35
@@ -695,11 +695,11 @@ state 46
 	fieldaccess:  IDENTIFIER.DOT IDENTIFIER 
 	expr:  IDENTIFIER.    (71)
 	arrayelem:  IDENTIFIER.bracketed 
-	typeDef:  IDENTIFIER.    (115)
+	typeDef:  IDENTIFIER.    (116)
 
 	DOT  shift 88
 	OPENSQUARE  shift 95
-	IDENTIFIER  reduce 115 (src line 289)
+	IDENTIFIER  reduce 116 (src line 290)
 	.  reduce 71 (src line 236)
 
 	bracketed  goto 94
@@ -1468,12 +1468,12 @@ state 102
 	CHAR  shift 33
 	STRING  shift 34
 	PAIR  shift 174
-	IDENTIFIER  shift 175
+	IDENTIFIER  shift 176
 	.  error
 
 	basetype  goto 172
 	arraytype  goto 173
-	pairtype  goto 176
+	pairtype  goto 175
 	pairelemtype  goto 171
 
 state 103
@@ -2343,21 +2343,21 @@ state 141
 	fieldaccess  goto 52
 
 state 142
-	arraytype:  basetype OPENSQUARE CLOSESQUARE.    (120)
+	arraytype:  basetype OPENSQUARE CLOSESQUARE.    (121)
 
-	.  reduce 120 (src line 296)
+	.  reduce 121 (src line 297)
 
 
 state 143
-	arraytype:  arraytype OPENSQUARE CLOSESQUARE.    (122)
+	arraytype:  arraytype OPENSQUARE CLOSESQUARE.    (123)
 
-	.  reduce 122 (src line 298)
+	.  reduce 123 (src line 299)
 
 
 state 144
-	arraytype:  pairtype OPENSQUARE CLOSESQUARE.    (121)
+	arraytype:  pairtype OPENSQUARE CLOSESQUARE.    (122)
 
-	.  reduce 121 (src line 297)
+	.  reduce 122 (src line 298)
 
 
 state 145
@@ -2845,16 +2845,17 @@ state 174
 
 
 state 175
-	pairelemtype:  IDENTIFIER.    (111)
+	pairelemtype:  pairtype.    (111)
+	arraytype:  pairtype.OPENSQUARE CLOSESQUARE 
 
+	OPENSQUARE  shift 87
 	.  reduce 111 (src line 284)
 
 
 state 176
-	arraytype:  pairtype.OPENSQUARE CLOSESQUARE 
+	pairelemtype:  IDENTIFIER.    (112)
 
-	OPENSQUARE  shift 87
-	.  error
+	.  reduce 112 (src line 285)
 
 
 state 177
@@ -2887,9 +2888,9 @@ state 180
 
 
 state 181
-	typeDef:  IDENTIFIER.    (115)
+	typeDef:  IDENTIFIER.    (116)
 
-	.  reduce 115 (src line 289)
+	.  reduce 116 (src line 290)
 
 
 state 182
@@ -3851,12 +3852,12 @@ state 227
 	CHAR  shift 33
 	STRING  shift 34
 	PAIR  shift 174
-	IDENTIFIER  shift 175
+	IDENTIFIER  shift 176
 	.  error
 
 	basetype  goto 172
 	arraytype  goto 173
-	pairtype  goto 176
+	pairtype  goto 175
 	pairelemtype  goto 248
 
 state 228
@@ -4596,11 +4597,11 @@ state 278
 
 
 71 terminals, 28 nonterminals
-123 grammar rules, 279/2000 states
+124 grammar rules, 279/2000 states
 0 shift/reduce, 0 reduce/reduce conflicts reported
 77 working sets used
 memory: parser 546/30000
-246 extra closures
+256 extra closures
 1788 shift entries, 3 exceptions
 144 goto entries
 270 entries saved by goto default

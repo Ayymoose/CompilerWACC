@@ -257,8 +257,8 @@ expr : INTEGER        { $$ =  $1 }
      | expr OR expr   { $$ = Binop{Left : $1, Binary : OR,   Right : $3, Pos : $<pos>1, FileText :&parserlex.(*Lexer).input  } }
      | OPENROUND expr CLOSEROUND  { $$ = $2 }
      | CALL IDENTIFIER OPENROUND exprlist CLOSEROUND    { $$ = Call{Ident : $2, ParamList : $4, Pos : $<pos>1, FileText :&parserlex.(*Lexer).input  } }
-     | CALL fieldaccess OPENROUND exprlist CLOSEROUND    { $$ = CallInstance{Class : ($2.(FieldAccess)).ObjectName, Func: ($2.(FieldAccess)).Field, ParamList : $4, Pos : $<pos>1, FileText :&parserlex.(*Lexer).input  } }
-     | THIS DOT IDENTIFIER                                  { $$ = ThisInstance{$3} }
+     | CALL fieldaccess OPENROUND exprlist CLOSEROUND   { $$ = CallInstance{Class : ($2.(FieldAccess)).ObjectName, Func: ($2.(FieldAccess)).Field, ParamList : $4, Pos : $<pos>1, FileText :&parserlex.(*Lexer).input  } }
+     | THIS DOT IDENTIFIER                              { $$ = ThisInstance{$3} }
 
 arrayliter : OPENSQUARE exprlist CLOSESQUARE { $$ = ArrayLiter{&parserlex.(*Lexer).input, $<pos>1, $2 } }
 
@@ -278,14 +278,15 @@ pairelem : FST expr { $$ = PairElem{Fsnd: Fst, Expr : $2, Pos : $<pos>1  } }
 
 pairtype : PAIR OPENROUND pairelemtype COMMA pairelemtype CLOSEROUND  { $$ = PairType{FstType : $3, SndType : $5} }
 
-pairelemtype : basetype  { $$ = $1 }
-             | arraytype { $$ = $1 }
-             | PAIR      { $$ = Pair}
+pairelemtype : basetype   { $$ = $1 }
+             | arraytype  { $$ = $1 }
+             | PAIR       { $$ = Pair}
+             | pairtype   { $$ = $1}
              | IDENTIFIER { $$ = ClassType($1)}
 
-typeDef : basetype  { $$ =  $1 }
-        | arraytype { $$ =  $1 }
-        | pairtype  { $$ =  $1 }
+typeDef : basetype   { $$ =  $1 }
+        | arraytype  { $$ =  $1 }
+        | pairtype   { $$ =  $1 }
         | IDENTIFIER { $$ = ClassType($1) }
 
 basetype : INT      { $$ =  Int }
@@ -293,8 +294,8 @@ basetype : INT      { $$ =  Int }
          | CHAR     { $$ =  Char }
          | STRING   { $$ =  String }
 
-arraytype : basetype OPENSQUARE CLOSESQUARE { $$ = ArrayType{Type : $1} }
-          | pairtype OPENSQUARE CLOSESQUARE { $$ = ArrayType{Type : $1} }
+arraytype : basetype OPENSQUARE CLOSESQUARE  { $$ = ArrayType{Type : $1} }
+          | pairtype OPENSQUARE CLOSESQUARE  { $$ = ArrayType{Type : $1} }
           | arraytype OPENSQUARE CLOSESQUARE { $$ = ArrayType{Type : $1} }
 
 %%
