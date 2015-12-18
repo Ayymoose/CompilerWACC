@@ -14,8 +14,12 @@ begin
   int pointY = a + c.y;
 
   if !c.complex then
-    print "not complex"
-  else skip
+    println "not complex"
+  else
+    println "is complex"
   fi
+
+  print "x = "; println pointX;
+  print "y = "; println pointY;
 
 end
