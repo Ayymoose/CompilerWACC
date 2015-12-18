@@ -2,4 +2,5 @@ begin
 class Test open
 int cool, char k
 close
+skip
 end
